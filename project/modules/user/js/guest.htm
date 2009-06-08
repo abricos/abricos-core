@@ -1,0 +1,155 @@
+<!--{panel}-->
+<div style="font-size: 120%">
+	<h1>Страница пользователя</h1>
+	
+	Если вы регистрировались на этом сайте, пожалуйста <a href="#" id="{i#blogin}">авторизуйтесь</a>.
+	<br /><br />
+	Если вы не имеете логин для доступа к авторизованным частям сайта, то вы можете 
+	<a href="#" id="{i#breg}">пройти регистрацию</a>, чтобы получить его.
+	<br /><br />
+	Если вы забыли логин или пароль, воспользуйтесь процедурой <a href="#" id="{i#bpwd}">восстановления пароля</a>.
+</div>
+
+<!--{password}-->
+<div class='hd'>Восстановление пароля</div>
+<div class='bd'>
+	<form id='{i#form}'>
+		<p>Введите E-mail, указанный при регистрации.</p>
+		<p>Вам будет выслана инструкция по переустановке пароля.</p>
+		<p>
+			E-mail: <input id='{i#email}' type="text" size="50" />
+		<p>
+		<div style="margin-top:6px; text-align: right" >
+			<input id='{i#bsend}' type="button" value="Восстановить Имя пользователя / Пароль" />&nbsp;&nbsp;&nbsp;
+			<input id='{i#bcancel}' type="button" value="Отмена" />
+		</div>
+	</form>
+</div>
+
+<!--{pwdokpanel}-->
+<div class='hd'>Восстановление пароля</div>
+<div class='bd'>
+	<div style="font-size: 120%">
+		Инструкция по восстановлению пароля была отправлена вам на email: "{v#email}".<br />
+		Проверьте вашу почту.
+		<div style="margin-top:6px; text-align: right" >
+			<input id="{i#bclose}" type="button" value="Закрыть" />
+		</div>
+	</div>
+</div>
+
+<!--{pwdchange}-->
+<div class='hd'>Восстановление пароля</div>
+<div class='bd'>
+	<div style="font-size: 120%">
+		{v#body}
+	</div>
+</div>
+
+<!--{pwdchangeok}-->
+Ваш пароль был переустановлен и выслан вам на email. <br />
+Проверьте вашу почту.
+<div style="margin-top:6px; text-align: right" >
+	<input id="{i#blogin}" type="button" value="Авторизация" />&nbsp;&nbsp;
+	<input id="{i#bclose}" type="button" value="Отмена" />
+</div>
+
+<!--{pwdchangeerror}-->
+Системе не удалось распознать идентификатор восстановления пароля.<br />
+Возможно это связанно с истечением срока отведенного под изменение пароля.<br />
+Если вы все еще хотите запросить инструкцию по восстановлению пароля, <br />
+то возпользуйтесь процедурой <a href="#" id="{i#bpwd}">восстановления пароля</a> 
+<div style="margin-top:6px; text-align: right" >
+	<input id="{i#bclose}" type="button" value="Закрыть" />
+</div>
+
+<!--{register}-->
+<div class='hd'>Регистрация</div>
+<div class='bd'>
+	<form id="{i#form}">
+		<div align="left">
+			<div style="margin-bottom:3px">Для регистрации необходимо заполнить поля</div>
+			<div style="margin-bottom:3px">
+	        <strong>Имя</strong>:<br />
+	        <input id="{i#username}" type="text" size="50" maxlength="25" />
+	    </div>
+			<fieldset>
+				<legend>Пароль</legend>
+				<table cellpadding="0" cellspacing="3" border="0" width="400">
+				<tr>
+					<td colspan="2">Введите свой пароль. Пароль чувствителен к регистру букв.</td>
+				</tr>
+				<tr>
+					<td>
+						Пароль:<br />
+						<input id="{i#pass}" type="password" size="25" maxlength="15" />
+					</td>
+					<td>
+						Подтвердите пароль:<br />
+						<input id="{i#passconf}" type="password" size="25" maxlength="15" />
+					</td>
+				</tr>
+				</table>
+			</fieldset>
+				<fieldset>
+					<legend>Email адрес</legend>
+					<table cellpadding="0" cellspacing="3" border="0" width="400">
+					<tr>
+						<td colspan="2">Введите правильный email адрес.</td>
+					</tr>
+					<tr>
+						<td>
+							Email адрес:<br />
+							<input id="{i#email}" type="text" size="25" maxlength="50" />
+						</td>
+						<td>
+							Подтвердите email адрес:<br />
+							<input id="{i#emailconf}" type="text" size="25" maxlength="50" />
+						</td>
+					</tr>
+					</table>
+				</fieldset>
+	    </div>
+	    <div style="margin-top:6px; text-align: right" >
+				<input id="{i#breg}" type="button" value="Зарегистрироваться" />
+				&nbsp;&nbsp;
+				<input id="{i#bcancel}" type="button" name="Reset" value="Отмена" />
+			</div>
+	</form>
+</div>
+
+<!--{regokpanel}-->
+<div class='hd'>Регистрация</div>
+<div class='bd'>
+	<div style="font-size: 120%"> 
+		Заявка на регистрацию принята успешно. <br />
+		На Ваш email: "<span id="{i#email}"></span>" выслано письмо с потверждением регистрации.<br />
+		Проверьте вашу почту.
+		<div style="margin-top:6px; text-align: right" >
+			<input id="{i#bclose}" type="button" value="Закрыть" />
+		</div>
+	</div>
+</div>
+
+<!--{activate}-->
+<div class='hd'>Активация</div>
+<div class='bd'>
+	<div style="font-size: 120%">
+		{v#body}
+	</div>
+</div>
+
+<!--{activok}-->
+Активация пользователя прошла успешно.<br />
+Имя пользователя: {v#unm}
+<div style="margin-top:6px; text-align: right" >
+	<input id="{i#blogin}" type="button" value="Авторизация" />&nbsp;&nbsp;
+	<input id="{i#bclose}" type="button" value="Отмена" />
+</div>
+
+<!--{activerror}-->
+Ошибка активации пользователя:<br />
+{v#err}
+<div style="margin-top:6px; text-align: right" >
+	<input id="{i#bclose}" type="button" value="Закрыть" />
+</div>

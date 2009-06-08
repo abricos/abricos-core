@@ -1,0 +1,150 @@
+<!--{panel}-->
+<div id="{i#table}"></div>
+<div style="text-align: right">
+	<a href="#" id="{i#rcclear}">Очистить корзину</a>
+</div>
+
+<!--{table}-->
+<table class="bk-table-def" style="width: 100%">
+	<thead>
+		<tr>
+			<th>Название</th>
+			<th>Комментарий</th>
+			<th>Исправлен</th>
+			<th>Удален</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{rowgrptype0}-->
+<td colspan="6" align="left" style="text-align: left; padding-top: 12px; font-size: 110%; background-color: #F6F6F6"><strong>Модуль {v#own}</strong></td>
+
+<!--{rowgrptype1}-->
+<td colspan="6" align="left" style="text-align: left; padding-top: 12px; font-size: 110%; background-color: #F6F6F6"><strong>Стиль {v#own}</strong></td>
+
+<!--{rowgrptype2}-->
+<td colspan="6" align="left" style="text-align: left; padding-top: 12px; font-size: 110%; background-color: #F6F6F6"><strong>Контент {v#own}</strong></td>
+
+<!--{row}-->
+<tr>
+	<td>{v#nm}</td>
+	<td>{v#cmt}</td>
+	<td>{v#ud}</td>
+	<td>{v#dd}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+	<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
+<tr>
+
+<!--{rownmedit}-->
+<font color="red">{v#nm}</font>
+
+<!--{rowdel}-->
+<tr>
+	<td style="text-decoration: line-through;">{v#nm}</td>
+	<td>{v#cmt}</td>
+	<td>{v#ud}</td>
+	<td>{v#dd}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+	<td><a href="#" id="{i#restore}-{v#id}">Восстановить</a></td>
+</tr>
+
+<!--{editor}-->
+<div class='hd'>Редактор</div>
+<div class='bd'>
+	<div class="field linespace-1" style="width: 790px">
+		<p>
+			<label id="{i#owner}-lbl">Источник:</label>
+			<input type="text" id="{i#owner}" value="" style="width: 200px" disabled="disabled" />
+			<label id="{i#name}-lbl">Имя:</label>
+			<input type="text" id="{i#name}" value="" style="width: 200px" disabled="disabled" />
+		</p>
+		<div id="{i#param}"></div>
+		<p>
+			<label id="{i#body}-lbl">Код:</label><br />
+			<textarea id="{i#body}" style="width: 770px; height: 300px"></textarea>
+		</p>
+		<p>
+			<label id="{i#cmt}-lbl">Комментарий:</label><br />
+			<textarea id="{i#cmt}" style="width: 770px; height: 50px"></textarea>
+		</p>
+	</div>
+	<div class="buttons right">
+		<input id='{i#bsave}' type="button" value="Сохранить" />
+		<input id='{i#bcancel}' type="button" value="Отмена" />
+	</div>
+</div>
+
+<!--{param}-->
+<div style="border: 1px solid #CBCBCB; padding: 0px 10px 0px 10px;">
+	<table style="width:100%"><tbody><tr>
+		<td>
+			<label id="{i#param}">Параметры:</label>	
+		</td>
+		<td style="text-align: right">
+			<input class="btn" type="button" value="Добавить" id="{i#badd}" />						
+		</td>
+	</tr></tbody></table>
+	<div id="{i#table}" style="height: 120px; overflow-y:auto;"></div>
+</div>
+
+<!--{tableparam}-->
+<table class="bk-table-def" style="width: 768px">
+	<thead>
+		<tr>
+			<th>Тип</th>
+			<th>Имя</th>
+			<th>Значение</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{rowparam}-->
+<tr>
+	<td>{v#tp}</td>
+	<td>{v#nm}</td>
+	<td>{v#v}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+	<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
+<tr>
+
+<!--{option}-->
+<option value="{v#id}">{v#name}</option>
+
+<!--{parameditor}-->
+<div class='hd'>Редактор</div>
+<div class='bd'>
+	<div class="field linespace-1" style="width: 400px">
+		<p>
+			<label id="{i#type}-lbl">Тип параметра:</label>
+			<select id="{i#type}">
+				<option value="0">Локальная переменная</option>
+				<option value="1">Глобальная переменная</option>
+				<option value="2">Модуль</option>
+				<option value="3">Шаблон</option>
+				<option value="4">Фраза</option>
+				<option value="5">PHP скрипт</option>
+				<option value="6">JavaScript модуль</option>
+				<option value="7">JavaScript файл</option>
+				<option value="8">CSS файл</option>
+			</select>
+		</p>
+		<p id="{i#name}-cont">
+			<label id="{i#name}-lbl">Имя:</label>
+			<input type="text" id="{i#name}" value="" style="width: 200px" />
+		</p>
+		<p id="{i#value}-cont">
+			<label id="{i#value}-lbl">Значение:</label><br />
+			<textarea id="{i#value}" style="width: 380px; height: 150px"></textarea>
+		</p>
+	</div>
+	<div class="buttons right">
+		<input id='{i#bsave}' type="button" value="Сохранить" />
+		<input id='{i#bcancel}' type="button" value="Отмена" />
+	</div>
+</div>

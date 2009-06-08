@@ -1,0 +1,75 @@
+<!--{panel}-->
+<h3>Пользователи <a href="#"><img id="{i#refresh}" src="/modules/admin/js/images/refresh.png" title="Обновить"/></a></h3>
+
+<div id='{i#pagtop}'></div>
+<div id='{i#table}'></div>
+<div id='{i#pagbot}'></div>
+
+<!--{table}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Имя</th>
+			<th>E-mail</th>
+			<th>Регистрация</th>
+			<th>Визит</th>
+			<th>Статус</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{row}-->
+<tr>
+	<td>{v#id}</td>
+	<td>{v#unm}</td>
+	<td>{v#eml}</td>
+	<td>{v#dl}</td>
+	<td>{v#vst}</td>
+	<td>{v#ugp}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Редактировать</a></td>
+</tr>
+
+<!--{editor}-->
+<div class='hd'>Редактор пользователя</div>
+<div class='bd'>
+
+	<div class="field linespace-1">
+		<p>
+			Имя: <br />
+			<input id="{i#unm}" type="text" style="width: 300px" disabled="disabled" />
+		</p>
+		<p>
+			E-mail:<br />
+			<input id="{i#eml}" type="text" style="width: 300px" />
+		</p>
+		<p>
+			Статус:
+			<span id="{i#ugrpcont}">
+				&nbsp;<label id="{i#ugrplbl}"></label>&nbsp;<input id="{i#bugrpch}" value="Сменить" type="button" />
+			</span>
+		</p>
+		<p id="{i#ugrpcontch}" style="display: none;">
+			<label for="{i#ugrp1}"><input type="radio" id="{i#ugrp1}" name="usergroup" value="1" />Заблокирован</label><br />
+			<label for="{i#ugrp3}"><input type="radio" id="{i#ugrp3}" name="usergroup" value="3" />Ожидает активацию</label><br />
+			<label for="{i#ugrp4}"><input type="radio" id="{i#ugrp4}" name="usergroup" value="4" />Зарегистрирован</label><br />
+			<label for="{i#ugrp5}"><input type="radio" id="{i#ugrp5}" name="usergroup" value="5" />Модератор</label><br />
+			<label for="{i#ugrp6}"><input type="radio" id="{i#ugrp6}" name="usergroup" value="6" />Администратор</label>
+		</p>
+		<p>
+			Пароль: <input id="{i#bpass}" type="button" value="Сменить" />
+		</p>
+		<p id="{i#passcont}" style="display: none;">
+			Пароль: <input id="{i#pass}" type="password" style="width: 150px" /><br />
+			Еще раз: <input id="{i#passconf}" type="password" style="width: 150px" />
+		</p>
+		 
+	 	<div class="buttons right">
+			<input id="{i#bsave}" type="button" value="Сохранить" />
+			<input id="{i#bcancel}" type="button" value="Отмена" />
+		</div>
+		 
+	</div>
+</div>

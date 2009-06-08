@@ -1,0 +1,43 @@
+<!--{blockguest}-->
+<a href="#" ><strong id="{i#blogin}">Вход</strong></a> 
+<strong> • </strong>
+<a href="#" ><strong id="{i#breg}">Регистрация</strong></a>
+
+<!--{blockuser}-->
+<a href="/user/"><strong>{v#name}</strong></a> (<a href="#" id="{i#blogout}" title="Выйти">Выйти</a>)
+<br />
+<a href="/user/"><strong>Панель управления</strong></a>
+
+<!--{loginpanel}-->
+<div class='hd'>Вход на сайт</div>
+<div class='bd'>
+	<form id="{i#form}" method="post" action="#" onSubmit="return false;">
+		<div id="{i#error}" style="color: red; display: none;" ></div>
+				
+		<table cellpadding="2" cellspacing="2" border="0">
+		<tr>
+			<td><label>Имя</label></td>
+			<td>
+				<input id="{i#username}" type="text" style="font-size: 160%" name="username" size="10"/>
+			</td>
+		</tr>
+		<tr>
+			<td><label>Пароль</label></td>
+			<td><input id="{i#userpass}" type="password" style="font-size: 160%" name="password" size="10" /></td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center">
+			<input id="{i#blogin}" type="button" value="Войти" />&nbsp;&nbsp;&nbsp;
+			<input id="{i#bcancel}" type="button" value="Отмена" />
+			<input id="{i#bloginsub}" type="submit" value="Войти" style="display: none" />
+			</td>
+		</tr>
+		<tr><td colspan="2">
+		    <a href="#" id="{i#breg}" title="Регистрация нового пользователя">Зарегистрироваться</a>
+		</td></tr>
+		<tr><td colspan="2">
+		    <a href="#" id="{i#bpwd}" title="Восстановление пароля">Забыли пароль?</a>
+		</td></tr>
+		</table>
+	</form>
+</div>

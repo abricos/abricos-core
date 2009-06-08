@@ -1,0 +1,161 @@
+/**
+* @version $Id: main.css 289 2008-09-11 06:51:47Z AKuzmin $
+* @package CMSBrick
+* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+*/
+#cmscontent{
+	z-index: 1;
+	visibility: visible ;
+	overflow: visible ;
+}
+div#header{display: none;}
+div#content p{line-height:1.4}
+div#navigation, div#extra{display: none;}
+
+* html div#navigation, * html div#extra {display: none;} /*только для IE6*/
+
+div#footer{display: none;}
+div#wrapper{width:100%;}
+
+*{margin:0;padding:0}
+body,table,tr,th,td, img {border: 0px}
+div#ajaxcontent {padding: 6px;}
+
+body{font: 76% arial,sans-serif;color: #333}
+p{margin:0 10px 10px}
+
+div.out	{
+border: 1px solid #EEF1F2;
+padding: 0;
+margin:0 0 10px 0;
+}
+div.in	{
+margin: 1px;
+padding: 4px 10px;
+}
+
+h1, h2	{
+padding: 0 0 8px 0;
+margin: 0;
+font-size: 140%;
+}
+h2	{
+font-size: 100%;
+}
+
+
+/*NEWS*/
+.news1, dl, dt, dd	{
+padding:0px;
+margin:0px;
+font-size: 100%;
+}
+dl	{
+
+}
+dd	{
+padding: 4px 0px 4px 10px;
+}
+dt	{
+font-weight:bold;
+color: #333;
+padding: 4px 0px;
+}
+
+.newstitle,.newsdate, .newssubtitle, .dlink a, .newsarchiv a	{
+	font-size: 8pt;
+	margin: 0px 0px 6px 0px;
+}
+.newstitle {
+	font-weight: bold
+}
+.dlink	{
+margin-bottom: 12px;
+text-align: right;
+}
+.dlink a	{
+/*	color: #09F;*/
+	text-decoration: underline;
+}
+
+.newsarchiv	{
+text-align: center;
+}
+.newsarchiv a	{
+/*color: #09F;*/
+text-decoration: underline;
+}
+
+
+
+
+.newstitle1,.newsdate1, .newssubtitle1, .dlink1 a, .newsarchiv1 a	{
+	font-size: 8pt;
+	margin: 0px 0px 6px 0px;
+}
+.newstitle1 {
+	font-weight: bold;
+	color: #666;
+}
+.newssubtitle1	{
+margin-bottom: 12px;
+}
+.newssubtitle1 a	{
+	color: #09F;
+	text-decoration: underline;
+}
+
+
+/*PRICE BEGIN*/
+table.price	{
+border-collapse:collapse;
+border: 1px solid #000;
+width: 100%;
+}
+.price th	{
+padding: 8px;
+font-size: 90%;
+border: 1px solid #000;
+}
+.price td	{
+padding:2px 8px;
+border: 1px solid #000;
+}
+.price .tr_bg td	{
+}
+.price .u1, .price .u2	{
+font-weight: bold;
+}
+.price .u1	{
+}
+.price .u2	{
+}
+.price .u3	{
+font-size: 100%;
+font-weight: bold;
+}
+.price .u4	{
+font-size: 80%;
+font-weight: bold;
+}
+.price tr >  td:first-child  + td +td{ text-align: right; width: 10%;}
+.price tr >  td:first-child  + td { text-align: right; width: 10%;}
+.price tr >  th:first-child { text-align: left; width: 80%;}
+.colgr1	{
+}
+.col1	{
+width: 80%;
+}
+.col2, .col3	{
+text-align: right;
+width: 10%;
+}
+.left	{
+text-align: left;
+}
+.price_old	{text-decoration: line-through; font-size: 90%;}
+.price_new	{color: red; font-weight: bold; margin-left: 10px; font-size: 120%}
+/*PRICE END*/
+		.icons {display: none;}
+		div#logo	{position: absolute; display:block; z-index: 1000}

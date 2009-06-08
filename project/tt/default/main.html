@@ -1,0 +1,61 @@
+<!--[*]
+[var=meta_title][/var][var=meta_keys][/var][var=meta_desc][/var]
+[ph=sys:meta_title][/ph][ph=sys:meta_keys][/ph][ph=sys:meta_desc][/ph]
+[ph=sys:site_name]Brick CMS[/ph]
+[ph=sys:site_title]система управления web-контентом[/ph]
+[bkvar=ttowner]default[/bkvar]
+[bkvar=js][/bkvar]
+[bkvar=css][/bkvar]
+[mod=sys]jsvar[/mod]
+[mod=news]pub_columnblock[/mod]
+[mod=sitemap]pub_menublock,pub_breadcrumb[/mod]
+[mod=user]userblock[/mod]
+[mod=rss]meta[/mod]
+[*]--><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru" dir="ltr">
+<head>
+	<title>[var]meta_title[/var]</title>
+	<meta name="keywords" content="[var]meta_keys[/var]" />
+	<meta name="description" content="[var]meta_desc[/var]" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	[mod]rss:meta[/mod]
+	<style type="text/css" media="screen, projection">/*<![CDATA[*/	@import "/tt/[bkvar]ttowner[/bkvar]/css/reset-fonts-grids.css"; /*]]>*/</style>
+	<style type="text/css" media="screen, projection">/*<![CDATA[*/	@import "/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=1.0.1"; /*]]>*/</style>
+	[bkvar]css[/bkvar]
+
+<script language="JavaScript" src="/gzip.php?base=/js/yui/2.6.0&file=/yuiloader/yuiloader-min.js,/event/event-min.js" type="text/javascript"></script>
+[mod]sys:jsvar[/mod]
+[bkvar]js[/bkvar]
+</head>
+
+<body class="yui-skin-sam">
+<div id="cmscontent" class="yui-t3">
+	<div id="hd">
+	<div id="logo">
+		<span>[ph]sys:site_name[/ph]</span>
+		<p>[ph]sys:site_title[/ph]</p>
+	</div>
+		[mod]sitemap:pub_breadcrumb[/mod]
+		[mod]user:userblock[/mod]
+	</div>
+	<div id="bd">
+		<div id="yui-main">
+			<div class="yui-b out" id="content">
+				<div class="in">
+					[tt]content[/tt]
+				</div>
+			</div>
+		</div>
+	<div class="yui-b" id="navigation">
+		[mod]sitemap:pub_menublock[/mod]
+		[mod]news:pub_columnblock[/mod]
+	</div>
+</div>
+	<div id="ft">
+		<p>&#169; [ph]sys:site_name[/ph] - все права защищены. Работает на <a href="http://www.cmsbrick.ru">CMSBrick</a></p>
+	</div>
+
+</div>
+
+</body>
+</html>

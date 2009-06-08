@@ -1,0 +1,39 @@
+<!--{panel}-->
+<div class="field linespace-1">
+	<h3>Общие настройки</h3>
+	<p>
+		<label id="{i#site_name}-lbl">Название сайта:</label><br />
+		<input type="text" id="{i#site_name}" value="" style="width: 400px" />
+	</p>
+	<p>
+		<label id="{i#admin_mail}-lbl">E-mail администратора:</label><br />
+		<input type="text" id="{i#admin_mail}" value="" style="width: 400px" />
+	</p>
+	<p>
+		<label id="{i#site_title}-lbl">Краткое описание сайта:</label><br />
+		<textarea id="{i#site_title}" style="width: 500px; height: 30px"></textarea>
+	</p>
+	<h3>Стиль сайта</h3>
+	<p>
+		<select id="{i#style}"></select>
+	</p>
+	<h3>Мета теги по умолчанию</h3>
+	<p>
+		<label id="{i#meta_title}-lbl">Title:</label><br />
+		<textarea id="{i#meta_title}" style="width: 500px; height: 30px"></textarea>
+	</p>
+	<p>
+		<label id="{i#meta_keys}-lbl">Keywords:</label><br />
+		<textarea id="{i#meta_keys}" style="width: 500px; height: 30px"></textarea>
+	</p>
+	<p>
+		<label id="{i#meta_desc}-lbl">Description:</label><br />
+		<textarea id="{i#meta_desc}" style="width: 500px; height: 30px"></textarea>
+	</p>
+</div>
+<div class="buttons-top right">
+	<input id='{i#bsave}' type="button" value="Сохранить" />
+</div>
+
+<!--{option}-->
+<option value="{v#id}">{v#tl}</option>

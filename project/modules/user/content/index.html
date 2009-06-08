@@ -1,0 +1,34 @@
+<!--[*]
+[script]cp.php[/script]
+[tt=module]_sys[/tt]
+
+[mod=user]userblock[/mod]
+[bkvar=accden]
+	<div style="font-size: 150%">
+		<br /><br /><br /><br />
+		Доступ запрещен. Возможно у вас нет прав или необходимо авторизоваться.
+	</div>
+	<a href="/">Вернуться на главную</a>
+[/bkvar]
+[bkvar=cpbody]
+	<div id="bk_user_cp">
+		<div style="font-size: 150%">
+			<br /><br /><br /><br />
+			Пожалуйста, подождите, идет загрузка...
+		</div>
+	</div>
+	
+	<script language='JavaScript' type='text/javascript' charset='utf-8'>
+		Brick.Loader.add({mod:[{name:'user',files:['cpanel.js']}],
+	    onSuccess: function() {
+	    	var d=#mlist#;
+	    	Brick.User.CP.Manager.initialize(d);
+		  }
+		})
+	</script> 
+	
+[/bkvar]
+[bkvar=body][/bkvar]
+[*]-->
+[mod]user:userblock[/mod]
+[bkvar]body[/bkvar]

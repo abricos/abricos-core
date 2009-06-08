@@ -1,0 +1,15 @@
+<!--[*]
+[tt=main][/tt]
+[script]activate.php[/script]
+[bkvar=result][/bkvar]
+[*]-->
+<div id="bk_user">Пожалуйста, подождите, идет загрузка данных...</div>
+
+<script language='JavaScript' type='text/javascript' charset='utf-8'>
+	Brick.Loader.add({
+		mod:[{name:'user',files:['user.js','guest.js']}],    
+		onSuccess: function(){
+			Brick.User.Guest.Activate.initialize([bkvar]result[/bkvar]);
+		}
+	});
+</script> 

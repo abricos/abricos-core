@@ -1,0 +1,150 @@
+<!--{panel}-->
+<table class="h100 w100">
+	<tbody>
+		<tr>
+			<td>
+				<div id="{gi#header}"><span>Панель управления</span></div>
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<table class="h100 w100">
+					<tbody>
+						<tr>
+							<td class="w20" valign="top">
+				      
+				        <div class="{gi#panel}">
+				      		<div class="head">Меню</div>
+				      		<ul class="{gi#menu}" id="{i#mainmenu}"></ul>
+				    		</div>
+							
+							</td>
+							<td valign="top">
+    							
+    							<div class="{gi#panel}">
+										<div class="head" id="{i#contname}"></div>
+										<div class="out" id="{i#modbody}"></div>
+    							</div>
+    							
+							</td>							
+						</tr>
+					</tbody>
+				</table>
+				
+			</td>
+		</tr>
+		<tr>
+		<td>
+			<table class="w100">
+				<tbody><tr id="{gi#footer}">
+					<td><p><a href="http://www.cmsbrick.ru/">Brick CMS</a> 2008</p></td>
+					<td><p class="right"><a href="http://www.cmsbrick.ru/">www.cmsbrick.ru</a></p></td>
+				</tr>
+			</tbody></table>
+		</td>
+	</tr>
+	</tbody>
+</table>
+
+<!--{menuitem}-->
+<li class="{gi#micon}-{v#id} level-0"><a href="#" id="{gi#menuid}-{v#id}">{v#tl}</a>{v#child}</li>
+
+<!--{menuchild}-->
+<ul class="hide" id="{i#id}-{v#id}">{v#items}</ul>
+
+<!--{menuchilditem}-->
+<li class="child"><a href="#" id="{gi#menuid}-{v#id}">{v#tl}</a>{v#child}</li>
+
+<!--{miicon}-->
+.{gi#micon}-{v#id} {
+	background-image:url({v#url});
+}
+
+<!--{css}-->
+.{gi#menu} .level-0 {
+	padding-left: 24px;
+	background-repeat: no-repeat;
+	background-attachment: scroll;
+	margin: 3px 0;
+}
+.{gi#menu} .child {}
+.{gi#menu} li a {
+	line-heigth: 21px;
+	vertical-align: middle;
+	text-decoration:none;
+	font-size: 8pt;
+	font-family: Verdana;
+	color: #FF7700;
+	white-space: nowrap;
+}
+.{gi#menu} li a:link, 
+.{gi#menu} li a:visited {
+	color: #FF7700;
+}
+.{gi#menu} li a:hover {
+	text-decoration:underline;
+}
+.{gi#menu} .sel {
+	font-weight: bold;
+}
+
+#{gi#header}	{
+	height: 60px;
+	background: #0094D6 url(/modules/user/js/images/brick.gif) no-repeat right;
+	border-bottom:1px solid #666666;
+}
+#{gi#header} a {
+	color:#FFFFFF;
+}
+#{gi#header} span{
+	color: #FFFFFF;
+	font: 2em arial,sans-serif;
+	margin: 1em 1em;
+}
+
+.{gi#panel} {
+	border: 1px solid #E1E1E1;
+	background-color: #fff;
+	margin: 5px 5px 5px 5px;
+}
+.{gi#panel} .head {
+	position: relative;
+	white-space: nowrap;
+	padding: 1px 8px;
+	margin-top: 0px;
+	background: #149BD7 url(/modules/user/js/images/bg_h.gif) repeat-x;
+	height: 20px;
+	color: #fff;
+	font-size: 8pt;
+	font-weight: bold;
+	vertical-align: middle;
+	line-height: 20px;
+	border-bottom: 1px solid #E1E1E1;
+}
+.{gi#panel} .panel-close {
+	cursor:pointer;
+	height:11px;
+	position:absolute;
+	right:8px;
+	top:6px;
+	width:11px;
+	overflow:hidden;
+	text-decoration:none;
+	text-indent:-10000em;
+}
+
+.{gi#panel} .out	{
+	margin: 14px
+}
+#{gi#footer} {
+	background:#0094D6 none repeat scroll 0%;
+	border-top:1px solid #666666;
+	color:#FFFFFF;
+}
+#{gi#footer}  a {
+	color:#FFFFFF;
+}
+#{gi#footer} p	{
+	margin: 0.6em 1em;
+}
