@@ -121,6 +121,9 @@ class CMSModuleSys extends CMSModule {
 				array_push($newChildren, $childbrick);
 			}
 		}
+		
+		Brick::$builder->template = $template;
+		
 		$brick->child = $newChildren;
 		array_push($template->child, $brick);
 

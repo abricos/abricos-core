@@ -84,6 +84,13 @@ class CMSSysBrickBuilder {
 	 * @var CMSSysBrick
 	 */
 	public $brick = null;
+
+	/**
+	 * Template
+	 *
+	 * @var CMSSysBrick
+	 */
+	public $template = null;
 	
 	private $_globalVar = array();
 	private $_phrase = array();
