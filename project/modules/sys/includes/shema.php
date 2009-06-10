@@ -76,7 +76,10 @@ if (version_compare($svers, "0.0.0", "==")){
 		  `username` varchar(150) NOT NULL default '',
 		  `password` varchar(32) NOT NULL default '',
 		  `email` varchar(100) NOT NULL default '',
-		  `homepage` varchar(100) NOT NULL default '',
+		  `realname` varchar(150) NOT NULL default '',
+		  `sex` TINYINT(1) NOT NULL default '0' COMMENT 'Пол: 0-не указан,1-мужской,2-женский',
+		  `homepagename` varchar(150) NOT NULL default '' COMMENT 'Название сайта',
+		  `homepage` varchar(100) NOT NULL default '' COMMENT 'Адрес сайта',
 		  `icq` varchar(20) NOT NULL default '',
 		  `aim` varchar(20) NOT NULL default '',
 		  `yahoo` varchar(32) NOT NULL default '',
@@ -234,6 +237,14 @@ if (version_compare($svers, "1.0.2", "<")){
 	);
 	
 	if (!$install){
+		
+		$db->query_write("
+			ALTER TABLE `".$pfx."user` 
+				ADD `realname` VARCHAR( 150 ) NOT NULL DEFAULT '' AFTER `email`,
+				ADD `sex` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '0' AFTER `realname`,
+				ADD `homepagename` VARCHAR( 150 ) NOT NULL AFTER `sex`
+		");
+		
 		// экспорт старых фраз
 		$ins = array();
 		$rows = $db->query_read("SELECT name, phrase	FROM ".$pfx."phrase");

@@ -52,7 +52,7 @@ class CMSModuleSys extends CMSModule {
 	public $session = null;
 		
 	public function __construct(){
-		$this->version = "1.0.2";
+		$this->version = "1.0.3";
 		$this->name = "sys";
 	}
 	

@@ -8,9 +8,10 @@
 
 $brick = Brick::$builder->brick;
 
-$mod = Brick::$modules->GetModule('user');
+$mod = Brick::$modules->GetModule('sys');
+$modum = Brick::$modules->GetModule('user');
 $ds = $mod->getDataSet();
-$um = $mod->GetUserManager();
+$um = $modum->GetUserManager();
 
 $ret = new stdClass();
 $ret->_ds = array();

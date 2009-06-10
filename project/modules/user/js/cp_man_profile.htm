@@ -92,19 +92,19 @@
 <h3>Учетная запись</h3>
 <div class="field">
 	Имя пользователя: 
-	<input type="text" id="{i#username}" value="" class="w300" disabled="disabled" />
+	<input type="text" id="{i#unm}" value="" class="w300" disabled="disabled" />
 </div>
 <h4>Почтовый ящик</h4>
 <div class="field">
 	Электронная почта для восстановления пароля: <br /> 
-	<input type="text" id="{i#username}" value="" class="w300" disabled="disabled" /> 
+	<input type="text" id="{i#eml}" value="" class="w300" disabled="disabled" /> 
 </div>
 <h4>Пароль</h4>
 <div class="field">
 	Старый пароль: <input type="text" id="{i#passold}" value="" class="w100"/><br />
 	Новый пароль: <input type="text" id="{i#passnew}" value="" class="w100"/><br />
 	<div class="dsc">Пароль должен содержать не менее 4 символов и не может совпадать с логином. Не используйте простые пароли — будьте разумны.</div>
-	Повторите пароль: <input type="text" id="{i#passnew}" value="" class="w100"/><br />
+	Повторите пароль: <input type="text" id="{i#passnewret}" value="" class="w100"/><br />
 </div>
 
 <input type="button" id="{i#bsave}" value="Сохранить" class="button"/>
@@ -114,14 +114,13 @@
 <h4>Сайт</h4>
 <div class="field">
 	Название сайта: <br />
-	<input type="text" id="{i#sitename}" value="" class="sitef"/> <br />
+	<input type="text" id="{i#hpnm}" value="" class="sitef"/> <br />
 	<div class="fullnamedsc">Укажите название сайта.</div>
 	
 	Адрес сайта: <br />
-	<input type="text" id="{i#siteurl}" value="" class="sitef"/> <br />
+	<input type="text" id="{i#hp}" value="" class="sitef"/> <br />
 	<div class="fullnamedsc">Укажите URL сайта.</div>
 </div>
-
 <h4>Контакты</h4>
 <div class="field">
 	<table class="contable">
@@ -137,14 +136,13 @@
 		</tbody>
 	</table>
 </div>
-
 <input type="button" id="{i#bsave}" value="Сохранить" class="button"/>
 
 <!--{person}-->
 <h3>Личная информация</h3>
 <div class="field">
 	Настоящее имя: <br />
-	<input type="text" id="{i#fullname}" value="" class="fullname"/> <br />
+	<input type="text" id="{i#rnm}" value="" class="fullname"/> <br />
 	<div class="fullnamedsc">Укажите ваше имя и фамилию, чтобы другие пользователи знали, как вас зовут.</div>
 </div>
 <div class="field">
@@ -159,6 +157,7 @@
 	Дата рождения:
 	<select id="{i#bd_day}">
 		<option value="0">день</option>
+		{v#lstday}
 	</select>
 	<select id="{i#bd_month}">
 		<option value="0">месяц</option>
@@ -177,10 +176,11 @@
 	</select>
 	<select id="{i#bd_year}">
 		<option value="0">год</option>
+		{v#lst}
 	</select>
 </div>
 <input type="button" id="{i#bsave}" value="Сохранить" class="button"/>
 
 <!--{optionrow}-->
-<option value="{v#value}" >{v#text}</option>
+<option value="{v#v}" >{v#t}</option>
 

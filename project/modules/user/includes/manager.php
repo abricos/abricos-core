@@ -95,6 +95,13 @@ class CMSUserManager {
 				return;
 			}
 		}
+		$data['realname'] = $d->rnm;
+		$data['sex'] = $d->sex;
+		$data['birthday'] = $d->bday;
+		$data['homepagename'] = $d->hpnm;
+		$data['homepage'] = $d->hp;
+		$data['icq'] = $d->icq;
+		$data['skype'] = $d->skype;
 		CMSQUser::UserSave($this->db, $d->id, $data);
 	}
 }

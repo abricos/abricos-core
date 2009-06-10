@@ -726,6 +726,17 @@ Brick.dateExt = function(){
 				var tm = hour +':'+(min);
 				return s+', '+tm;
 			}
+		},
+		unixToArray: function(udate){
+			var msec = udate*1000;
+			var cd = new Date(msec);
+			return {
+				'day': cd.getDate(),
+				'month': cd.getMonth(),
+				'year': cd.getFullYear(),
+				'min': cd.getMinutes()+1,
+				'hour': cd.getHours()
+			};
 		}
 	}
 }();

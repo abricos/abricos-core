@@ -83,56 +83,30 @@ class CMSModuleUser extends CMSModule {
 		return md5(md5($password).$salt);
 	}
 	
-	public $ds = null;
-	public function getDataSet(){
-		if (is_null($this->ds)){
-			$json = $this->registry->input->clean_gpc('p', 'json', TYPE_STR);
-			if (empty($json)){ return; }
-			$obj = json_decode($json);
-			if (empty($obj->_ds)){ return; }
-			$this->ds = $obj->_ds;
-		}
-		return $this->ds;
-	}
-	
-	public function columnToObj($result){
-		$arr = array();
-		$db = $this->registry->db;
-		$count = $db->num_fields($result);
-		for ($i=0;$i<$count;$i++){
-			array_push($arr, $db->field_name($result, $i));
-		}
-		return $arr;
-	}
-	
-	public function rowToObj($row){
-		$ret = new stdClass();
-		$ret->d = $row;
-		return $row;
-	}
-	
-	public function &rowsToObj($rows){
-		$arr = array();
-		while (($row = $this->registry->db->fetch_array($rows))){
-			array_push($arr, $this->rowToObj($row));
-		}
-		return $arr;
-	}
-	
 }
 
 
 class CMSQUser{
 	
+	const FIELDS_USERPUB = "
+		userid as id, 
+		username as unm,
+		usergroupid as ugp,
+		joindate as dl,
+		lastvisit as vst,
+		realname as rnm,
+		sex,
+		homepagename as hpnm,
+		homepage as hp,
+		birthday as bday,
+		icq,
+		skype
+	";
+	
 	public static function UserPublicInfo(CMSDatabase $db, $username){
 		$sql = "
 			SELECT 
-				userid as id, 
-				username as unm,
-				usergroupid as ugp,
-				email as eml,
-				joindate as dl,
-				lastvisit as vst
+				".CMSQUser::FIELDS_USERPUB."
 			FROM ".$db->prefix."user
 			WHERE username='".bkstr($username)."'
 			LIMIT 1
@@ -143,20 +117,15 @@ class CMSQUser{
 	public static function UserPrivateInfo(CMSDatabase $db, $userid){
 		$sql = "
 			SELECT 
-				userid as id, 
-				username as unm,
-				usergroupid as ugp,
+				".CMSQUser::FIELDS_USERPUB.",
 				email as eml,
-				'' as pass,
-				joindate as dl,
-				lastvisit as vst
+				'' as pass
 			FROM ".$db->prefix."user
 			WHERE userid='".bkint($userid)."'
 			LIMIT 1
 		";
 		return $db->query_read($sql);
 	}
-	
 	
 	public static function UserById(CMSDatabase $db, $userid){
 		$sql = "

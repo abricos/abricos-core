@@ -15,13 +15,13 @@
 		name: 'user-profile',
 		titleid: "user.profile.cp.title",
 		icon: "/modules/user/js/images/cp_icon.gif",
-		initialize: function(div){
+		initialize: function(container){
 			wWait.show();
 			Brick.Loader.add({
 				mod:[{name: 'user', files: ['cp_man_profile.js']}],
 		    onSuccess: function() {
 					wWait.hide();
-					Brick.User.Profile.Manager.initialize(div);
+					Brick.mod.user.my.cp.initialize(container);
 			  }
 			});
 		}
