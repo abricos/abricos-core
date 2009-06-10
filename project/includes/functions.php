@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: functions.php 722 2009-03-27 05:45:31Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

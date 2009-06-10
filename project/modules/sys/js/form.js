@@ -1,5 +1,5 @@
 /**
-* @version $Id: form.js 790 2009-05-08 06:48:30Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

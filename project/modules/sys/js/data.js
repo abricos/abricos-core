@@ -1,5 +1,5 @@
 /**
-* @version $Id: data.js 786 2009-05-06 11:24:27Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

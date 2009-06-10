@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: module.php 776 2009-04-29 10:21:54Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
@@ -140,9 +140,17 @@ class CMSModuleSys extends CMSModule {
 		return 'index'; 
 	}
 	
+	private $brickReader = null;
+	
+	public function getBrickReader(){
+		if (is_null($this->brickReader)){
+			require_once CWD.'/modules/sys/includes/brickreader.php';
+			$this->brickReader = new CMSSysBrickReader($this->registry);
+		}
+		return $this->brickReader;
+	}
 	
 	public $ds = null;
-	
 	public function getDataSet(){
 		if (is_null($this->ds)){
 			$json = $this->registry->input->clean_gpc('p', 'json', TYPE_STR);
@@ -178,15 +186,6 @@ class CMSModuleSys extends CMSModule {
 		return $arr;
 	}
 	
-	private $brickReader = null;
-	
-	public function getBrickReader(){
-		if (is_null($this->brickReader)){
-			require_once CWD.'/modules/sys/includes/brickreader.php';
-			$this->brickReader = new CMSSysBrickReader($this->registry);
-		}
-		return $this->brickReader;
-	}
 }
 
 class CMSQSys {

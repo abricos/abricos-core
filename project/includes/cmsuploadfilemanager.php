@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: cmsuploadfilemanager.php 418 2008-10-20 14:33:59Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

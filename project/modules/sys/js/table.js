@@ -1,5 +1,5 @@
 /**
-* @version $Id: table.js 638 2009-01-26 06:15:38Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

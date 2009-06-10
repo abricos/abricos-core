@@ -1,5 +1,5 @@
 /**
-* @version $Id: editor.js 769 2009-04-27 04:45:07Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

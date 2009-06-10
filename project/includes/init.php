@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: init.php 759 2009-04-21 09:17:26Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

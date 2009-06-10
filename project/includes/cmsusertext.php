@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: manager.php 776 2009-04-29 10:21:54Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
@@ -66,7 +66,7 @@ class CMSUserText {
 	 * @param array $error
 	 * @return string
 	 */
-	public function JevixParser($text, &$error=null) {		
+	public function JevixParser($text, &$error=null) {
 		return $this->jevix->parse($text, $error);		
 	}
 	

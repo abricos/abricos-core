@@ -1,5 +1,5 @@
 /**
-* @version $Id: widgets.js 584 2008-12-27 14:43:51Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: cmsregistry.php 787 2009-05-06 12:37:16Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
@@ -121,7 +121,7 @@ final class CMSRegistry extends CMSBaseClass {
 	 */
 	public function GetUserTextManager(){
 		if (is_null($this->_userTextManager)){
-			require_once CWD.'/includes/jevix/jevix.class.php';
+			require_once CWD.'/includes/cmsusertext.php';
 			$this->_userTextManager = new CMSUserText();
 		}
 		return $this->_userTextManager;

@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: phrase.php 775 2009-04-29 04:44:26Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

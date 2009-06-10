@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: brickmanager.php 789 2009-05-07 13:29:50Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
@@ -95,6 +95,8 @@ class CMSSysBrickBuilder {
 	private $_globalVar = array();
 	private $_phrase = array();
 	private $_jsmod = array();
+	private $_jsfile = array();
+	private $_cssfile = array();
 	
 	/**
 	 * Менеджер фраз
@@ -172,6 +174,20 @@ class CMSSysBrickBuilder {
 	 */
 	public function AddJSModule($moduleName, $file){
 		$this->_jsmod[$moduleName][$file] = true;
+	}
+	
+	/**
+	 * Добавление JS файлов
+	 */
+	public function AddJSFile($file){
+		$this->_jsfile[$file] = $file;
+	}
+	
+	/**
+	 * Добавление CSS файла
+	 */
+	public function AddCSSFile($file){
+		$this->_cssfile[$file] = $file;
 	}
 	
 	private function SetVar($brick, $search, $replace){
@@ -272,6 +288,15 @@ class CMSSysBrickBuilder {
 			}
 			$brick->param->var['js'] = "<script language='JavaScript' type='text/javascript' charset='utf-8'>Brick.Loader.add({mod:[".implode(',', $list)."]})</script>";
 			$brick->param->var['ttowner'] = $brick->owner;
+
+			// добавление дополнительных JS файлов
+			foreach ($this->_jsfile as $value){
+				$brick->param->var['js'] .= "<script src='".$value."' language='JavaScript' type='text/javascript' charset='utf-8'></script>";
+			}
+			// добавление css файлов
+			foreach ($this->_cssfile as $value){
+				$brick->param->var['css'] .= "<style type='text/css' media='screen, projection'>/*<![CDATA[*/	@import '".$value."'; /*]]>*/</style>";
+			}
 		}
 		
 		foreach ($brick->child as $childbrick){
@@ -321,6 +346,12 @@ class CMSSysBrickBuilder {
 		}
 		foreach ($p->phrase as $key => $value){
 			$this->_phrase[$key] = $value;
+		}
+		foreach ($p->jsfile as $value){
+			$this->AddJSFile($value);
+		}
+		foreach ($p->css as $value){
+			$this->AddCSSFile($value);
 		}
 		foreach ($p->jsmod as $key => $files){
 			foreach ($files as $file){

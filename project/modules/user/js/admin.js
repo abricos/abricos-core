@@ -1,5 +1,5 @@
 /**
-* @version $Id: cp_man.js 697 2009-02-27 13:41:48Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: cmsdata.php 609 2009-01-15 07:24:21Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php

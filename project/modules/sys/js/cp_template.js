@@ -1,5 +1,5 @@
 /**
-* @version $Id: eltype.js 753 2009-04-15 12:54:14Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
