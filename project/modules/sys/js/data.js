@@ -627,16 +627,18 @@
 			}
 			return ts;
 		},
-		request: function(obj){
-			obj = obj || {};
+		request: function(hidden){
+			hidden = hidden || false;
 			var ts = this.getPostData();
 			if (YAHOO.lang.isNull(ts)){ return; }
-			Brick.util.Connection.sendCommand(this.name, 'js_data', { json: {
-				'_ds': {
-				'pfx': this.prefix,
-				'ss': this.session,
-				'ts': ts
-			}
+			Brick.util.Connection.sendCommand(this.name, 'js_data', {
+				hidden: hidden,
+				json: {
+					'_ds': {
+					'pfx': this.prefix,
+					'ss': this.session,
+					'ts': ts
+				}
 			}});
 		},
 		isFill: function(tables){

@@ -310,7 +310,6 @@ if (version_compare($svers, "1.0.2", "<")){
 		$db->query_write("DROP TABLE IF EXISTS `".$pfx."cenzura`");
 	}else{
 		// инсталяция, внесение данных 
-		
 		$db->query_write("
 			INSERT INTO `".$pfx."sys_menu` (`menuid`, `parentmenuid`, `menutype`, `name`, `title`, `descript`, `link`, `language`, `menuorder`, `level`, `off`, `dateline`, `deldate`) VALUES
 			(1, 0, 1, '', 'Главная', 'Главная страница сайта Brick CMS', '/', 'ru', 0, 0, 0, 0, 0),
@@ -321,6 +320,15 @@ if (version_compare($svers, "1.0.2", "<")){
 			INSERT INTO `".$pfx."sys_page` (`pageid`, `menuid`, `brickid`, `contentid`, `pagename`, `title`, `language`, `metakeys`, `metadesc`, `usecomment`, `dateline`, `deldate`) VALUES
 			(1, 0, 0, 1, 'index', '', 'ru', '', '', 0, 1241810741, 0),
 			(2, 2, 0, 2, 'index', '', 'ru', '', '', 0, 1241845327, 0)
+		");
+
+		// Настройки по умолчанию
+		$db->query_write("
+			INSERT INTO `".$pfx."sys_phrase` (`module`, `name`, `phrase`, `language`) VALUES
+			('sys', 'style', 'default', 'ru'),
+			('sys', 'site_name', 'Brick CMS', 'ru'),
+			('sys', 'site_title', 'система управления web-контентом', 'ru'),
+			('sys', 'admin_mail', '', 'ru')
 		");
 		
 	}

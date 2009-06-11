@@ -635,22 +635,25 @@ Brick.widget.WindowWait = function(){
 	var sendPost = function(module, brick, cfg ){
 
 		cfg = cfg || {};
-		cfg['json'] = cfg['json'] || {}; 
+		cfg['json'] = cfg['json'] || {};
+		var hidden = cfg['hidden'] || false;
 
 		var post = "json="+encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['json']));
-		wWait.show();
+		if (!hidden){
+			wWait.show();
+		}
 		YAHOO.util.Connect.asyncRequest("POST", 
 			uniqurl('/ajax/query.html?md='+module+'&bk='+brick), 
 			{
 				success: function(o) {
-					wWait.hide(); 
+					if (!hidden){wWait.hide();} 
 					readScript(o.responseText);
 					if (typeof cfg.success == 'function'){
 						cfg.success(o);
 					}
 				}, 
 				failure: function(o){ 
-					wWait.hide(); 
+					if (!hidden){wWait.hide();} 
 					alert("CONNECTION FAILED!"); 
 				}
 			}, 
@@ -677,9 +680,6 @@ Brick.widget.WindowWait = function(){
 			sendPost(module, brick, cfg);
 		}
 	}
-	
-
-	
 })();
 
 
