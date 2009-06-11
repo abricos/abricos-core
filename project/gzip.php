@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id: gzip.php 727 2009-03-31 11:18:10Z AKuzmin $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
