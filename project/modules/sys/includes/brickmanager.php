@@ -438,6 +438,14 @@ class CMSSysBrickManager extends CMSBaseClass {
 		$db = $this->registry->db;
 		$recache = false;
 		
+		// Если это кирпичь модуля, то необходимо проверить наличие модуля в системе
+		if ($brickType == CMSQSys::BRICKTYPE_BRICK){
+			$mod = $this->registry->modules->GetModule($owner);
+			if (empty($mod)){
+				return null;
+			}
+		}
+		
 		// кеш, применим только к шаблону
 		if ($brickType == CMSQSys::BRICKTYPE_TEMPLATE){
 			if (CMSRegistry::$instance->config['Misc']['brick_cache']){
@@ -495,6 +503,9 @@ class CMSSysBrickManager extends CMSBaseClass {
 			foreach($p->module as $key => $value){
 				foreach ($value as $cbricknm => $pinparam){
 					$childBrick = $this->BuildOutput($key, $cbricknm, CMSQSys::BRICKTYPE_BRICK, $brick, $pinparam);
+					if (is_null($childBrick)){
+						continue;
+					}
 					array_push($brick->child, $childBrick);
 				}
 			}

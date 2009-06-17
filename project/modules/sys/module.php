@@ -70,7 +70,6 @@ class CMSModuleSys extends CMSModule {
 	 */
 	public function BuildOutput(){
 		// Определить модуль управления выводом
-		$cms = $this->registry;
 		$adress = $this->registry->adress;
 		$modules = $this->registry->modules;
 		
