@@ -390,8 +390,13 @@ class CMSQSys {
 			array_push($insert, "(".CMSQSys::BRICKPRM_GLOBALVAR.", '".bkstr($key)."', '".bkstr($value)."', ".$brickid.")");
 		}
 		foreach($param->module as $key => $value){
-			foreach ($value as $brick){
-				array_push($insert, "(".CMSQSys::BRICKPRM_MODULE.", '".bkstr($key)."', '".bkstr($brick)."', ".$brickid.")");
+			foreach ($value as $brickname => $modparam){
+				$arr = array();
+				array_push($arr, $brickname);
+				foreach ($modparam as $pname => $pvalue){
+					array_push($arr, $brickname.'='.$pvalue);
+				}
+				array_push($insert, "(".CMSQSys::BRICKPRM_MODULE.", '".bkstr($key)."', '".bkstr(implode("|", $arr))."', ".$brickid.")");
 			}
 		}
 		if (!empty($param->template)){

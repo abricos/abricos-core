@@ -185,16 +185,13 @@ class CMSSysBrickReader {
 						$param->module[$p['nm']] = array();
 					}
 					// модуль и его параметры
-					foreach ($p['v'] as $modstr){
-						$tmp = explode("|",$modstr);
-						$param->module[$p['nm']][$tmp[0]] = array();
-						$cnt = count($tmp);
-						for ($i=1;$i<$cnt;$i++){
-							$ttmp = explode("=", $tmp[$i]);
-							$param->module[$p['nm']][$tmp[0]][$ttmp[0]] = $ttmp[1]; 
-						}
+					$tmp = explode("|",$p['v']);
+					$param->module[$p['nm']][$tmp[0]] = array();
+					$cnt = count($tmp);
+					for ($i=1;$i<$cnt;$i++){
+						$ttmp = explode("=", $tmp[$i]);
+						$param->module[$p['nm']][$tmp[0]][$ttmp[0]] = $ttmp[1]; 
 					}
-					// CMSSysBrickReader::SyncParamVar($param->module[$p['nm']], $p['v']);
 					break;
 				case CMSQSys::BRICKPRM_PARAM:
 					if (!is_array($param->param[$p['nm']])){
@@ -289,12 +286,16 @@ class CMSSysBrickReader {
 		$p->var = CMSSysBrickReader::BrickParseVar($param, "bkvar");
 		// глобальные переменные
 		$p->gvar = CMSSysBrickReader::BrickParseVar($param, "var");
+		
 		// подключаемые модули
+		// объявление может быть из нескольких кирпичей с параметрами
+		// например: [mod=mymod]mybrick1|p1=mystr|p2=10,mybrick2[/mod]
 		$arr = CMSSysBrickReader::BrickParseVar($param, "mod");
 		foreach($arr as $key => $value){
 			if (!is_array($p->module[$key])){
 				$p->module[$key] = array();
 			}
+			
 			$mods = explode(',', $value);
 			// модуль и его параметры
 			foreach ($mods as $modstr){
