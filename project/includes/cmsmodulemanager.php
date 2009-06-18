@@ -19,6 +19,13 @@ abstract class CMSModule extends CMSBaseClass {
 	public $version = "0.0.0";
 	
 	/**
+	 * Ревизия модуля
+	 * 
+	 * @var string
+	 */
+	public $revision = "";
+	
+	/**
 	 * Наименование - идентификатор модуля
 	 *
 	 * @var string
@@ -202,6 +209,18 @@ class CMSModuleManager extends CMSBaseClass {
 			if (!file_exists($file)){return null;}
 			require_once($file);
 			$mod = $this->table[$name];
+			if (!empty($mod)){
+				// добавить ревизию если есть
+				if ($name == 'sys'){
+					$revision = CWD."/revision";
+				}else{
+					$revision = CWD."/modules/".$name."/revision";
+				}
+				if (file_exists($revision)){
+					$rev = file_get_contents($revision);
+					$mod->revision = intval($rev); 
+				}
+			}
 		}
 		return $mod;
 	}

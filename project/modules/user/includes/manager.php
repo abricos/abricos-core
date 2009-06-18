@@ -48,6 +48,25 @@ class CMSUserManager {
 	}
 	
 	/**
+	 * Получить список модулей
+	 */
+	public function ModuleList(){
+		if (!$this->IsAdministrator()){ return null; }
+		$this->registry->modules->RegisterAllModule();
+		$modules = $this->registry->modules->GetModules();
+		$ret = array();
+		foreach ($modules as $name => $mod){
+			array_push($ret, array(
+				"id" => $name,
+				"nm" => $name,
+				"vs" => $mod->version,
+				"rv" => $mod->revision
+			));
+		}
+		return $ret;
+	}
+	
+	/**
 	 * Получить полную информацию о пользователе.
 	 * Информация доступна владельцу и администратору.
 	 *

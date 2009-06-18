@@ -130,6 +130,14 @@ class CMSSysBrickBuilder {
 			}
 		}
 		
+		// установка версии
+		if (isset($this->_globalVar['version'])){
+			$modSys = $this->registry->modules->GetModule('sys');
+			$version = $modSys->version . (!empty($modSys->revision)?"-r".$modSys->revision: "");
+			$this->_globalVar['version'] = $version;  
+			
+		}
+		
 		$this->FetchVars($brick);
 		
 		$this->PagePrint($brick);

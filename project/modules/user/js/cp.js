@@ -13,7 +13,7 @@
 	if (!Brick.env.user.isRegister()){ return; }
 	Brick.User.CP.Manager.register({
 		name: 'user-profile',
-		titleid: "user.profile.cp.title",
+		titleid: "mod.user.cp.profile.title",
 		icon: "/modules/user/js/images/cp_icon.gif",
 		initialize: function(container){
 			wWait.show();
@@ -31,7 +31,7 @@
 	
 	Brick.User.CP.Manager.register({
 		name: 'user-users',
-		titleid: "user.users.cp.title",
+		titleid: "mod.user.cp.users.title",
 		icon: "/modules/user/js/images/cp_icon.gif",
 		initialize: function(div){
 			wWait.show();
@@ -40,6 +40,21 @@
 		    onSuccess: function() {
 					wWait.hide();
 					Brick.mod.user.admin.cp.initialize(div);
+			  }
+			});
+		}
+	});
+
+	Brick.User.CP.Manager.register({
+		name: 'user-modules',
+		titleid: "mod.user.cp.modules.title",
+		initialize: function(div){
+			wWait.show();
+			Brick.Loader.add({
+				mod:[{name: 'user', files: ['cp_modules.js']}],
+		    onSuccess: function() {
+					wWait.hide();
+					Brick.mod.user.modules.cp.initialize(div);
 			  }
 			});
 		}

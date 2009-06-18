@@ -51,6 +51,9 @@ foreach ($ds->ts as $ts){
 			case 'usercount':
 				$rows = $um->UserCount();
 				break;
+			case 'modules':
+				$rows = $um->ModuleList();
+				break;
 		}
 		if (!is_null($rows)){
 			if ($qcol){

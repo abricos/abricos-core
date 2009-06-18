@@ -1,13 +1,16 @@
 Brick.util.Language.add('ru',{
-	'user':{
-		'profile':{
-			'cp':{
-				'title': 'Настройки профиля'
-			}
-		},
-		'users': {
-			'cp':{
-				'title': 'Пользователи'
+	'mod': {
+		'user': {
+			'cp': {
+				'profile':{
+					'title': 'Настройки профиля' 
+				},
+				'users':{
+					'title': 'Пользователи'
+				},
+				'modules':{
+					'title': 'Модули'
+				}
 			}
 		}
 	}
