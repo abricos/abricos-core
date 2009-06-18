@@ -137,7 +137,7 @@ Brick.namespace('widget');
 		}
 		
 		var lang = Brick.env.language;
-		var exp = new RegExp("(\{\#[a-zA-Z_\.]+\})", "g"), s, arr, key, phrase, i;
+		var exp = new RegExp("(\{\#[a-zA-Z0-9_\.\-]+\})", "g"), s, arr, key, phrase, i;
 		for (var name in t){
 			s = t[name];
 			arr = s.match(exp)
