@@ -199,10 +199,7 @@ class CMSSysBrickReader {
 					}
 					CMSSysBrickReader::SyncParamVar($param->param[$p['nm']], $p['v']);
 				case CMSQSys::BRICKPRM_PHRASE:
-					if (!is_array($param->phrase[$p['nm']])){
-						$param->phrase[$p['nm']] = array();
-					}
-					CMSSysBrickReader::SyncParamVar($param->phrase[$p['nm']], $p['v']);
+					$param->phrase[$p['nm']] = $p['v'];
 					break;
 				case CMSQSys::BRICKPRM_SCRIPT:
 					CMSSysBrickReader::SyncParamVar($param->script, $p['v']);

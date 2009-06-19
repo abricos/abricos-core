@@ -122,7 +122,6 @@ class CMSModuleSys extends CMSModule {
 		}
 		
 		Brick::$builder->template = $template;
-		
 		$brick->child = $newChildren;
 		array_push($template->child, $brick);
 

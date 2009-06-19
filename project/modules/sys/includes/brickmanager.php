@@ -110,6 +110,10 @@ class CMSSysBrickBuilder {
 		$this->phrase = new CMSSysPhrase($this->registry );
 	}
 	
+	/**
+	 * Сборка страницы. 
+	 * параметр $brick - имеет тип шаблон.
+	 */
 	public function Compile(CMSSysBrick $brick){
 		$this->TakeGlobalParam($brick);
 		$this->phrase->Preload($this->_phrase);
@@ -118,15 +122,14 @@ class CMSSysBrickBuilder {
 		
 		// Установка метатегов страницы по умолчанию, если они не установлены в процессе компиляции кирпичей
 		if (isset($this->_phrase['sys:meta_title'])){
-			// шаблон содержит фразы метатегов по умолчанию
-			if (empty($this->_globalVar['meta_title'])){
-				$this->_globalVar['meta_title'] = $this->_phrase['sys:meta_title'];
+			if (isset($this->_globalVar['meta_title']) && empty($this->_globalVar['meta_title'])){
+				$this->_globalVar['meta_title'] = $this->phrase->Get('sys', 'meta_title');
 			}
-			if (empty($this->_globalVar['meta_keys'])){
-				$this->_globalVar['meta_keys'] = $this->_phrase['sys:meta_keys'];
+			if (isset($this->_globalVar['meta_keys']) && empty($this->_globalVar['meta_keys'])){
+				$this->_globalVar['meta_keys'] = $this->phrase->Get('sys', 'meta_keys');
 			}
-			if (empty($this->_globalVar['meta_desc'])){
-				$this->_globalVar['meta_desc'] = $this->_phrase['sys:meta_desc'];
+			if (isset($this->_globalVar['meta_desc']) && empty($this->_globalVar['meta_desc'])){
+				$this->_globalVar['meta_desc'] = $this->phrase->Get('sys', 'meta_desc');
 			}
 		}
 		
@@ -135,7 +138,6 @@ class CMSSysBrickBuilder {
 			$modSys = $this->registry->modules->GetModule('sys');
 			$version = $modSys->version . (!empty($modSys->revision)?"-r".$modSys->revision: "");
 			$this->_globalVar['version'] = $version;  
-			
 		}
 		
 		$this->FetchVars($brick);
@@ -316,19 +318,6 @@ class CMSSysBrickBuilder {
 			$this->SetVar($brick, "[bkvar]".$key."[/bkvar]", $value);
 		}
 		
-		/*
-		foreach ($brick->child as $childbrick){
-			if ($childbrick->type == CMSQSys::BRICKTYPE_CONTENT){
-				
-				$this->SetVar($brick, "[tt]content[/tt]", $childbrick->content);
-				
-			}else if ($childbrick->type == CMSQSys::BRICKTYPE_BRICK){
-				$this->SetVar($brick, "[mod]".$childbrick->owner.":".$childbrick->name."[/mod]", $childbrick->content);
-			}
-			$childbrick->content = "";
-		}
-		/**/
-		
 		foreach ($p->gvar as $key => $value){
 			$this->SetVar($brick, "[var]".$key."[/var]", $this->_globalVar[$key]);
 		}
@@ -469,6 +458,7 @@ class CMSSysBrickManager extends CMSBaseClass {
 			}
 		}
 		
+		// Возможно кирпичь редактировался пользователем, тогда он будет взять из базы 
 		if (is_null($brick) && !is_null($this->custom)){
 			$customBrick = $this->custom->GetBrick($owner, $brickName, $brickType);
 		}
@@ -478,7 +468,6 @@ class CMSSysBrickManager extends CMSBaseClass {
 			$brick = new CMSSysBrick($owner, $brickName, $brickType, $brickFF->body, $brickFF->param, $parent);
 			$this->SyncParam($owner, $brickName, $brickType, $brick->param);
 		}else{
-			// print_r($customBrick);
 			$param = new CMSSysBrickParam();
 			$this->SyncParam($owner, $brickName, $brickType, $param);
 			$brick = new CMSSysBrick($owner, $brickName, $brickType, $customBrick['bd'], $param, $parent);
@@ -676,11 +665,18 @@ class CMSSysBrick {
 	}
 }
 
+/**
+ * Класс управления кирпичей редактированных администратором
+ *
+ */
 class CMSSysBrickCustomManager {
 	
 	public $bricks = array();
 	public $params = array();
 	
+	/**
+	 * Конструктор. Загружает из БД все custom кирпичи и их параметры
+	 */
 	public function __construct(CMSRegistry $registry){
 		$db = $registry->db;
 		$rows = CMSQSys::BrickListCustom($db);

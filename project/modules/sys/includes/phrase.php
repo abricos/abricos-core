@@ -37,6 +37,9 @@ class CMSSysPhraseItem {
 	}
 }
 
+/**
+ * Менеджер управления фразами.
+ */
 class CMSSysPhrase extends CMSBaseClass {
 	
 	/**
@@ -56,7 +59,6 @@ class CMSSysPhrase extends CMSBaseClass {
 	 */
 	public function __construct(CMSRegistry $registry){
 		$this->registry = $registry;
-		// $this->Preload($list);
 	}
 	
 	/**
