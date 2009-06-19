@@ -370,10 +370,10 @@ Brick.namespace('widget');
 				this._reqtinymce = false;
 				tinyMCE_GZ.init(
 					{
-						baseURL: '/js/tinymce/3.2.3',
+						baseURL: '/js/tinymce/3.2.4.1',
 						themes : "advanced",
 						plugins : "safari,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras",
-				    languages : "en,ru", disk_cache : true, version: '3.2.3'
+				    languages : "en,ru", disk_cache : true, version: '3.2.4.1'
 					}, 
 					function() {__self._event();}
 				);
@@ -449,7 +449,7 @@ Brick.namespace('widget');
 					case 'tinymce':
 						this._reqtinymce = true;
 						// alert("Brick.Loader: This is a old thersion!\n Please, use mod:[{name:'sys', files:['tiny_mce_gzip.js']}]");
-						fp = "/js/tinymce/3.2.3/tiny_mce_gzip.js?v=1";
+						fp = "/js/tinymce/3.2.4.1/tiny_mce_gzip.js?v=2";
 						break;
 					case 'accordionview':
 						fp = "/gzip.php?file=/js/yui/2.6.0/accordionview/accordionview-min.js";
