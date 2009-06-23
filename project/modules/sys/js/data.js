@@ -321,7 +321,7 @@
 					row = new Row(data[i]);
 					this.add(row);
 				}
-				_lastUpdate = ((new Date()).getTime()/1000);
+				_lastUpdate =  Math.round(((new Date()).getTime()/1000));
 			};
 			
 			this.clone = function(){
@@ -524,7 +524,7 @@
 				o['cs'] = o['cs'] || [];
 				this.columns.update(o['cs']);
 				_rowsparam.update(o['rs']);
-				_lastUpdate = ((new Date()).getTime()/1000);
+				_lastUpdate =  Math.round((new Date()).getTime()/1000);
 				_recycleclear = false;
 			};
 			
@@ -554,7 +554,7 @@
 			this.name = name;
 			this.prefix = prefix;
 			this.tables = {};
-			this.session = ((new Date()).getTime()/1000);
+			this.session =  Math.round((new Date()).getTime()/1000);
 			this.onComplete = new YAHOO.util.CustomEvent("onComplete"); 
 		},
 		add: function(table){
@@ -738,7 +738,7 @@
 
 			var json = {
 				'__data': {
-					'session': ((new Date()).getTime()/1000), 
+					'session':  Math.round((new Date()).getTime()/1000), 
 					'dictlist': obj
 				}
 			};
