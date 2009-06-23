@@ -141,7 +141,7 @@ class CMSSysBrickBuilder {
 		}
 		
 		$this->FetchVars($brick);
-		
+
 		$this->PagePrint($brick);
 		
 		$this->phrase->Save();
@@ -158,14 +158,18 @@ class CMSSysBrickBuilder {
 	 * @param string $name
 	 */
 	public function LoadBrick(CMSModule $module, $name, CMSSysBrick $parent = null){
+		
 		$bm = new CMSSysBrickManager($this->registry, false);
 		$brick = $bm->BuildOutput($module->name, $name, CMSQSys::BRICKTYPE_BRICK, $parent);
+		
 		if (!empty($parent)){
 			array_push($parent->child, $brick);
 			if (!is_array($parent->param->module[$brick->owner])){
 				$parent->param->module[$brick->owner] = array();
 			}
-			array_push($parent->param->module[$brick->owner], $name);
+			$bmod = new stdClass();
+			$bmod->name = $name;
+			array_push($parent->param->module[$brick->owner], $bmod);
 		}
 		$this->TakeGlobalParam($brick);
 		$this->ExecuteBrick($brick);
@@ -217,12 +221,6 @@ class CMSSysBrickBuilder {
 			$this->_setheader = true;
 		}
 		
-		$name = "mod";
-		$pattern = "#\[".$name."\](.+?)\[/".$name."\]#is";
-		
-		$mathes = array();
-		preg_match_all($pattern, $brick->content, $mathes, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
-		
 		$contentPos = -1;
 		$brickContent = null;
 		if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE){
@@ -234,6 +232,13 @@ class CMSSysBrickBuilder {
 				}
 			}
 		}
+
+		$name = "mod";
+		$pattern = "#\[".$name."\](.+?)\[/".$name."\]#is";
+		
+		$mathes = array();
+		preg_match_all($pattern, $brick->content, $mathes, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+		
 		if (empty($mathes)){
 			if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE){
 				$ca = split("\[tt\]content\[\/tt\]", $content);
@@ -251,10 +256,11 @@ class CMSSysBrickBuilder {
 			$replstr = $value[0][0];
 			$count = $value[0][1]-$position;
 			$sa = split(":", $value[1][0]);
+			$id = count($sa) == 3 ? $sa[2] : 0;
 			$mods = $brick->param->module[$sa[0]];
 			if (empty($mods)){ continue; }
-			foreach ($mods as $brickname => $pinparam){
-				if ($sa[1] != $brickname){ continue; }
+			foreach ($mods as $mbrick){
+				if ($sa[1] != $mbrick->name){ continue; }
 				$content = substr($brick->content, $position, $count);
 				if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE && $contentPos >= $position && $contentPos <= $count+$position){
 					$ca = split("\[tt\]content\[\/tt\]", $content);
@@ -266,7 +272,11 @@ class CMSSysBrickBuilder {
 				}
 				$position = $value[0][1]+strlen($replstr);
 				foreach ($brick->child as $cbrick){
-					if ($cbrick->owner == $sa[0] && $cbrick->name == $brickname && $cbrick->type != CMSQSys::BRICKTYPE_CONTENT){
+					
+					if ($cbrick->owner == $sa[0] && $cbrick->name == $mbrick->name && $cbrick->type != CMSQSys::BRICKTYPE_CONTENT) {
+						if($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $id){
+							continue; 
+						}
 						$this->PagePrint($cbrick);
 						break;
 					}
@@ -438,9 +448,7 @@ class CMSSysBrickManager extends CMSBaseClass {
 		// Если это кирпичь модуля, то необходимо проверить наличие модуля в системе
 		if ($brickType == CMSQSys::BRICKTYPE_BRICK){
 			$mod = $this->registry->modules->GetModule($owner);
-			if (empty($mod)){
-				return null;
-			}
+			if (empty($mod)){ return null; }
 		}
 		
 		// кеш, применим только к шаблону
@@ -464,6 +472,7 @@ class CMSSysBrickManager extends CMSBaseClass {
 		}
 		$brick = null;
 		if (empty($customBrick)){
+			// кирпич не найден в БД, читаем из файла
 			$brickFF = CMSSysBrickReader::ReadBrick($owner, $brickName, $brickType);
 			$brick = new CMSSysBrick($owner, $brickName, $brickType, $brickFF->body, $brickFF->param, $parent);
 			$this->SyncParam($owner, $brickName, $brickType, $brick->param);
@@ -474,8 +483,7 @@ class CMSSysBrickManager extends CMSBaseClass {
 		}
 		
 		$p = $brick->param;
-		
-		// если кирпич вызывается с параметрами, необходим изменить дефалтные
+		// если кирпич вызывается с параметрами, необходим изменить дефолтные
 		if (!empty($inparam)){
 			foreach ($inparam as $key => $value){
 				$p->param[$key] = $value;
@@ -498,11 +506,9 @@ class CMSSysBrickManager extends CMSBaseClass {
 		}
 		if (!empty($p->module)){
 			foreach($p->module as $key => $value){
-				foreach ($value as $cbricknm => $pinparam){
-					$childBrick = $this->BuildOutput($key, $cbricknm, CMSQSys::BRICKTYPE_BRICK, $brick, $pinparam);
-					if (is_null($childBrick)){
-						continue;
-					}
+				foreach ($value as $obj){
+					$childBrick = $this->BuildOutput($key, $obj->name, CMSQSys::BRICKTYPE_BRICK, $brick, $obj->param);
+					if (is_null($childBrick)){ continue; }
 					array_push($brick->child, $childBrick);
 				}
 			}

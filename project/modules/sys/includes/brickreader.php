@@ -29,20 +29,6 @@ class CMSSysBrickReader {
 		$this->isAdmin = $registry->session->IsAdminMode(); 
 	}
 	
-	public static function ReadBrick($owner, $name, $type){
-		$path = CWD."/modules/".$owner."/";
-		
-		switch ($type){
-			case CMSQSys::BRICKTYPE_BRICK: $path .= "brick/"; break; 
-			case CMSQSys::BRICKTYPE_CONTENT: $path .= "content/"; break;
-			case CMSQSys::BRICKTYPE_TEMPLATE: 
-				$path = CWD."/tt/".$owner."/"; 
-				break;
-		}
-		$path .= $name.".html";
-		return CMSSysBrickReader::ReadBrickFromFile($path);
-	}
-	
 	/**
 	 * Проверка на изменение кирпичей движка
 	 *
@@ -186,12 +172,19 @@ class CMSSysBrickReader {
 					}
 					// модуль и его параметры
 					$tmp = explode("|",$p['v']);
-					$param->module[$p['nm']][$tmp[0]] = array();
+					// если кирпич обявляется несколько раз с разными параметрами, то 
+					// необходимо идентифицировать его по id
+					$brickname = $tmp[0];
+					$inparam = array();
 					$cnt = count($tmp);
 					for ($i=1;$i<$cnt;$i++){
 						$ttmp = explode("=", $tmp[$i]);
-						$param->module[$p['nm']][$tmp[0]][$ttmp[0]] = $ttmp[1]; 
+						$inparam[$ttmp[0]] = $ttmp[1];
 					}
+					$bmod = new stdClass();
+					$bmod->name = $brickname;
+					if (count($inparam)>0){ $bmod->param = $inparam; }
+					array_push ($param->module[$p['nm']], $bmod);
 					break;
 				case CMSQSys::BRICKPRM_PARAM:
 					if (!is_array($param->param[$p['nm']])){
@@ -224,6 +217,20 @@ class CMSSysBrickReader {
 			}
 		}
 		if (!$find){array_push($arr, $val); }
+	}
+	
+	public static function ReadBrick($owner, $name, $type){
+		$path = CWD."/modules/".$owner."/";
+		
+		switch ($type){
+			case CMSQSys::BRICKTYPE_BRICK: $path .= "brick/"; break; 
+			case CMSQSys::BRICKTYPE_CONTENT: $path .= "content/"; break;
+			case CMSQSys::BRICKTYPE_TEMPLATE: 
+				$path = CWD."/tt/".$owner."/"; 
+				break;
+		}
+		$path .= $name.".html";
+		return CMSSysBrickReader::ReadBrickFromFile($path);
 	}
 	
 	public static function ReadBrickFromFile($file){
@@ -274,7 +281,10 @@ class CMSSysBrickReader {
 		preg_match($pattern, $filebody, $mathes);
 		$param = $mathes[1];
 		
-		$ret->hash = md5("sz".filesize($file)."tm".filemtime($file));
+		$ret->hash = "";
+		if (file_exists($file)){
+			$ret->hash = md5("sz".filesize($file)."tm".filemtime($file));
+		}
 		
 		$ret->body = preg_replace($pattern, '', $filebody);
 		$p = new CMSSysBrickParam();
@@ -294,15 +304,22 @@ class CMSSysBrickReader {
 			}
 			
 			$mods = explode(',', $value);
-			// модуль и его параметры
 			foreach ($mods as $modstr){
-				$tmp = explode("|",$modstr);
-				$p->module[$key][$tmp[0]] = array();
+				// модуль и его параметры
+				$tmp = explode("|", $modstr);
+				// если кирпич обявляется несколько раз с разными параметрами, то 
+				// необходимо идентифицировать его по id
+				$brickname = $tmp[0];
+				$inparam = array();
 				$cnt = count($tmp);
 				for ($i=1;$i<$cnt;$i++){
 					$ttmp = explode("=", $tmp[$i]);
-					$p->module[$key][$tmp[0]][$ttmp[0]] = $ttmp[1]; 
+					$inparam[$ttmp[0]] = $ttmp[1];
 				}
+				$bmod = new stdClass();
+				$bmod->name = $brickname;
+				if (count($inparam)>0){ $bmod->param = $inparam; }
+				array_push ($p->module[$key], $bmod);
 			}
 		}
 		
