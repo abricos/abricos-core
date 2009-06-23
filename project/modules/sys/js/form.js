@@ -58,7 +58,13 @@
 			if (tag == 'input'){
 				var type = el.type.toLowerCase();
 				if (type == 'checkbox'){
-					el.checked = value ? "checked" : "";
+					switch(value){
+						case "0":
+							break;
+						default:
+							el.checked = value ? "checked" : "";
+							break;
+					}
 					return;
 				}
 			}else if (tag == 'label'){
