@@ -116,7 +116,7 @@
 				'hpnm': this.elv('hpnm'),
 				'hp': this.elv('hp'),
 				'icq': this.elv('icq'),
-				'skype': this.elv('skype'),
+				'skype': this.elv('skype')
 			});
 			this.saverow();
 		}

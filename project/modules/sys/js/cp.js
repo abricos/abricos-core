@@ -25,22 +25,6 @@
 			});
 		}
 	};
-	/*
-	module['child'] = [{
-		name: 'catalog',
-		titleid: "catalog.title",
-		initialize: function(container){
-			wWait.show();
-			Brick.Loader.add({
-				mod:[{name: 'catalog', files: ['cp_config.js']}],
-		    onSuccess: function() {
-					wWait.hide();
-					var cppage = new Brick.Catalog.CPPage(container, 'cps');
-			  }
-			});
-		}
-	}];
-	/**/
 	Brick.User.CP.Manager.register(module);
 
 })();

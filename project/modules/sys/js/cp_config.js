@@ -91,9 +91,15 @@ var moduleInitialize = function(){
 				t = tSetVar(t, 'tl', di['nm']);
 				lst += t;
 			});
-			this.el('style').innerHTML = lst;
+			lst = tSetVar(T['select'], 'list', lst);
+			this.el('styles').innerHTML = lst;
 			this.rows['config'].foreach(function(row){
 				var di = row.cell;
+				if (di['nm'] == 'style'){
+					var el = Dom.get(TId['select']['id']);
+					Brick.util.Form.setValue(el, di['ph']);
+					return;
+				}
 				var el = __self.el(di['nm']);
 				if (!el){ return; }
 				__self.setelv(di['nm'], di['ph']);
@@ -103,11 +109,16 @@ var moduleInitialize = function(){
 			var __self = this;
 			this.rows['config'].foreach(function(row){
 				var di = row.cell;
+				
+				if (di['nm'] == 'style'){
+					var el = Dom.get(TId['select']['id']);
+					row.update({ 'ph': Brick.util.Form.getValue(el) });
+					return;
+				}
+
 				var el = __self.el(di['nm']);
 				if (!el){ return; }
-				row.update({
-					'ph': __self.elv(di['nm'])
-				});
+				row.update({ 'ph': __self.elv(di['nm']) });
 			});
 			this.tables['config'].applyChanges();
 			DATA.request();

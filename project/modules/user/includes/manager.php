@@ -56,6 +56,7 @@ class CMSUserManager {
 		$modules = $this->registry->modules->GetModules();
 		$ret = array();
 		foreach ($modules as $name => $mod){
+			if ($name == 'user' || $name == 'ajax'){ continue; }
 			array_push($ret, array(
 				"id" => $name,
 				"nm" => $name,

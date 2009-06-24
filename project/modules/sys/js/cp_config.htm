@@ -14,9 +14,7 @@
 		<textarea id="{i#site_title}" style="width: 500px; height: 30px"></textarea>
 	</p>
 	<h3>Стиль сайта</h3>
-	<p>
-		<select id="{i#style}"></select>
-	</p>
+	<p id="{i#styles}"></p>
 	<h3>Мета теги по умолчанию</h3>
 	<p>
 		<label id="{i#meta_title}-lbl">Title:</label><br />
@@ -34,6 +32,9 @@
 <div class="buttons-top right">
 	<input id='{i#bsave}' type="button" value="Сохранить" />
 </div>
+
+<!--{select}-->
+<select id="{i#id}">{v#list}</select>
 
 <!--{option}-->
 <option value="{v#id}">{v#tl}</option>
