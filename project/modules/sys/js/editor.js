@@ -51,9 +51,8 @@
 				title : 'File Manager',
 					image : '/modules/filemanager/js/images/icon.gif',
 					onclick : function() {
-						Brick.mod.filemanager.show(function(file){
-							var linker = new Brick.FM.Linker(file);
-							ed.selection.setContent(linker.getHTML());
+						Brick.mod.filemanager.show(function(data){
+							ed.selection.setContent(data.html);
 						});
 					}
 			});

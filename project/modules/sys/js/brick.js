@@ -157,8 +157,14 @@ Brick.namespace('widget');
 	Brick.util.Template.setProperty = function(t, name, value){
 		var exp = new RegExp("\{v\#"+name+"\}", "g");
 		return t.replace(exp, value);
-	}
-	
+	};
+
+	Brick.util.Template.setPropertyArray = function(t, obj){
+		for (var n in obj){
+			t = Brick.util.Template.setProperty(t, n, obj[n]);
+		}
+		return t;
+	};
 })();
 
 /* * * * * * * * * * * * Template Id Manager * * * * * * * * * * */
@@ -448,16 +454,10 @@ Brick.namespace('widget');
 					switch(nm){
 					case 'tinymce':
 						this._reqtinymce = true;
-						// alert("Brick.Loader: This is a old thersion!\n Please, use mod:[{name:'sys', files:['tiny_mce_gzip.js']}]");
 						fp = "/js/tinymce/3.2.4.1/tiny_mce_gzip.js?v=2";
 						break;
 					case 'accordionview':
 						fp = "/gzip.php?file=/js/yui/2.6.0/accordionview/accordionview-min.js";
-						/*
-						loader.addModule({
-							name: "reset-fonts", type: "css", 
-							fullpath: "/js/yui/2.6.0/reset-fonts/reset-fonts.css"});
-						/**/
 						loader.addModule({
 							name: "accordionview-css", type: "css", 
 							fullpath: "/js/yui/2.6.0/accordionview/assets/skins/sam/accordionview.css"});

@@ -24,34 +24,24 @@
 var moduleInitialize = function(){
 (function(){
 	
-	Brick.widget.Panel = function(template, userConfig/*, tman/**/){
+	Brick.widget.Panel = function(template, userConfig){
 		userConfig = L.merge(userConfig || {}, {
 			zindex: 1000,
 			draggable: true, 
 			modal:true, 
 			visible:false
 		})
-		this.init(template, userConfig /*, tman/**/);
+		this.init(template, userConfig);
 	};
 	
 	var Panel = Brick.widget.Panel;
 	
 	Panel.prototype = {
 		
-		/**
-		 * The class's constructor function
-		 * @property contructor
-     * @type Function
-     */
 		constructor: Panel,
-		// templateManager: null,
 
-		init: function(template, userConfig/*, tman/**/){
-			
-			// this.templateName = userConfig['templateName']; // на будущее: передача шаблона, его имени и мендеджера идентификатора элемента. Создание функции el, которая возвращает элемент и кеширует его, чтоб при следующем запросе не использовал Dom.get
-			// this.templateManager = tman;
-			// this._elCache = {};
-	
+		init: function(template, userConfig){
+
 			template = template || "";
 			template = this.initTemplate(template);
 			
@@ -79,24 +69,6 @@ var moduleInitialize = function(){
 		center: function(){
 			this._basePanel.center();
 		},
-		/*
-		el: function(name){
-			var tman = this.templateManager;
-			alert(tman);
-			if (typeof tman  == 'undefined'){
-				alert('Error in Brick.widget.Panel: Template manager can`t initialized');
-				return null;
-			}
-			var t = tman['T'];
-			var tId = tman['TId'];
-			var tName = tman['TName'];
-			var id = tId[tName][name];
-			if (typeof this._elCache[id] == 'undefined'){
-				this._elCache[id] = Dom.get(id);
-			}
-			return this._elCache[id];
-		},
-		/**/
 		initTemplate: function(template){
 			return template;
 		},
@@ -112,9 +84,7 @@ var moduleInitialize = function(){
 			this._basePanel.destroy();
 			this._basePanel = null;
 		},
-		onClick: function(el){
-			return false;
-		},
+		onClick: function(el){ return false; },
 		onClose: function(){}, 
 		onLoad: function(){}
 	};
