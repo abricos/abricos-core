@@ -39,6 +39,9 @@ class CMSSysPhraseItem {
 
 /**
  * Менеджер управления фразами.
+ * Задача класса загружать запрашиваемые фразы.
+ * Если фразы в базе не найдены, то создание их и 
+ * сохранение со значениями по умолчанию 
  */
 class CMSSysPhrase extends CMSBaseClass {
 	
@@ -86,31 +89,34 @@ class CMSSysPhrase extends CMSBaseClass {
 		$db = $this->registry->db;
 		$rows = CMSQSys::PhraseListByModule($db, $module);
 		$this->_preload($rows);
+		$this->Save();
 	}
 	
 	/**
-	 * Пакетная загрузка фраз
+	 * Пакетная загрузка фраз. Если фразы не нейдены в базе, то создание их со значениями
+	 * по умолчанию и сохранение
 	 *
-	 * @param array $list
+	 * @param array $list список фраз
 	 */
 	public function Preload($list){
 		$db = $this->registry->db;
 		$rows = CMSQSys::PhraseList($db, $list);
 		$this->_preload($rows);
+		foreach ($list as $key=>$value){
+			$sa = explode(":", $key);
+			if (count($sa) != 2){ continue; }
+			$this->Get($sa[0], $sa[1], $value, false);
+		}
+		$this->Save();
 	}
 	
 	private function _preload($rows){
-		// сохранение текущих фраз
-		$this->Save();
-		
 		$db = $this->registry->db;
 		while (($row = $db->fetch_array($rows))){
 			$key = $row['mnm'].":".$row['nm'];
-			if (empty($this->arr[$key])){
-				$phrase = new CMSSysPhraseItem($row['mnm'], $row['nm'], $row['ph']);
-				$phrase->id = $row['id'];
-				$this->arr[$key] = $phrase;
-			}
+			$phrase = new CMSSysPhraseItem($row['mnm'], $row['nm'], $row['ph']);
+			$phrase->id = $row['id'];
+			$this->arr[$key] = $phrase;
 		}
 	}
 
@@ -122,23 +128,33 @@ class CMSSysPhrase extends CMSBaseClass {
 	 * @param string $name
 	 * @param string $value 
 	 */
-	public function Get($modname, $name, $value = ""){
-		$phrase = $this->GetPhraseItem($modname, $name, $value);
+	public function Get($modname, $name, $value = "", $checkindb = true){
+		$phrase = $this->GetPhraseItem($modname, $name, $value, $checkindb);
 		return $phrase->value;
 	}
 	
-	private function GetPhraseItem($modname, $name, $value = ""){
+	/**
+	 * Получить фразу
+	 * 
+	 * @var string $modname имя модуля
+	 * @var string $name имя фразы
+	 * @var string $value значение по умолчанию 
+	 * @var string $checkindb если true, то загружать фразу из БД
+	 */
+	private function GetPhraseItem($modname, $name, $value = "", $checkindb = true){
 		$key = $modname.":".$name;
 		if (empty($this->arr[$key])){
+			$phrase = null;
 			// возможно эта фраза не была выбрана из БД, проверочный запрос
-			$phrase = CMSQSys::Phrase($this->registry->db, $modname, $name);
+			if ($checkindb)
+				$phrase = CMSQSys::Phrase($this->registry->db, $modname, $name);
 			if (empty($phrase)){
 				$item = new CMSSysPhraseItem($modname, $name, $value);
 				$item->isnew = true;
 				$this->arr[$key] = $item;
 			}else{
 				$item = new CMSSysPhraseItem($modname, $name, $phrase['ph']);
-				$item->id = $row['id'];
+				$item->id = $phrase['id'];
 				$this->arr[$key] = $item;
 			}
 		}
@@ -171,9 +187,11 @@ class CMSSysPhrase extends CMSBaseClass {
 		}
 		if (!empty($arrnew)){
 			CMSQSys::PhraseListAppend($this->registry->db, $arrnew);
+			// echo("append\n");
 		}
 		if (!empty($arrupdate)){
 			CMSQSys::PhraseListUpdate($this->registry->db, $arrupdate);
+			// echo("update\n");
 		}
 	}
 }

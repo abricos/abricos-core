@@ -115,7 +115,9 @@ class CMSSysBrickBuilder {
 	 * параметр $brick - имеет тип шаблон.
 	 */
 	public function Compile(CMSSysBrick $brick){
+		// загрузить все глобальные параметры кирпичей 
 		$this->TakeGlobalParam($brick);
+		
 		$this->phrase->Preload($this->_phrase);
 		
 		$this->ExecuteBrick($brick);
@@ -172,6 +174,7 @@ class CMSSysBrickBuilder {
 			array_push($parent->param->module[$brick->owner], $bmod);
 		}
 		$this->TakeGlobalParam($brick);
+		$this->phrase->Preload($this->_phrase);
 		$this->ExecuteBrick($brick);
 	}
 	
