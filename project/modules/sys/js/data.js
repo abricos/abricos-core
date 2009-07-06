@@ -60,6 +60,7 @@
 	};
 	Row.prototype = {
 		init: function(data){
+			data = data || {};
 			var _isnew = false;
 			var _applychanges = false;
 			var _isupdate = false;
