@@ -20,7 +20,7 @@
 
 	Brick.Loader.add({
 		yahoo: ['json'],
-		mod:[{name: 'sys', files: ['form.js']}],
+		mod:[{name: 'sys', files: ['form.js','container.js']}],
     onSuccess: function() {
 			Dom = YAHOO.util.Dom;
 			E = YAHOO.util.Event;
@@ -32,9 +32,14 @@
 			Brick.util.Template.fillLanguage(T);
 			TId = new Brick.util.TIdManager(T);
 			
+			moduleInitialize();
+			delete moduleInitialize;
+
 			Brick.User.Guest.initialize();
 	  }
 	});
+	
+var moduleInitialize = function(){
 
 /* * * * * * * * * * * Password Change * * * * * * * * * * */
 (function(){
@@ -259,78 +264,51 @@
 /* * * * * * * * * * * Guest Register Manager * * * * * * * * * * */
 (function(){
 	
-	var globalPanel=null;
 	
-	var register = function(){
-		this.init();
+	var RegisterForm = function(userid){
+		this.userid = userid;
+		RegisterForm.superclass.constructor.call(this, T['register']);
 	};
-	register.prototype = {
-		init: function(){
-
-			if (!L.isNull(globalPanel)){ globalPanel.destroy(); }
-			var __self = this;
+	YAHOO.extend(RegisterForm, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(TId['register'][name]); },
+		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
+		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
+		onLoad: function(){
 			
-			var t = T['register'];
-	
-			var div = document.createElement('div');
-			div.innerHTML = t;
-	
-			var win = new YAHOO.widget.Panel(div, {zindex:1000, draggable: true, modal:true, visible:false});
-			win.render(document.body);
-			globalPanel = this.win = win;
-
-			win.hideEvent.subscribe(function(){ __self.close(); });
-			win.show();
-			win.center();
-	
-			var __self = this;
-			E.on(div, 'click', function(e){
-				if (__self.clickEvent(E.getTarget(e))){ E.stopEvent(e); }
-			});
-			E.on(TId['register']['form'], 'submit', function(){ __self.send();});
 		},
-		close: function(){
-			this.win.hide();
-		},
-		el: function(name){
-			return Dom.get(TId['register'][name]);
-		},
-		clickEvent: function (el){
+		onClick: function(el){
+			var tp = TId['register']; 
 			switch(el.id){
-			case TId['register']['breg']:
-				this.send();
-				return true;
-			case TId['register']['bcancel']:
-				this.close();
-				return true;
+			case tp['bcancel']: this.close(); return true;
+			case tp['breg']: this.save(); return true;
 			}
 			return false;
 		},
-		send: function(){
+		save: function(){
 			var unm = this.el('username');
 			var pass = this.el('pass');
 			var passconf = this.el('passconf');
 			var email = this.el('email');
 			var emailconf = this.el('emailconf');
 
+			var lng = Brick.util.Language.getData()['user']['guest']['register']['error']['client']; 
+			
 			var validobj = {
 				elements: {
-					'username':{ obj: unm, rules: ["empty","username"], args:{"field":"Имя пользователя"}},
-					'pass':{ obj: pass, rules: ["empty"], args:{"field":"Пароль"}},
-					'passconf':{ obj: passconf, rules: ["empty"], args:{"field":"Пароль подтв."}},
-					'email':{ obj: email, rules: ["empty","email"], args:{"field":"E-mail"}},
-					'emailconf':{ obj: emailconf, rules: ["empty","email"], args:{"field":"E-mail подтв."}}
+					'username':{ obj: unm, rules: ["empty","username"], args:{"field": lng['username']}},
+					'pass':{ obj: pass, rules: ["empty"], args:{"field": lng['pass']}},
+					'passconf':{ obj: passconf, rules: ["empty"], args:{"field": lng['passc']}},
+					'email':{ obj: email, rules: ["empty","email"], args:{"field": lng['email']}},
+					'emailconf':{ obj: emailconf, rules: ["empty","email"], args:{"field": lng['emailc']}}
 				}
 			};
 			
 			var validator = new Brick.util.Form.Validator(validobj);
 			var errors = validator.check();
-			if (errors.length > 0){
-				return;
-			}
+			if (errors.length > 0){ return; }
 			
-			if (pass.value != passconf.value){ alert('Пароли не совпадают'); return; }
-			if (email.value != emailconf.value){ alert('E-mail не совпадают'); return; }
+			if (pass.value != passconf.value){ alert(lng['passconf']); return; }
+			if (email.value != emailconf.value){ alert(lng['emailconf']); return; }
 			
 			var obj = {
 				'act':'reg',
@@ -346,15 +324,14 @@
 				connectCallback, 
 				post
 			);
-			
 		}
-	}
+	});
 	
 	Brick.User.Guest.Register = function(){
 		var activeRegPanel = null;
 		return {
 			show: function(){
-				activeRegPanel = new register(); 
+				activeRegPanel = new RegisterForm(); 
 			},
 			result: function(d){
 				if (d.error > 0){
@@ -430,5 +407,5 @@
 	};
 
 })();
-
+};
 })();
