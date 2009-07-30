@@ -284,7 +284,7 @@ class CMSSqlQueryUser{
 	 */
 	public static function QueryRegUserActivate(CMSDatabase  $db, $userid, $activateId){
 
-		$user = CMSSqlQuery::QueryGetUserInfo($db, $userid);
+		$user = CMSQUser::UserById($db, $userid);
 		if (empty($user)){
 			return 1;
 		}
