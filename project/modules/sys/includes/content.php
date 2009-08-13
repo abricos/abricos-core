@@ -49,6 +49,17 @@ if (!empty($modSitemap)){
 }
 if (!is_null($page)){
 	$brick->content = $page['bd'];
+	
+	if (!empty($page['mods'])){
+		
+		$mods = json_decode($page['mods']);
+		foreach ($mods as $own => $val){
+			foreach ($mods->$own as $bkname => $val2){
+				Brick::$builder->LoadBrickS($own, $bkname, $brick);
+			}
+		}
+	}
+	
 	if (!empty($page['tl'])){
 		Brick::$builder->SetGlobalVar('meta_title', $page['tl']);
 	}

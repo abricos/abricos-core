@@ -9,6 +9,12 @@
 class Brick {
 	
 	/**
+	 * Используемый стиль (шаблоны) при сборке страницы
+	 * 
+	 */
+	public static $style = 'default';
+	
+	/**
 	 * Идентификатор глобального контента из таблицы content
 	 *
 	 * @var int
@@ -61,6 +67,13 @@ class Brick {
 		return str_replace("{v#".$varname."}", $value, $template);
 	}
 	
+	public static function ReplaceVarByData($template, $data){
+		foreach ($data as $varname => $value){
+			$template = Brick::ReplaceVar($template, $varname, $value);
+		}
+		return $template;
+	}
+	
 	/**
 	 * Сессия пользователя
 	 *
@@ -92,11 +105,35 @@ class CMSSysBrickBuilder {
 	 */
 	public $template = null;
 	
+	/**
+	 * Глобальные переменные [var=имя]значение[/var]
+	 */
 	private $_globalVar = array();
+	/**
+	 * Фразы из БД [phrase=имя]значение по умолчанию[/phrase]
+	 */
 	private $_phrase = array();
+	/**
+	 * JS Widget модуля [mjs=имя модуля]файл js[/mjs]
+	 */
 	private $_jsmod = array();
+	/**
+	 * CSS модуля [mcss=имя модуля]файл css[/mcss]
+	 */
+	private $_cssmod = array();
+	/**
+	 * JS файл [js]путь к файлу[/js]
+	 */
 	private $_jsfile = array();
+	/**
+	 * CSS файл [css]путь к файлу[/css]
+	 */
 	private $_cssfile = array();
+	
+	/**
+	 * Массив всех используемых модулей в построение страницы
+	 */
+	private $_usemod = array();
 	
 	/**
 	 * Менеджер фраз
@@ -108,6 +145,12 @@ class CMSSysBrickBuilder {
 	public function __construct(CMSRegistry $registry){
 		$this->registry = $registry;
 		$this->phrase = new CMSSysPhrase($this->registry );
+	}
+	
+	private function SetUseModule($modname){
+		if ($this->_usemod[$modname]){ return; }
+		$this->_usemod[$modname] = true;
+		
 	}
 	
 	/**
@@ -159,10 +202,12 @@ class CMSSysBrickBuilder {
 	 * @param CMSModule $module
 	 * @param string $name
 	 */
-	public function LoadBrick(CMSModule $module, $name, CMSSysBrick $parent = null){
+	public function LoadBrick(CMSModule $module, $name, CMSSysBrick $parent = null, $overparam = null){
 		
 		$bm = new CMSSysBrickManager($this->registry, false);
 		$brick = $bm->BuildOutput($module->name, $name, CMSQSys::BRICKTYPE_BRICK, $parent);
+		
+		$this->SetUseModule($module->name);
 		
 		if (!empty($parent)){
 			array_push($parent->child, $brick);
@@ -175,13 +220,29 @@ class CMSSysBrickBuilder {
 		}
 		$this->TakeGlobalParam($brick);
 		$this->phrase->Preload($this->_phrase);
+		
+		if (!is_null($overparam)){
+			if (!empty($overparam['bkvar'])){
+				foreach ($overparam['bkvar'] as $key => $value){
+					$brick->param->var[$key] = $value;
+				}
+			}
+			if (!empty($overparam['p'])){
+				foreach ($overparam['p'] as $key => $value){
+					$brick->param->param[$key] = $value;
+				}
+			}
+		}
+
 		$this->ExecuteBrick($brick);
+		return $brick;
 	}
 	
-	public function LoadBrickS($moduleName, $name, CMSSysBrick $parent = null){
+	public function LoadBrickS($moduleName, $name, CMSSysBrick $parent = null, $overparam = null){
 		$mod = $this->registry->modules->GetModule($moduleName);
-		$this->LoadBrick($mod, $name, $parent);
+		return $this->LoadBrick($mod, $name, $parent, $overparam);
 	}
+	
 
 	/**
 	 * Динамическое добавление JavaScript модуля
@@ -316,6 +377,23 @@ class CMSSysBrickBuilder {
 			foreach ($this->_jsfile as $value){
 				$brick->param->var['js'] .= "<script src='".$value."' language='JavaScript' type='text/javascript' charset='utf-8'></script>";
 			}
+			
+			// проверка css модулей по умолчания
+			foreach ($this->_usemod as $modname => $value){
+				$mod = Brick::$modules->GetModule($modname);
+				if (empty($mod->defaultCSS)){ continue; }
+				$webcssfile = "/modules/".$modname."/css/".$mod->defaultCSS;
+				$cssfile = CWD.$webcssfile;
+				if (!file_exists($cssfile)){ continue; }
+				// есть ли перегруженный файл css
+				$weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$mod->defaultCSS;
+				$override = CWD.$weboverride;
+				if (file_exists($override)){
+					$webcssfile = $weboverride; 
+				}
+				$this->AddCSSFile($webcssfile);
+			}
+			
 			// добавление css файлов
 			foreach ($this->_cssfile as $value){
 				$brick->param->var['css'] .= "<style type='text/css' media='screen, projection'>/*<![CDATA[*/	@import '".$value."'; /*]]>*/</style>";
@@ -350,6 +428,9 @@ class CMSSysBrickBuilder {
 	 * @param CMSSysBrick $brick
 	 */
 	private function TakeGlobalParam(CMSSysBrick $brick){
+		if ($brick->type != CMSQSys::BRICKTYPE_TEMPLATE){
+			$this->SetUseModule($brick->owner);
+		}
 		$p = $brick->param;
 		foreach ($p->gvar as $key => $value){
 			$this->_globalVar[$key] = $value;
@@ -469,7 +550,7 @@ class CMSSysBrickManager extends CMSBaseClass {
 			}
 		}
 		
-		// Возможно кирпичь редактировался пользователем, тогда он будет взять из базы 
+		// Возможно кирпичь редактировался пользователем, тогда он будет взят из базы 
 		if (is_null($brick) && !is_null($this->custom)){
 			$customBrick = $this->custom->GetBrick($owner, $brickName, $brickType);
 		}

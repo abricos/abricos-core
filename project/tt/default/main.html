@@ -20,43 +20,43 @@
 	<meta name="description" content="[var]meta_desc[/var]" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	[mod]rss:meta[/mod]
-	<style type="text/css" media="screen, projection">/*<![CDATA[*/	@import "/tt/[bkvar]ttowner[/bkvar]/css/reset-fonts-grids.css"; /*]]>*/</style>
-	<style type="text/css" media="screen, projection">/*<![CDATA[*/	@import "/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=1.0.1"; /*]]>*/</style>
+	<link rel="stylesheet" href="/js/yui/2.6.0/reset-fonts-grids/reset-fonts-grids.css" type="text/css" />
+	<link rel="stylesheet" href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=1.0.2" type="text/css" />
 	[bkvar]css[/bkvar]
 
-<script language="JavaScript" src="/gzip.php?base=/js/yui/2.6.0&file=/yuiloader/yuiloader-min.js,/event/event-min.js" type="text/javascript"></script>
-[mod]sys:jsvar[/mod]
-[bkvar]js[/bkvar]
+	<script language="JavaScript" src="/gzip.php?base=/js/yui/2.6.0&file=/yuiloader/yuiloader-min.js,/event/event-min.js" type="text/javascript"></script>
+	[mod]sys:jsvar[/mod]
+	[bkvar]js[/bkvar]
 </head>
-
 <body class="yui-skin-sam">
-<div id="cmscontent" class="yui-t3">
-	<div id="hd">
-	<div id="logo">
-		<span>[ph]sys:site_name[/ph]</span>
-		<p>[ph]sys:site_title[/ph]</p>
-	</div>
-		[mod]sitemap:pub_breadcrumb[/mod]
-		[mod]user:userblock[/mod]
-	</div>
-	<div id="bd">
-		<div id="yui-main">
-			<div class="yui-b out" id="content">
-				<div class="in">
-					[tt]content[/tt]
+	<div id="doc3" class="yui-t3">
+		<div id="hd">
+			<div class="logo">
+				<span class="tl">[ph]sys:site_name[/ph]</span>
+				<p class="desc">[ph]sys:site_title[/ph]</p>
+			</div>
+			[mod]sitemap:pub_breadcrumb[/mod]
+		</div>
+		<div id="bd">
+			<div id="yui-main">
+				<div class="yui-b">
+					<div class="yui-g out">
+							<div id="content" class="in">
+								[tt]content[/tt]
+							</div>
+					</div>
 				</div>
 			</div>
+			<div class="yui-b">
+				[mod]sitemap:pub_menublock[/mod]
+				[mod]news:pub_columnblock[/mod]
+			</div>
 		</div>
-	<div class="yui-b" id="navigation">
-		[mod]sitemap:pub_menublock[/mod]
-		[mod]news:pub_columnblock[/mod]
+		<div id="ft">
+			<p>&#169; [ph]sys:site_name[/ph] - все права защищены. Работает на <a href="http://www.cmsbrick.ru">Brick CMS</a> [var]version[/var]</p>
+		</div>
+		[mod]user:userblock[/mod]
 	</div>
-</div>
-	<div id="ft">
-		<p>&#169; [ph]sys:site_name[/ph] - все права защищены. Работает на <a href="http://www.cmsbrick.ru">Brick CMS</a> [var]version[/var]</p>
-	</div>
-
-</div>
-
 </body>
+
 </html>

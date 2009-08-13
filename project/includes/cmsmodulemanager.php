@@ -53,6 +53,11 @@ abstract class CMSModule extends CMSBaseClass {
 	public $lang = array();
 	
 	/**
+	 * CSS по умолчанию (имя файла в папке css модуля).
+	 */
+	public $defaultCSS = "";
+	
+	/**
 	 * Получить имя кирпича данного модуля для сборки вывода
 	 *
 	 * @return unknown

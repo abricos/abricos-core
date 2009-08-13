@@ -52,7 +52,20 @@ class CMSSysBrickReader {
 		
 		$mods = $this->registry->modules->GetModules();
 		foreach ($mods as $module){
-			$files = glob(CWD."/modules/".$module->name."/brick/pub_*.html");
+			$files = array();
+			$files1 = glob(CWD."/modules/".$module->name."/brick/pub_*.html");
+			$files2 = glob(CWD."/modules/".$module->name."/brick/p_*.html");
+			
+			if (!empty($files1)){
+				foreach ($files1 as $file){
+					array_push($files, $file);
+				}
+			}
+			if (!empty($files2)){
+				foreach ($files2 as $file){
+					array_push($files, $file);
+				}
+			}
 			foreach ($files as $file){
 				$bname = basename($file, ".html");
 				$key = $module->name.".".$bname;
@@ -221,15 +234,24 @@ class CMSSysBrickReader {
 	
 	public static function ReadBrick($owner, $name, $type){
 		$path = CWD."/modules/".$owner."/";
+		$nextpath = "";
 		
 		switch ($type){
-			case CMSQSys::BRICKTYPE_BRICK: $path .= "brick/"; break; 
-			case CMSQSys::BRICKTYPE_CONTENT: $path .= "content/"; break;
+			case CMSQSys::BRICKTYPE_BRICK: $nextpath = "brick/"; break; 
+			case CMSQSys::BRICKTYPE_CONTENT: $nextpath = "content/"; break;
 			case CMSQSys::BRICKTYPE_TEMPLATE: 
 				$path = CWD."/tt/".$owner."/"; 
 				break;
 		}
+		$path .= $nextpath;
 		$path .= $name.".html";
+		
+		// возможно в шаблоне есть перегруженный кирпич
+		$override = CWD."/tt/".Brick::$style."/override/".$owner."/".$nextpath.$name.".html";
+		if ($type != CMSQSys::BRICKTYPE_TEMPLATE && file_exists($override)){
+			$path = $override;
+		}
+		
 		return CMSSysBrickReader::ReadBrickFromFile($path);
 	}
 	

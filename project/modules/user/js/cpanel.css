@@ -128,3 +128,9 @@ b, strong	{
 .yui-skin-sam .yui-panel .bd {
 	background-color: #FFFFFF;
 }
+
+#mod-user-userblock {
+	position: absolute; 
+	right: 15px; 
+	top: 5px;
+}

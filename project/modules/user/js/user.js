@@ -144,7 +144,7 @@
 	Brick.User.Manager = function(){
 		return {
 			init: function(){
-				var div = Dom.get('bkt_user');
+				var div = Dom.get('mod-user-userblock');
 				if (L.isNull(div)){ return; }
 				
 				var usr = Brick.env.user, t=""; 

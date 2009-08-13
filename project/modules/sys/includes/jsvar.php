@@ -18,6 +18,7 @@ $param->var['g'] = $user['usergroupid'];
 $param->var['uid'] = $user['userid'];
 $param->var['unm'] = $user['username'];
 $param->var['s'] = Brick::$session->sessionHash;
+$param->var['ttname'] = Brick::$builder->phrase->Get('sys', 'style', 'default');
 
 $key = 0;
 $dir = dir(CWD."/modules");

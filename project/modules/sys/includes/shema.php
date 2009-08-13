@@ -334,4 +334,11 @@ if (version_compare($svers, "1.0.2", "<")){
 	}
 }
 
+if (version_compare($svers, "1.0.4", "<")){
+		// возможность использовать кирпичи модулей на страницах
+		$db->query_write("
+			ALTER TABLE `".$pfx."sys_page` 
+				ADD `mods` TEXT NOT NULL  AFTER `metadesc`
+		");
+}
 ?>

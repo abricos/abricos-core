@@ -52,7 +52,7 @@ class CMSModuleSys extends CMSModule {
 	public $session = null;
 		
 	public function __construct(){
-		$this->version = "1.0.3";
+		$this->version = "1.0.4";
 		$this->name = "sys";
 	}
 	
@@ -85,10 +85,16 @@ class CMSModuleSys extends CMSModule {
 			}
 		}
 		
-		Brick::$modman = $modman;
-		
 		// имя кирпича
 		$contentName = $modman->GetContentName();
+		
+		/*
+		if ($modman == $this && $contentName == 'index'){
+			echo($contentName);
+		}
+		/**/
+		
+		Brick::$modman = $modman;
 		
 		if ($this->registry->pageStatus != PAGESTATUS_OK){
 			Brick::$modman = $modman = $this;
@@ -105,6 +111,8 @@ class CMSModuleSys extends CMSModule {
 		Brick::$session = $this->session;
 		Brick::$builder = new CMSSysBrickBuilder($this->registry);
 		
+		Brick::$style = Brick::$builder->phrase->Get('sys', 'style', 'default');
+
 		$brick = $bm->BuildOutput($modman->name, $contentName, CMSQSys::BRICKTYPE_CONTENT);
 		
 		// Любая сборка страницы начинается с кирпича BRICKTYPE_CONTENT
