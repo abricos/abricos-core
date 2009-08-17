@@ -335,10 +335,19 @@ if (version_compare($svers, "1.0.2", "<")){
 }
 
 if (version_compare($svers, "1.0.4", "<")){
-		// возможность использовать кирпичи модулей на страницах
-		$db->query_write("
-			ALTER TABLE `".$pfx."sys_page` 
-				ADD `mods` TEXT NOT NULL  AFTER `metadesc`
-		");
+	// возможность использовать кирпичи модулей на страницах
+	$db->query_write("
+		ALTER TABLE `".$pfx."sys_page` 
+			ADD `mods` TEXT NOT NULL  AFTER `metadesc`
+	");
 }
+
+if (version_compare($svers, "1.0.4.1", "<")){
+	// возможность выбирать шаблон
+	$db->query_write("
+		ALTER TABLE `".$pfx."sys_page` 
+			ADD `template` varchar(100) NOT NULL DEFAULT '' AFTER `metadesc`
+	");
+}
+
 ?>

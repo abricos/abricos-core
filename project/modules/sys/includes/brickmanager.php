@@ -285,6 +285,14 @@ class CMSSysBrickBuilder {
 			$this->_setheader = true;
 		}
 		
+		/*
+		print_r(array(
+			"n" => $brick->name,
+			"p" => $brick->param->param 
+		));
+		
+		/**/
+		
 		$contentPos = -1;
 		$brickContent = null;
 		if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE){
@@ -323,6 +331,9 @@ class CMSSysBrickBuilder {
 			$id = count($sa) == 3 ? $sa[2] : 0;
 			$mods = $brick->param->module[$sa[0]];
 			if (empty($mods)){ continue; }
+			
+			// echo("id=".$id."<br>");
+			
 			foreach ($mods as $mbrick){
 				if ($sa[1] != $mbrick->name){ continue; }
 				$content = substr($brick->content, $position, $count);
