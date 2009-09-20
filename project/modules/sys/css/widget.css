@@ -1,0 +1,82 @@
+
+.yui-skin-sam .yui-panel .bd {
+	background-color: #FFF !important; 
+}
+
+.hide {
+	display: none;
+}
+.right {
+	text-align: right;
+}
+
+/* * * * * Field style * * * * */
+.field {
+	margin: 4px;
+	font-family: verdana,sans-serif;
+}
+.field h3 {
+	color: #999999;
+	font-size: 1.5em;
+	font-size-adjust: none;
+	font-stretch: normal;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	margin: 5px 0 20px 0;
+	text-decoration: underline;
+}
+.field p {
+	margin: 10px 2px 20px 10px;
+}
+.field input, 
+.field select {
+	margin: 0px 7px;
+}
+.field .dsc {
+	color: #999999;
+	font-size: 0.81em;
+	margin: 2px 0 10px;
+	display: block;
+}
+.linespace-1 p {
+	margin: 3px 2px 7px 10px;
+}
+
+/* * * * * Button style * * * * */
+.btn { margin: 4px 2px; padding: 1px 6px; }
+.buttons { margin: 25px 2px 2px 2px; }
+.buttons input { margin: 0px 5px; padding: 1px 6px; }
+.buttons-top { margin: 2px 2px 10px 2px; }
+.buttons-top input { margin: 0px 5px; padding: 1px 6px; }
+
+/* * * * * Table style * * * * */
+.bk-table-def {
+	border:1px solid #CBCBCB;
+	width:100%;
+}
+.bk-table-def th {
+	background-color: #F0F0F0;
+	color: #333333;
+	padding: 6px;
+	vertical-align:text-top;
+	white-space:nowrap;
+	font-weight: bold;
+}
+.bk-table-def td {
+	background-color: #FFFFFF;
+	padding: 2px 6px;
+}
+.bk-table-def .sel td {
+	background-color: #DBE3F1;
+}
+.bk-table-def a, 
+.bk-table-def a:link,
+.bk-table-def a:visited {
+	color: #0066CC;
+	text-decoration: none;
+}
+.bk-table-def a:hover {
+	text-decoration: underline;
+} 
+

@@ -85,7 +85,7 @@ foreach ($ds->ts as $ts){
 				$rows = array();
 				$dir = dir(CWD."/tt");
 				while (false !== ($entry = $dir->read())) {
-					if ($entry == "." || $entry == ".." || empty($entry) || $entry == "_sys"){ continue; }
+					if ($entry == "." || $entry == ".." || empty($entry) || $entry == "_sys" || $entry == "_my"){ continue; }
 					if (!file_exists(CWD."/tt/".$entry."/main.html")){ continue ;}
 					$row = array();
 					$row['nm'] = $entry;

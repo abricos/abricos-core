@@ -1,0 +1,55 @@
+/**
+* @version $Id: main.css 564 2008-12-23 14:11:20Z AKuzmin $
+* @package CMSBrick
+* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+*/
+
+/* * * * * Base element style * * * * */
+html, body	{
+	background:#EEF0F2
+}
+body {
+	font: 80% arial,sans-serif; 
+	color: #333
+}
+h1, h2, h3, h4, h5, h6 {
+	font-weight: normal;
+}
+table, tr, td, div, ul, ol, li, p, h1, h2, h3, h4, h5, h6	{
+	text-align: left;
+}
+ul {
+	list-style-image:none;
+	list-style-position:outside;
+	list-style-type:none;
+	margin:0;
+	padding: 4px 0 0 10px;
+}
+select, input {
+	font-family: verdana,sans-serif
+}
+h1 { font-size: 160%; }
+h2 { font-size: 150%; }
+h3 { font-size: 140%; }
+b, strong	{
+	font-weight: bold;
+}
+
+.w20	{ width:	20%; }
+.w50	{ width:	50%; }
+.w100	{ width:	100%; }
+.h100	{ height:	100%; }
+
+.hide {
+	display: none;
+}
+.right {
+	text-align: right;
+}
+
+#mod-user-userblock {
+	position: absolute; 
+	right: 15px; 
+	top: 5px;
+}

@@ -342,12 +342,16 @@ if (version_compare($svers, "1.0.4", "<")){
 	");
 }
 
-if (version_compare($svers, "1.0.4.1", "<")){
+if (version_compare($svers, "1.0.5", "<")){
 	// возможность выбирать шаблон
-	$db->query_write("
-		ALTER TABLE `".$pfx."sys_page` 
-			ADD `template` varchar(100) NOT NULL DEFAULT '' AFTER `metadesc`
-	");
+	
+	// Удалить временные файлы в связи с новыми версиями js библиотек
+	$chFiles = glob(CWD."/temp/*.gz");
+	foreach ($chFiles as $rfile){
+		@unlink($rfile);
+	}
+	
+	
 }
 
 ?>

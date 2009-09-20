@@ -14,7 +14,7 @@
 	Brick.User.CP.Manager.register({
 		name: 'user-profile',
 		titleid: "mod.user.cp.profile.title",
-		icon: "/modules/user/js/images/cp_icon.gif",
+		icon: "/modules/user/css/images/cp_icon.gif",
 		initialize: function(container){
 			wWait.show();
 			Brick.Loader.add({
@@ -32,7 +32,7 @@
 	Brick.User.CP.Manager.register({
 		name: 'user-users',
 		titleid: "mod.user.cp.users.title",
-		icon: "/modules/user/js/images/cp_icon.gif",
+		icon: "/modules/user/css/images/cp_icon.gif",
 		initialize: function(div){
 			wWait.show();
 			Brick.Loader.add({

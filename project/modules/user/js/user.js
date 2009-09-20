@@ -150,11 +150,11 @@
 				var usr = Brick.env.user, t=""; 
 				
 				if (usr.isRegistred()){
-					t = T['blockuser'];
+					t = T['user'];
 					t = tSetVar(t, 'name', usr.name);
 					div.innerHTML = t;
 				}else{
-					div.innerHTML = T['blockguest'];
+					div.innerHTML = T['guest'];
 				}
 				var __self = this;
 				E.on(div, 'click', function(e){
@@ -163,13 +163,13 @@
 			},
 			clickEvent: function (el){
 				switch(el.id){
-				case TId['blockguest']['blogin']:
+				case TId['guest']['blogin']:
 					this.login();
 					return true;
-				case TId['blockguest']['breg']:
+				case TId['guest']['breg']:
 					this.register();
 					return true;
-				case TId['blockuser']['blogout']:
+				case TId['user']['blogout']:
 					this.logout();
 					return true;
 				}

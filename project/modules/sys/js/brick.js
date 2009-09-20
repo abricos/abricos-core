@@ -19,7 +19,10 @@ Brick.env = function(){
 			isRegistred: function(){ return this.group >= 4; },
 			isRegister: function(){ return this.group >= 4; }
 		},
-		host: ''
+		host: '',
+		lib: {
+			yui: '2.8.0r4'
+		}
 	}
 }();
 
@@ -286,19 +289,6 @@ Brick.namespace('widget');
 
 /* * * * * * * * * * * * JS Loader * * * * * * * * * * */
 (function(){
-
-	/*
-	// Example: 
-	Brick.Loader.add(
-			{
-				mod:
-					[
-					 {name:'user',files:['user.js']},
-					 {name:'blog',files:['blog.js']}
-					 ]
-			}
-	);
-	/**/
 	
 	var module = function(o){
 		this.yahoo = [];
@@ -331,7 +321,7 @@ Brick.namespace('widget');
 		init: function(){
 			var __self = this;
 			this._yuiLoader = new YAHOO.util.YUILoader({ 
-		    base: "/js/yui/2.6.0/",
+		    base: "/js/yui/"+Brick.env.lib.yui+"/",
 				gzip: true, gzipBase: "/gzip.php?file=",
 		    filter: "MIN", 
 	      ignore: ['containercore'],
@@ -376,10 +366,10 @@ Brick.namespace('widget');
 				this._reqtinymce = false;
 				tinyMCE_GZ.init(
 					{
-						baseURL: '/js/tinymce/3.2.4.1',
+						baseURL: '/js/tinymce/3.2.6',
 						themes : "advanced",
 						plugins : "safari,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras",
-				    languages : "en,ru", disk_cache : true, version: '3.2.4.1'
+				    languages : "en,ru", disk_cache : true, version: '3.2.6'
 					}, 
 					function() {__self._event();}
 				);
@@ -454,14 +444,13 @@ Brick.namespace('widget');
 					switch(nm){
 					case 'tinymce':
 						this._reqtinymce = true;
-						fp = "/js/tinymce/3.2.4.1/tiny_mce_gzip.js?v=2";
+						fp = "/js/tinymce/3.2.6/tiny_mce_gzip.js"; 
 						break;
 					case 'accordionview':
-						fp = "/gzip.php?file=/js/yui/2.6.0/accordionview/accordionview-min.js";
+						fp = "/gzip.php?file=/js/yui/"+Brick.env.lib.yui+"/accordionview/accordionview-min.js";
 						loader.addModule({
 							name: "accordionview-css", type: "css", 
-							fullpath: "/js/yui/2.6.0/accordionview/assets/skins/sam/accordionview.css"});
-						// loader.require("reset-fonts");
+							fullpath: "/js/yui/"+Brick.env.lib.yui+"/accordionview/assets/skins/sam/accordionview.css"});
 						loader.require("accordionview-css");
 						loader.calculate({require: "button"});
 						loader.calculate({require: "animation"});
@@ -494,7 +483,7 @@ Brick.namespace('widget');
 								loader.addModule({
 									name: mm+mb, 
 									type: "js", 
-									fullpath: "/gzip.php?type=mod&module="+mm+"&version="+mv+"&file="+mb
+									fullpath: "/gzip.php?type=mod&module="+mm+"&version="+mv+"&tt="+Brick.env.ttname+"&file="+mb
 								});
 							}
 						}

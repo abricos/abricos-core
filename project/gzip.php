@@ -10,7 +10,7 @@
 @error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 // example
-// http://www.cmsbrick.ru/gzip.php?file=js/yui/2.6.0/yuiloader/yuiloader-min.js
+// http://www.cmsbrick.ru/gzip.php?file=js/yui/[версия yui]/yuiloader/yuiloader-min.js
 
 // Get input
 $files = explode(',', getParam("file", ""));
@@ -18,6 +18,7 @@ $basedir = getParam("base", "");
 $version = getParam("version", "");
 $lang = getParam("lang", "ru");
 $libType = getParam("type", "");
+$templateName = getParam("tt", "default");
 $module = getParam("module", "");
 
 $diskCache = getParam("diskcache", "true") == "true";
@@ -41,7 +42,11 @@ if ($libType == 'sys'){
 }else if ($libType == 'mod'){
 	$newFiles = array();
 	foreach($files as $file){
-		array_push($newFiles, '/modules/'.$module.'/js/'.$file);
+		if ($module == "_template"){
+			array_push($newFiles, '/tt/'.$templateName.'/jsmod/'.$file);
+		}else{
+			array_push($newFiles, '/modules/'.$module.'/js/'.$file);
+		}
 	}
 	$files = $newFiles;
 }
@@ -127,7 +132,7 @@ if ($cacheFileExists) {
 		
 	echo getFileContents($cacheFile);
 	die();
-}/**/
+}
 
 $content = "";
 foreach ($files as $file){
@@ -144,12 +149,21 @@ if ($libType == 'mod' || $libType == 'sys'){
 			$content .= "})();";
 		}
 	}
+
 	// Convert and Append template files
 	foreach ($files as $file){
 		$tempFile = createTemplateFile($realPath."/".$basedir."/".$file);
 		if (file_exists($tempFile)){
+			
+			// если шаблон перегружен, значит чтение перегруженого шаблона
+			$bname = basename($file, ".htm");
+			$override = createTemplateFile($realPath."/tt/".$templateName."/override/".$module."/js/".$bname);
 			$content .= "(function(){var mt=Brick.util.Template; if(typeof mt['".$module."']=='undefined'){mt['".$module."']={}};var t=mt['".$module."'];";
-			$content .= convertTemplateToJS($tempFile);
+			if (file_exists($override)){
+				$content .= convertTemplateToJS($override);
+			}else{
+				$content .= convertTemplateToJS($tempFile);
+			}
 			$content .= "})();";
 		}
 	}
@@ -173,18 +187,35 @@ if ($libType == 'mod' || $libType == 'sys'){
 	}
 }
 
+// Формирования системного js скрипта:
+// 1) чтение системного js файла /modules/sys/js/brick.js
+// 2) определение версии всех js модулей по формуле md5(размер+время модификации) 
+// и составление списка с добавление в системный js файл скрипт
 if ($libType == 'sys'){
 	$content .= "\n(function(){\nvar m={},v=[];\n";
 	
+	// проход по всем модулям
 	$dir = dir($realPath."/modules");
 	while (false !== ($entry = $dir->read())) {
+		
+		// Добавление js модулей шаблона
+		if ($entry == "."){
+			$entry = "_template";
+		}
+		
 		if ($entry == "." || $entry == ".." || empty($entry)){ continue; }
 		
-		$jsdir = $realPath."/modules/".$entry."/js";
+		if ($entry == "_template"){
+			$jsdir = $realPath."/tt/".$templateName."/jsmod";
+		}else{
+			$jsdir = $realPath."/modules/".$entry."/js";
+		}
+		
 		$jsfiles = glob($jsdir."/*.js");
 		if (empty($jsfiles)){ continue; 	}
 		$content .="\nv=[];\n"; 
 		
+		// чтение всех js модулей в модуле
 		foreach ($jsfiles as $jsfile){
 			$bname = basename($jsfile);
 			$key = filemtime($jsfile)+filesize($jsfile);
@@ -192,10 +223,19 @@ if ($libType == 'sys'){
 			$langFile = createLangFile($jsfile, $lang);
 			if (file_exists($langFile))
 				$key += filemtime($langFile)+filesize($langFile);
-			// template file
+
+			// шаблон js модуля
 			$tmpFile = createTemplateFile($jsfile);
-			if (file_exists($tmpFile))
-				$key += filemtime($tmpFile)+filesize($tmpFile);
+			if (file_exists($tmpFile)){
+				// если шаблон перегружен, значит чтение версии перегруженого шаблона
+				$override = createTemplateFile($realPath."/tt/".$templateName."/override/".$entry."/js/".basename($tmpFile));
+				if (file_exists($override)){
+					$key += filemtime($override)+filesize($override);
+				}else{
+					$key += filemtime($tmpFile)+filesize($tmpFile);
+				}
+			}
+
 			// css file
 			$tmpFile = createCssFile($jsfile);
 			if (file_exists($tmpFile))

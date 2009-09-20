@@ -45,9 +45,7 @@ while (false !== ($entry = $dir->read())) {
 	$modcp[$entry] = $prm;
 }
 	
-$param->var['body'] = 
-	str_replace("#mlist#", json_encode($modcp), $param->var['cpbody']);
+$param->var['body'] = 	str_replace("#mlist#", json_encode($modcp), $param->var['cpbody']);
 	
-/**/
 
 ?>

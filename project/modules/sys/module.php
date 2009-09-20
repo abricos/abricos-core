@@ -6,10 +6,8 @@
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-global $cms;
-
 $mod = new CMSModuleSys();
-$cms->modules->Register($mod);
+CMSRegistry::$instance->modules->Register($mod);
 
 /**
  * Системный модуль отображения страниц сайта из БД.
@@ -50,6 +48,8 @@ class CMSModuleSys extends CMSModule {
 	 * @var CMSSysSession
 	 */
 	public $session = null;
+	
+	public static $YUIVersion = "2.8.0r4";
 		
 	public function __construct(){
 		$this->version = "1.0.4";
@@ -210,6 +210,7 @@ class CMSQSys {
 	const BRICKPRM_JSFILE = 7;
 	const BRICKPRM_CSS = 8;
 	const BRICKPRM_PARAM = 9;
+	const BRICKPRM_CSSMOD = 6;
 	
 	const FIELDS_PHRASE = "
 		phraseid as id,

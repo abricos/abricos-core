@@ -177,6 +177,9 @@ class CMSSysBrickBuilder {
 				$this->_globalVar['meta_desc'] = $this->phrase->Get('sys', 'meta_desc');
 			}
 		}
+		if (isset($this->_globalVar['jsyui'])){
+			$this->_globalVar['jsyui'] = CMSModuleSys::$YUIVersion;
+		}
 		
 		// установка версии
 		if (isset($this->_globalVar['version'])){
@@ -255,6 +258,16 @@ class CMSSysBrickBuilder {
 	}
 	
 	/**
+	 * Динамическое добавление CSS модуля
+	 *
+	 * @param string $moduleName имя модуля
+	 * @param string $file - имя CSS файла
+	 */
+	public function AddCssModule($moduleName, $file){
+		$this->_cssmod[$moduleName][$file] = true;
+	}
+	
+	/**
 	 * Добавление JS файлов
 	 */
 	public function AddJSFile($file){
@@ -284,14 +297,6 @@ class CMSSysBrickBuilder {
 			header("Pragma: no-cache");
 			$this->_setheader = true;
 		}
-		
-		/*
-		print_r(array(
-			"n" => $brick->name,
-			"p" => $brick->param->param 
-		));
-		
-		/**/
 		
 		$contentPos = -1;
 		$brickContent = null;
@@ -389,6 +394,21 @@ class CMSSysBrickBuilder {
 				$brick->param->var['js'] .= "<script src='".$value."' language='JavaScript' type='text/javascript' charset='utf-8'></script>";
 			}
 			
+			foreach ($this->_cssmod as $modname => $files){
+				foreach ($files as $file => $value){
+					$webcssfile = "/modules/".$modname."/css/".$file;
+					
+					$weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$file;
+					if (file_exists(CWD.$weboverride)){
+						$webcssfile = $weboverride; 
+					}
+					if (!file_exists(CWD.$webcssfile)){ continue; }
+					if ( filesize(CWD.$webcssfile) <= 5){ continue; }
+					
+					$this->AddCSSFile($webcssfile);
+				}
+			}
+			
 			// проверка css модулей по умолчания
 			foreach ($this->_usemod as $modname => $value){
 				$mod = Brick::$modules->GetModule($modname);
@@ -400,6 +420,7 @@ class CMSSysBrickBuilder {
 				$weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$mod->defaultCSS;
 				$override = CWD.$weboverride;
 				if (file_exists($override)){
+					if ( filesize($override) <= 5){ continue; }
 					$webcssfile = $weboverride; 
 				}
 				$this->AddCSSFile($webcssfile);
@@ -458,6 +479,11 @@ class CMSSysBrickBuilder {
 		foreach ($p->jsmod as $key => $files){
 			foreach ($files as $file){
 				$this->_jsmod[$key][$file] = true;
+			}
+		}
+		foreach ($p->cssmod as $key => $files){
+			foreach ($files as $file){
+				$this->_cssmod[$key][$file] = true;
 			}
 		}
 		foreach ($brick->child as $childbrick){
@@ -685,7 +711,7 @@ class CMSSysBrickParam {
 	 */
 	public $phrase = array();
 	/**
-	 * JavaScript модули движка 
+	 * JavaScript модули 
 	 *
 	 * @var mixed
 	 */
@@ -702,6 +728,12 @@ class CMSSysBrickParam {
 	 * @var mixed
 	 */
 	public $css = array();
+	/**
+	 * CSS файлы модуля
+	 *
+	 * @var mixed
+	 */
+	public $cssmod = array();
 	
 }
 
@@ -767,7 +799,7 @@ class CMSSysBrick {
 }
 
 /**
- * Класс управления кирпичей редактированных администратором
+ * Класс управления кирпичей исправленых администратором сайта
  *
  */
 class CMSSysBrickCustomManager {

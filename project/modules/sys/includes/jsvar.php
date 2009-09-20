@@ -6,7 +6,6 @@
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-
 $brick = Brick::$builder->brick;
 $db = Brick::$db;
 $param = $brick->param;
@@ -18,7 +17,10 @@ $param->var['g'] = $user['usergroupid'];
 $param->var['uid'] = $user['userid'];
 $param->var['unm'] = $user['username'];
 $param->var['s'] = Brick::$session->sessionHash;
-$param->var['ttname'] = Brick::$builder->phrase->Get('sys', 'style', 'default');
+
+$template = Brick::$builder->phrase->Get('sys', 'style', 'default');
+$param->var['ttname'] = $template;
+$param->var['jsyui'] = CMSModuleSys::$YUIVersion;
 
 $key = 0;
 $dir = dir(CWD."/modules");
@@ -36,7 +38,14 @@ while (false !== ($entry = $dir->read())) {
 
 	$files = glob($jsdir."/*.htm");
 	foreach ($files as $file){
-		$key += filemtime($file)+filesize($file)+1;
+		// если есть перегруженый шаблон, то чтение его версии
+		$override = CWD."/tt/".$template."/override/".$entry."/js/".basename($file);
+		
+		if (file_exists($override)){
+			$key += filemtime($override)+filesize($override)+11;
+		}else{
+			$key += filemtime($file)+filesize($file)+1;
+		}
 	}
 
 	$files = glob($jsdir."/langs/*.js");
@@ -48,6 +57,12 @@ while (false !== ($entry = $dir->read())) {
 	foreach ($files as $file){
 		$key += filemtime($file)+filesize($file)+1;
 	}
+}
+
+// js модули шаблона
+$files = glob(CWD."/tt/".$template."/jsmod/*.js");
+foreach ($files as $file){
+	$key += filemtime($file)+filesize($file)+1;
 }
 
 $param->var['jsv'] = md5($key);

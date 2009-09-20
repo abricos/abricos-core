@@ -136,7 +136,7 @@ class CMSSysBrickReader {
 		$dir = dir(CWD."/tt/");
 		while (($dirname = $dir->read())) {
 			if ($dirname == "." || $dirname == ".." || empty($dirname)){ continue; }
-			if ($dirname == "_sys"){ continue; }
+			if ($dirname == "_sys" || $dirname == "_my"){ continue; }
 
 			$files = glob(CWD."/tt/".$dirname."/*.html");
 			foreach ($files as $file){
@@ -174,11 +174,19 @@ class CMSSysBrickReader {
 					CMSSysBrickReader::SyncParamVar($param->jsfile, $p['v']);
 					break;
 				case CMSQSys::BRICKPRM_JSMOD:
-					if (!is_array($param->module[$p['nm']])){
+					if (!is_array($param->jsmod[$p['nm']])){
 						$param->jsmod[$p['nm']] = array();
 					}
 					CMSSysBrickReader::SyncParamVar($param->jsmod[$p['nm']], $p['v']);
 					break;
+					
+				case CMSQSys::BRICKPRM_CSSMOD:
+					if (!is_array($param->cssmod[$p['nm']])){
+						$param->cssmod[$p['nm']] = array();
+					}
+					CMSSysBrickReader::SyncParamVar($param->cssmod[$p['nm']], $p['v']);
+					break;
+
 				case CMSQSys::BRICKPRM_MODULE:
 					if (!is_array($param->module[$p['nm']])){
 						$param->module[$p['nm']] = array();
@@ -233,25 +241,33 @@ class CMSSysBrickReader {
 	}
 	
 	public static function ReadBrick($owner, $name, $type){
-		$path = CWD."/modules/".$owner."/";
-		$nextpath = "";
-		
-		switch ($type){
-			case CMSQSys::BRICKTYPE_BRICK: $nextpath = "brick/"; break; 
-			case CMSQSys::BRICKTYPE_CONTENT: $nextpath = "content/"; break;
-			case CMSQSys::BRICKTYPE_TEMPLATE: 
-				$path = CWD."/tt/".$owner."/"; 
-				break;
+		if ($type == CMSQSys::BRICKTYPE_TEMPLATE){
+			// загрузка шаблона поставляемого с модулем
+			if ($owner == "_my"){
+				$path = CWD."/modules/".Brick::$modman->name."/tt/".$name.".html";
+				
+				// возможность перегрузить шаблон поставляемый с модулем
+				$override = CWD."/tt/".Brick::$style."/override/".Brick::$modman->name."/tt/".$name.".html";
+				if (file_exists($override)){
+					$path = $override;
+				}
+			}else{
+				$path = CWD."/tt/".$owner."/".$name.".html";
+			}
+		}else{
+			$nextpath = "";
+			switch ($type){
+				case CMSQSys::BRICKTYPE_BRICK: $nextpath = "brick/"; break; 
+				case CMSQSys::BRICKTYPE_CONTENT: $nextpath = "content/"; break;
+			}
+			$path = CWD."/modules/".$owner."/".$nextpath.$name.".html";
+			
+			// возможно c поставляемым шаблоном есть перегруженный кирпич
+			$override = CWD."/tt/".Brick::$style."/override/".$owner."/".$nextpath.$name.".html";
+			if (file_exists($override)){
+				$path = $override;
+			}
 		}
-		$path .= $nextpath;
-		$path .= $name.".html";
-		
-		// возможно в шаблоне есть перегруженный кирпич
-		$override = CWD."/tt/".Brick::$style."/override/".$owner."/".$nextpath.$name.".html";
-		if ($type != CMSQSys::BRICKTYPE_TEMPLATE && file_exists($override)){
-			$path = $override;
-		}
-		
 		return CMSSysBrickReader::ReadBrickFromFile($path);
 	}
 	
@@ -363,7 +379,13 @@ class CMSSysBrickReader {
 		foreach($arr as $key => $value){
 			$p->jsmod[$key] = explode(',', $value); 
 		}
-
+		
+		// CSS файлы модуля
+		$arr = CMSSysBrickReader::BrickParseVar($param, "mcss");
+		foreach($arr as $key => $value){
+			$p->cssmod[$key] = explode(',', $value); 
+		}
+		
 		// JavaScript файлы
 		$p->jsfile = CMSSysBrickReader::BrickParseValue($param, "js");
 		$p->css = CMSSysBrickReader::BrickParseValue($param, "css");

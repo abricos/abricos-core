@@ -32,7 +32,7 @@ $config['Misc']['cookietimeout'] = 86400 * 31;
 $config['Misc']['charset'] = "utf-8";
 $config['Misc']['language'] = "ru";
 
-$config['Misc']['brick_cache'] = true;
+$config['Misc']['brick_cache'] = false;
 
 
 ?>

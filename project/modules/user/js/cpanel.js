@@ -25,11 +25,10 @@
 			E = YAHOO.util.Event;
 			L = YAHOO.lang;
 			W = YAHOO.widget;
-			
+
 			T = Brick.util.Template['user']['cpanel'];
 			Brick.util.Template.fillLanguage(T);
 			TId = new Brick.util.TIdManager(T);
-			Brick.util.CSS.update(Brick.util.CSS['user']['cpanel']);
 			
 			Brick.util.CSS.update(T['css']);
 			delete T['css'];
@@ -173,7 +172,7 @@
 			m['id'] = mid;
 			this.modids[mid] = m;
 			
-			var icon = m['icon'] || "/modules/user/js/images/cp_icon_default.gif"; 
+			var icon = m['icon'] || "/modules/user/css/images/cp_icon_default.gif"; 
 			var ti = T['miicon'];
 			ti = tSetVar(ti, 'id', m['id']);
 			ti = tSetVar(ti, 'url', icon);
