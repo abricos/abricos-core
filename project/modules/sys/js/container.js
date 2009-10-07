@@ -57,6 +57,8 @@ var moduleInitialize = function(){
 			win.show();
 			win.center();
 			
+			this.onShow();
+			
 			var __self = this;
 			E.on(div, 'click', function(e){
 				var el = E.getTarget(e);
@@ -86,7 +88,8 @@ var moduleInitialize = function(){
 		},
 		onClick: function(el){ return false; },
 		onClose: function(){}, 
-		onLoad: function(){}
+		onLoad: function(){},
+		onShow: function(){}
 	};
 	
 })();	
