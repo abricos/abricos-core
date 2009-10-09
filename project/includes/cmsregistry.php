@@ -105,6 +105,22 @@ final class CMSRegistry extends CMSBaseClass {
 	public function Init(){
 		$this->modules = new CMSModuleManager($this);
 		$this->modules->FetchModulesInfo();
+		$modsinfo = $this->modules->modulesInfo;
+		
+		// проверка на наличие нового модуля в движке
+		$smoddir = CWD."/modules/";
+		$dir = dir($smoddir);
+		while(($sDir = $dir->read()) !== false) {
+			if($sDir != '.' && $sDir != '..' && is_dir($smoddir.$sDir)) {
+				if (!$modsinfo[$sDir]){ // модуль явно не зарегистрирован
+					// а модуль ли это?
+					if (file_exists($smoddir.$sDir."/module.php")){ // чтото похожее на него
+						// регистрируем его в системе
+						$this->modules->RegisterByName($sDir);
+					}
+				}
+			}
+		} 
 	}
 	
 	/**
