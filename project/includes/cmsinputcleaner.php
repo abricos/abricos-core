@@ -34,7 +34,7 @@ class CMSInputCleaner extends CMSBaseClass {
 	 * @param CMSRegistry $registry
 	 * @return CMSInputCleaner
 	 */
-	public function __construct(CMSRegistry $registry) {
+	public function CMSInputCleaner(CMSRegistry $registry) {
 		$this->registry = $registry;
 
 		if (!is_array($GLOBALS)) {

@@ -1,18 +1,20 @@
 <?php
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage Sys
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ */
 
 $mod = new CMSModuleSys();
 CMSRegistry::$instance->modules->Register($mod);
 
 /**
- * Системный модуль отображения страниц сайта из БД.
- * Управление меню сайта и т.п.
- *
+ * Системный модуль платформы Brick CMS
+ * @package CMSBrick
+ * @subpackage Sys
  */
 class CMSModuleSys extends CMSModule {
 	
@@ -51,7 +53,7 @@ class CMSModuleSys extends CMSModule {
 	
 	public static $YUIVersion = "2.8.0r4";
 		
-	public function __construct(){
+	public function CMSModuleSys(){
 		$this->version = "1.0.4";
 		$this->name = "sys";
 	}
@@ -194,6 +196,11 @@ class CMSModuleSys extends CMSModule {
 	
 }
 
+/**
+ * Набор статичных функций SQL запросов
+ * @package CMSBrick
+ * @subpackage Sys
+ */
 class CMSQSys {
 	
 	const BRICKTYPE_BRICK = 0;
@@ -721,7 +728,12 @@ class CMSQSys {
 	}
 }
 
-
+/**
+ * Набор статичных функций SQL запросов (старая версия)
+ *  
+ * @package CMSBrick
+ * @subpackage Sys
+ */
 class CMSSqlQuerySys extends CMSBaseClass {
 	
 	public static function MenuChangeOrder(CMSDatabase $db, $id, $neword){
@@ -765,8 +777,13 @@ class CMSSqlQuerySys extends CMSBaseClass {
 	
 }
 
-
-class CMSMenuItem extends CMSBaseClass {
+/**
+ * Элемент меню 
+ * 
+ * @package CMSBrick
+ * @subpackage Sys
+ */
+class CMSMenuItem {
 	/**
 	 * Идентификатор группы
 	 *
@@ -817,6 +834,11 @@ class CMSMenuItem extends CMSBaseClass {
 	
 }
 
+/**
+ * Менеджер формирование структуры меню 
+ * @package CMSBrick
+ * @subpackage Sys
+ */
 class CMSMenuManager extends CMSMenuItem {
 	
 	/**
@@ -844,7 +866,7 @@ class CMSMenuManager extends CMSMenuItem {
 	 */
 	public $adress;
 	
-	function __construct(CMSRegistry $registry){
+	public function CMSMenuManager(CMSRegistry $registry){
 		$this->registry = $registry;
 		$this->flag_current = true;
 		$this->vars['fulllink'] = "/";

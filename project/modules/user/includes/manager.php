@@ -33,7 +33,7 @@ class CMSUserManager {
 	 */
 	public $db = null;
 	
-	public function __construct(CMSRegistry $registry){
+	public function CMSUserManager(CMSRegistry $registry){
 		$this->registry = $registry;
 		$this->session = $registry->session;
 		$this->db = $registry->db;

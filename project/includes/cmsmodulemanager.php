@@ -9,7 +9,7 @@
 /**
  * Модуль
  */
-abstract class CMSModule extends CMSBaseClass {
+abstract class CMSModule {
 	
 	/**
 	 * Версия модуля
@@ -81,7 +81,7 @@ class CMSModuleUpdShema extends CMSBaseClass {
 	
 	public $serverVersion;
 	
-	function __construct($module, $serverVersion){
+	public function CMSModuleUpdShema($module, $serverVersion){
 		$this->module = $module;
 		$this->serverVersion = $serverVersion;
 	}
@@ -145,7 +145,7 @@ class CMSModuleManager extends CMSBaseClass {
 	 * @param CMSRegistry $cms
 	 * @return CMSModuleManager
 	 */
-	public function __construct($registry){
+	public function CMSModuleManager($registry){
 		$this->registry = $registry;
 		$this->db = $registry->db;
 	}

@@ -39,10 +39,9 @@ class CMSAdress extends CMSBaseClass{
 	
 	public $host = "";
 	
-	public function __construct(){
+	public function CMSAdress(){
 		$this->Build(fetch_uri());
 	}
-	
 	
 	/**
 	 * Получить адрес директории начиная с $sublevel

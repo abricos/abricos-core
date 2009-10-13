@@ -1,16 +1,23 @@
 <?php 
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage User
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ */
 
 global $cms;
 
 $modUser = new CMSModuleUser();
 $cms->modules->Register($modUser);
 
+/**
+ * Модуль "Пользователи" 
+ * @package CMSBrick
+ * @subpackage User
+ */
 class CMSModuleUser extends CMSModule {
 	
 	private $_usermanager = null;
@@ -85,7 +92,11 @@ class CMSModuleUser extends CMSModule {
 	
 }
 
-
+/**
+ * Набор статичных функций SQL запросов 
+ * @package CMSBrick
+ * @subpackage User
+ */
 class CMSQUser{
 	
 	const FIELDS_USERPUB = "
@@ -183,7 +194,11 @@ class CMSQUser{
 	}
 }
 
-
+/**
+ * Набор статичных функций SQL запросов (старая версию)
+ * @package CMSBrick
+ * @subpackage User
+ */
 class CMSSqlQueryUser{
 	
 	public static function PwdUserChange(CMSDatabase $db, $userid, $newpass){

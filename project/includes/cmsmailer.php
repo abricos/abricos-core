@@ -17,7 +17,7 @@ class CMSMailer extends PHPMailer {
 	 */
 	private $registry = null;
 	
-	function __construct(CMSRegistry $registry){
+	public function CMSMailer(CMSRegistry $registry){
 		$this->registry = $registry;
 		
 		$this->FromName = Brick::$builder->phrase->Get('sys', 'site_name');

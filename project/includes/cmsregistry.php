@@ -97,7 +97,7 @@ final class CMSRegistry extends CMSBaseClass {
 	
 	private $json = null;
 	
-	public function __construct(){
+	public function CMSRegistry(){
 		$this->input = new CMSInputCleaner($this);
 		$this->ip_address = $this->fetch_alt_ip();
 	}

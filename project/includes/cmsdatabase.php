@@ -7,47 +7,50 @@
 */
 
 /**
- * Менеджер Базы данных
+ * Абстрактный класс взаимодействия с базой данных.
+ * 
  */
-abstract class CMSDatabase extends CMSBaseClass {
+abstract class CMSDatabase {
 	/**
-	 * Главный класс управление движком
+	 * Ядро платформы BrickCMS
 	 *
 	 * @var CMSRegistry
 	 */
 	public $registry = null;
 	
 	/**
-	 * Режим "Только для чтения"
+	 * Режим "Только для чтения".
+	 * Если значение установлено в TRUE, то все запросы, которые подразумевают внесения 
+	 * изменений в таблицы базы данных, будут игнорированы. 
 	 *
-	 * @var boolean
+	 * @var bool
 	 */
 	public $readonly = false;
 
 	/**
-	* Имя базы
-	*
-	* @var string
-	*/
+	 * Имя базы
+	 *
+	 * @var string
+	 */
 	public $database = "";
 
 	/**
-	* Ссылка коннекта к БД
-	*
-	* @var	string
-	*/
+	 * Ссылка коннекта к БД
+	 *
+	 * @var	string
+	 */
 	public $connection = null;
 
 	/**
-	* Последний вызываемый запрос к БД
-	*
-	* @var	string
-	*/
+	 * Последний обработанный SQL запрос к базе данных
+	 *
+	 * @var	string
+	 */
 	protected $sql = '';
 	
 	/**
 	 * Номер ошибки
-	 * @var	integer	Номер ошибки
+	 * @var	integer
 	 */
 	public $error = 0;
 	
@@ -57,9 +60,21 @@ abstract class CMSDatabase extends CMSBaseClass {
 	 */
 	public $errorText = '';
 	
-	const ERROR_CONNECT = 1;
-	const ERROR_SELECT_DB = 2; 
-	const ERROR_EXECUTE_QUERY = 3; 
+	/**
+	 * Ошибка - Связь с базой данных не установлена
+	 * @var integer
+	 */
+	const ERROR_CONNECT			= 1;
+	/**
+	 * Ошибка - База данных {@link $database} не найдена
+	 * @var integer
+	 */
+	const ERROR_SELECT_DB		= 2; 
+	/**
+	 * Ошибка в SQL запросе, текст ошибки в {@link $errorText}
+	 * @var integer
+	 */
+	const ERROR_EXECUTE_QUERY	= 3; 
 	
 	/**
 	 * Массив констант используемых в fetch_array
@@ -68,20 +83,42 @@ abstract class CMSDatabase extends CMSBaseClass {
 	 */
 	public $fetchtypes = array();
 	
-	const DBARRAY_BOTH	= 0;
-	const DBARRAY_ASSOC = 1;
+	/**
+	 * Тип массива результата SQL запроса: Числовой и Ассоциативный ключ 
+	 * @var integer
+	 */
+	const DBARRAY_BOTH		= 0;
+	/**
+	 * Тип массива результата SQL запроса: Ассоциативный ключ 
+	 * @var integer
+	 */
+	const DBARRAY_ASSOC		= 1;
+	/**
+	 * Тип массива результата SQL запроса: Числовой 
+	 * @var integer
+	 */
 	const DBARRAY_NUM		= 2;
 	
 	/**
-	* Number of queries executed
+	* Количество выполненых SQL запросов за текущую сессию
 	*
-	* @var	integer	The number of SQL queries run by the system
+	* @var integer 
 	*/
 	protected $querycount = 0;
-	
+
+	/**
+	 * Префикс таблиц
+	 * 
+	 * @var string
+	 */
 	public $prefix = 'cms_';
 	
-	public function __construct(CMSRegistry $registry){
+	/**
+	 * Конструктор  
+	 * 
+	 * @param CMSRegistry $registry 
+	 */
+	public function CMSDatabase(CMSRegistry $registry){
 		$this->registry = $registry;
 	}
 	
@@ -91,23 +128,22 @@ abstract class CMSDatabase extends CMSBaseClass {
 	}
 	
 	protected abstract function SetError($error);
+	
 	/**
-	 * Есть ли ошибка
+	 * Если возникла ошибка в процессе работы с базой данных, то вернет TRUE
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function IsError(){return $this->error > 0;}
 	
 	/**
-	* Соединение с БД
+	* Установка соединения с базой данных 
 	*
-	* @param	string	Имя БД
-	* @param	string	Имя сервера (по умолчанию 'localhost') или IP адрес
-	* @param	integer	Порт
-	* @param	string	Имя пользователя
-	* @param	string	Пароль
-	*
-	* @return	none
+	* @param string имя базы данных
+	* @param string адрес сервера (имя или IP адрес)
+	* @param integer порт сервера
+	* @param string имя пользователя
+	* @param string пароль пользователя
 	*/
 	public function connect($database, $servername, $port, $username, $password){
 		$this->database = $database;
@@ -123,12 +159,12 @@ abstract class CMSDatabase extends CMSBaseClass {
 	protected abstract function connect_pt($servername, $port, $username, $password);
 	
 	/**
-	* Selects a database to use
-	*
-	* @param	string	The name of the database located on the database server(s)
-	*
-	* @return	boolean
-	*/
+	 * Выбрать базу данных 
+	 *
+	 * @param string имя базы данных
+	 *
+	 * @return bool TRUE - если база данных выбрана
+	 */
 	public function select_db($database = ''){
 		if ($database != '')		{
 			$this->database = $database;
@@ -148,14 +184,17 @@ abstract class CMSDatabase extends CMSBaseClass {
 	private function &execute_query(){
 		$this->querycount = $this->querycount + 1;
 		$result = $this->execute_query_pt();
-		// echo($this->sql."\n");
 		if (!$result){
 			$this->SetError(CMSDatabase::ERROR_EXECUTE_QUERY);
 		}
-		// echo("error=".$this->errorText."\n");
 		return $result;
 	}
 	
+	/**
+	 * Функция возвращает идентификатор добавленной записи выполненого последнего SQL запроса insert  
+	 * 
+	 * @return integer
+	 */
 	public function insert_id(){
 		return $this->insert_id_pt(); 
 	}
@@ -164,10 +203,11 @@ abstract class CMSDatabase extends CMSBaseClass {
 	protected abstract function &execute_query_pt();
 	
 	/**
-	 * Преобразование результата запроса в массив
-	 * Значение $type определяет тип возвращаемого результата
+	 * Выбирает строку из результата запроса и возвращает значения из этой строки в виде массива
 	 * 
-	 * @param	string	ID результата
+	 * Значение $type определяет будет ли массив иметь числовой или ассоциативный ключ, или оба
+	 * 
+	 * @param	string	ID результата SQL запроса
 	 * @param	integer	одно из значений CMSDatabase::DBARRAY_ASSOC / CMSDatabase::DBARRAY_NUM / CMSDatabase::DBARRAY_BOTH
 	 */
 	public function fetch_array($queryresult, $type = CMSDatabase::DBARRAY_ASSOC){
@@ -177,6 +217,13 @@ abstract class CMSDatabase extends CMSBaseClass {
 	}
 	protected abstract function fetch_array_pt($queryresult, $type = CMSDatabase::DBARRAY_ASSOC);
 
+	/**
+	 * Функция возвращает первую запись из SQL запроса в виде ассоциативного массива
+	 * 
+	 * @param string $sql SQL запрос 
+	 * @param $type
+	 * @return mixed
+	 */
 	public function &query_first($sql, $type = CMSDatabase::DBARRAY_ASSOC) {
 		if ($this->IsError()) return null;
 		$this->sql =& $sql;
@@ -188,18 +235,36 @@ abstract class CMSDatabase extends CMSBaseClass {
 		return $returnarray;
 	}
 	
+	/**
+	 * Выполнить SQL запрос
+	 * @param string $sql SQL запрос
+	 * @return integer идентификатор указателя на результат
+	 */
 	public function query($sql) {
 		if ($this->IsError()) return null;
 		$this->sql =& $sql;
 		return $this->execute_query();
 	}
 
+	/**
+	 * Выполнить SQL запрос на чтение
+	 * @param string $sql SQL запрос
+	 * @return integer идентификатор указателя на результат
+	 */
 	public function query_read($sql) {
 		if ($this->IsError()) return null;
 		$this->sql =& $sql;
 		return $this->execute_query();
 	}
 	
+	/**
+	 * Выполнить SQL запрос на запись. 
+	 * 
+	 * Если параметр $ignoreReadOnly = true, то игнорировать свойство {@link $readonly} 
+	 * @param $sql
+	 * @param $ignoreReadOnly
+	 * @return integer идентификатор указателя на результат SQL запроса
+	 */
 	public function query_write($sql, $ignoreReadOnly = false) {
 		if ($this->IsError()) return null;
 		if ($this->readonly){
@@ -210,6 +275,11 @@ abstract class CMSDatabase extends CMSBaseClass {
 		return $this->execute_query();
 	}
 	
+	/**
+	 * Вернуть кол-во записей из результата SQL запроса
+	 * @param integer $queryresult идентификатор указателя на результат SQL запроса
+	 * @return integer
+	 */
 	public function num_rows($queryresult) {
 		if ($this->IsError()) return 0;
 		return $this->num_rows_pt($queryresult);
@@ -217,6 +287,11 @@ abstract class CMSDatabase extends CMSBaseClass {
 	
 	protected abstract function num_rows_pt($queryresult);
 	
+	/**
+	 * Вернуть кол-во полей таблицы из указанного результата SQL запроса
+	 * @param integer $queryresult идентификатор указателя на результат SQL запроса
+	 * @return integer
+	 */
 	public function num_fields($queryresult) {
 		return $this->num_fields_pt($queryresult);
 	}
@@ -250,14 +325,13 @@ abstract class CMSDatabase extends CMSBaseClass {
 	protected abstract function fetch_field_pt($queryresult);	
 
 	/**
-	* Frees all memory associated with the specified query result
-	*
-	* @param	string	The query result ID we are dealing with
-	*
-	* @return	boolean
-	*/
+	 * Освободить всю память связанную с указанным результатом запроса
+	 *
+	 * @param string $queryresult идентификатор указателя на результат SQL запроса
+	 *
+	 * @return bool
+	 */
 	public function free_result($queryresult) {
-		
 		$this->sql = '';
 		return $this->free_result_pt($queryresult);
 	}
@@ -265,10 +339,10 @@ abstract class CMSDatabase extends CMSBaseClass {
 	protected abstract function free_result_pt($queryresult);
 
 	/**
-	* Retuns the number of rows affected by the most recent insert/replace/update query
-	*
-	* @return	integer
-	*/
+	 * Вернуть кол-во задействованных строк в последнем запросе insert/replace/update
+	 *
+	 * @return integer
+	 */
 	public function affected_rows() {
 		$this->rows = $this->affected_rows_pt(); 
 		return $this->rows;

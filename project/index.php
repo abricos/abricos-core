@@ -3,6 +3,7 @@
 * @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @link http://cmsbrick.ru
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
