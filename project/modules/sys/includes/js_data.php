@@ -1,10 +1,15 @@
 <?php
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * Обработка запросов DataSet
+ * 
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage Sys
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ */
+
 
 if (!Brick::$session->IsAdminMode()){ return; }
 $brick = Brick::$builder->brick;

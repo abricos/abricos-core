@@ -1,10 +1,14 @@
 <?php
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * Формирование базовых данных для работы системы BrickJSEngine
+ * 
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage Sys
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ */
 
 $brick = Brick::$builder->brick;
 $db = Brick::$db;

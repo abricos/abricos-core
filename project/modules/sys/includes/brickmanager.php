@@ -1,22 +1,30 @@
 <?php
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage Sys
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ */
 
+/**
+ * Класс статичных функций и свойств. 
+ * 
+ * @package CMSBrick
+ * @subpackage Sys
+ */
 class Brick {
 	
 	/**
-	 * Используемый стиль (шаблоны) при сборке страницы
-	 * 
+	 * Текущий стиль, содержащий шаблоны, для сборок страниц
+	 * @var string
 	 */
 	public static $style = 'default';
 	
 	/**
-	 * Идентификатор глобального контента из таблицы content
-	 *
+	 * Идентификатор страницы.
+	 * 
 	 * @var int
 	 */
 	public static $contentId = 0;
@@ -29,14 +37,14 @@ class Brick {
 	public static $builder = null;
 	
 	/**
-	 * База данных
+	 * Менеджер базы данных
 	 *
 	 * @var CMSDatabase
 	 */
 	public static $db = null;
 	
 	/**
-	 * Текущий модуль управления выводом содержания
+	 * Модуль, который получил управления на вывод страницы
 	 *
 	 * @var CMSModule
 	 */
@@ -63,10 +71,41 @@ class Brick {
 	 */
 	public static $input = null;
 	
+	/**
+	 * Замена в тексте $template идентификатора $varname на значение $value
+	 * 
+	 * Например:<br>
+	 * <pre>
+	 *   $result = Brick::$ReplaceVar("Строка {v#for} теста", "for", "для");
+	 *   
+	 *   // $result будет содержать текст: "Строка для теста"
+	 * </pre>
+	 * 
+	 * @param string $template исходный текст
+	 * @param string $varname идентификатор замены
+	 * @param string $value значение, на которое будет заменен идентификатор
+	 * @return string
+	 */
 	public static function ReplaceVar($template, $varname, $value){
 		return str_replace("{v#".$varname."}", $value, $template);
 	}
 	
+	/**
+	 * Пакетная замена в тексте $template данными из ассоциативного массива
+	 * 
+	 * Например:<br>
+	 * <pre>
+	 *   $result = Brick::$ReplaceVar("Строка в которой {v#s1} заменить {v#s2}", array(
+	 *     "s1" => "необходимо", "s2" => "текст"
+	 *   ));
+	 *   
+	 *   // $result будет содержать текст: "Строка в которой необходимо заменить текст"
+	 * </pre>
+	 * 
+	 * @param string $template исходный текст
+	 * @param mixed $data ассоциативный массив
+	 * @return string
+	 */
 	public static function ReplaceVarByData($template, $data){
 		foreach ($data as $varname => $value){
 			$template = Brick::ReplaceVar($template, $varname, $value);
@@ -75,13 +114,19 @@ class Brick {
 	}
 	
 	/**
-	 * Сессия пользователя
+	 * Сессия текущего пользователя
 	 *
 	 * @var CMSSysSession
 	 */
 	public static $session = null;
 }
 
+/**
+ * Конструктор страницы из кирпичей 
+ * 
+ * @package CMSBrick
+ * @subpackage Sys
+ */
 class CMSSysBrickBuilder {
 	
 	/**
@@ -92,46 +137,60 @@ class CMSSysBrickBuilder {
 	public $registry = null;
 	
 	/**
-	 * Текущий кирпич
+	 * Текущий кирпич.
+	 * 
+	 * Используется в скриптах управления кирпичем
 	 *
 	 * @var CMSSysBrick
 	 */
 	public $brick = null;
 
 	/**
-	 * Template
+	 * Шаблон
 	 *
 	 * @var CMSSysBrick
 	 */
 	public $template = null;
 	
 	/**
-	 * Глобальные переменные [var=имя]значение[/var]
+	 * Глобальные переменные кирпича 
+	 * 
+	 * Список всех переменных объявленых в блоке кирпича "Параметры": <br>
+	 * [var=имя]значение[/var]
+	 * 
+	 * @access private
+	 * @var mixed
 	 */
 	private $_globalVar = array();
 	/**
 	 * Фразы из БД [phrase=имя]значение по умолчанию[/phrase]
+	 * @access private
 	 */
 	private $_phrase = array();
 	/**
 	 * JS Widget модуля [mjs=имя модуля]файл js[/mjs]
+	 * @access private
 	 */
 	private $_jsmod = array();
 	/**
 	 * CSS модуля [mcss=имя модуля]файл css[/mcss]
+	 * @access private
 	 */
 	private $_cssmod = array();
 	/**
 	 * JS файл [js]путь к файлу[/js]
+	 * @access private
 	 */
 	private $_jsfile = array();
 	/**
 	 * CSS файл [css]путь к файлу[/css]
+	 * @access private
 	 */
 	private $_cssfile = array();
 	
 	/**
-	 * Массив всех используемых модулей в построение страницы
+	 * Массив модулей используемых в построение страницы
+	 * @access private
 	 */
 	private $_usemod = array();
 	
@@ -142,15 +201,23 @@ class CMSSysBrickBuilder {
 	 */
 	public $phrase = null;
 
-	public function __construct(CMSRegistry $registry){
+	/**
+	 * Конструктор
+	 * 
+	 * @param CMSRegistry $registry
+	 */
+	public function CMSSysBrickBuilder(CMSRegistry $registry){
 		$this->registry = $registry;
 		$this->phrase = new CMSSysPhrase($this->registry );
 	}
-	
+
+	/**
+	 * Заносит модуль в {@link $_usemod}
+	 * @param string $modname имя модуля
+	 */
 	private function SetUseModule($modname){
 		if ($this->_usemod[$modname]){ return; }
 		$this->_usemod[$modname] = true;
-		
 	}
 	
 	/**
@@ -527,10 +594,15 @@ class CMSSysBrickBuilder {
 }
 
 /**
- * Класс управления кирпичами
- *
+ * Загрузчик кирпичей.
+ * 
+ * Загружает кирпичи и их параметры из базы данных, если они были изменены 
+ * администратором сайта, либо с файловой системы
+ * 
+ * @package CMSBrick
+ * @subpackage Sys
  */
-class CMSSysBrickManager extends CMSBaseClass {
+class CMSSysBrickManager {
 	
 	/**
 	 * Ядро
@@ -546,7 +618,7 @@ class CMSSysBrickManager extends CMSBaseClass {
 	 */
 	public $custom = null;
 	
-	public function __construct(CMSRegistry $registry, $useCustom = true){
+	public function CMSSysBrickManager(CMSRegistry $registry, $useCustom = true){
 		$this->registry = $registry;
 		// пользовательские кирпичи и параметры
 		if ($useCustom){
@@ -663,6 +735,9 @@ class CMSSysBrickManager extends CMSBaseClass {
 
 /**
  * Параметры кирпича
+ * 
+ * @package CMSBrick
+ * @subpackage Sys
  */
 class CMSSysBrickParam {
 	
@@ -737,6 +812,12 @@ class CMSSysBrickParam {
 	
 }
 
+/**
+ * Кирпич
+ * 
+ * @package CMSBrick
+ * @subpackage Sys
+ */
 class CMSSysBrick {
 	
 	/**
@@ -799,8 +880,10 @@ class CMSSysBrick {
 }
 
 /**
- * Класс управления кирпичей исправленых администратором сайта
+ * Класс управления кирпичами исправленых администратором сайта
  *
+ * @package CMSBrick
+ * @subpackage Sys
  */
 class CMSSysBrickCustomManager {
 	

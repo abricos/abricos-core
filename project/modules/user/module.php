@@ -8,10 +8,8 @@
  * @author Alexander Kuzmin (roosit@cmsbrick.ru)
  */
 
-global $cms;
-
 $modUser = new CMSModuleUser();
-$cms->modules->Register($modUser);
+CMSRegistry::$instance->modules->Register($modUser);
 
 /**
  * Модуль "Пользователи" 

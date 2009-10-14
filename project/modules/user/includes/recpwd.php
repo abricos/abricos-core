@@ -1,17 +1,18 @@
 <?php
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
-
-/*
- * Восстановление пароля
+ * Восстановление пароля пользователя
+ * 
  * URL по типу http://mysite.com/user/recpwd/{hash}, где:
  * {hash} - идентификатор восстановления пароля.
  * 
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage User
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
  */
+
 $brick = Brick::$builder->brick;
 
 $adress = Brick::$cms->adress;

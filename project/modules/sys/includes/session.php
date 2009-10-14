@@ -1,12 +1,19 @@
 <?php
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage Sys
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ */
 
-class CMSSysSession extends CMSBaseClass {
+/**
+ * Сессия пользователя
+ * @package CMSBrick
+ * @subpackage Sys
+ */
+class CMSSysSession {
 	/**
 	 * Ядро
 	 *
@@ -33,11 +40,13 @@ class CMSSysSession extends CMSBaseClass {
 	
 	/**
 	 * Данные сессии в БД
+	 * @var mixed
 	 */
 	public $session = null;
 
 	/**
 	 * Информация пользователя
+	 * @var mixed
 	 */
 	public $userinfo = array(
 		"userid"			=>	0,
@@ -87,11 +96,18 @@ class CMSSysSession extends CMSBaseClass {
 		CMSQSys::UserUpdateActive($this->registry->db, $userinfo['userid']);
 	}
 	
+	/**
+	 * Авторизация пользователя
+	 * @param $userid идентификатор пользователя
+	 */
 	public function Login($userid){
 		$this->session = CMSQSys::SessionUserUpdate($this, $userid);
 		$this->userinfo = CMSQSys::UserById($this->registry->db, $this->session['userid']);
 	}
 	
+	/**
+	 * Выход пользователя 
+	 */
 	public function Logout(){
 		$this->session = CMSQSys::SessionUserUpdate($this, 0);
 		$this->userinfo = array(
@@ -102,18 +118,24 @@ class CMSSysSession extends CMSBaseClass {
 	}
 		
 	/**
-	 * Является ли пользователь администратором
+	 * Вернуть TRUE если пользователь является администратором
+	 * @return bool
 	 */
 	public function IsAdminMode (){
 		return $this->userinfo["usergroupid"] >= USERGROUPID_ADMINISTRATOR;
 	}
 
+	/**
+	 * Вернуть TRUE если пользователь является супер администратором
+	 * @return bool
+	 */
 	public function IsSuperAdminMode (){
 		return $this->userinfo["usergroupid"] == USERGROUPID_SUPERADMINISTRATOR;
 	}
 	
 	/**
-	 * Является ли пользователь залогиненым
+	 * Вернуть TRUE если пользователь является зарегистрированным
+	 * @return bool
 	 */
 	public function IsRegistred(){
 		return $this->userinfo["usergroupid"] >= USERGROUPID_REGISTERED;

@@ -1,27 +1,42 @@
 <?php
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage Sys
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ */
 
+/**
+ * Элементы фразы
+ * @package CMSBrick
+ * @subpackage Sys
+ */
 class CMSSysPhraseItem {
 	public $module = "";
 	public $name = "";
 	public $value = "";
 	
 	/**
-	 * Идентификатор фразы в БД
-	 *
+	 * Идентификатор фразы в таблице БД
 	 * @var integer
 	 */
 	public $id = "";
 	
+	/**
+	 * Флаг определяющий является ли фраза новой
+	 * @var bool
+	 */
 	public $isnew = false;
+	
+	/**
+	 * Флаг определяющий была ли изменена фраза
+	 * @var bool
+	 */
 	public $isupdate = false;
 	
-	public function __construct($moduleName, $name, $value){
+	public function CMSSysPhraseItem($moduleName, $name, $value){
 		$this->module = $moduleName;
 		$this->name = $name;
 		$this->value = $value;
@@ -38,10 +53,12 @@ class CMSSysPhraseItem {
 }
 
 /**
- * Менеджер управления фразами.
- * Задача класса загружать запрашиваемые фразы.
- * Если фразы в базе не найдены, то создание их и 
- * сохранение со значениями по умолчанию 
+ * Менеджер управления фразами
+ * 
+ * Задача класса загружать запрашиваемые фразы. Если фразы в базе 
+ * не найдены, то создание их и сохранение со значениями по умолчанию 
+ * @package CMSBrick
+ * @subpackage Sys
  */
 class CMSSysPhrase extends CMSBaseClass {
 	
