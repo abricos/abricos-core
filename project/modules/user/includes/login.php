@@ -26,7 +26,7 @@ if ($p_do == "pwdchange"){
 	if (!Brick::$session->IsRegistred()){
 		return;
 	}
-	$p_password					= $in->clean_gpc('p', 'password',		TYPE_STR);
+	$p_password			= $in->clean_gpc('p', 'password',		TYPE_STR);
 	$p_passwordconfirm	= $in->clean_gpc('p', 'passwordconfirm',TYPE_STR);
 	
 	if (empty($p_password) || empty($p_passwordconfirm)){ 

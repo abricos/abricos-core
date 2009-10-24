@@ -1,21 +1,352 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-(function(){
+/**
+ * Компонент управления таблицами  
+ *
+ * @module Sys
+ * @title Менеджер DataSet
+ */
 (function(){
 
 	Brick.namespace('util.data.byid');
 
-	var Column = function(name){ this.init(name); };
+	/**
+	 * Менеджер таблиц DataSet. 
+	 * 
+	 * @class DataSet
+	 * @namespace Brick.util.data.byid
+	 * @constructor
+	 * @param name {String} Имя модуля платформы BrickCMS с которым происходит обмен данными
+	 * @param prefix {String} (optional) Префикс
+	 */
+	var DataSet = function(name, prefix){
+		
+		/**
+		 * Имя DataSet
+		 * 
+		 * @property name
+		 * @type String
+		 */
+		this.name = name;
+		
+		/**
+		 * Префикс
+		 * 
+		 * @property prefix
+		 * @type String
+		 */
+		this.prefix = prefix;
+		
+		/**
+		 * Коллекция таблиц
+		 * 
+		 * @property tables
+		 * @type {String: Brick.util.data.byid.Table}
+		 */
+		this.tables = {};
+		
+	    /**
+	     * Событие, вызывает, когда данные приходят с сервера в запросе и
+	     * заполняют таблицы 
+	     *
+	     * @event onComplete
+	     */
+		this.onComplete = new YAHOO.util.CustomEvent("onComplete");
+		
+		this.session =  Math.round((new Date()).getTime()/1000);
+	};
+	DataSet.prototype = {
+		
+		/**
+		 * Получить объект данных подготовелных для отправки в запросе серверу
+		 * 
+		 * @method _getPostData
+		 * @param tables {Brick.util.data.byid.Table[]} (optional) Массив таблиц, если не указан, 
+		 * будут использованы таблицы из коллекции этого DataSet 
+		 * @return {Object}
+		 * @private
+		 */
+		_getPostData: function(tables){
+			tables = tables || this.tables;
+			var ts = [], tmp;
+			for (var nn in tables){
+				tmp = this.tables[nn].getPostData();
+				
+				if (!YAHOO.lang.isNull(tmp)){
+					ts[ts.length] = tmp;
+				}
+			}
+			if (ts.length == 0){
+				return null;
+			}
+			return ts;
+		},
+		
+		/**
+		 * Добавляет таблицу в коллекцию
+		 * 
+		 * @method add
+		 * @param table {Brick.util.data.byid.Table} Добавляемая таблица
+		 * @return {Boolean} True если таблица добавлена, иначе False
+		 */
+		add: function(table){
+			if (this.tables[table.name]){
+				return false;
+			}
+			this.tables[table.name] = table;
+			return true;
+		},
+		
+		/**
+		 * Добавляет массив таблиц в коллекцию
+		 * 
+		 * @method addRange
+		 * @param tables {Brick.util.data.byid.Table[]} Массив добавляемых таблиц
+		 */
+		addRange: function(tables){
+			for (var nn in tables){
+				this.add(tables[nn]);
+			}
+		},
+		
+		/**
+		 * Получить таблицу из коллекции
+		 * 
+		 * @method get
+		 * @param name {String} Имя таблицы
+		 * @param createIfNotFound {Boolean} True - создаст таблицу, если ее нет в коллекции и вернее ее
+		 * @return {Brick.util.data.byid.Table} Таблица
+		 */
+		get: function(name, createIfNotFound){
+			if (!this.tables[name] && createIfNotFound){
+				this.add(new Table(name));
+			}
+			return this.tables[name];
+		},
+		
+		/**
+		 * Обновить данные в таблицах, которые сервер вернул в запросе, 
+		 * а так же выполнить событие onComplete
+		 * 
+		 * @method update
+		 * @param obj {Object} Данные ответа сервера
+		 * @return {Boolean} 
+		 */
+		update: function(obj){
+			
+			var checker = function(rq){
+				this.check = function(tables){
+					for (var i=0;i<tables.length;i++){
+						if (rq[tables[i]]){ return true; }
+					}
+					return false;
+				};
+				
+				this.checkWithParam = function(tname, param){
+					if (!rq[tname]){
+						return false;
+					}
+					var fromKey = Rows.getParamHash(param);
+					var arr = rq[tname];
+					for (var i=0;i<arr.length;i++){
+						if (fromKey == Rows.getParamHash(arr[i])){ return true; }
+					}
+					return false;
+				};
+			};
+			var updtbls = {};
+			var i, di, isempty, table;
+			for (i=0; i<obj['_ds'].length; i++){
+				di = obj['_ds'][i];
+				
+				updtbls[di['nm']] = function(){
+					var lst = [];
+					for (var i=0;i<di['rs'].length;i++){
+						lst[lst.length] = di['rs'][i]['p'];
+					}
+					return lst;
+				}();
+				this.get(di['nm'], true).update(di);
+			}
+			this.onComplete.fire(new checker(updtbls));
+		},
+		
+		
+		/**
+		 * Запросить сервер обновить данные в таблицах
+		 * 
+		 * @method request
+		 * @param hidden {Boolean} Если True, то запрос осуществить в фоновом режиме
+		 */
+		request: function(hidden){
+			hidden = hidden || false;
+			var ts = this._getPostData();
+			if (YAHOO.lang.isNull(ts)){ return; }
+			Brick.util.Connection.sendCommand(this.name, 'js_data', {
+				hidden: hidden,
+				json: {
+					'_ds': {
+					'pfx': this.prefix,
+					'ss': this.session,
+					'ts': ts
+				}
+			}});
+		},
+		
+		/**
+		 * Являются ли таблицы заполнеными
+		 * 
+		 * @method isFill
+		 * @param tables {Brick.util.data.byid.Table[]} (optional) Массив таблиц
+		 * @return {Boolean} Если False, то таблицы нуждаются в обновлении данных с сервера
+		 */
+		isFill: function(tables){
+			var ts = this._getPostData(tables);
+			return YAHOO.lang.isNull(ts); 
+		},
+		
+		report: function(){
+			var s = "DataSet<br />";
+			s += "name: "+this.name+", prefix: "+this.prefix+"<br />";
+			for (var nn in this.tables){
+				s += this.tables.report();
+			}
+			return s;
+		}
+	};
+	
+	/**
+	 * Таблица 
+	 * 
+	 * @namespace Brick.util.data.byid
+	 * @class Table
+	 * @constructor
+	 * @param name {String} Имя таблицы, используется для идентификации таблицы в коллекции
+	 */
+	var Table = function(name){
+
+		/**
+		 * Имя таблицы
+		 * 
+		 * @property name
+		 * @type String
+		 */
+		this.name = name;
+		
+		/**
+		 * Коллекция колонок
+		 * 
+		 * @property columns
+		 * @type Brick.util.data.byid.Columns
+		 */
+		this.columns = new Columns();
+		
+		var _rowsparam = new RowsParam();
+		var _lastUpdate = 0;
+		var _recycleclear = false;
+		
+		/**
+		 * Получить последний обновляемый rows
+		 * 
+		 * @method getLastUpdateRows
+		 * @return {Brick.util.data.byid.RowsParam}
+		 */
+		this.getLastUpdateRows = function(){
+			return _rowsparam.getLastUpdateRows();
+		};
+		
+		/**
+		 * 
+		 */
+		this.findRows = function(exp){
+			return _rowsparam.findRows(exp);
+		};
+		
+		this.newRow = function(){
+			var cols = this.columns.getArray();
+			var data = {};
+			for (var i=0;i<cols.length;i++){
+				data[cols[i].name] = "";
+			}
+			return new Row(data);
+		};
+		
+		this.recycleClear = function(){
+			_recycleclear = true;
+		};
+		
+		this.getPostData = function(){
+			var cmd = [];
+			if (this._lastUpdate == 0 || this.columns.count() == 0){
+				cmd[cmd.length] = 'i';
+			}
+			if (_recycleclear){
+				cmd[cmd.length] = 'rc';
+				_rowsparam.clear();
+			}
+			
+			var rows = _rowsparam.getPostData();
+			if (YAHOO.lang.isNull(rows)){ return null; }
+			var post = { 'nm': this.name, 'rs': rows };
+			
+			post['cmd'] = cmd;
+			return post;
+		}; 
+
+		/**
+		 * True - таблица заполнена и в ней не изменялись данные
+		 */
+		this.isFill = function(){
+			var pd = this.getPostData();
+			return YAHOO.lang.isNull(pd); 
+		};
+
+		this.getRows = function(param, overparam){
+			return _rowsparam.getRows(param, overparam);
+		};
+		
+		this.removeNonParam = function(param){
+			_rowsparam.removeNonParam(param);
+		};
+		
+		this.update = function(o){
+			o['cs'] = o['cs'] || [];
+			this.columns.update(o['cs']);
+			_rowsparam.update(o['rs']);
+			_lastUpdate =  Math.round((new Date()).getTime()/1000);
+			_recycleclear = false;
+		};
+		
+		this.applyChanges = function(){
+			_rowsparam.applyChanges();
+		};
+		
+		this.report = function(){
+			var s = "Table: "+this.name+"<br />";
+			s += "Columns: ";
+			var cols = this.columns.getArray();
+			for (var i=0;i<cols.length;i++){
+				s += cols[i].name+" ";
+			}
+			s += _rowsparam.report();
+			
+			return s;
+		};
+		
+	};
+	
+	var Column = function(name){ 
+		this.init(name); 
+	};
 	Column.prototype = {
 		init: function(name){
 			this.name = name;
 		}
-	}
+	};
 	
 	var Columns = function(){ this.init(); };
 	Columns.prototype = {
@@ -55,114 +386,117 @@
 	
 	var _globalRowId = 1;
 	
+	/**
+	 * Запись (строка) в коллекции Rows
+	 * 
+	 * @namespace Brick.util.data.byid
+	 * @class Row
+	 * @constructor
+	 * @param data {String: Object} (optional) Данные записи 
+	 */
 	var Row = function(data){
-		this.init(data);
-	};
-	Row.prototype = {
-		init: function(data){
-			data = data || {};
-			var _isnew = false;
-			var _applychanges = false;
-			var _isupdate = false;
-			var _isremove = false;
-			var _isrestore = false;
-			
-			if (!data['id']){
-				data['id'] = 'nn'+(_globalRowId++);
-				_isnew = true;
-			}
-			this.id = data['id'];
-			this.cell = data;
-			
-			this.isNew = function(){ return _isnew; };
-			this.isUpdate = function(){ return _isupdate; };
-			this.isApplyChanges = function(){ return _applychanges; };
-			this.isRemove = function(){ return _isremove; };
-			this.isRestore = function(){ return _isrestore; };
-			this.applyChanges = function(){
-				if (this.isNew() || this.isUpdate() || this.isRemove() || this.isRestore()){
-					_applychanges = true; 
-				}
-			};
-			
-			this.report = function(){
-				var s = "Row: id="+this.id+" cell={";
-				for (var nn in this.cell){
-					s += nn + "="+ YAHOO.lang.dump(this.cell[nn])+", "
-				}
-				s += "} flag:";
-				if (this.isNew()){ s += " new "}
-				if (this.isUpdate()){ s += " update "}
-					
-				s += "\n"
-				return s;
-			};
-			
-			this.remove = function(){
-				_isremove = true;
-			};
-			
-			this.restore = function(){
-				_isrestore = true;
-			};
-
-			this.checkExpression = function(exp){
-				for (var nn in exp){
-					if (this.cell[nn] != exp[nn]){ return false; }
-				}
-				return true;
-			};
-			
-			this.getPostData = function(){
-				if (!_applychanges){ return null; }
-				var flag = "";
-				if (this.isRestore()){ flag = 'r';
-				}else if (this.isRemove()){ flag = 'd';
-				}else if (this.isNew()){ flag = 'a';
-				}else if (this.isUpdate()){ flag = 'u'; }
-				return { f: flag, d: this.cell };
-			};
-			
-			this.update = function(data){
-				var newval, oldval;
-				for (var nn in data){
-					newval = data[nn];
-					oldval = this.cell[nn];
-					if (newval != oldval){
-						_isupdate = true;
-						this.cell[nn] = data[nn];
-					}
-				}
-			};
-			
-			this.clone = function(){
-				var data = {};
-				for (var nn in this.cell){
-					data[nn] = this.cell[nn];
-				}
-				var row = new Row(data);
-				return row;
-			};
-			
-			this.sync = function(row){
-				this.update(row.cell);
-				_isnew = row.isNew();
-				_applychanges = row.isApplyChanges();
-				_isupdate = row.isUpdate();
-				_isremove = row.isRemove();
-				_isrestore = row.isRestore();
-			};
+		data = data || {};
+		var _isnew = false;
+		var _applychanges = false;
+		var _isupdate = false;
+		var _isremove = false;
+		var _isrestore = false;
+		
+		if (!data['id']){
+			data['id'] = 'nn'+(_globalRowId++);
+			_isnew = true;
 		}
+		this.id = data['id'];
+		this.cell = data;
+		
+		this.isNew = function(){ return _isnew; };
+		this.isUpdate = function(){ return _isupdate; };
+		this.isApplyChanges = function(){ return _applychanges; };
+		this.isRemove = function(){ return _isremove; };
+		this.isRestore = function(){ return _isrestore; };
+		this.applyChanges = function(){
+			if (this.isNew() || this.isUpdate() || this.isRemove() || this.isRestore()){
+				_applychanges = true; 
+			}
+		};
+		
+		this.report = function(){
+			var s = "Row: id="+this.id+" cell={";
+			for (var nn in this.cell){
+				s += nn + "="+ YAHOO.lang.dump(this.cell[nn])+", ";
+			}
+			s += "} flag:";
+			if (this.isNew()){ s += " new ";}
+			if (this.isUpdate()){ s += " update ";}
+				
+			s += "\n";
+			return s;
+		};
+		
+		this.remove = function(){
+			_isremove = true;
+		};
+		
+		this.restore = function(){
+			_isrestore = true;
+		};
+
+		this.checkExpression = function(exp){
+			for (var nn in exp){
+				if (this.cell[nn] != exp[nn]){ return false; }
+			}
+			return true;
+		};
+		
+		this.getPostData = function(){
+			if (!_applychanges){ return null; }
+			var flag = "";
+			if (this.isRestore()){ flag = 'r';
+			}else if (this.isRemove()){ flag = 'd';
+			}else if (this.isNew()){ flag = 'a';
+			}else if (this.isUpdate()){ flag = 'u'; }
+			return { f: flag, d: this.cell };
+		};
+		
+		this.update = function(data){
+			var newval, oldval;
+			for (var nn in data){
+				newval = data[nn];
+				oldval = this.cell[nn];
+				if (newval != oldval){
+					_isupdate = true;
+					this.cell[nn] = data[nn];
+				}
+			}
+		};
+		
+		this.clone = function(){
+			var data = {};
+			for (var nn in this.cell){
+				data[nn] = this.cell[nn];
+			}
+			var row = new Row(data);
+			return row;
+		};
+		
+		this.sync = function(row){
+			this.update(row.cell);
+			_isnew = row.isNew();
+			_applychanges = row.isApplyChanges();
+			_isupdate = row.isUpdate();
+			_isremove = row.isRemove();
+			_isrestore = row.isRestore();
+		};
 	};
 	
 	var globalForeachId = 1;
 	
 	var keysort = function(a, b){
-    var anew = a.toLowerCase();
-    var bnew = b.toLowerCase();
-    if (anew < bnew) return -1;
-    if (anew > bnew) return 1;
-    return 0;
+	    var anew = a.toLowerCase();
+	    var bnew = b.toLowerCase();
+	    if (anew < bnew) return -1;
+	    if (anew > bnew) return 1;
+	    return 0;
 	};
 	
 	var Rows = function(param, overparam){
@@ -234,6 +568,13 @@
 				return null;
 			};
 			
+			/**
+			 * Найти запись в коллекции используя выражение exp
+			 * 
+			 * @method find
+			 * @param exp {String: String|Integer} Выражение
+			 * @return
+			 */
 			this.find = function(exp){
 				var rows = this.filter(exp);
 				if (rows.count() == 0){
@@ -242,6 +583,15 @@
 				return rows.getByIndex(0);
 			};
 			
+			/**
+			 * Вернуть коллекцию записей в таблице отфильтрованных по выражению exp.
+			 * 
+			 * Например: filter({'field1': 0, 'field2': 'black'})
+			 * 
+			 * @method filter
+			 * @param exp {String: String|Integer} Выражение
+			 * @return {Rows}
+			 */
 			this.filter = function(exp){ // example: {fld1: 0, fld2: ''}
 				var row, rows = new Rows(), isret;
 				for (var id in _rows){
@@ -351,6 +701,10 @@
 		}
 	};
 	
+	/**
+	 * Коллекция коллекций записей в таблице. Идентификатором коллекции 
+	 * является набор параметров
+	 */
 	var RowsParam = function(){
 		this.init();
 	};
@@ -376,6 +730,12 @@
 				_rows = _newrows;
 			};
 			
+			/**
+			 * Получить коллекцию записей
+			 * @param param 
+			 * @param overparam
+			 * @return
+			 */
 			this.getRows = function(param, overparam){
 				var key = Rows.getParamHash(param);
 				if (!_rows[key]){
@@ -399,15 +759,26 @@
 			};
 			
 			/**
-			 * Найти rows в котором запись соответствует условию exp 
+			 * Найти запись среди коллекций записей используя выражение exp
+			 *  
+			 * @method findRow
+			 * @param exp Выражение
+			 * @return {Row}
 			 */
-			this.findRows = function(exp){
+			this.findRow = function(exp){
 				for(var nn in _rows){
 					var row = _rows[nn].find(exp);
 					if (row){ return row; }
 				}
 				return null;
 			};
+			
+			// Метод findFows для обеспечения совместимости предыдущей версии.
+			// Вместо него необходимо использовать метод findRow
+			this.findRows = function(exp){
+				return this.findRow(exp); 
+			};
+
 			
 			this.update = function(o){
 				var di, i, rows;
@@ -451,223 +822,21 @@
 		}
 	};
 
-	var Table = function(name){
-		this.init(name);
-	};
-	Table.prototype = {
-		init: function(name){
-			this.name = name;
-			this.columns = new Columns();
-			
-			var _rowsparam = new RowsParam();
-			var _lastUpdate = 0;
-			var _recycleclear = false;
-			
-			/**
-			 * Получить последний обновляемый rows
-			 */
-			this.getLastUpdateRows = function(){
-				return _rowsparam.getLastUpdateRows();
-			};
-			
-			this.findRows = function(exp){
-				return _rowsparam.findRows(exp);
-			};
-			
-			this.newRow = function(){
-				var cols = this.columns.getArray();
-				var data = {};
-				for (var i=0;i<cols.length;i++){
-					data[cols[i].name] = "";
-				}
-				return new Row(data);
-			};
-			
-			this.recycleClear = function(){
-				_recycleclear = true;
-			};
-			
-			this.getPostData = function(){
-				var cmd = [];
-				if (this._lastUpdate == 0 || this.columns.count() == 0){
-					cmd[cmd.length] = 'i';
-				}
-				if (_recycleclear){
-					cmd[cmd.length] = 'rc';
-					_rowsparam.clear();
-				}
-				
-				var rows = _rowsparam.getPostData();
-				if (YAHOO.lang.isNull(rows)){ return null; }
-				var post = { 'nm': this.name, 'rs': rows };
-				
-				post['cmd'] = cmd;
-				return post;
-			}; 
 
-			/**
-			 * True - таблица заполнена и в ней не изменялись данные
-			 */
-			this.isFill = function(){
-				var pd = this.getPostData();
-				return YAHOO.lang.isNull(pd); 
-			};
-
-			this.getRows = function(param, overparam){
-				return _rowsparam.getRows(param, overparam);
-			};
-			
-			this.removeNonParam = function(param){
-				_rowsparam.removeNonParam(param);
-			}
-			
-			this.update = function(o){
-				o['cs'] = o['cs'] || [];
-				this.columns.update(o['cs']);
-				_rowsparam.update(o['rs']);
-				_lastUpdate =  Math.round((new Date()).getTime()/1000);
-				_recycleclear = false;
-			};
-			
-			this.applyChanges = function(){
-				_rowsparam.applyChanges();
-			};
-			
-			this.report = function(){
-				var s = "Table: "+this.name+"<br />";
-				s += "Columns: "
-				var cols = this.columns.getArray();
-				for (var i=0;i<cols.length;i++){
-					s += cols[i].name+" ";
-				}
-				s += _rowsparam.report();
-				
-				return s;
-			};
-		}
-	};
-	
-	var DataSet = function(name, prefix){
-		this.init(name, prefix);
-	};
-	DataSet.prototype = {
-		init: function(name, prefix){
-			this.name = name;
-			this.prefix = prefix;
-			this.tables = {};
-			this.session =  Math.round((new Date()).getTime()/1000);
-			this.onComplete = new YAHOO.util.CustomEvent("onComplete"); 
-		},
-		add: function(table){
-			if (this.tables[table.name]){
-				return;
-			}
-			this.tables[table.name] = table;
-		},
-		addRange: function(tables){
-			for (var nn in tables){
-				this.add(tables[nn]);
-			}
-		},
-		get: function(name, createIfNotFound){
-			if (!this.tables[name] && createIfNotFound){
-				this.add(new Table(name));
-			}
-			return this.tables[name];
-		},
-		update: function(obj){
-			
-			var checker = function(rq){
-				this.check = function(tables){
-					for (var i=0;i<tables.length;i++){
-						if (rq[tables[i]]){ return true; }
-					}
-					return false;
-				};
-				
-				this.checkWithParam = function(tname, param){
-					if (!rq[tname]){
-						return false;
-					}
-					var fromKey = Rows.getParamHash(param);
-					var arr = rq[tname];
-					for (var i=0;i<arr.length;i++){
-						if (fromKey == Rows.getParamHash(arr[i])){ return true; }
-					}
-					return false;
-				};
-			};
-			var updtbls = {};
-			var i, di, isempty, table;
-			for (i=0; i<obj['_ds'].length; i++){
-				di = obj['_ds'][i];
-				
-				updtbls[di['nm']] = function(){
-					var lst = [];
-					for (var i=0;i<di['rs'].length;i++){
-						lst[lst.length] = di['rs'][i]['p'];
-					}
-					return lst;
-				}();
-				this.get(di['nm'], true).update(di);
-			}
-			this.onComplete.fire(new checker(updtbls));
-		},
-		getPostData: function(tables){
-			tables = tables || this.tables;
-			var ts = [], tmp;
-			for (var nn in tables){
-				tmp = this.tables[nn].getPostData();
-				
-				if (!YAHOO.lang.isNull(tmp)){
-					ts[ts.length] = tmp;
-				}
-			}
-			if (ts.length == 0){
-				return null;
-			}
-			return ts;
-		},
-		request: function(hidden){
-			hidden = hidden || false;
-			var ts = this.getPostData();
-			if (YAHOO.lang.isNull(ts)){ return; }
-			Brick.util.Connection.sendCommand(this.name, 'js_data', {
-				hidden: hidden,
-				json: {
-					'_ds': {
-					'pfx': this.prefix,
-					'ss': this.session,
-					'ts': ts
-				}
-			}});
-		},
-		isFill: function(tables){
-			var ts = this.getPostData(tables);
-			return YAHOO.lang.isNull(ts); 
-		},
-		report: function(){
-			var s = "DataSet<br />";
-			s += "name: "+this.name+", prefix: "+this.prefix+"<br />"
-			for (var nn in this.tables){
-				s += this.tables.report();
-			}
-			return s;
-		}
-	};
 	
 	Brick.util.data.byid.DataSet = DataSet;
 	Brick.util.data.byid.Table = Table;
 	Brick.util.data.byid.Row = Row;	
 
 })();
+
 (function(){
 	Brick.namespace('util.Data');
 	
 	/* * * * * * * * * * * * * Table * * * * * * * * * * */
 	var Table = function(name){
 		this.init(name);
-	}
+	};
 	Table.prototype = {
 		init: function(name){
 			this.data = [];
@@ -710,12 +879,12 @@
 			}
 			return ret;
 		}
-	}
+	};
 	Brick.util.Data.Table = Table;
 
 	var loader = function(parent, moduleName, mmPrefix){
 		this.init(parent, moduleName, mmPrefix);
-	}
+	};
 	loader.prototype = {
 		init: function(parent, moduleName, mmPrefix){
 			this.moduleName = moduleName;
@@ -755,11 +924,11 @@
 			}
 			Brick.util.Connection.sendCommand(this.moduleName, 'js_data', { json: json });
 		}
-	}
+	};
 	
 	var DataSet = function(moduleName, mmPrefix){
 		this.init(moduleName, mmPrefix);
-	}
+	};
 	DataSet.prototype = {
 		init: function(moduleName, mmPrefix){
 			this.ds = {};
@@ -805,7 +974,7 @@
 		complete: function(){
 			this.onComplete.fire();
 		}
-	}
+	};
 	
 	Brick.util.Data.DataSet = DataSet;
 
@@ -826,7 +995,7 @@
 			this.child[node['id']] = node;
 			node['parent'] = this;
 		}
-	}
+	};
 	
 	var Tree = function(cfg){
 		this.init(cfg);
@@ -850,9 +1019,8 @@
 				}
 			}
 		}
-	}
+	};
 	
 	Brick.util.Data.Tree = Tree;
 
-})();
 })();

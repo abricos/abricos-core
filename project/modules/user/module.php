@@ -51,12 +51,45 @@ class CMSModuleUser extends CMSModule {
 				$cname = "activate";
 			}else if ($adress->dir[1] == 'recpwd'){ // http://mysite.com/user/recpwd/{idhash}
 				$cname = "recpwd";
+			}else if ($adress->dir[1] == 'json'){
+				$cname = "json";
 			}
 		}
 		if ($cname == ''){
 			$this->registry->SetPageStatus(PAGESTATUS_404);
 		}
 		return $cname;
+	}
+	
+	/**
+	 * Проверить данные авторизации и вернуть номер ошибки: 0-данные валидатные, >0-номер ошибки 
+	 * 
+	 * @param $username
+	 * @param $password
+	 * @return Integer
+	 */
+	public static function UserLogin($username, $password){
+		if (empty($username) || empty($password)){ 
+			return 3; 
+		}
+	
+		if (!CMSModuleUser::UserVerifyName($username)){
+			return 1;
+		}
+		$db = CMSRegistry::$instance->db;
+		
+		$user = CMSSqlQuery::QueryGetUserInfoByUsername($db, $username);
+		if (empty($user)){
+			return 2;
+		}
+		if ($user['usergroupid'] < 4){
+			return 5;
+		}
+		$passcrypt = CMSModuleUser::UserPasswordCrypt($password, $user["salt"]);
+		if ($passcrypt != $user["password"]){
+			return 2;
+		}
+		return 0;
 	}
 	
 	public static function UserCreateSalt() {
@@ -123,7 +156,7 @@ class CMSQUser{
 		return $db->query_read($sql);
 	}
 	
-	public static function UserPrivateInfo(CMSDatabase $db, $userid){
+	public static function UserPrivateInfo(CMSDatabase $db, $userid, $retarray = false){
 		$sql = "
 			SELECT 
 				".CMSQUser::FIELDS_USERPUB.",
@@ -133,7 +166,41 @@ class CMSQUser{
 			WHERE userid='".bkint($userid)."'
 			LIMIT 1
 		";
-		return $db->query_read($sql);
+		if (!$retarray)
+			return $db->query_read($sql);
+		else
+			return $db->query_first($sql);
+	}
+
+	public static function UserPrivateInfoByUserName(CMSDatabase $db, $username, $retarray = false){
+		$sql = "
+			SELECT 
+				".CMSQUser::FIELDS_USERPUB.",
+				email as eml,
+				'' as pass
+			FROM ".$db->prefix."user
+			WHERE username='".bkstr($username)."'
+			LIMIT 1
+		";
+		if (!$retarray)
+			return $db->query_read($sql);
+		else
+			return $db->query_first($sql);
+	}
+
+	public static function UserPasswordInfoByUserName(CMSDatabase $db, $username, $retarray = false){
+		$sql = "
+			SELECT
+				password,
+				salt 
+			FROM ".$db->prefix."user
+			WHERE username='".bkstr($username)."'
+			LIMIT 1
+		";
+		if (!$retarray)
+			return $db->query_read($sql);
+		else
+			return $db->query_first($sql);
 	}
 	
 	public static function UserById(CMSDatabase $db, $userid){
@@ -172,6 +239,20 @@ class CMSQUser{
 			LIMIT 1
 		";
 		return $db->query_read($sql); 
+	}
+	
+	public static function UserListAll(CMSDatabase $db){
+		$sql = "
+			SELECT 
+				userid as id, 
+				username as unm,
+				usergroupid as ugp,
+				email as eml,
+				joindate as dl,
+				lastvisit as vst
+			FROM ".$db->prefix."user
+		";
+		return $db->query_read($sql); 		
 	}
 	
 	public static function UserList(CMSDatabase $db, $page, $limit){

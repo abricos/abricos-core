@@ -54,7 +54,7 @@ class CMSSysSession {
 		"username"		=>	"Guest"
 	);
 	
-	public function __construct(CMSRegistry $registry){
+	public function CMSSysSession(CMSRegistry $registry){
 		$this->registry = $registry;
 		$this->sessionIdHash = md5($_SERVER['HTTP_USER_AGENT'] . $this->registry->ip_address);
 		$this->cookieTimeOut = intval($this->registry->config['Misc']['cookietimeout']);

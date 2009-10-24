@@ -34,5 +34,7 @@ $config['Misc']['language'] = "ru";
 
 $config['Misc']['brick_cache'] = false;
 
+$config['Json']['password'] = "jsonpass";
+
 
 ?>
