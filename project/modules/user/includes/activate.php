@@ -22,7 +22,7 @@ $ret->error = 0;
 		
 $ret->error = CMSSqlQueryUser::QueryRegUserActivate(Brick::$db, $p_userid, $p_actid); 
 if ($ret->error == 0){
-	$user = CMSSqlQuery::QueryGetUserInfo(Brick::$db, $p_userid);
+	$user = CMSQUser::UserById(Brick::$db, $p_userid);
 	$ret->unm = $user['username'];
 }
 $brick->param->var['result'] = json_encode($ret); 
