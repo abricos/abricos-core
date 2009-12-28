@@ -1,0 +1,24 @@
+<!--[*]
+[script]p_paginator.php[/script]
+
+[p=total]0[/p]
+[p=page]0[/p]
+[p=perpage]10[/p]
+[p=pagelink]5[/p]
+[p=uri]/[/p]
+[p=uripage]page[/p]
+
+
+[bkvar=container]<ul class="paginator">{v#c}</ul>[/bkvar]
+
+[bkvar=first]<li><a href="{v#lnk}" class="first" title="На первую страницу">&#171;</a></li>[/bkvar]
+[bkvar=last]<li><a href="{v#lnk}" class="last" title="На последнюю страницу">&#187;</a></li>[/bkvar]
+[bkvar=prev]<li><a href="{v#lnk}" class="prev" title="На страницу назад">&#8592;&nbsp;назад</a></li>[/bkvar]
+[bkvar=next]<li><a href="{v#lnk}" class="next" title="На страницу вперед">вперед&nbsp;&#8594;</a></li>[/bkvar]
+[bkvar=curr]<li><em>{v#c}</em></li>[/bkvar]
+[bkvar=item]<li><a href="{v#lnk}">{v#c}</a></li>[/bkvar]
+
+[bkvar=result][/bkvar]
+
+[*]-->
+<div class="mod-sitemap">[bkvar]result[/bkvar]</div>

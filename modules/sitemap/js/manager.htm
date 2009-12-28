@@ -1,0 +1,111 @@
+<!--{managerpanel}-->
+<div class='hd'>Панель администратора</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+	<div style="text-align: right">
+		<input id="{i#bclose}" type="button" value="Закрыть" />
+	</div>
+</div>
+
+<!--{managerwidget}-->
+<div class="bk_sitemap-def"> 
+	<div class="bk_sitemap-page">{#sitemap.def.page}</div>
+	<div class="bk_sitemap-status"><!-- {#sitemap.def.status} --></div>
+	<div class="bk_sitemap-modify">{#sitemap.def.modify}</div>
+</div>
+<ul class="bk_sitemap-root">
+	<li class="bk_sitemap-level-0"> 
+		<div class="bk_sitemap-page bk_sitemap-left-root">
+			<span class="w1">
+				<a title="/" href="/" target="_blank"><span class="bk_sitemap-title">{#sitemap.panel.title}</span></a>
+			</span>
+		</div>
+		<div class="bk_sitemap-status bk_sitemap-published-status"><!-- {#sitemap.status.published} --></div>
+		<div class="bk_sitemap-modify">
+			<img src="{#img.icons.empty}" alt="" />
+			<img src="{#img.icons.empty}" alt="" />
+			<img id="{i#rootedit}" class="img_link" alt="{#sitemap.modify.edit}" title="{#sitemap.modify.edit}" src="/modules/sitemap/images/edit.gif"/>
+			<img id="{i#rootadd}" class="img_link" alt="{#sitemap.modify.add}" title="{#sitemap.modify.add}" src="/modules/sitemap/images/plus.png"/>
+			<img src="{#img.icons.empty}" alt="" />
+		</div>
+	</li>
+</ul>
+<ul id="{i#items}" class="bk_sitemap"></ul>
+
+<!--{maplist}-->
+<ul id="{i#id}-{v#id}" class="relative">{v#list}</ul>
+
+<!--{mapitem}-->
+<li class="bk_sitemap-level-{v#level} {v#childstatus}"> 
+	<div class="bk_sitemap-page">
+		<span class="w1">
+   		<img id="{i#expand}-{v#id}" src="{#sitemap.img.expand}" class="bk_sitemap-expander img_link" title="" alt=""/>
+			{v#imgtype}
+			<a title="" href="{v#url}" target="_blank"><span class="bk_sitemap-title">{v#title}</span></a>
+		</span>
+	</div>
+	<div class="bk_sitemap-status bk_sitemap-hidden-status"><!-- {#sitemap.status.hidden} --></div>
+  <div class="bk_sitemap-modify">{v#buttons}</div>
+  {v#child}
+</li>
+
+<!--{mapitempage}-->
+<li class="bk_sitemap-level-{v#level} no-children"> 
+	<div class="bk_sitemap-page">
+		<span class="w1">
+			<img src="/images/empty.gif" alt="{#sitemap.icons.page}" title="{#sitemap.icons.page}" class="bk_sitemap-icon" />
+			<a title="" href="{v#url}" target="_blank"><span class="bk_sitemap-title">{v#title}</span></a>
+		</span>
+	</div>
+	<div class="bk_sitemap-status bk_sitemap-hidden-status"><!-- {#sitemap.status.hidden} --></div>
+  <div class="bk_sitemap-modify">{v#buttons}</div>
+</li>
+
+
+<!--{imgtypemenu}-->
+<img src="/modules/sitemap/images/paper_bag.png" alt="{#sitemap.icons.menu}" title="{#sitemap.icons.menu}" class="bk_sitemap-icon"/>
+
+<!--{imgtypelink}-->
+<img src="/modules/sitemap/images/chain.png" alt="{#sitemap.icons.link}" title="{#sitemap.icons.link}" class="bk_sitemap-icon"/>
+
+<!--{imgtypepage}-->
+<img src="/modules/sitemap/images/document.png" alt="{#sitemap.icons.page}" title="{#sitemap.icons.page}" class="bk_sitemap-icon"/>
+
+<!--{biempty}-->
+<img src="{#img.icons.empty}" alt="" />
+
+<!--{biup}-->
+<img id="{i#id}-{v#id}" class="img_link" alt="{#sitemap.modify.up}" title="{#sitemap.modify.up}" src="/modules/sitemap/images/arrow_up.png"/>
+
+<!--{bidown}-->
+<img id="{i#id}-{v#id}" class="img_link" alt="{#sitemap.modify.down}" title="{#sitemap.modify.down}" src="/modules/sitemap/images/arrow_down.png"/>
+
+<!--{biedit}-->
+<img id="{i#id}-{v#id}" class="img_link" alt="{#sitemap.modify.edit}" title="{#sitemap.modify.edit}" src="/modules/sitemap/images/edit.gif" />
+<!--{bieditp}-->
+<img id="{i#id}-{v#id}" class="img_link" alt="{#sitemap.modify.edit}" title="{#sitemap.modify.edit}" src="/modules/sitemap/images/edit.gif"/>
+
+
+<!--{biadd}-->
+<img id="{i#id}-{v#id}" class="img_link" alt="{#sitemap.modify.add}" title="{#sitemap.modify.add}" src="/modules/sitemap/images/plus.png"/>
+
+<!--{birem}-->
+<img id="{i#id}-{v#id}" class="img_link" class="remove" alt="{#sitemap.modify.delete}" title="{#sitemap.modify.delete}" src="/modules/sitemap/images/icon-remove.gif"/>
+
+<!--{biremp}-->
+<img id="{i#id}-{v#id}" class="img_link" class="remove" alt="{#sitemap.modify.delete}" title="{#sitemap.modify.delete}" src="/modules/sitemap/images/icon-remove.gif"/>
+
+<!--{mnuadd}-->
+<div class='hd'>{#sitemap.mnuadd.hd}</div>
+<div class='bd' style="font-size: 130%">
+	<p>{#sitemap.mnuadd.question}</p>
+	<label for="{i#type0}"><input id="{i#type0}" name="item_type" value="0" type="radio" checked />{#sitemap.mnuadd.section}</label><br />
+	<label for="{i#type1}"><input id="{i#type1}" name="item_type" value="1" type="radio" />{#sitemap.mnuadd.link}</label><br />
+	<label for="{i#type2}"><input id="{i#type2}" name="item_type" value="2" type="radio" />{#sitemap.mnuadd.page}</label><br />
+	
+	<br />
+	<input id="{i#badd}" type="button" value="{#sitemap.mnuadd.badd}" />
+	&nbsp;&nbsp;&nbsp;
+	<input id="{i#bcancel}" type="button" value="{#sitemap.mnuadd.bcancel}" />
+</div>
+

@@ -1,0 +1,141 @@
+<!--{pageeditor}-->
+<div class='hd'>{#sitemap.pageeditor.hd}</div>
+<div class='bd'>
+	<div class="buttons-top right">
+		<input id='{i#bsave}' type="button" value="{#sitemap.pageeditor.bsave}" />
+		<input id='{i#bcancel}' type="button" value="{#sitemap.pageeditor.bcancel}" />
+	</div>
+	<div class="field linespace-1" style="width: 790px">
+	
+	<div id="{i#tab}" class="yui-navset">
+		<ul class="yui-nav">
+			<li class="selected"><a href="#{i#tabbody}"><em>Страница</em></a></li>
+	    <li><a href="#{i#tabmeta}"><em>Дополнительно</em></a></li>
+		</ul>            
+	  <div class="yui-content">
+		  <div id="{i#tabbody}">
+				<div id="{i#menucont}" style="display: none;">
+					<h3>{#sitemap.pageeditor.hd2}</h3>
+					<p>
+						{#sitemap.pageeditor.title}
+						<input type="text" id="{i#mtitle}" style="width: 400px" />
+					</p>
+					<p>
+						{#sitemap.pageeditor.descr}
+						<input type="text" id="{i#mdesc}" style="width: 400px" />
+					</p>
+					<p>
+						{#sitemap.pageeditor.name}
+						<input type="text" id="{i#mname}" style="width: 400px" />
+						<span class="dsc">{#sitemap.pageeditor.namedesc}</span>
+					</p>
+				</div>
+				<h3>{#sitemap.pageeditor.page}</h3>
+				<p id="{i#pgnamecont}">
+					{#sitemap.pageeditor.pagename}<input type="text" id="{i#pgname}" style="width: 400px" />
+				</p>
+				<textarea id="{i#editor}" style="width: 750px; height: 250px"></textarea>
+				<h3>Модули</h3>
+				<div id="{i#modlist}" style="clear: both;" >
+				</div>
+				<div style="clear: both;"></div>
+				<div class="right" style="margin-top: 10px;">
+					<input id='{i#baddmod}' type="button" value="Добавить" />
+				</div>
+			</div>
+			<div id="{i#tabmeta}">
+				<h3>{#sitemap.pageeditor.meta}</h3>
+				<p>
+					{#sitemap.pageeditor.metatitle}<br />
+					<input type="text" id="{i#pgtitle}" style="width: 400px" />
+				</p>
+				<p>
+					{#sitemap.pageeditor.keywords}<br />
+					<textarea id="{i#pgkeys}" style="width: 500px"></textarea>
+				</p>
+				<p>
+					{#sitemap.pageeditor.description}<br />
+					<textarea id="{i#pgdesc}" style="width: 500px"></textarea>
+				</p>
+				<div style="display: none">
+					<h3>Шаблон</h3>
+					<p id="{i#templates}"></p>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+</div>
+
+<!--{select}-->
+<select id="{i#id}">{v#list}</select>
+
+<!--{option}-->
+<option value="{v#id}">{v#tl}</option>
+
+<!--{moditem}-->
+<div style="float: left; text-align: center; margin-left: 5px">
+	<span>{v#own}</span><br />
+	<span>{v#nm}</span><br />
+	<span>
+		<a href="#" id="{i#insert}-{v#id}">Вставить</a>&nbsp;
+		<a href="#" id="{i#remove}-{v#id}">Удалить</a>
+	</span>	
+</div>
+
+<!--{mods}-->
+<div class='hd'>Список модулей</div>
+<div class='bd'>
+	<div class="field linespace-1" style="width: 600px">
+		<h3>Доступные модули</h3>
+		<div id="{i#table}" style="height: 220px; overflow-y:auto;"></div>
+	</div>
+	<div class="buttons right">
+		<input id='{i#baddmod}' type="button" value="Отмена" />
+	</div>
+</div>
+
+<!--{modstable}-->
+<table class="bk-table-def" style="width: 100%">
+	<thead>
+		<tr>
+			<th>Модуль</th>
+			<th>Кирпич</th>
+			<th>Параметры</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{modsrow}-->
+<tr>
+	<td>{v#own}</td>
+	<td>{v#nm}</td>
+	<td><input type="text" id="{i#prm}-{v#id}" style="width: 120px" /></td>
+	<td><a href="#" id="{i#select}-{v#id}">Выбрать</a></td>
+<tr>
+
+<!--{linkeditor}-->
+<div class='hd'>{#sitemap.linkeditor.hd}</div>
+<div class='bd'>
+	<div class="field linespace-1" style="width: 600px">
+		<p>
+			{#sitemap.linkeditor.hd2}
+			<input type="text" id="{i#mtitle}" style="width: 400px" />	
+		</p>
+		<p>
+			{#sitemap.linkeditor.descr}
+			<input type="text" id="{i#mdesc}" style="width: 400px" />
+		</p>
+		<p>
+			{#sitemap.linkeditor.link}
+			<input type="text" id="{i#mlink}" style="width: 400px" />
+		</p>
+	</div>
+	<div class="buttons right">
+		<input id='{i#bsave}' type="button" value="{#sitemap.linkeditor.bsave}" />
+		<input id='{i#bcancel}' type="button" value="{#sitemap.linkeditor.bcancel}" />
+	</div>
+</div>
+
