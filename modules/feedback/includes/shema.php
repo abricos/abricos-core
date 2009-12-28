@@ -3,20 +3,20 @@
  * Структура таблиц модуля
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Feedback
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$cms = CMSRegistry::$instance;
+
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$svers = $cms->modules->moduleUpdateShema->serverVersion;
-$db = $cms->db;
+$updateManager = CMSRegistry::$instance->modules->updateManager; 
+$db = CMSRegistry::$instance->db;
 $pfx = $db->prefix;
 
-if (version_compare($svers, "1.0.0", "<")){
+if ($updateManager->isInstall()){
 	
 	// таблица сообщений
 	$db->query_write("

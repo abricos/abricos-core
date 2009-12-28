@@ -1,11 +1,10 @@
 <?php 
 /**
  * @version $Id$
- * @package CMSBrick
- * @subpackage Feedback
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @package Abricos * @subpackage Feedback
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $cms = CMSRegistry::$instance;
@@ -15,7 +14,7 @@ $cms->modules->Register($mod);
 
 /**
  * Модуль обратной связи
- * @package CMSBrick
+ * @package Abricos 
  * @subpackage Feedback
  */
 class CMSModFeedback extends CMSModule {
@@ -24,7 +23,7 @@ class CMSModFeedback extends CMSModule {
 	 * Конструктор 
 	 */
 	public function CMSModFeedback(){
-		$this->version = "1.0.0";
+		$this->version = "0.2";
 		$this->name = "feedback";
 		$this->takelink = "feedback";
 	}
@@ -33,7 +32,7 @@ class CMSModFeedback extends CMSModule {
 /**
  * Класс статичных функций модуля
  * 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Feedback
  */
 class CMSModFeedbackMan {
@@ -135,7 +134,7 @@ class CMSModFeedbackMan {
 /**
  * Класс статичных функций запросов к базе данных
  * 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Feedback
  */
 class CMSQFeedback {

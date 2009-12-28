@@ -3,20 +3,19 @@
  * Структура таблиц модуля
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage News
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-global $cms;
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$svers = $cms->modules->moduleUpdateShema->serverVersion;
-$db = $cms->db;
+$updateManager = CMSRegistry::$instance->modules->updateManager; 
+$db = CMSRegistry::$instance->db;
 $pfx = $db->prefix;
 
-if (version_compare($svers, "1.0.1", "<")){
+if ($updateManager->isInstall()){
 	$db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."ns_cat (
 		  `catid` int(10) unsigned NOT NULL auto_increment,

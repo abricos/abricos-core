@@ -1,0 +1,49 @@
+<!--[*]
+[tt=main][/tt]
+[mod=sys]dev_msgwarn[/mod]
+[mcss=sys]widget.css[/mcss]
+[*]-->
+<h2>Модуль "Новости" - страница разработчика</h2>
+
+[mod]sys:dev_msgwarn[/mod]
+
+<h3>Панель "Список новостей"</h3>
+<input id="btn_showNewsListPanel" type="button" value="Открыть панель"></input>
+
+<h3>Панель "Редактор новостей"</h3>
+<p>Создание новости.</p>
+<input id="btn_showNewsEditorPanel_new" type="button" value="Создать новость"></input>
+
+<p>Редактирование новости.</p>
+<p>
+Введите идентификатор редактируемой новости:
+<input id="txt_newsId" type="text" value="0" />
+</p>
+<input id="btn_showNewsEditorPanel" type="button" value="Редактировать новость" />
+
+<script>
+	YAHOO.util.Event.onDOMReady(function () {
+		
+        YAHOO.util.Event.addListener("btn_showNewsListPanel", "click", function(){
+    		Brick.Component.API.fire('news', 'api', 'showNewsListPanel');
+		});
+
+		YAHOO.util.Event.addListener("btn_showNewsEditorPanel_new", "click", function(){
+			Brick.Component.API.fire('news', 'api', 'showEditorPanel');
+		});
+		
+		YAHOO.util.Event.addListener("btn_showNewsEditorPanel", "click", function(){
+		
+			var input = document.getElementById('txt_newsId');
+			var newsId = input.value * 1;
+			if (newsId <= 0){
+			    alert('Необходимо указать идентификатор новости');
+			    return;
+			} 
+			
+			Brick.Component.API.fire('news', 'api', 'showEditorPanel', newsId);
+		});
+		
+    });
+</script>
+

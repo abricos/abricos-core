@@ -4,7 +4,7 @@
 [bkvar=fid][/bkvar]
 [bkvar=onload][/bkvar]
 [bkvar=onloads]
-	window.opener.Brick.mod.filemanager.currentBrowser.uploadOK(#fid#);
+	window.opener.Brick.mod.filemanager.API.activeBrowser.uploadOK(#fid#);
 	self.close();
 [/bkvar]
 [bkvar=ftypelst][/bkvar]
@@ -15,6 +15,7 @@
 [bkvar=err3]{#filemanager.upload_servererror}[/bkvar]
 [bkvar=err4]{#filemanager.upload_piclimit}[/bkvar]
 [bkvar=err5]{#filemanager.upload_profilelimit}[/bkvar]
+[bkvar=err6]Нет прав на выгрузку файла[/bkvar]
 [bkvar=errt]
 	<div align="center"><font color="red">
 		{#filemanager.upload_file}<b>#2</b>{#filemanager.upload_notload}<br />
@@ -86,6 +87,6 @@
 </table>
 </form>
 <script type="text/javascript">
-	window.opener.Brick.mod.filemanager.currentBrowser.setUploader(this);
+	window.opener.Brick.mod.filemanager.API.activeBrowser.setUploader(this);
 	[bkvar]onload[/bkvar]
 </script>

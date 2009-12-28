@@ -1,0 +1,30 @@
+<!--[*]
+[tt=main][/tt]
+[mod=sys]dev_msgwarn[/mod]
+[mcss=sys]widget.css[/mcss]
+[*]-->
+<h2>Модуль "Обратная связь" - страница разработчика</h2>
+<h3>Элементы управления для пользователей</h3>
+<h4>Панель отправки сообщения</h4>
+<input id="btn_showNewMessagePanel" type="button" value="Отправить сообщение"></input>
+
+<h3>Элементы управления для администратора</h3>
+[mod]sys:dev_msgwarn[/mod]
+
+<h4>Панель администратора</h4>
+<input id="btn_showManagerPanel" type="button" value="Открыть панель"></input>
+
+<script>
+	YAHOO.util.Event.onDOMReady(function () {
+		
+        YAHOO.util.Event.addListener("btn_showNewMessagePanel", "click", function(){
+    		Brick.Component.API.fire('feedback', 'api', 'showNewMessagePanel');
+		});
+		
+        YAHOO.util.Event.addListener("btn_showManagerPanel", "click", function(){
+    		Brick.Component.API.fire('feedback', 'api', 'showManagerPanel');
+		});
+		
+    });
+</script>
+

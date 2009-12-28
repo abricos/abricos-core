@@ -3,11 +3,11 @@
  * Получить файл из базы данных
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage FileManager
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 error_reporting(E_ERROR);
@@ -41,21 +41,21 @@ if($adress->level > 2 && $adress->dir[1] == 'i'){
 }
 
 $modFM = Brick::$modules->GetModule('filemanager');
-$cmsupload = $modFM->GetUpload();
+$fileManager = $modFM->GetFileManager(); 
 
-$p_filehash = $cmsupload->ImageConvert($p_filehash, $p_w, $p_h, $p_cnv);
+$p_filehash = $fileManager->ImageConvert($p_filehash, $p_w, $p_h, $p_cnv);
 
-$fileinfo = CMSQFileManager::FileGet(Brick::$db, $p_filehash);
+$fileinfo = $fileManager->GetFileData($p_filehash);
 
 if (empty($fileinfo)){ EchoEmptyGif(); }
 
 $etag = $p_filehash.'-'.$fileinfo['dateline'];
 
-if (isset($_SERVER['HTTP_IF_NONE_MATCH']))
+if (isset($_SERVER['HTTP_IF_NONE_MATCH'])){
 	$client_etag = stripslashes(stripslashes($_SERVER['HTTP_IF_NONE_MATCH']));
-else 
+} else 
 	$client_etag = false;
-	
+
 // Обновить счетчик
 CMSQFileManager::FileUpdateCounter(Brick::$db, $p_filehash);
 
@@ -65,9 +65,9 @@ if ($client_etag == $etag){
 }
 
 header('Cache-control: max-age=31536000');
-header('Expires: '.gmdate("D, d M Y H:i:s", TIMENOW+31536000).' GMT');
 header('Last-Modified: '.gmdate('D, d M Y H:i:s', $fileinfo['dateline']).' GMT');
-header('ETag: "'.$etag.'"');
+header('ETag: '.$etag.'');
+header('Expires: ' . gmdate("D, d M Y H:i:s", time() + 3600 * 24 * 15) . ' GMT');
 
 $filename = $fileinfo['filename'];
 $extension = $fileinfo['extension'];
@@ -115,8 +115,9 @@ if (in_array($extension, array('jpg', 'jpe', 'jpeg', 'gif', 'png'))) {
 
 header('Content-Length: ' . $fileinfo['filesize']);
 
-$mimetype= $cmsupload->fileType[$extension]['mimetype'];
-//$mimetype = $fileinfo['mimetype'];
+$fileExtList = $fileManager->GetFileExtensionList();
+
+$mimetype = $fileExtList[$extension]['mimetype'];
 
 if (!empty($mimetype)) {
 	header('Content-type: '.$mimetype);
@@ -125,14 +126,15 @@ if (!empty($mimetype)) {
 }
 
 $count = 1;
-while (!empty($fileinfo['filedata']) AND connection_status() == 0) {
+while (!empty($fileinfo['filedata']) && connection_status() == 0) {
+	
 	echo $fileinfo['filedata'];
 	flush();
 
 	if (strlen($fileinfo['filedata']) == 2097152) {
 
 		$startat = (2097152 * $count) + 1;
-		$fileinfo = CMSQFileManager::FileGet(Brick::$db, $p_filehash, $startat);
+		$fileinfo = $fileManager->GetFileData($p_filehash, $startat);
 		$count++;
 	} else {
 		$fileinfo['filedata'] = '';
@@ -141,6 +143,13 @@ while (!empty($fileinfo['filedata']) AND connection_status() == 0) {
 
 Brick::$db->close();
 exit;
+
+function save_log($str){
+	$handle = fopen("w:/tmp/log.log", 'w');
+	fwrite($handle, $str);
+	fclose($handle);
+}
+
 
 function EchoEmptyGif(){
 	$filedata = base64_decode('R0lGODlhAQABAIAAAMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==');

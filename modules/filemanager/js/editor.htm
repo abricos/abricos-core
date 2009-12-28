@@ -1,0 +1,22 @@
+<!--{editor}-->
+<div class='hd'>{#fm.editor.hd}</div>
+<div class='bd'>
+	<div id='{i#tgrpsel}'>
+		{#fm.editor.tools}
+		<input class="btn" id='{i#btsize}' value='{#fm.editor.resize}' type='button' />
+		<input class="btn" id='{i#btcrop}' value='{#fm.editor.crop}' type='button' />
+	</div> 
+	<div id='{i#tgrpact}' style="display: none">
+		<input class="btn" id='{i#btapply}' value='{#fm.editor.apply}' type='button' />
+		<input class="btn" id='{i#btcancel}' value='{#fm.editor.cancel}' type='button' />
+	</div> 
+	
+	<div id="{i#image}" style="text-align: center"></div>
+	<div class="buttons right">
+		<input type="checkbox" id="{i#iscopy}" checked="checked" />
+		<label id="{i#iscopy}-lbl" for="{i#iscopy}">{#fm.editor.copy}</label>
+			
+		<input id='{i#bsave}' value='{#fm.editor.save}' type='button' disabled="disabled" />&nbsp;
+		<input id='{i#bcancel}' value='{#fm.editor.cancel}' type='button' />
+	</div>
+</div>

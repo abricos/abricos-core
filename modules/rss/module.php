@@ -3,11 +3,11 @@
  * Модуль "RSS"
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos 
  * @subpackage RSS
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reservedd.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $modRss = new CMSModuleRss();
@@ -17,13 +17,13 @@ CMSRegistry::$instance->modules->Register($modRss);
  * Модуль "RSS"
  * формат запроса http://domain.com/rss/{имя модуля}/{параметры}
  *
- * @package CMSBrick
+ * @package Abricos
  * @subpackage RSS
  */
 class CMSModuleRss extends CMSModule {
 	
 	public function __construct(){
-		$this->version = "1.0.1";
+		$this->version = "0.2";
 		$this->name = "rss";
 		$this->takelink = "rss";
 	}
@@ -49,7 +49,7 @@ class CMSModuleRss extends CMSModule {
 
 /**
  * Элемент RSS записи
- * @package CMSBrick
+ * @package Abricos 
  * @subpackage RSS
  */
 class CMSRssWriter2_0Item {
@@ -71,7 +71,7 @@ class CMSRssWriter2_0Item {
 
 /**
  * RSS writer
- * @package CMSBrick
+ * @package Abricos
  * @subpackage RSS
  */
 class CMSRssWriter2_0 {
@@ -138,7 +138,7 @@ class CMSRssWriter2_0 {
 
 /**
  * Статичные функции запросов к базе данных
- * @package CMSBrick
+ * @package Abricos
  * @subpackage RSS
  */
 class CMSQRss {

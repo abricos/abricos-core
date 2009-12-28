@@ -1,4 +1,3 @@
 <!--[*]
-[mjs=feedback]api.js[/mjs]
 [*]-->
-<input type="button" onclick="Brick.mod.feedback.api.show();" value="Обратная связь" />
+<input type="button" onclick="Brick.Component.API.fire('feedback', 'api', 'showNewMessagePanel'); return false;" value="Обратная связь" />

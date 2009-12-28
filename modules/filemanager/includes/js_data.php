@@ -1,18 +1,18 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage FileManager
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $brick = Brick::$builder->brick;
-$userid = Brick::$session->userinfo['userid'];
 $mod = Brick::$modules->GetModule('sys');
-$ds = $mod->getDataSet();
+$fileManager = Brick::$modules->GetModule('filemanager')->GetFileManager();
 
+$ds = $mod->getDataSet();
 $ret = new stdClass();
 $ret->_ds = array();
 
@@ -24,20 +24,22 @@ foreach ($ds->ts as $ts){
 		switch ($ts->nm){
 			case 'files':
 				foreach ($tsrs->r as $r){
-					if ($r->f == 'u' && $r->d->act == 'editor'){ CMSFileManagerMan::ImageEditorSave($r->d); }
-					if ($r->f == 'd'){ CMSFileManagerMan::FileRemove($r->d); }
+					if ($r->f == 'u' && $r->d->act == 'editor'){ $fileManager->ImageEditorSave($r->d); }
+					if ($r->f == 'd'){ $fileManager->FileRemove($r->d->fh); }
 				}
 				break;
 			case 'editor':
 				foreach ($tsrs->r as $r){
-					if ($r->f == 'a'){ CMSFileManagerMan::ImageChange($tsrs->p->filehash, $tsrs->p->session, $r->d); }
+					if ($r->f == 'a'){ 
+						$fileManager->ImageEditorChange($tsrs->p->filehash, $tsrs->p->session, $r->d); 
+					}
 				}
 				break;
 			case 'folders':
 				foreach ($tsrs->r as $r){
-					if ($r->f == 'a'){ CMSFileManagerMan::FolderAppend($r->d); }
-					if ($r->f == 'd'){ CMSFileManagerMan::FolderRemove($r->d); }
-					if ($r->f == 'u'){ CMSFileManagerMan::FolderChangePhrase($r->d); }
+					if ($r->f == 'a'){ $fileManager->FolderAppendFromData($r->d); }
+					if ($r->f == 'd'){ $fileManager->FolderRemove($r->d); }
+					if ($r->f == 'u'){ $fileManager->FolderChangePhrase($r->d); }
 				}
 				break;
 		}
@@ -57,13 +59,13 @@ foreach ($ds->ts as $ts){
 		$rows = null;
 		switch ($ts->nm){
 			case 'files':
-				$rows = CMSQFileManager::FileList(Brick::$db, $userid, $tsrs->p->folderid, CMSQFileManager::FILEATTRIBUTE_NONE); 
+				$rows = $fileManager->FileList($tsrs->p->folderid); 
 				break;
 			case 'folders':
-				$rows = CMSQFileManager::FolderList(Brick::$db, $userid); 
+				$rows = $fileManager->FolderList(); 
 				break;
 			case 'editor':
-				$rows = CMSQFileManager::EditorList(Brick::$db, $tsrs->p->filehash, $tsrs->p->session);
+				$rows = $fileManager->EditorList($tsrs->p->filehash, $tsrs->p->session); 
 				break;
 		}
 		

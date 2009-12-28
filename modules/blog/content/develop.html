@@ -1,0 +1,53 @@
+<!--[*]
+[tt=main][/tt]
+[mcss=sys]widget.css[/mcss]
+[*]-->
+<h2>Разработка и отладка модуля "Блог"</h2>
+<h3>Записи в блоге</h3>
+<input id="btn_showTopicListPanel" type="button" value="Выполнить API.showTopicListPanel()"></input>
+
+<h3>Редактор записи</h3>
+<p>Создание записи в блоге</p>
+<input id="btn_showTopicEditorPanel_new" type="button" value="Выполнить API.showTopicEditorPanel(0)"></input>
+
+<p>Редактирование записи в блоге</p>
+<p>
+Введите идентификатор редактируемой записи:
+<input id="txt_topicId" type="text" value="0" />
+</p>
+<input id="btn_showTopicEditorPanel" type="button" value="Выполнить API.showTopicEditorPanel([идентификатор записи])" />
+<h3>Категории блога</h3>
+<input id="btn_showCategoryListPanel" type="button" value="Выполнить API.showCategoryListPanel()" />
+
+<script>
+
+	YAHOO.util.Event.onDOMReady(function () {
+        YAHOO.util.Event.addListener("btn_showTopicListPanel", "click", function(){
+    		Brick.Component.API.fire('blog', 'api', 'showTopicListPanel');
+		});
+
+        YAHOO.util.Event.addListener("btn_showTopicEditorPanel_new", "click", function(){
+    		Brick.Component.API.fire('blog', 'api', 'showTopicEditorPanel');
+		});
+
+        YAHOO.util.Event.addListener("btn_showTopicEditorPanel", "click", function(){
+
+            var input = document.getElementById('txt_topicId');
+            var topicId = input.value * 1;
+            if (topicId <= 0){
+                alert('Необходимо указать идентификатор записи в блоге');
+                return;
+            } 
+            
+    		Brick.Component.API.fire('blog', 'api', 'showTopicEditorPanel', topicId);
+		});
+        
+        YAHOO.util.Event.addListener("btn_showCategoryListPanel", "click", function(){
+    		Brick.Component.API.fire('blog', 'api', 'showCategoryListPanel', function(result){
+        		alert(YAHOO.lang.dump(result));
+        	});
+		});
+    });
+	
+</script>
+

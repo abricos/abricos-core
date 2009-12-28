@@ -1,30 +1,61 @@
-/**
+/*
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @copyright Copyright (C) 2008 Abricos All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
-(function(){
 
-	var wWait = Brick.widget.WindowWait;
-	Brick.namespace('mod.filemanager');
-
-	Brick.mod.filemanager.currentBrowser = null;
+/**
+ * Модуль "Менеджер файлов".
+ * 
+ * @module FileManager
+ * @namespace Brick.mod.filemanager
+ */
+var Component = new Brick.Component();
+Component.requires = { yahoo: ['dom'] };
+Component.entryPoint = function(){
 	
-	Brick.mod.filemanager.show = function(callback){
-		if (Brick.objectExists('Brick.mod.filemanager.Browser')){
-			Brick.mod.filemanager.currentBrowser = new Brick.mod.filemanager.Browser(callback);
-		}else{
-			wWait.show();
-			whilelog = true;
-			Brick.Loader.add({
-				mod:[{name: 'filemanager', files: ['filemanager.js']}],
-		    onSuccess: function(){
-					wWait.hide();
-					Brick.mod.filemanager.currentBrowser = new Brick.mod.filemanager.Browser(callback);
-				}
-			});
-		}
+	var Dom = YAHOO.util.Dom,
+		L = YAHOO.lang;
+	
+	var NS = this.namespace;
+	
+	/**
+	 * API модуля
+	 * 
+	 * @class API
+	 * @extends Brick.Component.API
+	 * @static
+	 */
+	var API = NS.API;
+	
+	API.showFileBrowserPanel = function(callback){
+		API.fn('filemanager', function(){
+			API.activeBrowser = new NS.BrowserPanel(callback);
+			API.dsRequest();
+		});
 	};
 	
-})();
+	API.showManagerWidget = function(container){
+		API.fn('manager', function(){
+			new NS.ManagerWidget(container);
+		});
+	};
+	
+	API.showImageEditorPanel = function(file){
+		API.fn('editor', function(){
+			new NS.ImageEditorPanel(new NS.File(file));
+		});
+	};
+
+	/**
+	 * Запросить DataSet произвести обновление данных.
+	 * 
+	 * @method dsRequest
+	 */
+	API.dsRequest = function(){
+		if (!Brick.objectExists('Brick.mod.filemanager.data')){
+			return;
+		}
+		Brick.mod.filemanager.data.request(true);
+	};
+};

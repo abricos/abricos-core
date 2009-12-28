@@ -1,49 +1,103 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
-(function(){
 
-	var wWait = Brick.widget.WindowWait;
-	var DATA;
+/**
+ * Модуль обратной связи.
+ * 
+ * @module Feedback
+ * @namespace Brick.mod.feedback
+ */
+
+var Component = new Brick.Component();
+Component.requires = {
+	yahoo: ['dom']
+};
+Component.entryPoint = function(){
 	
-	Brick.namespace('mod.feedback.api');
+	var Dom = YAHOO.util.Dom,
+		E = YAHOO.util.Event,
+		L = YAHOO.lang;
+	
+	var NS = this.namespace;
+	
+	/**
+	 * API модуля
+	 * 
+	 * @class API
+	 * @extends Brick.Component.API
+	 * @static
+	 */
+	var API = NS.API;
+	
+	/**
+	 * Открыть панель "Отправить сообщение администрации сайта"
+	 * 
+	 * @method showNewMessagePanel
+	 * @static
+	 * @param {Object} param
+	 */
+	API.showNewMessagePanel = function(param){
+		API.fn('form', function(param){
+			new NS.NewMessagePanel(param);
+		});
+	};
 
-	var loadlib = function(callback){
-		wWait.show();
-		Brick.Loader.add({
-			mod:[
-			     {name: 'feedback', files: ['form.js']}
-			    ],
-	    onSuccess: function() {
-				wWait.hide();
-				callback();
-		  }
+	/**
+	 * Показать виджет "Отправить сообщение администрации сайта"
+	 * 
+	 * @method showNewMessageWidget
+	 * @static
+	 * @param {String | HTMLElement} container
+	 * @param {Object} param
+	 */
+	API.showNewMessageWidget = function(container, param){
+		API.fn('form', function(param){
+			var widget = new NS.NewMessageWidget(container, param);
+			API.addWidget('NewMessageWidget', widget);
+		});
+	};
+
+	/**
+	 * Открыть панель "Администрирование модуля"
+	 * 
+	 * @method showManagerPanel
+	 * @static 
+	 */
+	API.showManagerPanel = function(){
+		API.fn('manager', function(){
+			new NS.ManagerPanel();
+			API.dsRequest();
 		});
 	};
 	
-	var isloadlib = false;
-	var Bmfa = Brick.mod.feedback.api;
-	Bmfa.show = function(param){
-		if (!isloadlib){
-			isloadlib = true;
-			var ret;
-			loadlib(function(){ ret = Bmfa.show(param); });
-			return ret;
-		}
-		return new Brick.mod.feedback.user.Form(param);
+	/**
+	 * Показать виджет "Администрирование модуля"
+	 * 
+	 * @method showManagerWidget
+	 * @static
+	 * @param {String | HTMLElement} container
+	 */
+	API.showManagerWidget = function(container){
+		API.fn('manager', function(){
+			var widget = new NS.ManagerWidget(container);
+			API.addWidget('ManagerWidget', widget);
+			API.dsRequest();
+		});
 	};
-	
-	Bmfa.insert = function(containerid, param){
-		if (!isloadlib){
-			isloadlib = true;
-			var ret;
-			loadlib(function(){ ret = Bmfa.insert(containerid, param); });
-			return ret;
+
+	/**
+	 * Запросить DataSet произвести обновление данных.
+	 * 
+	 * @method dsRequest
+	 */
+	API.dsRequest = function(){
+		if (!Brick.objectExists('Brick.mod.feedback.data')){
+			return;
 		}
-		return new Brick.mod.feedback.user.Panel(containerid, param);
+		Brick.mod.feedback.data.request(true);
 	};
-	
-})();
+
+};

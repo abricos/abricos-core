@@ -2,31 +2,31 @@
 /**
  * Схема таблиц модуля
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage FileManager
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$cms = CMSRegistry::$instance;
-$charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$svers = $cms->modules->moduleUpdateShema->serverVersion;
-$pfx = $cms->db->prefix;
-$db = $cms->db;
 
-if (version_compare($svers, "0.0.0", "==")){
-	
+$charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
+$updateManager = CMSRegistry::$instance->modules->updateManager; 
+$db = CMSRegistry::$instance->db;
+$pfx = $db->prefix;
+
+if ($updateManager->isInstall()){
 	// таблица файлов
 	$db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."fm_file (
 		  `fileid` int(10) unsigned NOT NULL auto_increment,
 		  `userid` int(10) unsigned NOT NULL,
 		  `filehash` varchar(8) NOT NULL,
-		  `filename` varchar(250) NOT NULL,
+		  `filename` varchar(250) NOT NULL default '',
+		  `title` VARCHAR( 250 ) NOT NULL default '',
 		  `filedata` mediumblob,
-		  `filesize` int(10) unsigned NOT NULL,
-		  `extension` varchar(20) NOT NULL,
+		  `filesize` int(10) unsigned NOT NULL default 0,
+		  `extension` varchar(20) NOT NULL default '',
 		  `counter` int(10) unsigned NOT NULL default '0',
 		  `lastget` int(10) unsigned NOT NULL default '0',
 		  `dateline` int(10) unsigned NOT NULL,
@@ -67,7 +67,7 @@ if (version_compare($svers, "0.0.0", "==")){
 		(3, 'gif', 0, 'image/gif', 307200, 1024, 768, 0),
 		(4, 'jpe', 0, '', 307200, 1024, 768, 0),
 		(5, 'jpeg', 0, '', 307200, 1024, 768, 0),
-		(6, 'jpg', 0, 'image/jpeg', 307200, 1600, 1600, 0),
+		(6, 'jpg', 0, 'image/jpeg', 307200, 1024, 768, 0),
 		(7, 'pdf', 0, 'application/pdf', 51200, 0, 0, 0),
 		(8, 'png', 0, 'image/png', 307200, 1024, 768, 0),
 		(9, 'rar', 0, 'application/rar', 102400, 0, 0, 0),
@@ -118,13 +118,6 @@ if (version_compare($svers, "0.0.0", "==")){
 		(2, 5, 15728640),
 		(3, 6, 104857600)
 	");
-}
-
-if (version_compare($svers, "1.0.2", "<")){
-	
-	$db->query_write("
-		ALTER TABLE `".$pfx."fm_file` ADD `title` VARCHAR( 250 ) NOT NULL AFTER `filename`
-	");
 
 	// таблица для хранения изменений в редакторе картинок
 	$db->query_write("
@@ -145,4 +138,19 @@ if (version_compare($svers, "1.0.2", "<")){
 		)".$charset
 	);
 }
+
+if ($updateManager->isInstall() || $updateManager->isUpdate('0.3')){
+	
+	CMSRegistry::$instance->modules->GetModule('filemanager')->permission->InstallDefault();
+	
+	// Добавить поле имени файла в файловой системе
+	$db->query_write("
+		ALTER TABLE `".$db->prefix."fm_file` 
+			ADD `fsname` varchar(250) NOT NULL default '' AFTER `folderid`
+	");
+	
+	
+}
+
+	
 ?>

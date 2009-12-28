@@ -1,4 +1,13 @@
 <!--{panel}-->
+<div class='hd'>Список новостей</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+	<div style="text-align: right">
+		<input id="{i#bclose}" type="button" value="Закрыть" />
+	</div>
+</div>
+
+<!--{widget}-->
 <h3>{#news.admin.panel.title}</h3>
 
 <table width="100%">
@@ -38,8 +47,14 @@
 			{v#scb}
 		</tr>
 	</thead>
-	<tbody>{v#body}</tbody>
+	<tbody>{v#rows}</tbody>
 </table>
+
+<!--{rowwait}-->
+<tr>
+	<td colspan="7">Идет загрузка данных...</td>
+</tr>
+
 
 <!--{row}-->
 <tr>

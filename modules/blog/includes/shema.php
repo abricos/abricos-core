@@ -2,21 +2,19 @@
 /**
  * Схема таблиц модуля
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Blog
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-/* * * * * * * * Blog Module Shema * * * * * * * * */
-global $cms;
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$svers = $cms->modules->moduleUpdateShema->serverVersion;
-$pfx = $cms->db->prefix;
-$db = $cms->db;
+$updateManager = CMSRegistry::$instance->modules->updateManager; 
+$db = CMSRegistry::$instance->db;
+$pfx = $db->prefix;
 
-if (version_compare($svers, "0.0.0", "==")){
+if ($updateManager->isInstall()){
 	$db->query_write("
 		CREATE TABLE `".$pfx."bg_cat` (
 			`catid` INTEGER(10) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -45,6 +43,8 @@ if (version_compare($svers, "0.0.0", "==")){
 			`topicid` INTEGER(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 			`name` VARCHAR(250) NOT NULL,
 			`title` VARCHAR(250) NOT NULL,
+			`metadesc` VARCHAR( 250 ) NOT NULL DEFAULT '',
+			`metakeys` VARCHAR( 150 ) NOT NULL DEFAULT '',
 			`catid` INTEGER(10) UNSIGNED NOT NULL DEFAULT '0',
 			`intro` TEXT NOT NULL,
 			`contentid` INTEGER(10) UNSIGNED NOT NULL,
@@ -63,10 +63,8 @@ if (version_compare($svers, "0.0.0", "==")){
 			`tagid` INTEGER(10) UNSIGNED NOT NULL,
 			PRIMARY KEY (`toptagid`)) 
 	". $charset);
-}
 
-if (version_compare($svers, "1.0.1", "<")){
-
+	/*
 	$rows = $db->query_read("
 		SELECT contentid as ctid
 		FROM ".$pfx."bg_topic
@@ -82,16 +80,11 @@ if (version_compare($svers, "1.0.1", "<")){
 			WHERE ".implode(' OR ', $wh)." 
 		");
 	}
+	*/
 }
 
-if (version_compare($svers, "1.0.2", "<")){
-	$db->query_write("
-		ALTER TABLE `".$pfx."bg_topic` 
-		ADD `metadesc` VARCHAR( 250 ) NOT NULL DEFAULT '' AFTER `name` ,
-		ADD `metakeys` VARCHAR( 150 ) NOT NULL DEFAULT '' AFTER `metadesc` ;
-	");
+if ($updateManager->isInstall() || $updateManager->isUpdate('0.4')){
+	CMSRegistry::$instance->modules->GetModule('blog')->permission->InstallDefault();
 }
-/*
-/**/
 
 ?>

@@ -3,34 +3,38 @@
 <div class='bd'>
 	<div id="{i#widget}"></div>
 	<div class="buttons right">
-		<input id='{i#bsave}' type="button" value="{#mod.feedback.user.form.bsend}" />
-		<input id='{i#bcancel}' type="button" value="{#mod.feedback.user.form.bcancel}" />
+		<input id='{i#bsave}' type="button" value="{#mod.feedback.user.form.bsend}" class="btn" />
+		<input id='{i#bcancel}' type="button" value="{#mod.feedback.user.form.bcancel}" class="btn" />
 	</div>
 </div>
 
 <!--{panel}-->
 <div id="{i#widget}"></div>
 <div class="buttons right">
-	<input id='{i#bsave}' type="button" value="{#mod.feedback.user.form.bsend}" />
+	<input id='{i#bsave}' type="button" value="{#mod.feedback.user.form.bsend}" class="btn" />
 </div>
 
 <!--{widget}-->
-<div class="field linespace-1" style="width: 500px">
+<div class="field" style="width: 500px">
 	<h3>{v#title}</h3>
-	<p>
-		<label id="{i#fio}-lbl">{#mod.feedback.user.form.fname}:</label>
-		<input type="text" id="{i#fio}" value="" style="width: 250px" />
-	</p>
-	<p style="display: {v#phonehide}">
-		<label id="{i#phone}-lbl">{#mod.feedback.user.form.fphone}:</label>
-		<input type="text" id="{i#phone}" value="" style="width: 150px" />
-	</p>
-	<p>
-		<label id="{i#email}-lbl">{#mod.feedback.user.form.femail}:</label>
-		<input type="text" id="{i#email}" value="" style="width: 150px" />
-	</p>
-	<p style="display: {v#messagehide}">
-		<label id="{i#message}-lbl">{#mod.feedback.user.form.fmessage}:</label><br /> 
-		<textarea id="{i#message}" style="width: 480px; height: 200px"></textarea>
-	</p>
+	<table class="fiedls"><tbody>
+		<tr>
+			<td><label id="{i#fio}-lbl">{#mod.feedback.user.form.fname}:</label></td>
+			<td><input type="text" id="{i#fio}" value="" style="width: 250px" /></td>
+		</tr>
+		<tr style="display: {v#phonehide}">
+			<td><label id="{i#phone}-lbl">{#mod.feedback.user.form.fphone}:</label></td>
+			<td><input type="text" id="{i#phone}" value="" style="width: 150px" /></td>
+		</tr>
+		<tr>
+			<td><label id="{i#email}-lbl">{#mod.feedback.user.form.femail}:</label></td>
+			<td><input type="text" id="{i#email}" value="" style="width: 150px" /></td>
+		</tr>
+		<tr style="display: {v#messagehide}">
+			<td colspan="2">
+				<label id="{i#message}-lbl">{#mod.feedback.user.form.fmessage}:</label><br /> 
+				<textarea id="{i#message}" style="width: 480px; height: 200px"></textarea>
+			</td>
+		</tr>
+	</tbody></table>
 </div>

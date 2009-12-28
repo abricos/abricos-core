@@ -1,32 +1,25 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
-(function(){
 
-	if (!Brick.objectExists('Brick.User.CP.Manager')){ return; }
-	if (!Brick.env.user.isModerator()){ return; }
-
-	var wWait = Brick.widget.WindowWait;
-
-	Brick.User.CP.Manager.register({
-		name: 'blog',
-		titleid: "blog.admin.cp.title",
-		icon: "/modules/blog/js/images/cp_icon.gif",
-		css: '.icon-blog	{ background-position: -48px -61px; }',
-		initialize: function(div){
-			wWait.show();
-			Brick.Loader.add({
-				mod:[{name: 'blog', files: ['cp_man.js']}],
-		    onSuccess: function() {
-				
-					wWait.hide();
-					Brick.Blog.Admin.CP.initialize(div);
-			  }
-			});
-		}
-	});
-
-})();
+var Component = new Brick.Component();
+Component.requires = {
+	mod:[
+	     {name: 'user', files: ['cpanel.js']}
+	]
+};
+Component.entryPoint = function(){
+	
+	if (Brick.Permission.check('blog', '50') < 1){ return; }
+	
+	var cp = Brick.mod.user.cp;
+	
+	var menuItem = new cp.MenuItem(this.moduleName);
+	menuItem.icon = '/modules/blog/images/cp_icon.gif';
+	menuItem.entryComponent = 'api';
+	menuItem.entryPoint = 'Brick.mod.blog.API.showTopicListByUserWidget';
+	
+	cp.MenuManager.add(menuItem);
+};

@@ -10,12 +10,12 @@
 						<td style="text-align: right;">
 							
 							<a href="#" id='{i#bnewfolder}'>
-								<img src='/modules/filemanager/js/images/folder__plus.png' title='{#fm.panel.newfolder}' alt='New folder' />{#fm.panel.newfolder}</a>
+								<img src='/modules/filemanager/images/folder__plus.png' title='{#fm.panel.newfolder}' alt='New folder' />{#fm.panel.newfolder}</a>
 							
 							&nbsp;&nbsp;
 							
 							<a href="#" id='{i#bupload}' title='{#fm.panel.bload}'>
-								<img src='/modules/filemanager/js/images/plus.png' alt='upload' title='{#fm.panel.bload}' />{#fm.panel.bfload}</a>
+								<img src='/modules/filemanager/images/plus.png' alt='upload' title='{#fm.panel.bload}' />{#fm.panel.bfload}</a>
 						
 						</td>
 					</tr>
@@ -115,29 +115,6 @@
 	<a href="{v#isrc}" target="_blank"><img src="{v#sisrc}" width="{v#siw}" height="{v#sih}" alt="{v#sialt}" title="{v#sitl}" /></a>
 </div>
 
-<!--{editor}-->
-<div class='hd'>{#fm.editor.hd}</div>
-<div class='bd'>
-	<div id='{i#tgrpsel}'>
-		{#fm.editor.tools}
-		<input class="btn" id='{i#btsize}' value='{#fm.editor.resize}' type='button' />
-		<input class="btn" id='{i#btcrop}' value='{#fm.editor.crop}' type='button' />
-	</div> 
-	<div id='{i#tgrpact}' style="display: none">
-		<input class="btn" id='{i#btapply}' value='{#fm.editor.apply}' type='button' />
-		<input class="btn" id='{i#btcancel}' value='{#fm.editor.cancel}' type='button' />
-	</div> 
-	
-	<div id="{i#image}" style="text-align: center"></div>
-	<div class="buttons right">
-		<input type="checkbox" id="{i#iscopy}" checked="checked" />
-		<label id="{i#iscopy}-lbl" for="{i#iscopy}">{#fm.editor.copy}</label>
-			
-		<input id='{i#bsave}' value='{#fm.editor.save}' type='button' disabled="disabled" />&nbsp;
-		<input id='{i#bcancel}' value='{#fm.editor.cancel}' type='button' />
-	</div>
-</div>
-
 <!--{files}-->
 <table width="100%">
 	<thead>
@@ -192,7 +169,7 @@
 
 <!--{filesrowfd}-->
 <tr id="{i#id}-{v#id}" style='cursor: pointer'>
-	<td style="height:20px; width:16px;"><img src='/modules/filemanager/js/images/folder.png' title='' alt='' /></td>
+	<td style="height:20px; width:16px;"><img src='/modules/filemanager/images/folder.png' title='' alt='' /></td>
 	<td>{v#fn}</td>
 	<td colspan="2"></td>
 	<td><a id="{i#edit}-{v#id}" href="#">{#fm.filesrowfd.edit}</a></td>
@@ -210,7 +187,5 @@
 <img src='{v#src}' title='' alt=''/>
 
 <!--{imagefile}-->
-<img src='/modules/filemanager/js/images/file.png' title='' alt='' />
+<img src='/modules/filemanager/images/file.png' title='' alt='' />
 
-<!--{imagehtml}-->
-<img {v#id} src='{v#src}' title='{v#title}' alt='{v#alt}' width="{v#width}" height="{v#height}"/>

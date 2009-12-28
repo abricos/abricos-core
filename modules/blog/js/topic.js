@@ -1,144 +1,308 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos. All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-Brick.namespace('Blog.Topic');
+/**
+ * @module Blog
+ * @namespace Brick.mod.blog
+ */
+ 
 
-(function(){
-	var T, TId;
-
+var Component = new Brick.Component();
+Component.requires = {
+    yahoo: ['autocomplete'],
+	mod:[
+	     {name: 'sys', files: ['form.js', 'editor.js', 'data.js', 'container.js', 'widgets.js']}
+	]
+};
+Component.entryPoint = function(){
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
-		L = YAHOO.lang;
-
-	var BW, BC = Brick.util.Connection;
-
-	var dateExt = Brick.dateExt;
-	var elClear = Brick.elClear;
+		L = YAHOO.lang,
+		W = YAHOO.widget;
+	
+	var TMG = this.template, 
+		NS = this.namespace,
+		API = this.namespace.API;
+	
 	var tSetVar = Brick.util.Template.setProperty;
+	var tSetVarA = Brick.util.Template.setPropertyArray;
+	
+	if (!Brick.objectExists('Brick.mod.blog.data')){
+		Brick.mod.blog.data = new Brick.util.data.byid.DataSet('blog');
+	}
+	var DATA = Brick.mod.blog.data;
 
-	Brick.Loader.add({
-    yahoo: ['dragdrop','autocomplete'],
-		mod: 
-			[
-			 {name: 'sys', files: ['editor.js','container.js']}, 
-			 {name: 'blog', files: ['category.js']}
-			],
-    onSuccess: function() {
-			T = Brick.util.Template['blog']['topic'];
-			Brick.util.Template.fillLanguage(T);
-			TId = new Brick.util.TIdManager(T);
+	// Шаблон для модальных панелей
+	var TM = TMG.build('topiclistpanel,editor,btnsave,btnpub,btndraft'+
+			',catlistpanel,catlisttable,catlistrowwait,catlistrow,cateditorpanel'),
+		T = TM.data,
+		TId = TM.idManager;
+	
+	
+//////////////////////////////////////////////////////////////
+//                        TopicListPanel                    //
+//////////////////////////////////////////////////////////////
+(function(){
+	
+	/**
+	 * Панель "Список записей в блоге".
+	 * 
+	 * @class TopicListPanel
+	 */
+	var TopicListPanel = function(){
+		TopicListPanel.superclass.constructor.call(this, {
+			modal: true, fixedcenter: true
+		});
+	};
+	YAHOO.extend(TopicListPanel, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(TId['topiclistpanel'][name]); },
+		initTemplate: function(){
+			return T['topiclistpanel'];
+		},
+		onLoad: function(){
+			this.topicListWidget = new NS.TopicListWidget(TId['topiclistpanel']['container']);
 			
-			moduleInitialize();
-			delete moduleInitialize;
+			var firstRender = true, __self = this;
+			this.topicListWidget.parentRender = this.topicListWidget.renderElements;
+			this.topicListWidget.renderElements = function(){
+				this.parentRender();
+				if (firstRender){
+					__self.center();
+				}
+				firstRender = false;
+			};
+		},
+		
+		/**
+		 * Обработать закрытие панели.
+		 * 
+		 * @method onClose
+		 */
+		onClose: function(){
+			this.topicListWidget.destroy();
+		},
+		
+		/**
+		 * Обработать клик мыши по области панели.
+		 * 
+		 * @method onClick
+		 * @param {Object} el HTML элемент по которому был клик мыши.
+		 */
+		onClick: function(el){
+			var tp = TId['topiclistpanel'];
+			switch(el.id){
+			case tp['bclose']: this.close(); return true;
+			}
+			return false;
 		}
 	});
 	
-var moduleInitialize = function(){
+	NS.TopicListPanel = TopicListPanel;
+	
+})();
+	
+//////////////////////////////////////////////////////////////
+//                        TopicListWidget                   //
+//////////////////////////////////////////////////////////////
 (function(){
 	
-	Brick.Blog.Topic.Manager = function(){
-		return {
-			activeEditor: null,
-			tagManager: null,
-			load: function(topicid){
-				if (topicid == 0){
-					this.show();
-				}else{
-					BC.sendCommand('blog', 'js_topic', {json:{id: topicid}});
-				}
+	/**
+	 * Виджет "Список записей в блоге".
+	 * 
+	 * @class TopicListWidget
+	 */
+	var TopicListWidget = function(container){
+		container = L.isString(container) ? Dom.get(container) : container;
+		var TM = TMG.build('panel,table,row,rowwait,rowdel'),
+			T = TM.data,
+			TId = TM.idManager;
+		
+		this._TM = TM;
+		this._T = T;
+		this._TId = TId;
+		
+		var config = {
+			rowlimit: 10,
+			tables: {
+				'list': 'topiclistbyuser',
+				'count': 'topiccountbyuser'
 			},
-			show: function(obj){
-				if (!L.isNull(this.activeEditor)){this.activeEditor.destroy();}
-				this.activeEditor = new Editor(obj);
-			},
-			getTagManager: function(){
-				if (L.isNull(this.tagManager)){
-					this.tagManager = new tags();
-				}
-				return this.tagManager;
-			}
-		}
-	}();
-	
-	/* * * * * * * * * * * * * Topic Editor * * * * * * * * * * */
-	var Editor = function(obj){
-		this.obj = L.merge({
-			id:0, tl:'', mtd:'', mtk:'', nm:'', 
-			catid:'', catnm:'',catph:'', tags:[], 
-			ctid:0, intro:'', body:'',dl:0,de:0,dp:0,dd:0,st:0,
-			uid:0,unm:''
-		}, obj || {});
-
-		Editor.superclass.constructor.call(this, T['editor'], {width:'780px'}, {'T':T,'TName':'editor','TId':TId});
+			tm: TM,
+			paginators: ['panel.pagtop', 'panel.pagbot'],
+			DATA: DATA
+		};
+		TopicListWidget.superclass.constructor.call(this, container, config);    
 	};
-	YAHOO.extend(Editor, Brick.widget.Panel, {
-		init: function(template, userConfig){
-			this.validator = null;
-			Editor.superclass.init.call(this, template, userConfig);
-		},
-		setCategory: function(obj){
-			this.obj['catid'] = obj['id'];
-			this.obj['catph'] = obj['ph'];
-			this.obj['catnm'] = obj['nm'];
-			this.updateCategory();
-		},
-		getCategory: function(){ return {id: this.obj['catid'],nm: this.obj['catnm'],ph: this.obj['catph']} },
+	
+    YAHOO.extend(TopicListWidget, Brick.widget.TablePage, {
+    	initTemplate: function(){
+    		return this._T['panel'];
+    	},
+    	renderTableAwait: function(){
+    		this._TM.getEl("panel.table").innerHTML = this._TM.replace('table', {'rows': this._T['rowwait']});
+    	},
+    	renderTable: function(lst){
+    		this._TM.getEl("panel.table").innerHTML = this._TM.replace('table', {'rows': lst}); 
+    	}, 
+		renderRow: function(di){
+			return this._TM.replace(di['dd']>0 ? 'rowdel' : 'row', {
+				'unm': di['unm'],
+				'dl': Brick.dateExt.convert(di['dl']),
+				'de': Brick.dateExt.convert(di['de']),
+				'dp': di['dp']>0 ? Brick.dateExt.convert(di['dp']) : this._T['bipub'],
+				'cat': di['cat'],
+				'lnk': '/blog/'+di['catnm']+'/'+di['id'],
+				'tl': di['tl'],
+				'id': di['id']
+			});
+    	},
+    	onClick: function(el){
+			var tp = this._TId['panel']; 
+			switch(el.id){
+			case tp['btnadd']: 
+				API.showTopicEditorPanel(0); 
+				return true;
+			case tp['refresh']: this.Bloglist.refresh(); return true;
+			case tp['rcshow']: this.recycle('show'); return true;
+			case tp['rchide']: this.recycle('hide'); return true;
+			case tp['rcclear']: this.recycleClear(); return true;
+			}
+			
+			var prefix = el.id.replace(/([0-9]+$)/, '');
+			var numid = el.id.replace(prefix, "");
+			
+			switch(prefix){
+			case (this._TId['row']['edit']+'-'):
+				API.showTopicEditorPanel(numid);
+				return true;
+			case (this._TId['row']['remove']+'-'): this.topicRemove(numid); return true;
+			case (this._TId['rowdel']['restore']+'-'): this.topicRestore(numid); return true;
+			case (this._TId['bipub']['id']+'-'): this.topicPublish(numid); return true;
+			}
+			return false;
+    	}
+    });
+	
+	NS.TopicListWidget = TopicListWidget;
+})();
+
+//////////////////////////////////////////////////////////////
+//                      TopicEditorPanel                    //
+//////////////////////////////////////////////////////////////
+(function(){
+	
+	/**
+	 * Панель "Редактор записи в блоге"
+	 * 
+	 * @class TopicEditorPanel
+	 * @constructor
+	 * @param {Integer} Идентификатор записи.
+	 */
+	var TopicEditorPanel = function(topicId){
+		
+		/**
+		 * Идентификатор записи.
+		 * @property topicId
+		 * @type Integer
+		 */
+		this.topicId = topicId;
+		
+		TopicEditorPanel.superclass.constructor.call(this, {
+			modal: true, fixedcenter: true
+		});
+	};
+	YAHOO.extend(TopicEditorPanel, Brick.widget.Panel, {
+		
+		/**
+		 * Рубрика блога.
+		 * 
+		 * @property category
+		 * @type Object
+		 */
+		category: {},
+		
+		/**
+		 * Редактор поля "Анонс"
+		 * 
+		 * @property editorIntro
+		 * @type Brick.widget.Editor
+		 */
+		editorIntro: null,
+		
+		/**
+		 * Редактор поля "Основная запись"
+		 * 
+		 * @property editorBody
+		 */
+		editorBody: null,
+		
+		/**
+		 * Получить элемент по идентификатору базового шаблона
+		 * @method el
+		 * @param {String} name Имя элемента
+		 * @return {HTMLElement | null}
+		 */
 		el: function(name){ return Dom.get(TId['editor'][name]); },
+		
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
-		updateCategory: function(){ this.setelv('category', this.obj['catph']); },
-		initTemplate: function(t){
+		
+		initTemplate: function(){
+			var t = T['editor'];
 			var o = this.obj;
-			var btns = o['id']>0 ? T['btnsave'] : T['btnpub']+T['btndraft'];
+			var btns = this.topicId>0 ? T['btnsave'] : T['btnpub']+T['btndraft'];
 			t = tSetVar(t, 'buttons', btns);
 			return t;
 		},
 		onLoad: function(){
-			var o = this.obj;
-			
-			var oTags = this.el('tags');
-			this.tagManager = Brick.Blog.Topic.Manager.getTagManager();
-			this.tagManager.setInputElement(TId['editor']['tags'],TId['editor']['tagscont']);
-			
-			var tags = o['tags'];
-			for(var i=0;i<tags.length;i++){
-				oTags.value = i==0 ? tags[i]['ph'] : (oTags.value+', '+tags[i]['ph']);
-			}
-			
-			this.updateCategory();
-			this.setelv('title', o['tl']);
-			
-			this._editorIntro = new Brick.widget.editor.TinyMCE(TId['editor']['bodyint'],{
-				'value': o['intro'],
-				width: '750px', height: '150px', buttonsgroup: 'page' 
-			});
-
-			this._editorMan = new Brick.widget.editor.TinyMCE(TId['editor']['bodyman'],{
-				'value': o['body'],
-				width: '750px', height: '250px', buttonsgroup: 'page' 
-			});
+			this.tagManager = new TagsAutocomplete(TId['editor']['tags'], TId['editor']['tagscont']);
 			
 			this.validator = new Brick.util.Form.Validator({
 				elements: {
 					'category':{obj: this.el('category'), rules: ["empty"], args:{"field":"Рубрика"}},
 					'title':{obj: this.el('title'), rules: ["empty"], args:{"field":"Заголовок"}},
-					'tags': {obj: oTags, rules: ["empty"], args:{"field":"Метки"}}
+					'tags': {obj: this.el('tags'), rules: ["empty"], args:{"field":"Метки"}}
 				}
 			});
+			
+			var Editor = Brick.widget.Editor;
+
+			this.editorIntro = new Editor(TId['editor']['bodyint'], {
+				width: '750px', height: '150px', 'mode': Editor.MODE_VISUAL
+			});
+
+			this.editorBody = new Editor(TId['editor']['bodyman'], {
+				width: '750px', height: '250px', 'mode': Editor.MODE_VISUAL
+			});
+
+			if (this.topicId > 0){
+				this.initTables();
+				if (DATA.isFill(this.tables)){
+					this.renderElements();
+				}
+				DATA.onComplete.subscribe(this.dsComplete, this, true);
+			}else{
+				this.renderElements();
+			}
 		},
-		onClose: function(){
-			this._editorIntro.destroy();
-			this._editorMan.destroy();
+		initTables: function(){
+			this.tables = { 'topic': DATA.get('topic', true) };
+			this.rows = this.tables['topic'].getRows({topicid: this.topicId});
+		},
+		dsComplete: function(type, args){
+			var __self = this;
+			if (args[0].checkWithParam('topic', {topicid: this.topicId})){ __self.renderElements(); }
 		},
 		onClick: function(el){
 			var __self = this;
 			switch(el.id){
 			case TId['editor']['bcategory']:
-				Brick.Blog.Category.Manager.select(function(obj){ __self.setCategory(obj); });
+				API.showCategoryListPanel(function(data){ 
+					__self.setCategory(data); 
+				});
 				return true;
 			case TId['btnpub']['id']: this.save('pub'); return true;
 			case TId['btndraft']['id']: this.save('draft'); return true;
@@ -147,70 +311,311 @@ var moduleInitialize = function(){
 			}
 			return false;
 		},
-		save: function(status){
-			var __self = this;
-			var o = this.obj;
-			o['type'] = 'topic';
-			o['act'] = 'save';
+		setCategory: function(d){
+			this.category = d;
+			this.setelv('category', this.category['ph'] || ''); 
+		},
+		renderElements: function(){
 			
-			if (status == 'pub'){
-				o['st'] = 1;
-			}else if (status == 'draft'){
-				o['st'] = 0;
-			}
+			var disBtn = function(a){
+				for(var i=0;i<a.length;i++){
+					var el = Dom.get(TId[a[i]]['id']); 
+					if (!L.isNull(el)){ el.disabled = ""; }
+				}
+			};
 
+			this.el('bcategory').disabled = "";
+			this.el('title').disabled = "";
+			this.el('tags').disabled = "";
+			disBtn(['btnpub', 'btndraft', 'btnsave']);
+			
+			if (this.topicId > 0){
+				var table = this.tables['topic'];
+				var row  = this.rows.getByIndex(0);
+				var o = row.cell;
+				
+				this.editorIntro.setContent(o['intro']);
+				this.editorBody.setContent(o['body']);
+				
+				this.setCategory({
+					'id': o['catid'],
+					'ph': o['catph'],
+					'nm': o['catnm']
+				});
+				
+				this.setelv('title', o['tl']);
+				
+				this.setelv('tags', o['tags']);
+				
+			}
+		},
+		onClose: function(){
+			this.editorIntro.destroy();
+			this.editorBody.destroy();
+			
+			if (this.topicId > 0){
+				DATA.onComplete.unsubscribe(this.dsComplete);
+			}
+		},
+		save: function(status){
 			var errors = this.validator.check();
 			if (errors.length > 0){ return; }
 			
 			var oTitle = this.el('title');
 			var oTags = this.el('tags');
 
-			var sIn = this._editorIntro.getValue();
-			var sBd = this._editorMan.getValue();
-
+			var sIn = this.editorIntro.getContent();
+			var sBd = this.editorBody.getContent();
 			
 			var s = sIn + ' ' + sBd;
-
-			o['mtd'] = Brick.Blog.Topic.Description.create(s, oTitle.value, oTags.value);
-			o['nm'] = Brick.util.Translite.ruen(oTitle.value);
-			o['tl'] = oTitle.value;
-			o['intro'] = sIn;
-			o['body'] = sBd;
-			o['tags'] = oTags.value.split(',');
 			
-			if (Brick.objectExists('Brick.Blog.Admin.CP.Bloglist')){
-				o['page'] = Brick.Blog.Admin.CP.Bloglist.currentPage;
+			this.initTables();
+
+			var table = this.tables['topic'];
+			var row  = this.topicId > 0 ? this.rows.getByIndex(0) : table.newRow();
+			if (status == 'pub'){
+				row.update({ 'st': 1 });
+			}else if (status == 'draft'){
+				row.update({ 'st': 0 });
+			}
+			
+			var cat = this.category;
+			row.update({
+				// 'mtd': NS.Description.create(s, oTitle.value, oTags.value),
+				'nm': Brick.util.Translite.ruen(oTitle.value),
+				'tl': oTitle.value,
+				'intro': sIn,
+				'body': sBd,
+				'tags': oTags.value,
+				'catid': cat.id,
+				'catph': cat.ph,
+				'catnm': cat.nm
+			});
+			
+			if (row.isNew()){
+				this.rows.add(row);
 			}
 
-			BC.sendCommand('blog', 'js_bloglist', { json: o,
-				success: function(){ __self.close(); }
-			});
-
+			var tbl1 = DATA.get('topiclistbyuser');
+			var tbl2 = DATA.get('topiccountbyuser');
+			
+			if (!L.isNull(tbl1)){ tbl1.clear(); }
+			if (!L.isNull(tbl2)){ tbl2.clear(); }
+			
+			table.applyChanges();
+			DATA.request();
+			this.close();
 		}
 	});
 	
-	var tags = function(){
-		this.ds = null;
-		this.init();
-	};
-	tags.prototype = {
-		init: function(){
+	NS.TopicEditorPanel = TopicEditorPanel;
+	
+	var TagsAutocomplete = function(input, container){
 	    var ds = new YAHOO.util.XHRDataSource('/ajax/query.html?md=blog&bk=js_tags');
 	    ds.connMethodPost = true;  
 	    ds.responseSchema = {recordDelim: "\n",fieldDelim: "\t"};
 	    ds.responseType = YAHOO.util.XHRDataSource.TYPE_TEXT;
 	    ds.maxCacheEntries = 60;
-	    this.ds = ds;
-		},
-		setInputElement: function(input, container){
-			var oAC = new YAHOO.widget.AutoComplete(input, container, this.ds);
-		  oAC.delimChar = [",",";"]; // Enable comma and semi-colon delimiters
-		}, 
-		removeInputElement: function(){}
-	}
+
+		var oAC = new YAHOO.widget.AutoComplete(input, container, ds);
+		oAC.delimChar = [",",";"]; // Enable comma and semi-colon delimiters
+	};
 	
 })();
-};
+
+//////////////////////////////////////////////////////////////
+//                     CategoryListPanel                    //
+//////////////////////////////////////////////////////////////
+(function(){
+
+	/**
+	 * Панель "Список категорий блога"
+	 */
+	var CategoryListPanel = function(callback){
+		this.callback = callback;
+		this.selectedRow = null;
+		CategoryListPanel.superclass.constructor.call(this, {
+			modal: true, fixedcenter: true
+		});
+	};
+	
+	YAHOO.extend(CategoryListPanel, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(TId['catlistpanel'][name]); },
+		initTemplate: function(){
+			return T['catlistpanel'];
+		},
+		onLoad: function(){
+			this.el('table').innerHTML = tSetVar(T['catlisttable'], 'rows', T['catlistrowwait']);
+
+			this.tables = {'categorylist': DATA.get('categorylist', true) };
+			if (DATA.isFill(this.tables)){ this.renderElements(); }
+			
+			DATA.onComplete.subscribe(this.dsComplete, this, true);
+		},
+		dsComplete: function(type, args){
+			if (args[0].checkWithParam('categorylist')){ 
+				this.renderElements(); 
+			}
+		},
+		destroy: function(){
+			CategoryListPanel.superclass.destroy.call(this);
+			DATA.onComplete.unsubscribe(this.dsComplete, this); 
+		},
+		renderElements: function(){
+			var rows = this.tables['categorylist'].getRows();
+			var lst = "";
+			rows.foreach(function(row){
+				var di = row.cell;
+				t = T['catlistrow'];
+				t = tSetVar(t, 'ph', di['ph']);
+				t = tSetVar(t, 'cnt', di['cnt']);
+				t = tSetVar(t, 'id', di['id']);
+				lst += t;
+			});
+			this.el('table').innerHTML = tSetVar(T['catlisttable'], 'rows', lst); 
+		},
+		onClick: function(el){
+			var tp = TId['catlistpanel']; 
+			switch(el.id){
+			case tp['bselect']: this.select();	return true;
+			case tp['bcancel']: this.close(); return true;
+			case tp['bnew']: 
+				API.showCategoryEditorPanel();
+				return true;
+			}
+			var prefix = el.id.replace(/([0-9]+$)/, '');
+			var numid = el.id.replace(prefix, "");
+			var row = this.tables['categorylist'].getRows().getById(numid);
+			if (L.isNull(row)){ return false; }
+			
+			var di = row.cell;
+
+			var tp = TId['catlistrow']; 
+			switch(prefix){
+			case tp['td1']+'-':
+			case tp['td2']+'-':
+			case tp['td3']+'-':
+				this.el('category').value = di['ph'];
+				this.el('bselect').disabled = "";
+				this.selectedRow = di;
+				return true;
+			case tp['edit']+'-':
+				API.showCategoryEditorPanel(row.id);
+				return true;
+			case tp['del']+'-': 
+				this.remove(row); 
+				return true;
+			}
+			return false;
+		},
+		select: function(){
+			if (L.isNull(this.selectedRow)){ return; }
+			this.close();
+			this.callback(this.selectedRow);
+		}
+	});
+	
+	NS.CategoryListPanel = CategoryListPanel;
+	
+})();
+
+//////////////////////////////////////////////////////////////
+//                     CategoryEditorPanel                  //
+//////////////////////////////////////////////////////////////
+(function(){
+
+	var CategoryEditorPanel = function(categoryId){
+		this.categoryId = categoryId || 0;
+		CategoryEditorPanel.superclass.constructor.call(this, {
+			modal: true, fixedcenter: true
+		});
+	};
+	YAHOO.extend(CategoryEditorPanel, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(TId['cateditorpanel'][name]); },
+		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
+		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
+		initTemplate: function(){
+			return T['cateditorpanel'];
+		},
+		onLoad: function(){
+			var phrase = this.el('phrase');
+			this.validator = new Brick.util.Form.Validator({
+				elements: {'phrase':{ obj: phrase, rules: ["empty"], args:{"field":"Название"}}}
+			});
+			if (this.categoryId > 0){
+				this.initTables();
+				if (DATA.isFill(this.tables)){ 
+					this.renderElements(); 
+				}else{
+					DATA.onComplete.subscribe(this.dsComplete, this, true);
+				}
+			}else {
+				this.renderElements();
+			}
+		},
+		initTables: function(){
+			this.tables = {'category': DATA.get('category', true) };
+			this.rows = this.tables['category'].getRows({'categoryid': this.categoryId});
+		},
+		dsComplete: function(type, args){
+			if (args[0].checkWithParam('category', {categoryid: this.categoryId})){ this.renderElements(); }
+		},
+		destroy: function(){
+			DATA.onComplete.unsubscribe(this.dsComplete, this);
+			CategoryEditorPanel.superclass.destroy.call(this);
+		},
+		renderElements: function(){
+			if (this.categoryId > 0){
+				var row = this.rows.getByIndex(0);
+				this.setelv('phrase', row.cell['ph']);
+				this.setelv('name', row.cell['nm']);
+			}
+			this.el('bsave').disabled = "";
+		},
+		onClick: function(el){
+			var tp = TId['cateditorpanel'];
+			switch(el.id){
+			case tp['bsave']: this.save(); return true;
+			case tp['bcancel']: this.close(); return true;
+			case tp['name']: this._updateCatName(); return false;
+			}
+			return false;
+		},
+		_updateCatName: function(){
+			var txtname = this.el('name');
+			if (txtname.value.length == 0){
+				var txtphrase = this.el('phrase');
+				txtname.value = Brick.util.Translite.ruen(txtphrase.value);
+			}
+		},
+		save: function(){
+			this._updateCatName();
+			if (this.validator.check() > 0){ return; }
+			
+			this.initTables();
+			var table = this.tables['category'];
+			var row  = this.categoryId > 0 ? this.rows.getByIndex(0) : table.newRow();
+			
+			row.update({
+				'ph': this.elv('phrase'),
+				'nm': this.elv('name')
+			});
+			
+			if (row.isNew()){ this.rows.add(row); }
+			table.applyChanges();
+			
+			if (table.isFill()){ return; }
+			
+			if (!L.isNull(DATA.get('categorylist'))){
+				DATA.get('categorylist').clear();
+			}
+			DATA.request();
+			this.close();
+		}
+	});
+	
+	NS.CategoryEditorPanel = CategoryEditorPanel;
+})();
 
 (function(){
 	var cleanSpace = function(s){
@@ -222,7 +627,7 @@ var moduleInitialize = function(){
 		}while(n != s.length);
 		
 		return s;
-	}
+	};
 	
 	var keywords = function(){};
 	keywords.prototype = {
@@ -269,20 +674,20 @@ var moduleInitialize = function(){
 			}
 			return ret;
 		}
-	}
-	Brick.Blog.Topic.Keywords = new keywords();
+	};
+	NS.Keywords = new keywords();
 	
 	var search = function(s, f){
 		var r = new RegExp(f, 'gi');
 		return r.test(s);
-	}
+	};
 	
 	var descript = function(){};
 	descript.prototype = {
 		create: function(s, title, tags){
 
 			// ключевые слова
-			var keya = Brick.Blog.Topic.Keywords.createByBlogTags(title+' '+tags).split(' ');
+			var keya = NS.Keywords.createByBlogTags(title+' '+tags).split(' ');
 
 			// предложения страницы 
 			s = s.replace(/[^a-zA-Z0-9\-\а-\я\А-\Я\.\,\:]/g, " ");
@@ -331,10 +736,12 @@ var moduleInitialize = function(){
 				return ret; 
 			}
 		}
-	}
+	};
 	
-	Brick.Blog.Topic.Description = new descript();
+	NS.Description = new descript();
 	
 })();
+	
+};
 
-})();
+

@@ -1,3 +1,5 @@
 Brick.util.Language.add('ru',{
-	'blog':{'admin': {'cp':{'title': 'Блог' }}}
+	'mod':{'blog': {
+		'cp':{'title': 'Блог' }
+	}}
 });

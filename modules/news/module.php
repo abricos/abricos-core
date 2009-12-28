@@ -3,11 +3,10 @@
  * Модуль "Новости"
  * 
  * @version $Id$
- * @package CMSBrick
- * @subpackage News
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @package Abricos * @subpackage News
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 CMSRegistry::$instance->modules->GetModule('comment');
@@ -17,7 +16,7 @@ CMSRegistry::$instance->modules->Register($modNews);
 
 /**
  * Модуль "Новости" 
- * @package CMSBrick
+ * @package Abricos 
  * @subpackage News
  */
 class CMSModuleNews extends CMSModule {
@@ -44,7 +43,7 @@ class CMSModuleNews extends CMSModule {
 	public $newsid = 0;
 	
 	public function CMSModuleNews(){
-		$this->version = "1.0.1";
+		$this->version = "0.2";
 		$this->name = "news";
 		$this->takelink = "news";
 	}
@@ -133,7 +132,7 @@ class CMSModuleNews extends CMSModule {
 
 /**
  * Набор статичных функций запросов к базе данных 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage News
  */
 class CMSQNews {

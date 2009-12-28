@@ -1,87 +1,56 @@
-/**
+/*
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @copyright Copyright (C) 2008 Abricos All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-(function(){
 
-	Brick.namespace('mod.filemanager');
+/**
+ * @module FileManager
+ * @namespace Brick.mod.filemanager
+ */
 
-	var Dom, E,	L, W,	T, TId;
-	
-	var uniqurl = Brick.uniqurl;
-	var dateExt = Brick.dateExt;
-	var wWait = Brick.widget.WindowWait;
-	var byteToString = Brick.byteToString;
-	var elClear = Brick.elClear;
-	
+var Component = new Brick.Component();
+Component.requires = {
+	yahoo: ['animation','container','dragdrop','treeview','imagecropper'],
+	mod:[
+	     {name: 'sys', files: ['form.js','data.js']},
+	     {name: 'filemanager', files: ['api.js','lib.js']}
+	],
+	ext: [{
+		name: "treeview-folder-css",
+		fullpath: "/js/yui/"+Brick.env.lib.yui+"/treeview/assets/css/folders/tree.css",
+		type: "css"
+	}]
+};
+Component.entryPoint = function(){
+	var Dom = YAHOO.util.Dom,
+		E = YAHOO.util.Event,
+		L = YAHOO.lang,
+		W = YAHOO.widget;
+
 	var tSetVar = Brick.util.Template.setProperty;
 	var tSetVarA = Brick.util.Template.setPropertyArray;
-
-	Brick.Loader.add({
-		yahoo: ['animation','container','dragdrop','treeview','imagecropper'],
-		mod:[{name: 'sys', files: ['form.js','data.js']}],
-		ext: [
-	    {
-	    	name: "treeview-folder-css",
-	    	fullpath: "/js/yui/"+Brick.env.lib.yui+"/treeview/assets/css/folders/tree.css",
-	    	type: "css"
-	    }
-		],
-    onSuccess: function() {
-			Dom = YAHOO.util.Dom;
-			E = YAHOO.util.Event;
-			L = YAHOO.lang;
-			W = YAHOO.widget;
-
-			T = Brick.util.Template['filemanager']['filemanager'];
-			Brick.util.Template.fillLanguage(T);
-			TId = new Brick.util.TIdManager(T);
-			
-			Brick.util.CSS.update(Brick.util.CSS['filemanager']['filemanager']);
-
-			if (!Brick.objectExists('Brick.mod.filemanager.data')){
-				Brick.mod.filemanager.data = new Brick.util.data.byid.DataSet('filemanager');
-			}
-			DATA = Brick.mod.filemanager.data;
-			
-			moduleInitialize();
-			delete moduleInitialize;
-	  }
-	});
 	
-var moduleInitialize = function(){
+	var NS = this.namespace,
+		TMG = this.template,
+		API = NS.API;
+	
+	var TM = TMG.build(),
+		T = TM.data,
+		TId = TM.idManager;
+
+	if (!Brick.objectExists('Brick.mod.filemanager.data')){
+		Brick.mod.filemanager.data = new Brick.util.data.byid.DataSet('filemanager');
+	}
+	var DATA = Brick.mod.filemanager.data;
+	
+	Brick.util.CSS.update(Brick.util.CSS['filemanager']['filemanager']);
+	
 (function(){
-
-	var File = function(d){this.init(d);};
-	File.prototype = {
-		init: function(d){
-			this.type = 'file';
-			this.id = d['fh'];
-			this.privateid = d['id'];
-			this.name = d['fn'];
-			this.size = d['fs'];
-			this.date = d['d'];
-			this.folderid = d['fdid'];
-			this.extension = d['ext'];
-			this.attribute = d['a'];
-			this.image = null;
-			if (d['w']>0 && d['h']>0){ this.image = { width: d['w'], height: d['h'] }; }
-		}
-	}
-
-	var Folder = function(d){this.init(d);};
-	Folder.prototype = {
-		init: function(d){
-			this.id = d['id'];
-			this.pid = d['pid'];
-			this.name = d['fn'];
-			this.phrase = d['ph'];
-			this.type = 'folder';
-		}
-	}
+	
+	var File = NS.File;
+	var Folder = NS.Folder;
 
 	var ROOT_FOLDER = new Folder({"id":"0","pid":"-1","fn":"root","ph":"My files"}); 
 
@@ -90,7 +59,9 @@ var moduleInitialize = function(){
 	};
 	YAHOO.extend(FolderNode, YAHOO.widget.TextNode, {	});
 	
-	var FolderPanel = function(onSelectItem){ this.init(onSelectItem); };
+	var FolderPanel = function(onSelectItem){ 
+		this.init(onSelectItem); 
+	};
 	FolderPanel.prototype = {
 		init: function(onSelectItem){
 			this.onSelectItem = onSelectItem;
@@ -108,13 +79,13 @@ var moduleInitialize = function(){
 			this.rows = tables['folders'].getRows();
 			DATA.onComplete.subscribe(this.onDSComplete, this, true);
 			if (DATA.isFill(tables)){
-				this.render();
+				this.renderElements();
 			}
 		},
-		onDSComplete: function(type, args){if (args[0].check(['folders'])){ this.render(); } },
+		onDSComplete: function(type, args){if (args[0].check(['folders'])){ this.renderElements(); } },
 		destroy: function(){ DATA.onComplete.unsubscribe(this.onDSComplete); },
 		onClick: function(el){ return false; },
-		render: function(){
+		renderElements: function(){
 			this.tv.removeChildren(this.tv.getRoot());
 			var rootNode = this.tv.getRoot();
 			this.index['0'] = rootNode.index;
@@ -133,7 +104,7 @@ var moduleInitialize = function(){
 			this.rows.foreach(function(row){
 				var di = row.cell;
 				if (di['pid'] == folder['id']){
-					__self.renderNode(node, new Folder(di))
+					__self.renderNode(node, new Folder(di));
 				}
 			});
 		},
@@ -168,39 +139,64 @@ var moduleInitialize = function(){
 		},
 		fullPath: function(folderid){
 			var row = this.rows.getById(folderid);
-			if (L.isNull(row)){ return '//'+ROOT_FOLDER.phrase}
+			if (L.isNull(row)){ return '//'+ROOT_FOLDER.phrase; }
 			return this.fullPath(row.cell['pid'])+"/"+row.cell['ph'];
 		}
 	};
 
 	var CreateFolderPanel = function(callback){
 		this.callback = callback;
-		CreateFolderPanel.superclass.constructor.call(this, T['createfolderpanel']);
+		CreateFolderPanel.superclass.constructor.call(this, {
+			modal: true,
+			fixedcenter: true
+		});
 	};
 	YAHOO.extend(CreateFolderPanel, Brick.widget.Panel, {
 		el: function(name){ return Dom.get(TId['createfolderpanel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
+		initTemplate: function(){
+			return T['createfolderpanel'];
+		},
 		onClick: function(el){
 			var tp = TId['createfolderpanel'];
 			switch(el.id){
-			case tp['bcreate']: this.close(); this.callback(this.elv('name')); return true;
-			case tp['bcancel']: this.close(); return true;
+			case tp['bcreate']: 
+				this.callback(this.elv('name')); 
+				this.close();
+				return true;
+			case tp['bcancel']: 
+				this.close(); 
+				return true;
 			}
 			return false;
 		}
 	});
 
-	var FolderEditPanel = function(callback){
+	var FolderEditPanel = function(row, callback){
+		this.row = row;
 		this.callback = callback;
-		FolderEditPanel.superclass.constructor.call(this, T['editfolderpanel']);
+		FolderEditPanel.superclass.constructor.call(this, {
+			modal: true,
+			fixedcenter: true
+		});
 	};
 	YAHOO.extend(FolderEditPanel, Brick.widget.Panel, {
 		el: function(name){ return Dom.get(TId['editfolderpanel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
+		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
+		initTemplate: function(){
+			return T['editfolderpanel'];
+		},
+		onLoad: function(){
+			this.setelv('name', this.row.cell['ph']);
+		},
 		onClick: function(el){
 			var tp = TId['editfolderpanel'];
 			switch(el.id){
-			case tp['bsave']: this.close(); this.callback(this.elv('name')); return true;
+			case tp['bsave']: 
+				this.callback(this.elv('name')); 
+				this.close(); 
+				return true;
 			case tp['bcancel']: this.close(); return true;
 			}
 			return false;
@@ -210,10 +206,16 @@ var moduleInitialize = function(){
 	var FolderRemoveMsg = function(row, callback){
 		this.row = row;
 		this.callback = callback;
-		FolderRemoveMsg.superclass.constructor.call(this, T['folderremovemsg']);
+		FolderRemoveMsg.superclass.constructor.call(this, {
+			modal: true,
+			fixedcenter: true
+		});
 	};
 	YAHOO.extend(FolderRemoveMsg, Brick.widget.Panel, {
-		initTemplate: function(t){ return tSetVar(t, 'info', this.row.cell['ph']); },
+		initTemplate: function(){
+			var t = T['folderremovemsg'];
+			return tSetVar(t, 'info', this.row.cell['ph']); 
+		},
 		onClick: function(el){
 			var tp = TId['folderremovemsg'];
 			switch(el.id){
@@ -224,22 +226,27 @@ var moduleInitialize = function(){
 		}
 	});
 	
-	var Browser = function(callback){
+	var BrowserPanel = function(callback){
 		this.callback = callback;
-		Browser.superclass.constructor.call(this, T['panel']);
+		BrowserPanel.superclass.constructor.call(this, {
+			modal: true,
+			fixedcenter: true
+		});
 	};
-	YAHOO.extend(Browser, Brick.widget.Panel, {
+	YAHOO.extend(BrowserPanel, Brick.widget.Panel, {
 		el: function(name){ return Dom.get(TId['panel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setel: function(el, value){ Brick.util.Form.setValue(el, value); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
+		initTemplate: function(){
+			return T['panel'];
+		},
 		onLoad: function(){
 			var __self = this;
 			this.uploadWindow = null;
 			this.screenshot = new Screenshot(this, this.el('screenshot'));
-			this.folders = new FolderPanel(function(item){ __self.onSelectItem_foldersPanel(item)});
-			this.files = new FilesPanel(this.el('files'), '0', function(item){ __self.onSelectItem_filesPanel(item)});
-			DATA.request();
+			this.folders = new FolderPanel(function(item){ __self.onSelectItem_foldersPanel(item);});
+			this.files = new FilesPanel(this.el('files'), '0', function(item){ __self.onSelectItem_filesPanel(item);});
 		},
 		onSelectItem_foldersPanel: function(item){
 			this.files.setFolderId(item.id);
@@ -253,7 +260,7 @@ var moduleInitialize = function(){
 			if (!L.isNull(item)){
 				if (item.type == 'file'){
 					fname = item.name;
-					var lnk = new Linker(item);
+					var lnk = new NS.Linker(item);
 					fsrc = lnk.getHTML();
 				}else{
 					fname = item.phrase;
@@ -298,10 +305,10 @@ var moduleInitialize = function(){
 			var item = this.files.selectedItem;
 			if (item.type == 'folder'){
 				this.files.setFolderId(item.id);
-				this.folders.setFolderId(item.id)
+				this.folders.setFolderId(item.id);
 			}else{
 				if (this.callback){
-					var linker = new Linker(item);
+					var linker = new NS.Linker(item);
 					this.callback({
 						'html': this.elv('filesrc'),
 						'file': item,
@@ -312,21 +319,23 @@ var moduleInitialize = function(){
 			}
 		}
 	});
-	Brick.mod.filemanager.Browser = Browser;
+	NS.BrowserPanel = BrowserPanel;
 
-	var Screenshot = function(owner, container){ this.init(owner, container); };
+	var Screenshot = function(owner, container){ 
+		this.init(owner, container); 
+	};
 	Screenshot.prototype = {
 		selectItem: function(){
 			if (!this.owner.callback){ return; }
 			var item = this.file;
-			var linker = new Linker(item);
+			var linker = new NS.Linker(item);
 			
 			var width = this.elv('width')*1;
 			var height = this.elv('height')*1;
 			if (width == 0 || height == 0){ return; }
 			var title = this.elv('title');
 			
-			var smallLinker = new Linker(item);
+			var smallLinker = new NS.Linker(item);
 			smallLinker.setSize(width, height);
 			
 			var html = tSetVarA(this.elv('code'), {
@@ -348,6 +357,7 @@ var moduleInitialize = function(){
 		setel: function(el, value){ Brick.util.Form.setValue(el, value); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
 		init: function(owner, container){
+			
 			this.owner = owner;
 			container.innerHTML = T['screenshot'];
 			this.setImage(null);
@@ -387,7 +397,7 @@ var moduleInitialize = function(){
 			}
 			return false;
 		}
-	}
+	};
 	
 	var FilesPanel = function(container, folderid, onSelect){
 		folderid = folderid || '0';
@@ -407,13 +417,13 @@ var moduleInitialize = function(){
 			DATA.onComplete.subscribe(this.onDSComplete, this, true);
 			this.setFolderId(folderid);
 		},
-		onDSComplete: function(type, args){if (args[0].check(['files', 'folders'])){ this.render(); } },
+		onDSComplete: function(type, args){if (args[0].check(['files', 'folders'])){ this.renderElements(); } },
 		destroy: function(){ DATA.onComplete.unsubscribe(this.onDSComplete); },
 		setFolderId: function(folderid){
 			if (this.folderid == folderid){ return; }
 			this.folderid = folderid;
 			this.rows = DATA.get('files').getRows({'folderid': folderid});
-			if (DATA.isFill(this.tables)){ this.render(); }
+			if (DATA.isFill(this.tables)){ this.renderElements(); }
 			if (this.isinit){
 				this.isinit = false;
 			}else{
@@ -432,6 +442,7 @@ var moduleInitialize = function(){
 			switch (prefix){
 			case TId['filesrow']['edit']+'-': this.itemEdit(numid, false); break;
 			case TId['filesrow']['remove']+'-': this.itemRemove(numid, false); break;
+			case TId['filesrowfd']['edit']+'-': this.itemEdit(numid, true); break;
 			case TId['filesrowfd']['remove']+'-': this.itemRemove(numid, true); break;
 			}
 			var fel = el;
@@ -463,7 +474,7 @@ var moduleInitialize = function(){
 				row = DATA.get('folders').getRows().getById(this.folderid);
 				pparentFolderId = row.cell['pid'];
 			}
-			if (isParent){ item = new Folder({'id':pparentFolderId, 'pid':(row ? row.cell['pid'] : '-1')}) }
+			if (isParent){ item = new Folder({'id':pparentFolderId, 'pid':(row ? row.cell['pid'] : '-1')}); }
 			var parentfolderid = isFolder && isParent ? itemid : 'none';
 			var el = Dom.get(TId['filesrowparent']['id']+'-'+pparentFolderId);
 			if (el){ el.className = parentfolderid == itemid ? 'selected' : ''; }
@@ -486,12 +497,12 @@ var moduleInitialize = function(){
 				el.className = id == folderid ? 'selected' : '';
 			});
 			this.selectedItem = item;
-			if (this.onSelect){this.onSelect(item)};
+			if (this.onSelect){this.onSelect(item);};
 		},
 		itemEdit: function(itemid, isFolder){
 			if (!isFolder){
 				var row = this.rows.getById(itemid);
-				new ImageEditor(new File(row.cell));
+				API.showImageEditorPanel(row.cell);
 			}else{
 				var row = DATA.get('folders').getRows().getById(itemid);
 				var rows = this.rows;
@@ -521,7 +532,7 @@ var moduleInitialize = function(){
 				});
 			}
 		},
-		render: function(){
+		renderElements: function(){
 			var lstFolders = "";
 			var rowsFD = DATA.get('folders').getRows();
 			var folderid = this.folderid;
@@ -543,17 +554,16 @@ var moduleInitialize = function(){
 			this.rows.foreach(function(row){
 				var di = row.cell;
 				var file = new File(di);
-				var t = T['filesrow'];
 				var img = T['imagefile'];;
 				if (!L.isNull(file.image)){
-					var linker = new Linker(file);
+					var linker = new NS.Linker(file);
 					linker.setSize(16,16);
 					img = linker.getHTML();
 				}
-				lstFiles += tSetVarA(t, {
+				lstFiles += TM.replace('filesrow', {
 					'id': di['id'], 'img': img, 'fn': di['fn'],
-					'fs': byteToString(di['fs']), 'dl': dateExt.convert(di['d'], 1)
-				});
+					'fs': Brick.byteToString(di['fs']), 'dl': Brick.dateExt.convert(di['d'], 1)
+				}); 
 			});
 			
 			var el = Dom.get(TId['panel']['files']);
@@ -565,10 +575,15 @@ var moduleInitialize = function(){
 	var FileRemoveMsg = function(row, callback){
 		this.row = row;
 		this.callback = callback;
-		FileRemoveMsg.superclass.constructor.call(this, T['fileremovemsg']);
-	}
+		FileRemoveMsg.superclass.constructor.call(this, {
+			modal: true, fixedcenter: true
+		});
+	};
 	YAHOO.extend(FileRemoveMsg, Brick.widget.Panel, {
-		initTemplate: function(t){ return tSetVar(t, 'info', this.row.cell['fn']); },
+		initTemplate: function(){
+			var t = T['fileremovemsg'];
+			return tSetVar(t, 'info', this.row.cell['fn']); 
+		},
 		onClick: function(el){
 			var tp = TId['fileremovemsg'];
 			switch(el.id){
@@ -579,7 +594,7 @@ var moduleInitialize = function(){
 		}
 	});
 
-	var Uploader = function(doc){this.init(doc)};
+	var Uploader = function(doc){this.init(doc);};
 	Uploader.prototype = {
 		doc: null,
 		init: function(container){
@@ -601,227 +616,6 @@ var moduleInitialize = function(){
 		}
 	};
 
-
-	var ImageEditor = function(file, callback){
-		this.sourcefile = file;
-		this.callback = callback;
-		ImageEditor.superclass.constructor.call(this, T['editor']);
-	}
-	YAHOO.extend(ImageEditor, Brick.widget.Panel, {
-		el: function(name){ return Dom.get(TId['editor'][name]); },
-		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
-		setel: function(el, value){ Brick.util.Form.setValue(el, value); },
-		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
-		onLoad: function(){
-			this.imageid = "image_"+this.sourcefile.id;
-			this.selectedTools = '';
-			this.tables = null;
-			this.session = Math.round(((new Date()).getTime())/1000);
-			this.setFile(this.sourcefile);
-		},
-		setFile: function(file){
-			this.file = file;
-			var lnk = new Linker(file);
-			lnk.setId(this.imageid);
-			this.el('image').innerHTML = lnk.getHTML();
-		},
-		getRowsParam: function(){
-			return {'filehash': this.sourcefile.id, 'session': this.session};
-		}, 
-		selectTools: function(tools){
-			if (tools == ''){
-				this.el('tgrpsel').style.display = '';
-				this.el('tgrpact').style.display = 'none';
-			}else{
-				this.el('tgrpsel').style.display = 'none';
-				this.el('tgrpact').style.display = '';
-			}
-			this.selectedTools = tools;
-			switch(tools){
-			case 'size': this.selectToolsSize(); break;
-			case 'crop': this.selectToolsCrop(); break;
-			}
-		},
-		selectToolsSize: function(){
-			this.toolsSize = new YAHOO.util.Resize(this.imageid, {
-        handles: 'all', knobHandles: true, proxy: true, ghost: true, status: true, draggable: true
-			});
-		}, 
-		selectToolsCrop: function(){
-			this.toolsCrop = new YAHOO.widget.ImageCropper(this.imageid, {
-        initialXY: [0, 0], keyTick: 100, shiftKeyTick: 100
-			});
-		},
-		applyToolsChanges: function(){
-			var tools = this.selectedTools;
-			if (L.isNull(this.tables)){
-				this.tables = {'editor': DATA.get('editor', true) }
-				DATA.onComplete.subscribe(this.onDSComplete, this, true);
-			}
-			var img = Dom.get(this.imageid);
-			var table = this.tables['editor'];
-			var rows = table.getRows(this.getRowsParam());
-			var row = table.newRow();
-			row.update({ 'fh': this.sourcefile.id, 'tools': tools });
-			switch(tools){
-			case 'size':
-				row.update({
-					'w': img.style.width.replace('px', ''),
-					'h': img.style.height.replace('px', '')
-				});
-				break;
-			case 'crop':
-			 var coords = this.toolsCrop.getCropCoords();
-				row.update({
-					'w': coords.width, 'h': coords.height,
-					't': coords.top, 'l': coords.left
-				});
-				break;
-			}
-			rows.add(row);
-			table.applyChanges();
-			DATA.request();
-		},
-		onDSComplete: function(type, args){
-			if (args[0].checkWithParam('editor', this.getRowsParam())){ 
-				this.el('bsave').disabled = '';
-				var table = this.tables['editor'];
-				var rows = table.getRows(this.getRowsParam());
-				var row = rows.getByIndex(0);
-				var d = row.cell;
-				d['fh'] = d['fhdst']; d['tl'] = ''; d['fn'] = '';
-				var file = new File(d);
-				this.destroyTools();
-				this.setFile(file);
-			} 
-		},
-		save: function(){
-			if (L.isNull(this.tables)){ 
-				this.close();
-				return; 
-			}
-			var f = this.sourcefile;
-			var table = DATA.get('files');
-			var rows = table.getRows({'folderid': this.sourcefile.folderid});
-			var row = rows.find({'fh': f.id});
-			row.update({
-				'act': 'editor',
-				'copy': this.elv('iscopy'),
-				'session': this.session
-			});
-			table.applyChanges();
-			DATA.request();
-			this.close();
-		},
-		onClose: function(){
-			if (!L.isNull(this.tables)){ DATA.onComplete.unsubscribe(this.onDSComplete); }
-		},
-		cancelToolsChanges: function(){
-			var tools = this.selectedTools;
-			this.destroyTools();
-			switch(tools){
-			case 'size':
-				var img = Dom.get(this.imageid);
-				img.style.width = this.file.image.width+"px";
-				img.style.height = this.file.image.height+"px";
-				break;
-			}
-		},
-		destroyTools: function(){
-			switch(this.selectedTools){
-			case 'crop': this.toolsCrop.destroy(); break;
-			case 'size': this.toolsSize.destroy(); break;
-			}
-			this.selectTools('');
-		},
-		onClick: function(el){
-			var tp = TId['editor'];
-			switch(el.id){
-			case tp['btapply']: this.applyToolsChanges(); return true;
-			case tp['btcancel']: this.cancelToolsChanges(); return true;
-			case tp['btsize']: this.selectTools('size'); return true;
-			case tp['btcrop']: this.selectTools('crop'); return true;
-			case tp['bsave']: this.save(); return true;
-			case tp['bcancel']: this.close(); return true;
-			}
-			return false;
-		} 
-	});
-	
-	var Linker = function(file){this.init(file)};
-	Linker.prototype = {
-		init: function(file){
-			this.file = null;
-			this.imgsize = null;
-			this.objid = null;
-			this.file = file;
-			this.imgsize = { w: 0, h: 0 };
-		},
-		setSize: function(width, height){
-			this.imgsize = { w: width, h: height };
-		},
-		setId: function(id){
-			this.objid = id;
-		},
-		getObject: function(){
-			var o;
-			if (!L.isNull(this.file.image)){
-				o = document.createElement('img');
-				o.src = this.getSrc();
-				o.alt = this.file.name;
-			}else{
-				o = document.createElement('a');
-				o.href = this.getSrc();
-				o.innerHTML = this.file.name;
-			}
-			o.title = this.file.name;
-			if (!L.isNull(this.objid)){
-				o.id = this.objid;
-			}
-			return o;
-		},
-		_getSrc: function(id, name, w, h){
-			var ps='', p=[];
-			if (w*1 > 0){ p[p.length] = 'w_'+w; }
-			if (h*1 > 0){ p[p.length] = 'h_'+h; }
-			if (p.length>0){
-				ps = '/'+p.join('-');
-			}
-			return '/filemanager/i/'+id+ps+'/'+name;
-		},
-		getSrc: function(){
-			var f = this.file;
-			
-			return this._getSrc(f.id, f.name, this.imgsize.w, this.imgsize.h);
-		},
-		getHTML: function(){
-			var f = this.file;
-			if (!L.isNull(f.image)){
-				var w=0, h=0, width = f.image.width, height = f.image.height, isz = this.imgsize;
-				if (!L.isNull(isz)){
-					if (isz.w>0){w = isz.w; width=isz.w;}
-					if (isz.h>0){h = isz.h; height=isz.h}
-				}
-				var src = this._getSrc(f.id, f.name, w, h);
-				var html = tSetVarA(T['imagehtml'], {
-					'src': src,
-					'width': width+'px',
-					'height': height+'px',
-					'title': f.name,
-					'alt': f.name,
-					'id': !L.isNull(this.objid) ? ("id='"+this.objid+"'") : ''
-				});
-				return html;
-			}
-			
-			var div = document.createElement('div');
-			div.appendChild(this.getObject());
-			return div.innerHTML;
-		}
-	};
-	
-	Brick.mod.filemanager.Linker = Linker;
-
 })();
 };
-})();
+

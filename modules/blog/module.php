@@ -3,11 +3,11 @@
  * Модуль "Блог"
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Blog
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 CMSRegistry::$instance->modules->GetModule('comment');
@@ -16,10 +16,15 @@ CMSRegistry::$instance->modules->Register($mod);
 
 /**
  * Модуль "Блог" 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Blog
  */
 class CMSModuleBlog extends CMSModule {
+	
+	/**
+	 * @var CMSModuleBlog
+	 */
+	public static $instance = null;
 	
 	public $topicid; 
 	public $topicinfo;
@@ -31,7 +36,7 @@ class CMSModuleBlog extends CMSModule {
 	
 	public function CMSModuleBlog(){
 		// версия модуля
-		$this->version = "1.0.3";
+		$this->version = "0.4";
 		// имя модуля 
 		$this->name = "blog";
 
@@ -40,6 +45,10 @@ class CMSModuleBlog extends CMSModule {
 		// если при сборке страницы будет использован данный модуль,
 		// то будет подгружен стиль blog.css
 		$this->defaultCSS = "blog.css";
+		
+		CMSModuleBlog::$instance = $this;
+		
+		$this->permission = new BlogPermission($this);
 	}
 	
 	private function IsPage($p){
@@ -56,6 +65,7 @@ class CMSModuleBlog extends CMSModule {
 	}
 	
 	public function GetContentName(){
+		
 		$adress = $this->registry->adress;
 		$cname = '';
 		$baseUrl = "/".$this->takelink."/";
@@ -121,11 +131,151 @@ class CMSModuleBlog extends CMSModule {
 	public function OnComment(){
 		Brick::$builder->LoadBrickS('blog', 'cmtmailer', null);
 	}
+	
+	public static function IsAdmin(){
+		return CMSRegistry::$instance->session->IsAdminMode();
+	}
+	
+	/**
+	 * Получить список записей в блоге текущего пользователя
+	 * 
+	 * @param Integer $page 
+	 * @param Integer $total
+	 * @param Boolean $showRecycle Если True, показать удаленные записи
+	 * @return Integer Указатель на список
+	 */
+	public static function TopicListByUser($page, $total, $showRecycle){
+		if (!CMSModuleBlog::IsAdmin()) {return;}
+		$userid = CMSRegistry::$instance->session->userinfo['userid']; 
+		return CMSQBlog::TopicListByUserId(Brick::$db, $userid, $page, $total, $showRecycle);
+	}
+	
+	/**
+	 * Получить кол-во записей в блоге текущего пользователя
+	 * 
+	 * @param Boolean $showRecycle Если True, показать удаленные записи
+	 * @return Integer Кол-во записей
+	 */
+	public static function TopicCountByUser($showRecycle){
+		if (!CMSModuleBlog::IsAdmin()) {return;}
+		$userid = CMSRegistry::$instance->session->userinfo['userid'];
+		return CMSQBlog::TopicCountByUserId(Brick::$db, $userid, $showRecycle); 
+	}
+	
+	/**
+	 * Получить запись в блоге
+	 * 
+	 * @param Integer $topicId Идентификатор записи
+	 * @return Array
+	 */
+	public static function Topic($topicId){
+		$user = CMSRegistry::$instance->session->userinfo;
+		$info = CMSQBlog::TopicInfo(Brick::$db, $topicId);
+		
+		if (!Brick::$session->IsAdminMode() && $info['userid'] != $user['userid']){
+			return;
+		}
+		$topic = CMSQBlog::Topic(Brick::$db, $info['userid'], $topicId);
+		
+		$rows = CMSQBlog::Tags(Brick::$db, $topicId);
+		$tags = array();
+		while (($row = Brick::$db->fetch_array($rows))){
+			array_push($tags, $row['ph']);
+		}
+		$topic['tags'] = implode(', ', $tags);
+		
+		return $topic;	
+	}
+	
+	/**
+	 * Создать запись в блоге.
+	 * 
+	 * @param Object $obj
+	 */
+	public static function TopicAppend($obj){
+		if (!Brick::$session->IsAdminMode()){ return; }
+		$user = CMSRegistry::$instance->session->userinfo;
+		CMSModuleBlog::TopicCorrect($obj);
+		
+		$obj->uid = $user['userid'];
+		$obj->dl = TIMENOW;
+		$obj->id = CMSQBlog::TopicAppend(Brick::$db, $obj); 
+		
+		CMSModuleBlog::TopicTagsUpdate($obj);
+	}
+	
+	public static function TopicUpdate($obj){
+		if (!Brick::$session->IsAdminMode()){ return; }
+		$user = CMSRegistry::$instance->session->userinfo;
+		CMSModuleBlog::TopicCorrect($obj);
+		
+		$info = CMSQBlog::TopicInfo(Brick::$db, $obj->id);
+		CMSQBlog::TopicSave(Brick::$db, $info, $obj);
+		CMSModuleBlog::TopicTagsUpdate($obj);
+	}
+	
+	private static function TopicCorrect($obj){
+		$obj->nm = translateruen($obj->tl);
+		
+		if ($obj->st == 1 && empty($obj->dp)){
+			$obj->dp = TIMENOW;
+		}else if (empty($obj->st)){
+			$obj->dp = 0;
+		}
+		$obj->de = TIMENOW;
+	}
+	
+	private static function TopicTagsUpdate($obj){
+		$tagarr = array();
+		$tags = explode(",", $obj->tags);
+		foreach ($tags as $t){
+			$t = trim($t);
+			if (empty($t)){ continue; }
+			$tagarr[$t]['phrase'] = $t;
+			$tagarr[$t]['name'] = translateruen($t);
+		}
+		CMSQBlog::TagSetId(Brick::$db, $tagarr);
+		CMSQBlog::TagUpdate(Brick::$db, $obj->id, $tagarr);
+	}
+	
+	public static function CategoryAppend($obj){
+		if (!Brick::$session->IsAdminMode()){ return; }
+		if (empty($obj->nm) || empty($obj->ph)){ return; }
+		CMSQBlog::CategoryAdd(Brick::$db, $obj);
+	}
+}
+
+class BlogAction {
+	const BLOG_VIEW = 10;
+	const TOPIC_WRITE = 20;
+	const BLOG_ADMIN = 50;
+}
+
+class BlogPermission extends CMSPermission {
+	
+	public function BlogPermission(CMSModuleBlog $module){
+		
+		$defRoles = array(
+			new CMSRole(BlogAction::BLOG_VIEW, 1, USERGROUPID_ALL),
+			new CMSRole(BlogAction::TOPIC_WRITE, 1, USERGROUPID_MODERATOR),
+			new CMSRole(BlogAction::BLOG_ADMIN, 1, USERGROUPID_ADMINISTRATOR)
+		);
+		
+		parent::CMSPermission($module, $defRoles);
+	}
+	
+	public function GetRoles(){
+		$roles = array();
+		$roles[BlogAction::BLOG_VIEW] = $this->CheckAction(BlogAction::BLOG_VIEW);
+		$roles[BlogAction::TOPIC_WRITE] = $this->CheckAction(BlogAction::TOPIC_WRITE);
+		$roles[BlogAction::BLOG_ADMIN] = $this->CheckAction(BlogAction::BLOG_ADMIN);
+		return $roles;
+	}
 }
 
 /**
  * Набор статичных функция запросов к базе данных 
- * @package CMSBrick
+ * @package Abricos 
  * @subpackage Blog
  */
 class CMSQBlog extends CMSBaseClass {
@@ -222,14 +372,35 @@ class CMSQBlog extends CMSBaseClass {
 		return $db->query_read($sql);
 	}
 	
-	public static function CategoryByName(CMSDatabase $db, $category){
+	public static function CategoryById(CMSDatabase $db, $categoryId, $retArray = true){
+		$sql = "
+			SELECT 
+				a.catid as id,
+				a.phrase as ph,
+				a.name as nm
+			FROM ".$db->prefix."bg_cat a
+			WHERE a.catid='".bkstr($categoryId)."'
+			LIMIT 1
+		";
+		if ($retArray){
+			return $db->query_first($sql);
+		}else{
+			return $db->query_read($sql);
+		}
+	}
+	
+	public static function CategoryByName(CMSDatabase $db, $category, $retArray = true){
 		$sql = "
 			SELECT *
 			FROM ".$db->prefix."bg_cat a
 			WHERE a.name='".bkstr($category)."'
 			LIMIT 1
 		";
-		return $db->query_first($sql);
+		if ($retArray){
+			return $db->query_first($sql);
+		}else{
+			return $db->query_read($sql);
+		}
 	}
 	
 	public static function CategoryCheck(CMSDatabase $db, $data){
@@ -370,11 +541,11 @@ class CMSQBlog extends CMSBaseClass {
 			SELECT a.tagid as id, sum(a.cnt) as cnt, b.name AS nm, b.phrase AS ph
 			FROM (
 				SELECT tagid, count( tagid ) AS cnt
-				FROM cms_bg_toptag
+				FROM ".$db->prefix."bg_toptag
 				GROUP BY tagid
 				ORDER BY cnt DESC
 			) a
-			LEFT JOIN cms_bg_tag b ON b.tagid = a.tagid
+			LEFT JOIN ".$db->prefix."bg_tag b ON b.tagid = a.tagid
 			WHERE b.name != ''
 			GROUP BY nm
 			ORDER BY cnt DESC	
@@ -401,12 +572,12 @@ class CMSQBlog extends CMSBaseClass {
 			SELECT a.tagid as id, sum(a.cnt) as cnt, b.name AS nm, b.phrase AS ph
 			FROM (
 				SELECT tagid, count( tagid ) AS cnt
-				FROM cms_bg_toptag
+				FROM ".$db->prefix."bg_toptag
 				GROUP BY tagid
 				ORDER BY cnt DESC
 				".$slimit."
 			) a
-			LEFT JOIN cms_bg_tag b ON b.tagid = a.tagid
+			LEFT JOIN ".$db->prefix."bg_tag b ON b.tagid = a.tagid
 			WHERE b.name != ''
 			GROUP BY nm
 			ORDER BY ph	
@@ -567,7 +738,7 @@ class CMSQBlog extends CMSBaseClass {
 	}
 	
 	
-	public static function Topic(CMSDatabase $db, $obj){
+	public static function Topic(CMSDatabase $db, $userid, $topicid){
 		$sql = "
 			SELECT
 				a.topicid as id, 
@@ -594,18 +765,18 @@ class CMSQBlog extends CMSBaseClass {
 			LEFT JOIN ".$db->prefix."content b ON a.contentid = b.contentid
 			LEFT JOIN ".$db->prefix."user c ON a.userid = c.userid
 			LEFT JOIN ".$db->prefix."bg_cat d ON a.catid = d.catid
-			WHERE a.userid=".bkint($obj->uid)." AND a.topicid=".bkint($obj->id)."
+			WHERE a.userid=".bkint($userid)." AND a.topicid=".bkint($topicid)."
 			LIMIT 1
 		";
 		return $db->query_first($sql);
 	}
 	
-	public static function TopicUserListWhere($obj){
+	private static function TopicListWhereByUserId($userid, $showRecycle = false){
 		$where = array();
-		if (!empty($obj->uid)){
-			array_push($where, "a.userid=".bkint($obj->uid));
+		if (!empty($userid)){
+			array_push($where, "a.userid=".bkint($userid));
 		}
-		if ($obj->rc == "hide"){
+		if ($showRecycle){
 			array_push($where, "a.deldate=0");
 		}
 		
@@ -616,8 +787,8 @@ class CMSQBlog extends CMSBaseClass {
 		return $swhere;
 	}
 	
-	public static function TopicUserListCount(CMSDatabase $db, $obj){
-		$swhere = CMSQBlog::TopicUserListWhere($obj);
+	public static function TopicCountByUserId(CMSDatabase $db, $userid, $showRecycle){
+		$swhere = CMSQBlog::TopicListWhereByUserId($userid, $showRecycle);
 		$sql = "
 			SELECT count(topicid) as cnt
 			FROM ".$db->prefix."bg_topic a
@@ -627,9 +798,9 @@ class CMSQBlog extends CMSBaseClass {
 		return $row['cnt'];
 	}
 	
-	public static function TopicUserList(CMSDatabase $db, $obj){
-		$swhere = CMSQBlog::TopicUserListWhere($obj);
-		$from = (($obj->page-1)*10);
+	public static function TopicListByUserId(CMSDatabase $db, $userid, $page, $total, $showRecycle){
+		$swhere = CMSQBlog::TopicListWhereByUserId($userid, $showRecycle);
+		$from = (($page-1)*10);
 		$sql = "
 			SELECT 
 				a.topicid as id,
@@ -649,11 +820,12 @@ class CMSQBlog extends CMSBaseClass {
 			LEFT JOIN ".$db->prefix."user u ON a.userid = u.userid
 			".$swhere."
 			ORDER BY dl DESC 
-			LIMIT ".$from.",10
+			LIMIT ".$from.",".bkint($total)."
 		";
 		return $db->query_read($sql);
 	}
-	public static function TopicCreate(CMSDatabase $db, $obj){
+	
+	public static function TopicAppend(CMSDatabase $db, $obj){
 		$contentid = CMSSqlQuery::CreateContent($db, $obj->body, 'blog');
 		
 		$sql = "

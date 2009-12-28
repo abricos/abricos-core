@@ -1,0 +1,48 @@
+<!--{panel}-->
+<div class='hd'>Панель администратора</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+	<div style="text-align: right">
+		<input id="{i#bclose}" type="button" value="Закрыть" />
+	</div>
+</div>
+
+<!--{widget}-->
+<div id="{i#id}" class="yui-navset">
+	<ul class="yui-nav">
+		<li class="selected"><a href="#{i#limit}"><em>Лимиты</em></a></li>
+		<li><a href="#{i#exten}"><em>Разрешеные файлы</em></a></li>
+	</ul>            
+  <div class="yui-content">
+	  <div id="{i#limit}"></div>
+	  <div id="{i#exten}"></div>
+	</div>
+</div>
+
+<!--{limitwidget}-->
+<div id='{i#table}'></div>
+
+<!--{limittable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Группа</th>
+			<th>Объем</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{limitrowwait}-->
+<tr valign="top">
+	<td colspan="3">Идет загрузка данных...</td>
+</tr>
+
+<!--{limitrow}-->
+<tr valign="top">
+	<td>{v#grp}</td>
+	<td>{v#size}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+</tr>
+
