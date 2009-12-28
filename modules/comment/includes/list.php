@@ -1,11 +1,11 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Comment
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 // оставлять комментарии могут только зарегистрированные пользователи
@@ -38,7 +38,7 @@ if ($p_do == "send" && !empty($p_comment)){
 	$data['parentcommentid'] = $p_commentId;
 	$data['body'] = $p_comment;
 
-	$newCommentId = CMSQComt::Append(Brick::$db, $data);
+	$newCommentId = CMSQComment::Append(Brick::$db, $data);
 	$data['commentid'] = $newCommentId; 
 	
 	/* Отправка писем уведомлений */
@@ -54,7 +54,7 @@ if ($p_do == "send" && !empty($p_comment)){
 	}
 }
 
-$rows = CMSQComt::Comments(Brick::$db, $p_contentId, $p_last);
+$rows = CMSQComment::Comments(Brick::$db, $p_contentId, $p_last);
 
 while (($row = Brick::$db->fetch_array($rows))){
 	if ($row['st'] == 1){

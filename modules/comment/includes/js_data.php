@@ -1,11 +1,11 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Comment
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $brick = Brick::$builder->brick;
@@ -14,7 +14,6 @@ $modSys = Brick::$modules->GetModule('sys');
 $ds = $modSys->getDataSet();
 
 $modComment = Brick::$modules->GetModule('comment');
-$manager = $modComment->GetManager();
 
 $ret = new stdClass();
 $ret->_ds = array();
@@ -26,7 +25,18 @@ foreach ($ds->ts as $ts){
 		switch ($ts->nm){
 			case 'comments':
 				foreach ($tsrs->r as $r){
-					if ($r->f == 'a'){ $manager->Append($tsrs->p->cid, $r->d); }
+					if ($r->f == 'a'){
+						$modComment->Append($tsrs->p->cid, $r->d);
+					}
+				}
+				break;
+			case 'fulllist':
+				foreach ($tsrs->r as $r){
+					if ($r->f == 'u'){
+						if ($r->d->act == 'status'){
+							$modComment->ChangeStatus($r->d->id, $r->d->st);
+						} 
+					}
 				}
 				break;
 		}
@@ -46,13 +56,19 @@ foreach ($ds->ts as $ts){
 		$rows = null;
 		switch ($ts->nm){
 			case 'comments':
-				$rows = CMSQComt::Comments(Brick::$db, $tsrs->p->cid, $tsrs->op->lid);
+				$rows = $modComment->Comments($tsrs->p->cid, $tsrs->op->lid);
 				break;
 			case 'preview':
 				foreach ($tsrs->r as $r){
-					$rows = $manager->Preview($r->d);
+					$rows = $modComment->Preview($r->d);
 					break;
 				}
+				break;
+			case 'fulllist':
+				$rows = $modComment->FullList($tsrs->p->page, $tsrs->p->limit);
+				break;
+			case 'fulllistcount':
+				$rows = $modComment->FullListCount();
 				break;
 		}
 		if (!is_null($rows)){
@@ -62,11 +78,7 @@ foreach ($ds->ts as $ts){
 			}
 			$rs = new stdClass();
 			$rs->p = $tsrs->p;
-			if (is_array($rows)){
-				$rs->d = $rows;
-			}else{
-				$rs->d = $modSys->rowsToObj($rows);
-			}
+			$rs->d = is_array($rows) ? $rows : $modSys->rowsToObj($rows);
 			array_push($table->rs, $rs);
 		}
 	}

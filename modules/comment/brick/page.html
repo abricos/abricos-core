@@ -10,11 +10,11 @@
 	[bkvar]lst[/bkvar]
 </div>
 <script language='JavaScript' type='text/javascript' charset='utf-8'>
-	Brick.Loader.add({mod:[{name:'comment',files:['comment.new.js']}],
-    onSuccess: function() {
-			var d = [];
-			[bkvar]slst[/bkvar]
-			new Brick.mod.comment.Builder([bkvar]cid[/bkvar], d);
-	  }
-	})
+	var d = [];
+	[bkvar]slst[/bkvar]
+	Brick.Component.API.fire('comment', 'api', 'buildComments', {
+		elementId: 'mod-comment-data-[bkvar]cid[/bkvar]',
+		dbContentId: [bkvar]cid[/bkvar], 
+		data: d
+	});
 </script> 

@@ -1,476 +1,508 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-(function(){
-	if (typeof Brick.Comment != 'undefined'){
-		return;
+/**
+ * @module Comment
+ * @namespace Brick.mod.comment
+ */
+
+var Component = new Brick.Component();
+Component.requires = {
+	mod:[{name: 'sys', files: ['data.js']}]
+};
+Component.entryPoint = function(){
+	
+	var Dom = YAHOO.util.Dom,
+		E = YAHOO.util.Event,
+		L = YAHOO.lang;
+	
+	var NS = this.namespace;
+	var __selfCT = this;
+
+	if (!Brick.objectExists('Brick.mod.comment.data')){
+		Brick.mod.comment.data = new Brick.util.data.byid.DataSet('comment');
 	}
+	var DATA = Brick.mod.comment.data;
+	var tSetVar = Brick.util.Template.setProperty;
+	var tSetVarA = Brick.util.Template.setPropertyArray;
 	
-	Brick.namespace('Comment');
+	var _T = {};
+	var _TId = {};
 	
-	var Dom, E,	L, W,	C;
-	
-	var uniqurl = Brick.uniqurl;
-	var dateExt = Brick.dateExt;
-	var readScript = Brick.readScript;
-	var elClear = Brick.elClear;
-	var wWait = Brick.widget.WindowWait;
-
-	Brick.Loader.add({
-    yahoo: ["connection","container","dragdrop","resize"], 
-    onSuccess: function() {
-			Dom = YAHOO.util.Dom;
-			E = YAHOO.util.Event;
-			L = YAHOO.lang;
-			W = YAHOO.widget;
-			C = YAHOO.util.Connect;
-    }
-	});
-
-	
-	function connectFailure(o){ wWait.hide(); alert("CONNECTION FAILED!"); };
-	
-	var connectCallback = {
-		success: function(o) {
-			wWait.hide();
-			readScript(o.responseText);
-		}, failure: connectFailure
+	/**
+	 * Конструктор дерева комментариев на странице.
+	 * 
+	 * @class Builder
+	 * @constructor
+	 * @param {String} elementId Идентификатор HTML элемента, который содержит 
+	 * в себе список комментариев: имя пользователя, идентификатор и текст комментария.
+	 * @param {Integer} dbContentId Идентификатор из таблицы контента на сервера. 
+	 * @param {Object} data Сопутствующие данные комментариев.
+	 */
+	var Builder = function(elementId, dbContentId, data){
+		this.init(elementId, dbContentId, data);
 	};
-	
-(function(){
-	
-	Brick.Comment.List = function(){
-		var list = [];
-		return {
-			init: function(d, cid){
-				var m = list[cid] = new man();
-				m.init(d, cid);
-			},
-			update: function(d, cid){
-				var m = list[cid];
-				m.update(d);
-			}
-		}
-	}();;
-	
-	var getComment = function(id, man){
-		var i, d = man.data;
-		for (i=0;i<d.length;i++){
-			if (d[i].id == id){
-				return d[i];
-			}
-		}
-		return null;
-	}
-	
-	var createTree = function(cmt, man){
-		var i, d= man.data, ccmt;
-		for (i=0;i<d.length;i++){
-			ccmt = d[i]; 
-			if (ccmt.pid == cmt.id){
-				cmt.child.set(ccmt);
-				createTree(ccmt, man);
-			}
-		}
-	}
-	
-	var renderTree = function(container, cmt){
-		container.appendChild(cmt.build());
-		var ccnt = cmt.child.count(); 
 
-		if (ccnt == 0){return;}
+	/**
+	 * Хеш таблица экземпляров Builder.
+	 * 
+	 * @private
+	 * @static
+	 * @property _instances
+	 * @type Object
+	 */
+	Builder._instances = {};
+
+	/**
+	 * Получить объект Builder по HTML идентификатору.
+	 * 
+	 * @method getBuilderById
+	 * @static
+	 * @param {String} Идентификатор HTML элемента.
+	 */
+	Builder.getBuilderById = function(id) {
+        if (Editor._instances[id]) {
+            return Editor._instances[id];
+        }
+        return null;
+    };
+
+
+	Builder.prototype = {
+		/**
+		 * HTML элемент в котором будет построено дерево комментариев.
+		 * 
+		 * @property element
+		 * @type HTMLElement
+		 */
+		element: null,
 		
-		var i, ul = document.createElement('ul'), ccmt;
-		for (i=0;i<ccnt;i++){
-			ccmt = cmt.child.index(i);
-			renderTree(ul, ccmt);
-		}
-		container.appendChild(ul);
-	}
-	
-	var man = function(){};
-	man.prototype = {
-		data: null,
-		contentid: null,
-		lastDate: null,
+		/**
+		 * Идентификатор из таблицы контента на сервера.
+		 * 
+		 * @property dbContentId
+		 * @type Integer
+		 */
+		dbContentId: null,
+		
+		/**
+		 * Идентификатор последнего комментария
+		 * 
+		 * @property lastCommentId
+		 * @type Integer
+		 */
+		lastCommentId: 0,
+		
+		/**
+		 * Кол-во комментариев.
+		 * 
+		 * @property count
+		 * @type Integer
+		 */
+		count: 0,
+		
+		/**
+		 * Открытый редактор комментария.
+		 * 
+		 * @property reply
+		 * @type Brick.mod.comment.Reply
+		 */
 		reply: null,
-		init: function(d, cid){
+		
+		/**
+		 * Инициализация конструктора дерева комментариев.
+		 * 
+		 * @method init
+		 * @param {String} elementId Идентификатор HTML элемента, который содержит 
+		 * в себе список начальных данных комментариев: имя пользователя, идентификатор 
+		 * и текст комментария.
+		 * @param {Integer} dbContentId Идентификатор из таблицы контента на сервера. 
+		 * @param {Object} data Сопутствующие данные комментариев.
+		 */
+		init: function(elementId, dbContentId, data){
+			this.dbContentId = dbContentId;
+			this.element = Dom.get(elementId);
+			if (L.isNull(this.element)){ return; }
+			
+			Builder._instances[elementId] = this;
 
-			this.reply = new reply(this);
-			var __self = this;
-			this.data = [];
-			this.contentid = cid;
-			this.el = {};
+			var template = __selfCT.template.get(elementId);
+			_T[elementId] = template.data; 
+			_TId[elementId] = template.idManager;
+			this.build(data);
+		},
+		
+		/**
+		 * Построить HTML код комментария из шаблона.
+		 * 
+		 * @method _getHTMLNode
+		 * @private 
+		 * @param {Object} di Данные комментария. 
+		 */
+		_getHTMLNode: function(di){
+			var T = _T[this.element.id];
+			return tSetVarA(T['comment'], {
+				'unm': di['unm'],
+				'ttname': Brick.env.ttname,
+				'reply': (Brick.env.user.isRegister() ? T['reply'] : ""),
+				'de':  Brick.dateExt.convert(di['de']),
+				'id': di['id'],
+				'bd': di['st']>0?T['spam']: di['bd']
+			});
+		},
+		
+		/**
+		 * Построить дерево комментариев.
+		 * 
+		 * @param data
+		 * @return
+		 */
+		build: function(data){
+			var el = this.element;
 			
-			var c = this.el.container = Dom.get('bk-comt-d');
-			c.id = Dom.generateId();
-
-			this.el.comtcount = Dom.get('bk-comt-count');
-			this.el.comtcount.id = Dom.generateId();
-			
-			this.el.btnrefresh = Dom.get('bk-comt-refresh');
-			this.el.btnrefresh.id = Dom.generateId();
-			
-			this.el.btnsend = Dom.get('bk-comt-send');
-			if (!L.isNull(this.el.btnsend)){
-				this.el.btnsend.id = Dom.generateId();
-			}
-
-			this.el.rootreply = Dom.get('bk-comt-send-cont');
-			if (!L.isNull(this.el.rootreply)){
-				this.el.rootreply.id = Dom.generateId();
-			}
-			
-			this.data[0] = new comment({id:0, pid:-1, bd:'', de:0}, this);
-			this.data[0].reply = this.el.rootreply;
-
-			var i, lastDate = 0;
-			
-			for (i=0;i<d.length;i++){
-				lastDate = Math.max((d[i]['de'])*1, lastDate);
-				this.data[this.data.length] = new comment(d[i], this); 
-			}
-			this.lastDate = lastDate;
-			
-			var  t, id, cmt, cmt, body;
-			while(c.childNodes.length){
-				t = c.childNodes[0];
+			// чтение данных
+			var body = {};
+			while(el.childNodes.length){
+				var t = el.childNodes[0];
 				if (t.childNodes.length == 3){
-					id = t.childNodes[0];
-					body = t.childNodes[2];
-					cmt = getComment(id.innerHTML, this);
-					cmt.d['bd'] = body.innerHTML;
+					body[t.childNodes[0].innerHTML] = t.childNodes[2].innerHTML;
 				}
-				c.removeChild(t);
+				el.removeChild(t);
 			}
-			this.render();
+			var T = _T[el.id];
+			var TId = _TId[el.id];
+			
+			el.innerHTML = tSetVarA(T['panel'], {'id': this.dbContentId, 'ttname': Brick.env.ttname });
+			
+			var getEl = function(name){ return Dom.get(TId['panel'][name]); };
+			
+			if (Brick.env.user.isRegister()){
+				getEl('replyrootnone').style.display = 'none';
+			}else{
+				getEl('breplyroot').style.display = 'none';
+			}
 
-			var a = this.el.btnsend;
-			if (!L.isNull(a)){
-				a.style.cursor = 'pointer';
-				E.on(a, 'click', function(){
-					__self.reply.show(getComment(0, __self));
-					return false;
-				});
-			}
-			a = this.el.btnrefresh;
-			a.style.cursor = 'pointer';
-			E.on(a, 'click', function(){
-				__self.refresh();
-				return false;
+			var __self = this;
+			var lastCommentId = 0;
+			var _buildTree = function(container, pid){
+				
+				var i, di, lst = "";
+				for (i=0;i<data.length;i++){
+					di = data[i];
+					if (di['id']*1 > lastCommentId){
+						lastCommentId = di['id']*1;
+					}
+					if (di['pid'] == pid){
+						di['bd'] = body[di['id']];
+						lst += __self._getHTMLNode(di);
+					}
+				}
+				if (lst.length == 0){ return; }
+				var t = tSetVar(T['list'], 'id', pid);
+				container.innerHTML = tSetVar(t, 'list', lst);
+				
+				for (i=0;i<data.length;i++){
+					di = data[i];
+					if (di['pid'] == pid){
+						var child = Dom.get(TId['comment']['child']+'-'+di['id']);
+						_buildTree(child, di['id']);
+					}
+				}
+			};
+			
+			_buildTree(getEl('list'), 0);
+
+			this.lastCommentId = lastCommentId;
+			this.count = data.length;
+			this.renderCount();
+			
+			var __self = this;
+			E.on(el, 'click', function(e){if (__self.onClick(E.getTarget(e))){ E.stopEvent(e);}});
+			
+			var tables = {'comments': DATA.get('comments', true)};
+			var rows = tables['comments'].getRows({'cid': this.dbContentId}, {'lid': lastCommentId});
+			DATA.onComplete.subscribe(this.dsComplete, this, true);
+		},
+		
+		/**
+		 * Обработать событие DataSet.
+		 * 
+		 * @method dsComplete
+		 * @param type
+		 * @param args
+		 */
+		dsComplete: function(type, args){
+			if (!args[0].checkWithParam('comments', {'cid': this.dbContentId})){ return; }
+			
+			var __self = this;
+			var T = _T[this.element.id];
+			var TId = _TId[this.element.id];
+			var rows = DATA.get('comments').getRows({'cid': this.dbContentId});
+			var lastid = this.lastCommentId;
+			var count = this.count;
+			rows.foreach(function(row){
+				var di = row.cell;
+				var pid = di['pid'];
+				if (di['id']*1 > lastid){ lastid = di['id']*1; }
+				var item = __self._getHTMLNode(di);
+				var child = (count == 0 ? Dom.get(TId['panel']['list']) : Dom.get(TId['comment']['child']+'-'+pid));
+				var list = Dom.get(TId['list']['id']+'-'+pid);
+				if (L.isNull(list)){
+					var t = tSetVar(T['list'], 'id', pid);
+					child.innerHTML = tSetVar(t, 'list', item);
+				}else{
+					list.innerHTML += item;
+				}
+				count++;
 			});
 			
+			this.count = count;
+			this.lastCommentId = lastid;
+			rows.overparam.lid = lastid;
+			this.renderCount();
 		},
-		render: function(){
-			var c = this.el.container;
-			elClear(c);
-			for (i=0;i<this.data.length;i++){
-				if (this.data[i].pid == 0){
-					createTree(this.data[i], this);
-				}
-			}
-			var ul = document.createElement('ul');
-			c.appendChild(ul);
-			for (i=0;i<this.data.length;i++){
-				if (this.data[i].pid == 0){
-					renderTree(ul, this.data[i]);
-				}
-			}
-			this.el.comtcount.innerHTML = "("+(this.data.length-1)+")";
+		
+		/**
+		 * Перерисовать кол-во комментариев
+		 * 
+		 * @method renderCount
+		 */
+		renderCount: function(){
+			var TId = _TId[this.element.id];
+			var span = Dom.get(TId['panel']['count']);
+			span.innerHTML = "("+this.count+")";
 		},
-		update: function(d){
-			if (d.length == 0){ return; }
-			var i, lastDate = 0, nd = [], old, currIndex = this.data.length;
-			
-			for (i=0;i<d.length;i++){
-				lastDate = Math.max((d[i]['de'])*1, lastDate);
-				nd[nd.length] = new comment(d[i], this); 
+		
+		/**
+		 * Обработать клик мыши.
+		 * 
+		 * @method onClick
+		 * @param {HTMLElement} el
+		 * @return {Boolean}
+		 */
+		onClick: function(el){
+			if (!L.isNull(this.reply)){
+				if (this.reply.onClick(el)){ return true; }
 			}
-			this.lastDate = lastDate;
-			
-			for (i=0;i<nd.length;i++){
-				old = getComment(nd[i], this);
-				if (L.isNull(old)){
-					this.data[this.data.length] = nd[i];
-				}
+			var TId = _TId[this.element.id];
+			var tp = TId['panel'];
+			switch(el.id){
+			case tp['breplyroot']:
+				this.showReply(0);
+				return true;
+			case tp['refresh']:
+			case tp['refreshimg']:
+				this.refresh();
+				return true;
 			}
 			
-			var newData = [];
-			newData[0] = new comment({id:0, pid:-1, bd:'', de:0}, this);
-			newData[0].reply = this.el.rootreply;
+			var prefix = el.id.replace(/([0-9]+$)/, '');
+			var numid = el.id.replace(prefix, "");
 			
-			for (i=0;i<this.data.length;i++){
-				newData[newData.length] = new comment(this.data[i].d, this);
+			if (prefix == TId['reply']['id']+'-'){
+				this.showReply(numid); return true;
 			}
-			this.data = newData;
-			this.render();
+			return false;
 		},
+		
+		/**
+		 * Написать комментарий.
+		 * 
+		 * @method showReply
+		 * @param {Integer} parentCommentId Идентификатор комментария.
+		 */
+		showReply: function(parentCommentId){
+			if (!L.isNull(this.reply)){
+				this.reply.destroy();
+			}
+			this.reply = new Reply(this, parentCommentId);
+		},
+		
+		/**
+		 * Запросить сервер обновить дерево комментариев, а именно, 
+		 * подгрузить новые комментарии, если таковые имеются.
+		 * 
+		 * @method refresh
+		 */
 		refresh: function(){
-			var __self = this;
-			var url ='/ajax/query.html?md=comment&bk=list';
-			url += '&contentid='+this.contentid;
-			url += "&last="+this.lastDate;
-			wWait.show();
-			C.asyncRequest("POST", uniqurl(url), connectCallback); 
-		}
-	}
-	
-	Brick.Comment.ReplyEngine = function(){
-		return {
-			current: null,
-			set: function(reply){
-				if (!L.isNull(this.current)){
-					this.current.close();
-				}
-				this.current = reply;
-			}
-		}
-	}();
-	
-	var reply = function(man){this.init(man)};
-	reply.prototype = {
-		init: function(man){
-			this.man = man;
-			this.saved= null;
-			this.form= null;
-			this.editor= null;
-			this.current= null;
-			this.commentid= null;
-		},
-		show: function(cmt){
-			if (typeof tinyMCE == 'undefined'){
-				var __self = this;
-				wWait.show();
-				Brick.Loader.add({
-					ext: [{name: "tinymce"}],
-					mod:[{name:'sys',files:['editorold.js']}], 
-			    onSuccess: function() {
-						wWait.hide();
-						__self.show(cmt);
-				  },
-				  onFailure: function(){ wWait.hide(); }
-				});
-				return;
-			}
-			Brick.Comment.ReplyEngine.set(this);
-			this.commentid = cmt.id;
-			this.current = cmt;
-			
-			var saved = [], i;
-			for (i=0;i<cmt.reply.childNodes.length;i++){
-				saved[saved.length] = cmt.reply.childNodes[i];
-			}
-			this.saved = saved;
-			elClear(cmt.reply);
-			cmt.reply.appendChild(this.build());
-
-			tinyMCE.init(Brick.util.Editor.TinyMCE.get('comment'));
-			tinyMCE.execCommand( 'mceAddControl', true, this.form);
-		},
-		close: function(){
-			if (L.isNull(this.form)){ return; }
-			tinyMCE.execCommand( 'mceRemoveControl', true, this.form);
-			elClear(this.current.reply);
-			for (var i=0;i<this.saved.length;i++){
-				this.current.reply.appendChild(this.saved[i]);
-			}
-			this.form = null;
-		},
-		send: function(){
-			var __self = this;
-			var postData = 'comment='+encodeURIComponent(this.saveHTML());
-			var url = '/ajax/query.html?md=comment&bk=list&do=send';
-			url += '&contentid='+this.man.contentid;
-			url += '&commentid='+this.commentid;
-			url += "&last="+this.man.lastDate;
-
-			wWait.show();
-			C.asyncRequest("POST", 
-				uniqurl(url),{
-					success: function(o) {
-						wWait.hide();
-						__self.close();
-						readScript(o.responseText);
-					}, failure: connectFailure
-				}, postData
-			); 
-		},
-		build: function(){
-			var __self = this;
-			var div, h3, p, input, label, ta;
-			div = document.createElement('div');
-			div.className = 'bk-comt-reply';
-			var ret = div;
-			
-			var form = document.createElement('form');
-			this.form = form;
-			
-			p = document.createElement('p');
-			div.appendChild(p);
-			
-			ta = document.createElement('textarea');
-			ta.rows = 8;
-			ta.cols = 45;
-			ta.style.overflow = 'hidden';
-			p.appendChild(ta);
-			this.form = ta;
-			
-			p = document.createElement('p');
-			div.appendChild(p);
-			
-			input = document.createElement('input');
-			input.type = 'button';
-			input.value = ' Просмотр ';
-			p.appendChild(input);
-			var previewBtn = input;
-
-			input = document.createElement('input');
-			input.type = 'button';
-			input.value = ' Отправить комментарий ';
-			E.on(input, 'click', function(){__self.send();});
-			p.appendChild(input);
-
-			input = document.createElement('input');
-			input.type = 'button';
-			input.value = ' Отмена ';
-			E.on(input, 'click', function(){__self.close();});
-			p.appendChild(input);
-			
-			var previewDiv = document.createElement('div');
-			ret.appendChild(previewDiv);
-			
-			E.on(previewBtn, 'click', function(){
-				elClear(previewDiv);
-				var div = document.createElement('div');
-				div.innerHTML = __self.saveHTML();
-				previewDiv.appendChild(div); 
-			});
-			
-			return ret;
-		},
-		validator: null,
-		saveHTML: function(){
-			var editor = tinyMCE.get(this.form); 
-			var html = editor.getContent();
-			
-			if (L.isNull(this.validator)){
-				this.validator = new Brick.util.Editor.HTMLClean(
-						Brick.util.Editor.EnableTags.Comment
-				); 
-			}
-			
-			var clhtml = this.validator.cleanHTML(html);
-			
-			editor.setContent(clhtml);
-			return clhtml;
+			var table = DATA.get('comments');
+			var rows = table.getRows({'cid': this.dbContentId});
+			rows.clear();
+			DATA.request();
 		}
 	};
 	
-	var comment = function(d, man){this.init(d, man);};
-	comment.prototype = {
-		d: null,
-		id: null, pid: null,
-		child: null,
-		reply: null,
-		man: null,
-		init: function(d, man){
-			this.man = man;
-			this.d = d;
-			this.id = d['id'];
-			this.pid = d['pid'];
-			var __self = this; 
-			this.child = function(){
-				return {
-					d: [],
-					index: function(i){ return this.d[i]; },
-					set: function(cmt){
-						if (cmt.pid != __self.id){
-	            throw new TypeError("comment.child.set: is not a child comment");
-						}
-						this.d[this.d.length] = cmt;
-					},
-					get: function(id){
-						var i;
-						for (i=0;i<this.d.length;i++){
-							if (this.d[i].id == id){return this.d[i];}
-						}
-						return null;
-					},
-					count: function(){return this.d.length;}
-				}
-			}();
-		},
-		build: function(){
-			var __self = this;
-			var li, div, a, img, d = this.d, abbr, p;
-			
-			li = document.createElement('li');
-			
-			div = document.createElement('div');
-			li.appendChild(div);
-			div.className = "bk-comt-meta";
-			
-			a = document.createElement('a');
-			div.appendChild(a);
-			a.title = d['unm'];
-			a.href = "#";
-			
-			img = document.createElement('img');
-			a.appendChild(img);
-			img.src = "/images/stub-user-small.gif";
-			img.alt = d['unm'];
-			img.className = 'bk-comt-user';
-			
-			a = document.createElement('a');
-			div.appendChild(a);
-			a.className = 'bk-comt-url';
-			a.href = "#";
-			a.innerHTML = d['unm'];
-			
-			var date = dateExt.convert(d['dl']);
-			abbr = document.createElement('abbr');
-			div.appendChild(abbr);
-			abbr.title = date;
-			abbr.innerHTML = date;
+	Brick.mod.comment.Builder = Builder;	
 
-			a = document.createElement('a');
-			div.appendChild(a);
-			a.href = "#";
-			a.title = "Ссылка на комментарий";
-			a.innerHTML = "#";
+	
+	/**
+	 * Виджет "Написать комментарий"
+	 * 
+	 * @class Reply
+	 * @constructor
+	 * @param {Brick.mod.comment.Builder} owner Конструктор дерева комментариев.
+	 * @param {Integer} parentCommentId Идентификатор комментария родителя, в таблице 
+	 * комментариев на сервера, на который будет дан ответ, если 0, то это будет 
+	 * первый комментарий.  
+	 */
+	var Reply = function(owner, parentCommentId){
+		parentCommentId = parentCommentId*1 || 0;
+		this.init(owner, parentCommentId);
+	};
+
+	Reply.prototype = {
+		
+		/**
+		 * Конструктор дерева комментариев.
+		 * 
+		 * @property owner
+		 * @type Brick.mod.comment.Builder
+		 */
+		owner: null,
+		
+		/**
+		 * Идентификатор комментария родителя, в таблице 
+		 * комментариев на сервера, на который будет дан ответ, если 0, то это будет 
+		 * первый комментарий.
+		 * 
+		 * @property parentCommentId
+		 * @type Integer
+		 */
+		parentCommentId: 0,
+		
+		/**
+		 * Шаблон компонента.
+		 * 
+		 * @property _T
+		 * @private
+		 * @type Object
+		 */
+		_T: null,
+
+		/**
+		 * Мененджер идентификаторов HTML элеменов из шаблона.
+		 * 
+		 * @property _TId
+		 * @private
+		 * @type Object
+		 */
+		_TId: null,
+		
+		/**
+		 * Редактор комментария.
+		 * 
+		 * @property editor
+		 * @type Brick.widget.Editor
+		 */
+		editor: null,
+		
+		/**
+		 * Инициализировать редактор.
+		 * 
+		 * @method init
+		 * @param {Brick.mod.comment.Builder} owner Конструктор дерева комментариев.
+		 * @param {Integer} parentCommentId Идентификатор комментария родителя.
+		 */
+		init: function(owner, parentCommentId){
+			this.owner = owner;
+			this.parentCommentId = parentCommentId;
 			
-			div = document.createElement('div');
-			li.appendChild(div);
-			div.className = "bk-comt-content";
-			if (d['st'] == 1){
-				div.innerHTML = '<font style="font-size: 120%">Сообщение заблокировано администрацией</font>';
+			var T = this._T = _T[this.owner.element.id];
+			var TId = this._TId = _TId[this.owner.element.id];
+			
+			if (parentCommentId == 0){
+				this.contbutton = Dom.get(TId['panel']['replycont']);
+				this.panel = Dom.get(TId['panel']['reply']);
 			}else{
-				div.innerHTML = d['bd'];
+				this.contbutton = Dom.get(TId['reply']['contbtn']+'-'+parentCommentId);
+				this.panel = Dom.get(TId['reply']['reply']+'-'+parentCommentId);
 			}
+			this.contbutton.style.display = 'none';
 			
-			if (Brick.env.user.isRegistred() && d['st'] == 0){
-				
-				p = document.createElement('p');
-				div.appendChild(p);
-				a = document.createElement('a');
-				p.appendChild(a);
-				a.innerHTML = "Ответить";
-				this.reply = p;
-			
-				E.on(a, 'click', function(){
-					__self.man.reply.show(__self);
-					return false;
+			var __self = this;
+			this.panel.innerHTML = T['replypanel'];
+			Brick.Component.API.fireFunction('sys', 'editor', function(){
+				var Editor = Brick.widget.Editor;
+				__self.editor = new Editor(TId['replypanel']['editor'], {
+					'mode': Editor.MODE_VISUAL,
+					'toolbar': Editor.TOOLBAR_MINIMAL
 				});
+			});
+		},
+		
+		/**
+		 * Закрыть и разрушить панель.
+		 * 
+		 * @method destroy
+		 */
+		destroy: function(){
+			this.editor.destroy();
+			this.contbutton.style.display = "";
+			Brick.elClear(this.panel);
+			this.owner.reply = null;
+		},
+		
+		/**
+		 * Просмотреть комментарий как он будет выглядеть после отправки.
+		 * 
+		 * @method preview
+		 */
+		preview: function(){
+			var table = DATA.get('preview', true);
+			table.columns.update(["id","bd"]);
+			var row = table.newRow();
+			row.cell['bd'] = this.editor.getContent();
+			var rows = table.getRows();
+			rows.clear();
+			rows.add(row);
+			table.applyChanges();
+			var TId = this._TId;
+			var oncomplete = function(){
+				Dom.get(TId['replypanel']['preview']).innerHTML = rows.getById(1).cell['bd'];
+				DATA.onComplete.unsubscribe(oncomplete);
+			};
+			DATA.onComplete.subscribe(oncomplete);
+			DATA.request();
+		},
+		
+		/**
+		 * Отправить комментарий.
+		 * 
+		 * @method send
+		 */
+		send: function(){
+			var table = DATA.get('comments');
+			var rows = table.getRows({'cid': this.owner.dbContentId});
+			var row = table.newRow();
+			row.cell['pid'] = this.parentCommentId;
+			row.cell['bd'] = this.editor.getContent();
+			rows.add(row);
+			table.applyChanges();
+			DATA.request();
+			this.destroy();
+		},
+		
+		/**
+		 * Обработать клик мыши.
+		 * 
+		 * @method onClick
+		 * @param {HTMLElement} el
+		 * @return {Boolean}
+		 */
+		onClick: function(el){
+			var tp = this._TId['replypanel'];
+			switch(el.id){
+			case tp['bcancel']: this.destroy(); return true;
+			case tp['bsend']: this.send();	return true;
+			case tp['bpreview']: this.preview(); return true;
 			}
-			
-			return li;
+			return false;
 		}
-	}
+	};
 	
+	Brick.mod.comment.Reply = Reply;
 	
-})();
-})();
+};

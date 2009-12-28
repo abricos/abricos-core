@@ -1,3 +1,3 @@
 Brick.util.Language.add('ru',{
-	'comment':{'cp':{'title': 'Комментарии' }}
+	'mod': {'comment':{'cp':{'title': 'Комментарии' }}}
 });

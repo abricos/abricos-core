@@ -1,4 +1,13 @@
 <!--{panel}-->
+<div class='hd'>Список комментариев</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+	<div style="text-align: right">
+		<input id="{i#bclose}" type="button" value="Закрыть" />
+	</div>
+</div>
+
+<!--{widget}-->
 <h1>Комментарии <a href="#"><img id="{i#refresh}" src="/modules/user/css/images/refresh.png" title="Обновить"/></a></h1>
 
 <div id='{i#pagtop}'></div>
@@ -17,6 +26,11 @@
 	</thead>
 	<tbody>{v#rows}</tbody>
 </table>
+
+<!--{rowwait}-->
+<tr valign=top>
+	<td colspan="4">Идет загрузка данных...</td>
+</tr>
 
 <!--{row}-->
 <tr valign=top>

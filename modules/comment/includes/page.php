@@ -1,11 +1,11 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Comment
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $brick = Brick::$builder->brick;
@@ -25,7 +25,7 @@ if ($contentId == 0){
 $brick->param->var['cid'] = $contentId;
 
 $data = array();
-$rows = CMSQComt::Comments(Brick::$db, $contentId);
+$rows = CMSQComment::Comments(Brick::$db, $contentId);
 $lst = ""; $t = "";
 $slst = "";
 while (($row = Brick::$db->fetch_array($rows))){
