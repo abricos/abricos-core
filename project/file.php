@@ -1,8 +1,8 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 //error_reporting(E_ALL & ~E_NOTICE);
@@ -39,11 +39,10 @@ if (empty($fileinfo)){
 	exit;
 }
 
-
 header('Cache-control: max-age=31536000');
-header('Expires: ' . gmdate("D, d M Y H:i:s", TIMENOW + 31536000) . ' GMT');
 header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $fileinfo['dateline']) . ' GMT');
 header('ETag: "' . $fileinfo['fileid'] . '"');
+header("Expires: " . gmdate("D, d M Y H:i:s", time() + 3600 * 24 * 15) . " GMT");
 
 $filename = $fileinfo['filename'];
 $extension = $fileinfo['extension'];

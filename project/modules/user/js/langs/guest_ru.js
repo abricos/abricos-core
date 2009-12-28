@@ -1,9 +1,8 @@
 Brick.util.Language.add('ru',{
-	'user':{
-		'guest': {
+	'mod':{
+		'user': {
 			'register':{
 				'form':{
-	
 				},
 				'error':{
 					'client':{

@@ -1,9 +1,9 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @link http://cmsbrick.ru
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
+* @link http://abricos.org
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -26,8 +26,7 @@ $startTime = getmicrotime();
 /**/
 require_once('./global.php');
 
-global $cms;
-$cms->adress = new CMSAdress();
+$cms = CMSRegistry::$instance;
 
 // Основное управление сайтом ложится на системный модуль
 $modSys = $cms->modules->GetModule('sys');

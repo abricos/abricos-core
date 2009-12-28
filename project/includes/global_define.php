@@ -1,8 +1,8 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -15,6 +15,7 @@ define('USERGROUPID_REGISTERED',		4);
 define('USERGROUPID_AVAITEMAIL',		3);
 define('USERGROUPID_GUEST',				2);
 define('USERGROUPID_BANNED',			1);
+define('USERGROUPID_ALL',				0);
 
 
 define('TYPE_BOOL',     1); // force boolean

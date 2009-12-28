@@ -1,8 +1,8 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -10,7 +10,7 @@ define('PAGESTATUS_OK',				0);
 define('PAGESTATUS_404', 			404);
 define('PAGESTATUS_500',			500);
 
-final class CMSRegistry extends CMSBaseClass {
+final class CMSRegistry {
 	
 	/**
 	 * Экземляр ядра
@@ -104,8 +104,16 @@ final class CMSRegistry extends CMSBaseClass {
 	
 	public function Init(){
 		$this->modules = new CMSModuleManager($this);
+		
 		$this->modules->FetchModulesInfo();
+		
 		$modsinfo = $this->modules->modulesInfo;
+		
+		// временное решение в связи с переходом на платформу Abricos
+		if (!empty($modsinfo['sys']) && empty($modsinfo['sys']['installdate'])){
+			CMSSqlQuery::UpdateToAbricosPackage($db);
+		}
+		$this->modules->RegisterByName('sys');
 		
 		// проверка на наличие нового модуля в движке
 		$smoddir = CWD."/modules/";
@@ -120,7 +128,7 @@ final class CMSRegistry extends CMSBaseClass {
 					}
 				}
 			}
-		} 
+		}
 	}
 	
 	/**
@@ -180,6 +188,10 @@ final class CMSRegistry extends CMSBaseClass {
 		$config = array();
 		include(CWD . '/includes/config.php');
 		$this->config =& $config;
+		
+		if (!$this->config['JsonDB']['use']){
+			$this->config['JsonDB']['password'] = TIMENOW;
+		}
 	}
 	
 	function fetch_ip(){

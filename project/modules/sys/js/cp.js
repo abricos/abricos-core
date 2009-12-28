@@ -1,35 +1,36 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos. All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
 /**
  * @module Sys
  */
 
-(function(){
-
-	if (!Brick.objectExists('Brick.User.CP.Manager')){ return; }
-	if (!Brick.env.user.isAdmin()){ return; }
-
-	var wWait = Brick.widget.WindowWait;
+var Component = new Brick.Component();
+Component.requires = {
+	mod:[{name: 'user', files: ['cpanel.js']}]
+};
+Component.entryPoint = function(){
 	
-	var module = {
-		name: 'sys',
-		titleid: "sys.title",
-		initialize: function(container){
-			wWait.show();
-			Brick.Loader.add({
-				mod:[{name: 'sys', files: ['cp_manager.js']}],
-		    onSuccess: function() {
-					wWait.hide();
-					Brick.mod.sys.cppage.initialize(container);
-			  }
-			});
-		}
-	};
-	Brick.User.CP.Manager.register(module);
+	if (!Brick.env.user.isAdmin()){ return; }
+	var cp = Brick.mod.user.cp;
 
-})();
+	var menuItem = new cp.MenuItem(this.moduleName, 'manager');
+	menuItem.icon = '/modules/sys/images/cp_icon.gif';
+	menuItem.titleId = 'sys.title';
+	menuItem.entryComponent = 'api';
+	menuItem.entryPoint = 'Brick.mod.sys.API.showManagerWidget';
+	cp.MenuManager.add(menuItem);
+	
+	// TODO: Временно отключено
+	return;
+	var menuItem = new cp.MenuItem(this.moduleName, 'permission');
+	menuItem.icon = '/modules/sys/images/cp_icon.gif';
+	menuItem.titleId = 'sys.permission.title';
+	menuItem.entryComponent = 'api';
+	menuItem.entryPoint = 'Brick.mod.sys.API.showPermissionWidget';
+	cp.MenuManager.add(menuItem);
+	
+};

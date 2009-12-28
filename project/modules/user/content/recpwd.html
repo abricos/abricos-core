@@ -2,8 +2,8 @@
 [tt=main][/tt]
 [script]recpwd.php[/script]
 [bkvar=result][/bkvar]
-[ph=mduser_pwdreq_changemail_subj]Ваш новый пароль для доступа на %1$s[/ph]
-[ph=mduser_pwdreq_changemail]Дорогой(ая) %1$s,
+[ph=user:pwdres_changemail_subj]Ваш новый пароль для доступа на %1$s[/ph]
+[ph=user:pwdres_changemail]Дорогой(ая) %1$s,
 
 Как Вы и просили, ваш пароль был переустановлен. Новая информация о пароле следующая:
 
@@ -18,10 +18,5 @@
 <div id="bk_user">Пожалуйста, подождите, идет загрузка данных...</div>
 
 <script language='JavaScript' type='text/javascript' charset='utf-8'>
-	Brick.Loader.add({
-		mod:[{name:'user',files:['user.js','guest.js']}],    
-		onSuccess: function(){
-			Brick.User.Guest.PasswordChange.initialize([bkvar]result[/bkvar]);
-		}
-	});
+	Brick.Component.API.fire('user', 'api', 'showPwdRestResult', [bkvar]result[/bkvar]);
 </script> 

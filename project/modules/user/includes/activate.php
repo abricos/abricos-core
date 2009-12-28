@@ -7,11 +7,11 @@
  * {activeid} - идентификатор активации.
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage User
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $brick = Brick::$builder->brick;
@@ -23,7 +23,7 @@ $ret->error = 0;
 $ret->error = CMSSqlQueryUser::QueryRegUserActivate(Brick::$db, $p_userid, $p_actid); 
 if ($ret->error == 0){
 	$user = CMSQUser::UserById(Brick::$db, $p_userid);
-	$ret->unm = $user['username'];
+	$ret->username = $user['username'];
 }
 $brick->param->var['result'] = json_encode($ret); 
 

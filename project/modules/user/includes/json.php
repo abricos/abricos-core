@@ -3,11 +3,11 @@
  * JSON данные на запросы стороних сервисов
  * 
  * @version $Id: json.php 94 2009-10-14 07:58:03Z roosit $
- * @package CMSBrick
+ * @package Abricos
  * @subpackage User
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $brick = Brick::$builder->brick;
@@ -15,7 +15,9 @@ $brick = Brick::$builder->brick;
 $in = Brick::$input;
 
 $p_jsonPassword = $in->clean_gpc('p', 'jsonpass', TYPE_STR);
-$jsonPassword = CMSRegistry::$instance->config['JsonDB']['password'];
+$cfg = CMSRegistry::$instance->config['JsonDB'];
+if (!$cfg['use']){ return; }
+$jsonPassword = $cfg['password'];
 if ($p_jsonPassword != $jsonPassword){
 	sleep(2);
 	return;
@@ -33,7 +35,9 @@ if ($p_do == "user"){
 	$p_username	= trim($in->clean_gpc('p', 'username', TYPE_STR));
 	$p_password	= trim($in->clean_gpc('p', 'password', TYPE_STR));
 	
-	$error = CMSModuleUser::UserLogin($p_username, $p_password);
+	$userManager = CMSRegistry::$instance->modules->GetModule('user')->GetUserManager(); 
+	
+	$error = $userManager->UserLogin($p_username, $p_password);
 	if ($error > 0){
 		sleep(1);
 	}

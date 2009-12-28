@@ -1,59 +1,48 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos. All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-(function(){
-	Brick.namespace('mod.sys.template');
+/**
+ * @module Sys
+ */
 
-	var T, J, TId;
-
+var Component = new Brick.Component();
+Component.requires = {
+	mod:[
+	 	{name: 'sys', files: ['api.js','data.js','form.js','container.js']}
+	]
+};
+Component.entryPoint = function(){
+	
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
-		L = YAHOO.lang,
-		W = YAHOO.widget,
-		J = YAHOO.lang.JSON;
-
-	var BC = Brick.util.Connection;
-	var DATA;
-
-	var dateExt = Brick.dateExt;
-	var elClear = Brick.elClear;
-	var wWait = Brick.widget.WindowWait;
-	var tSetVar = Brick.util.Template.setProperty;
-
-	Brick.Loader.add({
-		yahoo: ['json'],
-		mod:[
-		     {name: 'sys', files: ['data.js', 'form.js']}
-		    ],
-    onSuccess: function() {
-		
-			if (!Brick.objectExists('Brick.mod.sys.data')){
-				Brick.mod.sys.data = new Brick.util.data.byid.DataSet('sys');
-			}
-			DATA = Brick.mod.sys.data;
-			
-			T = Brick.util.Template['sys']['cp_template'];
-			Brick.util.Template.fillLanguage(T);
-			TId = new Brick.util.TIdManager(T);
-
-			moduleInitialize();
-			delete moduleInitialize;
-	  }
-	});
+		L = YAHOO.lang;
 	
-var moduleInitialize = function(){
+	var NS = this.namespace,
+		TMG = this.template;
+	
+	var API = NS.API;
 
+	if (!Brick.objectExists('Brick.mod.sys.data')){
+		Brick.mod.sys.data = new Brick.util.data.byid.DataSet('sys');
+	}
+	var DATA = Brick.mod.sys.data;
+	
 (function(){
 	
-	var manager = function(container){
+	var TemplateWidget = function(container){
 		this.init(container);
 	};
-	manager.prototype = {
+	TemplateWidget.prototype = {
 		init: function(container){
+			var TM = TMG.build('panel,table,row,rowwait,rowdel,rowgrptype0,rowgrptype1,rowgrptype2,rownmedit');
+			var T = TM.data, TId = TM.idManager;
+			this._TM = TM;
+			this._T = T; 
+			this._TId = TId;
+		
 			var __self = this;
 			container.innerHTML = T['panel'];
 			
@@ -70,6 +59,8 @@ var moduleInitialize = function(){
 			DATA.onComplete.subscribe(this.onDSUpdate, this, true);
 			if (DATA.isFill(this.tables)){
 				this.render();
+			}else{
+				TM.getEl("panel.table").innerHTML = TM.replace('table', {'rows': T['rowwait']});
 			}
 		},
 		onDSUpdate: function(type, args){
@@ -79,6 +70,7 @@ var moduleInitialize = function(){
 			 DATA.onComplete.unsubscribe(this.onDSUpdate, this);
 		},
 		onClick: function(el){
+			var TId = this._TId;
 			if (el.id == TId['panel']['rcclear']){
 				this.recycleClear();
 				return true;
@@ -102,6 +94,8 @@ var moduleInitialize = function(){
 			return false;
 		},
 		renderType: function(bricktype){
+			var TM = this._TM, T = this._T, TId = this._TId;
+			
 			var rows;
 			if (bricktype == 2){
 				rows = this.rows['contents'];
@@ -117,26 +111,18 @@ var moduleInitialize = function(){
 				
 				if (grp != di['own']){
 					grp = di['own'];
-					s = T['rowgrptype'+bricktype];
-					s = tSetVar(s, 'own', di['own']);
-					lst += s;
+					lst += TM.replace('rowgrptype'+bricktype, {
+						'own': di['own']						
+					});
 				}
 				
-				s = di['dd']>0 ? T['rowdel'] : T['row'];
-				s = tSetVar(s, 'id', di['id']);
-				ss = di['nm'];
-				if (di['ud']>0){
-					ss = tSetVar(T['rownmedit'], 'nm', di['nm']);
-				}
-				s = tSetVar(s, 'nm', ss);
-				ss = di['cmt'];
-				
-				if (ss.length > 50){ ss = ss.substring(0, 50)+"..."; }
-				s = tSetVar(s, 'cmt', ss);
-				s = tSetVar(s, 'ud', (di['ud']>0 ? dateExt.convert(di['ud']) : ""));
-				s = tSetVar(s, 'dd', (di['dd']>0 ? dateExt.convert(di['dd']) : ""));
-
-				lst += s;
+				lst += TM.replace(di['dd']>0 ? 'rowdel' : 'row', {
+					'id': di['id'],
+					'nm': (di['ud']>0 ? TM.replace('rownmedit', {'nm': di['nm']}) : di['nm']),
+					'cmt': (di['cmt'].length > 50 ? di['cmt'].ss.substring(0, 50)+"..." : di['cmt']),
+					'ud': (di['ud']>0 ? Brick.dateExt.convert(di['ud']) : ""),
+					'dd': (di['dd']>0 ? Brick.dateExt.convert(di['dd']) : "")
+				});
 			}, this);
 			return lst;
 		},
@@ -146,20 +132,17 @@ var moduleInitialize = function(){
 			lst += this.renderType(0);
 			lst += this.renderType(2);
 
-			var div = Dom.get(TId['panel']['table']);
-			elClear(div);
-			div.innerHTML = tSetVar(T['table'], 'rows', lst);;
-			
+			this._TM.getEl('panel.table').innerHTML = this._TM.replace('table', {'rows': lst});
 		},
 		editById: function(id){
 			var tables = {
 				'brick': DATA.get('brick', true),
 				'brickparam': DATA.get('brickparam', true)
-			}
+			};
 			var rows = {
 				'brick': tables['brick'].getRows({'bkid': id}),
 				'brickparam': tables['brickparam'].getRows({'bkid': id})
-			}
+			};
 			
 			var __self = this;
 			var complete = function(type, args){
@@ -175,7 +158,7 @@ var moduleInitialize = function(){
 			}
 		},
 		edit: function(obj){
-			this.activeEditor = new Editor(obj);
+			this.activeEditor = new NS.TemplateEditorPanel(obj);
 		},
 		getrow: function(id){
 			var row = this.rows['bricks'].getById(id);
@@ -213,17 +196,27 @@ var moduleInitialize = function(){
 			this.tables['bricks'].recycleClear();
 			DATA.request();
 		}
-	}
-	Brick.mod.sys.template.Manager = manager;
+	};
+	NS.TemplateWidget = TemplateWidget;
+})();	
+	
+(function(){
+	
+	var TM = TMG.build('editor,param,tableparam,rowparam,option,parameditor'),
+		T = TM.data,
+		TId = TM.idManager;
 
 	var Editor = function(d){
 		this.brickid = d['id'];
 		this.rows = d['rows'];
-		Editor.superclass.constructor.call(this, T['editor']);
-	}
+		Editor.superclass.constructor.call(this, {
+			modal: true, 
+			fixedcenter: true
+		});
+	};
 	YAHOO.extend(Editor, Brick.widget.Panel, {
-		initTemplate: function(t){
-			return t;
+		initTemplate: function(){
+			return T['editor'];
 		},
 		onLoad: function(){
 			this.param = new Param(this.el('param'), {id: this.brickid, 'rows': this.rows['brickparam']});
@@ -263,6 +256,8 @@ var moduleInitialize = function(){
 		}
 	});
 	
+	NS.TemplateEditorPanel = Editor;
+	
 	var Param = function(container, obj){
 		this.init(container, obj);
 	}; 
@@ -276,32 +271,26 @@ var moduleInitialize = function(){
 		},
 		render: function(){
 			var lang = Brick.util.Language.getData()['sys']['brick']['paramtype'];
-			var lst = "", i, s, di, val;
+			var lst = "";
 			this.rows.foreach(function(row){
-				if (row.isRemove()){
-					return;
-				}
-				
-				di = row.cell;
-				s = T['rowparam'];
-				s = tSetVar(s, 'id', di['id']);
-				s = tSetVar(s, 'tp', lang[di['tp']]);
-				s = tSetVar(s, 'nm', di['nm']);
-				
-				val = Brick.util.Form.encode(di['v']);
+				if (row.isRemove()){ return; }
+				var di = row.cell;
+
+				var val = Brick.util.Form.encode(di['v']);
 				if (val.length > 50){
 					val = val.substr(0, 50)+'...';
 				}
-				
-				s = tSetVar(s, 'v', val);
-				lst += s;
+
+				lst += TM.replace('rowparam', {
+					'id': di['id'],
+					'tp': lang[di['tp']],
+					'nm': di['nm'],
+					'v': val
+				});
 			}, this);
 			
-			lst = tSetVar(T['tableparam'], 'rows', lst);
-
 			var div = Dom.get(TId['param']['table']);
-			elClear(div);
-			div.innerHTML = lst;
+			div.innerHTML = TM.replace('tableparam', {'rows': lst});
 		},
 		onClick: function(el){
 			if (el.id == TId['param']['badd']){
@@ -352,12 +341,14 @@ var moduleInitialize = function(){
 	var ParamEditor = function(row, callback){
 		this.row = row;
 		this.callback = callback;
-		Editor.superclass.constructor.call(this, T['parameditor']);
-	}
+		Editor.superclass.constructor.call(this, {
+			modal: true,
+			fixedcenter: true
+		});
+	};
 	YAHOO.extend(ParamEditor, Brick.widget.Panel, {
-		initTemplate: function(t){
-		
-			return t;
+		initTemplate: function(){
+			return T['parameditor'];
 		},
 		onLoad: function(){
 			
@@ -408,6 +399,6 @@ var moduleInitialize = function(){
 			this.callback();
 		}
 	});
-})();
+	
+})();	
 };
-})();

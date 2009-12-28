@@ -1,8 +1,8 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -113,6 +113,12 @@ abstract class CMSDatabase {
 	 */
 	public $prefix = 'cms_';
 	
+	private $serverName = '';
+	private $port = '';
+	private $userName = '';
+	private $password = ''; 
+	
+	
 	/**
 	 * Конструктор  
 	 * 
@@ -146,6 +152,10 @@ abstract class CMSDatabase {
 	* @param string пароль пользователя
 	*/
 	public function connect($database, $servername, $port, $username, $password){
+		$this->serverName = $servername;
+		$this->port = $port;
+		$this->userName = $username;
+		$this->password = $password;
 		$this->database = $database;
 		$link = $this->connect_pt($servername, $port, $username, $password); 
 		if (!$link){
@@ -157,6 +167,10 @@ abstract class CMSDatabase {
 	}
 	
 	protected abstract function connect_pt($servername, $port, $username, $password);
+	
+	public function reConnect(){
+		$this->connect($this->database, $this->serverName, $this->port, $this->userName, $this->password);
+	}
 	
 	/**
 	 * Выбрать базу данных 

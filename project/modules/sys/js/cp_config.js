@@ -1,59 +1,48 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos. All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-(function(){
-	Brick.namespace('mod.sys.config');
+/**
+ * @module Sys
+ */
 
-	var T, J, TId;
-
+var Component = new Brick.Component();
+Component.requires = {
+	mod:[
+	 	{name: 'sys', files: ['api.js','data.js','form.js']}
+	]
+};
+Component.entryPoint = function(){
+	
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
-		L = YAHOO.lang,
-		W = YAHOO.widget,
-		J = YAHOO.lang.JSON;
-
-	var BC = Brick.util.Connection;
-	var DATA;
-
-	var dateExt = Brick.dateExt;
-	var elClear = Brick.elClear;
-	var wWait = Brick.widget.WindowWait;
+		L = YAHOO.lang;
+	
+	var NS = this.namespace,
+		TMG = this.template;
+	
 	var tSetVar = Brick.util.Template.setProperty;
-
-	Brick.Loader.add({
-		yahoo: ['json'],
-		mod:[
-		     {name: 'sys', files: ['data.js', 'form.js']}
-		    ],
-    onSuccess: function() {
-		
-			if (!Brick.objectExists('Brick.mod.sys.data')){
-				Brick.mod.sys.data = new Brick.util.data.byid.DataSet('sys');
-			}
-			DATA = Brick.mod.sys.data;
-			
-			T = Brick.util.Template['sys']['cp_config'];
-			Brick.util.Template.fillLanguage(T);
-			TId = new Brick.util.TIdManager(T);
-
-			moduleInitialize();
-			delete moduleInitialize;
-	  }
-	});
 	
-var moduleInitialize = function(){
+	var API = NS.API;
 
-(function(){
-	
-	var manager = function(container){
+	if (!Brick.objectExists('Brick.mod.sys.data')){
+		Brick.mod.sys.data = new Brick.util.data.byid.DataSet('sys');
+	}
+	var DATA = Brick.mod.sys.data;
+
+	var ConfigWidget = function(container){
 		this.init(container);
 	};
-	manager.prototype = {
+	ConfigWidget.prototype = {
 		init: function(container){
+			var TM = TMG.build(),
+				T = TM.data,
+				TId = TM.idManager;
+			this._T = T;
+			this._TId = TId;
+		
 			var __self = this;
 			container.innerHTML = T['panel'];
 			
@@ -63,7 +52,7 @@ var moduleInitialize = function(){
 			};
 			this.rows = {
 				'config': this.tables['config'].getRows({'mod': 'sys'})
-			}
+			};
 			DATA.onComplete.subscribe(this.onDSUpdate, this, true);
 			if (DATA.isFill(this.tables)){
 				this.render();
@@ -71,17 +60,19 @@ var moduleInitialize = function(){
 		},
 		onDSUpdate: function(type, args){if (args[0].check(['config','styles'])){ this.render(); }},
 		destroy: function(){DATA.onComplete.unsubscribe(this.onDSUpdate, this);},
-		el: function(name){ return Dom.get(TId['panel'][name]); },
+		el: function(name){ return Dom.get(this._TId['panel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
 		onClick: function(el){
-			if (el.id == TId['panel']['bsave']){
+			if (el.id == this._TId['panel']['bsave']){
 				this.save();
 				return true;
 			}			
 			return false;
 		},
 		render: function(){
+			var T = this._T, TId = this._TId;
+			
 			var __self = this;
 			var lst = "";
 			this.tables['styles'].getRows().foreach(function(row){
@@ -106,6 +97,7 @@ var moduleInitialize = function(){
 			});
 		},
 		save: function(){
+			var T = this._T, TId = this._TId;
 			var __self = this;
 			this.rows['config'].foreach(function(row){
 				var di = row.cell;
@@ -123,10 +115,8 @@ var moduleInitialize = function(){
 			this.tables['config'].applyChanges();
 			DATA.request();
 		}
-	}
-	Brick.mod.sys.config.Manager = manager;
-
-
-})();
+	};
+	
+	NS.ConfigWidget = ConfigWidget;
+	
 };
-})();

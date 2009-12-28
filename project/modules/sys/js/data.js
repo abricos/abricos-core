@@ -1,23 +1,26 @@
 /*
 @version $Id$
-@copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+@copyright Copyright (C) 2008 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
 /**
- * Компонент управления таблицами  
- *
  * @module Sys
- * @title Менеджер DataSet
  */
-(function(){
 
-	Brick.namespace('util.data.byid');
+Brick.namespace('util.data.byid');
 
+var Component = new Brick.Component();
+Component.requires = {
+	mod:[{name: 'sys', files: ['data.js']}]
+};
+Component.entryPoint = function(){
+	
 	/**
 	 * Менеджер таблиц DataSet. 
 	 * 
 	 * @class DataSet
+	 * @submodule Data
 	 * @namespace Brick.util.data.byid
 	 * @constructor
 	 * @param name {String} Имя модуля платформы BrickCMS с которым происходит обмен данными
@@ -70,14 +73,19 @@
 		 * @return {Object}
 		 * @private
 		 */
-		_getPostData: function(tables){
+		_getPostData: function(tables, resetFlags){
 			tables = tables || this.tables;
+			resetFlags = resetFlags || false;
 			var ts = [], tmp;
 			for (var nn in tables){
-				tmp = this.tables[nn].getPostData();
+				var table = this.tables[nn];
+				tmp = table.getPostData();
 				
 				if (!YAHOO.lang.isNull(tmp)){
 					ts[ts.length] = tmp;
+					if (resetFlags){
+						table.resetFlags();
+					}
 				}
 			}
 			if (ts.length == 0){
@@ -99,6 +107,10 @@
 			}
 			this.tables[table.name] = table;
 			return true;
+		},
+		
+		remove: function(name){
+			delete this.tables[name];
 		},
 		
 		/**
@@ -125,7 +137,7 @@
 			if (!this.tables[name] && createIfNotFound){
 				this.add(new Table(name));
 			}
-			return this.tables[name];
+			return this.tables[name] || null;
 		},
 		
 		/**
@@ -184,7 +196,7 @@
 		 */
 		request: function(hidden){
 			hidden = hidden || false;
-			var ts = this._getPostData();
+			var ts = this._getPostData(this.tables, true);
 			if (YAHOO.lang.isNull(ts)){ return; }
 			Brick.util.Connection.sendCommand(this.name, 'js_data', {
 				hidden: hidden,
@@ -207,15 +219,6 @@
 		isFill: function(tables){
 			var ts = this._getPostData(tables);
 			return YAHOO.lang.isNull(ts); 
-		},
-		
-		report: function(){
-			var s = "DataSet<br />";
-			s += "name: "+this.name+", prefix: "+this.prefix+"<br />";
-			for (var nn in this.tables){
-				s += this.tables.report();
-			}
-			return s;
 		}
 	};
 	
@@ -260,12 +263,31 @@
 		};
 		
 		/**
+		 * Очистить таблицу от данных.
+		 * 
+		 * @method clear
+		 */
+		this.clear = function(){
+			_rowsparam.clear();
+		};
+		
+		this.countRowsParam = function(){
+			return _rowsparam.count();
+		};
+		
+		/**
 		 * 
 		 */
 		this.findRows = function(exp){
 			return _rowsparam.findRows(exp);
 		};
 		
+		/**
+		 * Создать и вернуть новую запись в таблице.
+		 * 
+		 * @method newRow
+		 * @return {Row} Новая запись
+		 */
 		this.newRow = function(){
 			var cols = this.columns.getArray();
 			var data = {};
@@ -298,19 +320,39 @@
 		}; 
 
 		/**
-		 * True - таблица заполнена и в ней не изменялись данные
+		 * Указать, актуальны ли данные в этой таблицы, если нет, то есть
+		 * необходимость запросить сервер на ее обновление.
+		 * 
+		 * @method isFill
+		 * @return {Boolean} Если True, таблицу необходимо обновить.
 		 */
 		this.isFill = function(){
 			var pd = this.getPostData();
 			return YAHOO.lang.isNull(pd); 
 		};
 
+		/**
+		 * Получить коолекцию записей по определенным параметрам.
+		 * @method getRows
+		 * @param {Object} param Параметры коллекции, так же является
+		 * идентификатором ее.
+		 * @param {Object} overparam Дополнительные параметры коллекции
+		 * @return {Rows}
+		 */
 		this.getRows = function(param, overparam){
 			return _rowsparam.getRows(param, overparam);
 		};
 		
+		this.getAllRows = function(){
+			return _rowsparam.getAllRows();
+		};
+
 		this.removeNonParam = function(param){
 			_rowsparam.removeNonParam(param);
+		};
+		
+		this.removeByParam = function(param){
+			_rowsparam.removeByParam(param);
 		};
 		
 		this.update = function(o){
@@ -321,22 +363,19 @@
 			_recycleclear = false;
 		};
 		
+		/**
+		 * Применить изменения в таблицы, тем самым указав DataSet 
+		 * что ее необходимо обновить запросом на сервер. 
+		 * 
+		 * @method applyChanges
+		 */
 		this.applyChanges = function(){
 			_rowsparam.applyChanges();
 		};
 		
-		this.report = function(){
-			var s = "Table: "+this.name+"<br />";
-			s += "Columns: ";
-			var cols = this.columns.getArray();
-			for (var i=0;i<cols.length;i++){
-				s += cols[i].name+" ";
-			}
-			s += _rowsparam.report();
-			
-			return s;
+		this.resetFlags = function(){
+			_rowsparam.resetFlags();
 		};
-		
 	};
 	
 	var Column = function(name){ 
@@ -406,41 +445,94 @@
 			data['id'] = 'nn'+(_globalRowId++);
 			_isnew = true;
 		}
+		
+		/**
+		 * Идентификатор записи
+		 * 
+		 * @property id
+		 * @type String
+		 */
 		this.id = data['id'];
+		
+		/**
+		 * Данные записи
+		 * @property cell
+		 * @type Object
+		 */
 		this.cell = data;
 		
+		/**
+		 * Указывает, является ли запись новой
+		 * @method isNew
+		 * @return {Boolean} Возвращает True, если запись новая, иначе False
+		 */
 		this.isNew = function(){ return _isnew; };
+		
+		/**
+		 * Указывает, были ли изменены данные в записи
+		 * @method isUpdate
+		 * @return {Boolean} Возвращает True, если данные записи
+		 * были изменены, иначе False
+		 */
 		this.isUpdate = function(){ return _isupdate; };
+		
+		/**
+		 * Указывает, были ли какие либо изменения в записи 
+		 * (удалена, обновлена или новая). Метод необходим для
+		 * определения необходимости отправить эту запись серверу.
+		 * 
+		 * @method isApplyChanges
+		 * @return {Boolean} Возвращает True, если запись
+		 * была изменена, иначе False
+		 */
 		this.isApplyChanges = function(){ return _applychanges; };
+		
+		/**
+		 * Указывает, помечена ли запись на удаление
+		 * @method isRemove
+		 * @return {Boolean} 
+		 */
 		this.isRemove = function(){ return _isremove; };
+		
+		/**
+		 * Указывает, помечена ли запись как восстановленая
+		 * @method isRestore
+		 * @return {Boolean} 
+		 */
 		this.isRestore = function(){ return _isrestore; };
+		
+		/**
+		 * Применить изменения в записи, тем самым подтвердив то,
+		 * что запись необходимо актуализировать на сервере.
+		 * @method applyChanges
+		 */
 		this.applyChanges = function(){
 			if (this.isNew() || this.isUpdate() || this.isRemove() || this.isRestore()){
 				_applychanges = true; 
 			}
 		};
 		
-		this.report = function(){
-			var s = "Row: id="+this.id+" cell={";
-			for (var nn in this.cell){
-				s += nn + "="+ YAHOO.lang.dump(this.cell[nn])+", ";
-			}
-			s += "} flag:";
-			if (this.isNew()){ s += " new ";}
-			if (this.isUpdate()){ s += " update ";}
-				
-			s += "\n";
-			return s;
-		};
-		
+		/**
+		 * Отметить флаг состояния записи: удалена
+		 * @method remove
+		 */
 		this.remove = function(){
 			_isremove = true;
 		};
 		
+		/**
+		 * Отметить флаг состояния записи: восстановлена
+		 * @method restore
+		 */
 		this.restore = function(){
 			_isrestore = true;
 		};
-
+		
+		/**
+		 * Сравнить совпадение данных выражения с данными записи. 
+		 * @method checkExpression
+		 * @param {Object} exp Данные выражения
+		 */
 		this.checkExpression = function(exp){
 			for (var nn in exp){
 				if (this.cell[nn] != exp[nn]){ return false; }
@@ -457,7 +549,59 @@
 			}else if (this.isUpdate()){ flag = 'u'; }
 			return { f: flag, d: this.cell };
 		};
+
+		/**
+		 * Сброс всех флагов указывающих на изменения данных в строке.
+		 * 
+		 * @method resetFlags
+		 */
+		this.resetFlags = function(){
+			_isnew = false;
+			_applychanges = false;
+			_isupdate = false;
+			_isremove = false;
+			_isrestore = false;
+		};
 		
+		/**
+		 * Удалить данные полей, при этом не удалять поле id и те, что 
+		 * указаны в параметре noneRemove. <br>
+		 * Зачастую бывает необходимо отправить на сервер изменения в
+		 * полях записи, но при этом не отправлять в запросе все поля. 
+		 * Как раз для этих случаев необходимо вызывать этот метод.  
+		 * 
+		 * @method clearFields
+		 * @param {String} noneRemove Поля, которые необходимо оставить. 
+		 * Указываются через запятую.
+		 */
+		this.clearFields = function(noneRemove){
+			noneRemove = noneRemove || "";
+			var arr = noneRemove.split(",");
+			var newCell = {};
+			for (var nn in this.cell){
+				if (nn == 'id'){
+					newCell[nn] = this.cell[nn];
+				}else{
+					var flagRemove = true;
+					for (var i=0;i<arr.length;i++){
+						if (nn == YAHOO.lang.trim(arr[i])){
+							flagRemove = false;
+							break;
+						}
+					}
+					if (!flagRemove){
+						newCell[nn] = this.cell[nn];
+					}
+				}
+			}
+			this.cell = newCell;
+		};
+		
+		/**
+		 * Обновить данные в записи.
+		 * @method update
+		 * @param {Object} data
+		 */
 		this.update = function(data){
 			var newval, oldval;
 			for (var nn in data){
@@ -470,6 +614,11 @@
 			}
 		};
 		
+		/**
+		 * Клонировать запись.
+		 * @method clone
+		 * @return {Row}
+		 */
 		this.clone = function(){
 			var data = {};
 			for (var nn in this.cell){
@@ -499,24 +648,74 @@
 	    return 0;
 	};
 	
+	/**
+	 * Коллекция записей
+	 * @class Rows
+	 * @constructor
+	 * @param {Object} param Параметры коллекции, так же является ее идентификатором.
+	 * @param {Object} overparam Дополнительные параметры коллекции.
+	 */
 	var Rows = function(param, overparam){
 		this.init(param, overparam);
 	};
+	
+	var toString = function(p){
+		var ret = '';
+		
+		if (YAHOO.lang.isArray(p) || YAHOO.lang.isObject(p)){
+			for (var n in p){
+				ret += toString(p[n]); 
+			}
+		} else if (YAHOO.lang.isFunction(p)){
+		} else {
+			ret += p + '';
+		}
+		return ret;
+	};
+	
+	/**
+	 * Получить хеш-идентификатор из объекта параметров коллекции.
+	 * 
+	 * @method getParamHash
+	 * @static
+	 * @param {Object} param Параметры коллекции записей.
+	 * @return {String} Хеш-идентификатор
+	 */
 	Rows.getParamHash = function(param){
 		param = param || {};
 		var arr = [];
 		for (var nn in param){
-			arr[arr.length] = nn + param[nn];
+			arr[arr.length] = nn + toString(param[nn]);
 		}
 		arr.sort(keysort);
 		return 'p'+arr.join('');
 	};
+	
 	Rows.prototype = {
 		init: function(param, overparam){
 			param = param || {};
 			overparam = overparam || {};
+			
+			/**
+			 * Параметры коллекции, так же является ее идентификатором.
+			 * @property param
+			 * @type Object
+			 */
 			this.param = param;
+
+			/**
+			 * Дополнительные параметры коллекции.
+			 * @property overparam
+			 * @type Object
+			 */
 			this.overparam = overparam;
+			
+			/**
+			 * Идентификатор коллекции, сформирован из param методом Rows.getParamHash().
+			 * 
+			 * @property key
+			 * @type String
+			 */
 			this.key = Rows.getParamHash(param);
 
 			var _rows = {};
@@ -525,14 +724,29 @@
 			
 			this.lastUpdateTime = function(){ return _lastUpdate; };
 			
+			/**
+			 * Очистить записи в коллекции, тем самым указав DataSet необходимость
+			 * обновить их запросом на сервер.
+			 * @method clear
+			 */
 			this.clear = function(){
 				_rows = {};
 				_count = 0;
 				_lastUpdate = 0;
 			};
 			
+			/**
+			 * Кол-во записей.
+			 * @method count
+			 * @return Integer
+			 */
 			this.count = function(){ return _count; };
 			
+			/**
+			 * Добавить запись в коллекцию.
+			 * @method add
+			 * @param {Row} row запись.
+			 */
 			this.add = function(row){
 				if (!_rows[row.id]){ _count++; }
 				_rows[row.id] = row;
@@ -540,6 +754,12 @@
 			
 			this.remove = function(row){ delete _rows[row.id]; };
 			
+			/**
+			 * Получить запись из коллекции по идентификатор row.id.
+			 * @method getById
+			 * @param {String} id Идентификатор записи.
+			 * @return {Row | null}
+			 */
 			this.getById = function(id){
 				if (_rows[id])
 					return _rows[id];
@@ -556,7 +776,12 @@
 				}
 				return null;
 			};
-			
+			/**
+			 * Получить запись из коллекции по индексу.
+			 * @method getByIndex
+			 * @param {Integer} index Индекс записи.
+			 * @return {Row | null}
+			 */
 			this.getByIndex = function(index){
 				var i = 0;
 				for (var id in _rows){
@@ -603,6 +828,15 @@
 				return rows;
 			};
 			
+			/**
+			 * Организовать проход по записям в коллекции.
+			 * 
+			 * @method foreach
+			 * @param {Function} func Функция обработчик прохода. Необходимо
+			 * определять с параметром, в него будет передаваться строка в процессе
+			 * прохода по коллекции. 
+			 * @param {Object} owner
+			 */
 			this.foreach = function(func, owner){
 				var fname = "__rows_foreach"+(globalForeachId++);
 				owner = owner || {};
@@ -615,14 +849,32 @@
 				delete owner[fname];
 			};
 
-			this.getValues = function(){
-				var data = [];
+			/**
+			 * Получить массив записей с их данными.
+			 * @method getValues
+			 * @return {Array}
+			 */
+			this.getValues = function(from, count){
+				
+				from = from || 0;
+				count = count || 9999999;
+				
+				var d = [];
+				var i=0;
 				for (var id in _rows){
-					data[data.length] = _rows[id].cell;
+					if (i >= from && d.length < count){
+						d[d.length] = _rows[id].cell;
+					}
+					i++;
 				}
-				return data;
+				return d;
 			};
 			
+			/**
+			 * Получить массив записей
+			 * @method getArray
+			 * @return {[Row]}
+			 */
 			this.getArray = function(){
 				var data = [];
 				for (var id in _rows){
@@ -653,18 +905,6 @@
 				return null;
 			};
 			
-			this.report = function(){
-				var s = "Rows: ";
-				for (var nn in this.param){
-					s += nn+": "+this.param[nn];
-				}
-				s += "\n";
-				for (var id in _rows){
-					s += _rows[id].report();
-				}
-				return s;
-			};
-			
 			this.update = function(data){
 				this.clear();
 				var i, row;
@@ -675,6 +915,17 @@
 				_lastUpdate =  Math.round(((new Date()).getTime()/1000));
 			};
 			
+			this.resetFlags = function(){
+				for (var id in _rows){
+					_rows[id].resetFlags();
+				}
+			};
+			
+			/**
+			 * Клонировать коллекцию.
+			 * @method clone
+			 * @return {Rows}
+			 */
 			this.clone = function(){
 				var rows = new Rows(this.param);
 				var data = [];
@@ -704,6 +955,7 @@
 	/**
 	 * Коллекция коллекций записей в таблице. Идентификатором коллекции 
 	 * является набор параметров
+	 * @class RowsParam
 	 */
 	var RowsParam = function(){
 		this.init();
@@ -718,6 +970,7 @@
 			
 			/**
 			 * Удаление всех rows не соотвествующих param
+			 * @method removeNonParam
 			 */
 			this.removeNonParam = function(param){
 				var _newrows = {};
@@ -731,18 +984,39 @@
 			};
 			
 			/**
+			 * Удаление всех rows соответствующих param
+			 * 
+			 * @method removeByParam
+			 */
+			this.removeByParam = function(param){
+				var key = Rows.getParamHash(param);
+				
+				if (_rows[key]){
+					delete _rows[key];
+					_count--;
+				}
+			};
+			
+			/**
 			 * Получить коллекцию записей
+			 * 
+			 * @method getRows
 			 * @param param 
 			 * @param overparam
 			 * @return
 			 */
 			this.getRows = function(param, overparam){
 				var key = Rows.getParamHash(param);
+
 				if (!_rows[key]){
 					_rows[key] = new Rows(param, overparam);
 					_count++;
 				}
 				return _rows[key];
+			};
+			
+			this.getAllRows = function(){
+				return _rows;
 			};
 			
 			this.getLastUpdateRows = function(){
@@ -778,7 +1052,6 @@
 			this.findRows = function(exp){
 				return this.findRow(exp); 
 			};
-
 			
 			this.update = function(o){
 				var di, i, rows;
@@ -790,7 +1063,9 @@
 			};
 			
 			this.clear = function(){
-				for(var nn in _rows){_rows[nn].clear();}				
+				for(var nn in _rows){
+					_rows[nn].clear();
+				}
 			};
 			
 			this.applyChanges = function(){
@@ -812,28 +1087,26 @@
 				return null;
 			};
 			
-			this.report = function(){
-				var s = "Parameters Row: <br />";
+			this.resetFlags = function(){
 				for(var nn in _rows){
-					s += _rows[nn].report();
-				}
-				return s;
+					_rows[nn].resetFlags();
+				}				
 			};
+
 		}
 	};
-
 
 	
 	Brick.util.data.byid.DataSet = DataSet;
 	Brick.util.data.byid.Table = Table;
 	Brick.util.data.byid.Row = Row;	
 
-})();
+};
 
+// Реализация первых версий
 (function(){
 	Brick.namespace('util.Data');
 	
-	/* * * * * * * * * * * * * Table * * * * * * * * * * */
 	var Table = function(name){
 		this.init(name);
 	};
@@ -978,8 +1251,6 @@
 	
 	Brick.util.Data.DataSet = DataSet;
 
-
-	/* * * * * * * * * * * * * Tree * * * * * * * * * * */
 	var TreeNode = function(id, pid, data){
 		this.init(id, pid, data);
 	};

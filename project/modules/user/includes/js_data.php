@@ -3,19 +3,19 @@
  * Обработка запросов DataSet 
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage User
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $brick = Brick::$builder->brick;
 
 $mod = Brick::$modules->GetModule('sys');
-$modum = Brick::$modules->GetModule('user');
+$modUser = Brick::$modules->GetModule('user');
+$userManager = $modUser->GetUserManager();
 $ds = $mod->getDataSet();
-$um = $modum->GetUserManager();
 
 $ret = new stdClass();
 $ret->_ds = array();
@@ -27,7 +27,7 @@ foreach ($ds->ts as $ts){
 		switch ($ts->nm){
 			case 'user':
 				foreach ($tsrs->r as $r){
-					if ($r->f == 'u'){ $um->UserSave($r->d); }
+					if ($r->f == 'u'){ $userManager->ChangeProfile($r->d); }
 				}
 				break;
 		}
@@ -47,16 +47,16 @@ foreach ($ds->ts as $ts){
 		$rows = null;
 		switch ($ts->nm){
 			case 'user':
-				$rows = $um->UserInfo($tsrs->p->id, $tsrs->p->unm);
+				$rows = $userManager->UserInfo($tsrs->p->id, $tsrs->p->unm);
 				break;
 			case 'userlist':
-				$rows = $um->UserList($tsrs->p->page, $tsrs->p->limit);
+				$rows = $userManager->UserList($tsrs->p->page, $tsrs->p->limit);
 				break;
 			case 'usercount':
-				$rows = $um->UserCount();
+				$rows = $userManager->UserCount();
 				break;
 			case 'modules':
-				$rows = $um->ModuleList();
+				$rows = $userManager->ModuleList();
 				break;
 		}
 		if (!is_null($rows)){

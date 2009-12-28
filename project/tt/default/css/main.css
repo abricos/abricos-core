@@ -17,7 +17,9 @@ body {
 	font-size: 82%;
 	color: #333;
 }
-
+table, tr, td, div, ul, ol, li, p, h1, h2, h3, h4, h5, h6	{
+	text-align: left;
+}
 #hd .logo {
 	color: #090;
 	margin: 30px 0 10px 10px; *

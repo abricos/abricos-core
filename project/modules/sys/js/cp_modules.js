@@ -1,7 +1,7 @@
 /**
 * @version $Id: cp_man_profile.js 19 2009-06-10 20:01:29Z AKuzmin $
-* @package CMSBrick
-* @copyright Copyright (C) 2008 Brick CMS. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 

@@ -1,11 +1,11 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Ajax
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $mod = new CMSModuleAjax();
@@ -13,7 +13,7 @@ CMSRegistry::$instance->modules->Register($mod);
 
 /**
  * Модуль обработки AJAX запросов
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Ajax
  */
 class CMSModuleAjax extends CMSModule{

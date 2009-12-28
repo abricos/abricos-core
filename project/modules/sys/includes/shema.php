@@ -3,25 +3,18 @@
  * Схема таблиц данного модуля.
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$cms = CMSRegistry::$instance;
-
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$svers = $cms->modules->moduleUpdateShema->serverVersion;
-$db = $cms->db;
+$updateManager = CMSRegistry::$instance->modules->updateManager; 
+$db = CMSRegistry::$instance->db;
 $pfx = $db->prefix;
-
-$install = false;
-
-if (version_compare($svers, "0.0.0", "==")){
-	$install = true;
-	
+if ($updateManager->isInstall()){
 	$db->query_write("
 		CREATE TABLE IF NOT EXISTS `".$pfx."content` (
 		  `contentid` int(8) unsigned NOT NULL auto_increment,
@@ -35,7 +28,7 @@ if (version_compare($svers, "0.0.0", "==")){
 
 	$mainpage = "
 <h1>Добро пожаловать!</h1>
-<p>Поздравляем! Система управления web-контентом Brick CMS успешно установлена на ваш сайт.</p>
+<p>Поздравляем! Платформа <a href='http://abricos.org'>Abricos</a> успешно установлена на ваш сайт.</p>
 <p>Спасибо за то, что выбрали наш продукт.</p>
 <p>С чего начать?</p>
 <h3>Изменение учетной записи пользователя по умолчанию.</h3>
@@ -46,10 +39,10 @@ if (version_compare($svers, "0.0.0", "==")){
 <li>В левом меню кликните на <strong>Пользователи</strong> и в списке, напротив единственной учетной записи admin, нажмите <strong>Редактировать</strong>.</li>
 <li>Смените пароль и e-mail, нажмите сохранить.</li>
 </ol>
-<p>Полную документацию по Brick CMS смотрите на <a href=\"http://cmsbrick.ru\">официальном сайте</a></p>
+<p>Полную документацию по Abricos смотрите на <a href='http://abricos.org'>официальном сайте</a></p>
 	";
 	$about = "
-<h1>О проекте</h1>\n<p><a href='http://cmsbrick.ru'>Brick CMS</a> - это самая современная на сегодняшний день система управления web-контентом.</p>	
+<h1>О проекте</h1>\n<p><a href='http://abricos.org'>Abricos</a> - это самая современная на сегодняшний день система управления web-контентом.</p>	
 	";
 	
 	$db->query_write("
@@ -99,6 +92,7 @@ if (version_compare($svers, "0.0.0", "==")){
 		  KEY `username` (`username`)
 		)".$charset
 	);
+	
 	// добавление в таблицу администратора
 	$db->query_write("
 		INSERT INTO `".$pfx."user` (`usergroupid`, `username`, `password`, `email`, `joindate`, `lastvisit`, `salt`) VALUES
@@ -132,10 +126,6 @@ if (version_compare($svers, "0.0.0", "==")){
 		  PRIMARY KEY  (`pwdreqid`)
 		)".$charset
 	);
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * */
-if (version_compare($svers, "1.0.2", "<")){
 
 	// Кеш собранных кирпичей
 	$db->query_write("
@@ -233,6 +223,7 @@ if (version_compare($svers, "1.0.2", "<")){
 		  `language` char(2) NOT NULL DEFAULT 'ru',
 		  `metakeys` varchar(250) NOT NULL DEFAULT '' COMMENT 'Описание',
 		  `metadesc` varchar(250) NOT NULL DEFAULT '' COMMENT 'Описание',
+		  `mods` TEXT NOT NULL,
 		  `usecomment` tinyint(1) unsigned NOT NULL default '0',
 		  `dateline` int(10) unsigned NOT NULL default '0',
 		  `deldate` int(10) unsigned NOT NULL default '0',
@@ -240,122 +231,59 @@ if (version_compare($svers, "1.0.2", "<")){
 		)".$charset
 	);
 	
-	if (!$install){
-		
-		$db->query_write("
-			ALTER TABLE `".$pfx."user` 
-				ADD `realname` VARCHAR( 150 ) NOT NULL DEFAULT '' AFTER `email`,
-				ADD `sex` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT '0' AFTER `realname`,
-				ADD `homepagename` VARCHAR( 150 ) NOT NULL AFTER `sex`
-		");
-		
-		// экспорт старых фраз
-		$ins = array();
-		$rows = $db->query_read("SELECT name, phrase	FROM ".$pfx."phrase");
-		while (($row = $this->registry->db->fetch_array($rows))){
-			$mod = ""; $name = ""; 
-			switch ($row['name']){
-				case "site_name": $mod = "sys"; $name = "site_name"; break; 
-				case "site_title": $mod = "sys"; $name = "site_title"; break; 
-				case "site_mt": $mod = "sys"; $name = "meta_title"; break; 
-				case "site_mk": $mod = "sys"; $name = "meta_keys"; break; 
-				case "site_md": $mod = "sys"; $name = "meta_desc"; break;
-				case "site_email_admin": $mod = "sys"; $name = "admin_mail"; break; 
-				case "mduser_reg_mailconf": $mod = "user"; $name = "reg_mailconf"; break; 
-				case "mduser_reg_mailconf_subj": $mod = "user"; $name = "reg_mailconf_subj"; break; 
-				case "mduser_pwdreq_changemail": $mod = "user"; $name = "pwd_mailchange"; break; 
-				case "mduser_pwdreq_changemail_subj": $mod = "user"; $name = "pwd_mailchange_subj"; break; 
-				case "mduser_pwdreq_mail": $mod = "user"; $name = "pwd_mail"; break; 
-				case "mduser_pwdreq_mail_subj": $mod = "user"; $name = "pwd_mail_subj"; break; 
-				case "_t_overmt": $mod = "sys"; $name = "meta_over"; break;
-				case "_t_overjs": $mod = "sys"; $name = "js_over"; break;
-				case "_t_logo": $mod = "sys"; $name = "logo"; break;
-				case "_t_lcol_adsense": $mod = "sys"; $name = "col_adsense"; break;
-			}
-			if (!empty($name)){
-				array_push($ins, "(
-					'".bkstr($mod)."',
-					'".bkstr($name)."',
-					'".bkstr($row['phrase'])."',
-					'ru')
-				");
-			}
-		}
-		if (!empty($ins)){
-			$db->query_write("
-				INSERT INTO ".$pfx."sys_phrase (module, name, phrase, language) VALUES
-				".implode(",", $ins)."
-			");
-		}
-		// далее удаление таблицы старой таблицы - phrase
-		
-		// перенос данных из старой таблицы
-		$db->query_write("
-			INSERT INTO ".$pfx."sys_menu 
-				(menuid, parentmenuid, menutype, name, title, descript, link, language, menuorder) 
-				SELECT
-					menuid, parentmenuid, IF(BIT_LENGTH(link)>0,1,0),
-					name, phrase, title, link, 'ru', menuorder 
-				FROM ".$pfx."menu
-				WHERE deldate=0 
-		");
-		
-		// перенос данных из старой таблицы
-		$db->query_write("
-			INSERT INTO ".$pfx."sys_page 
-				(pageid, menuid, contentid, pagename, title, metakeys, metadesc, dateline, language) 
-				SELECT
-					pageid, menuid, contentid, pagename, title, metakeys, metadesc, dateline, 'ru'
-				FROM ".$pfx."page
-				WHERE deldate=0 
-		");
-		
-		$db->query_write("DROP TABLE IF EXISTS `".$pfx."config`");
-		$db->query_write("DROP TABLE IF EXISTS `".$pfx."cenzura`");
-	}else{
-		// инсталяция, внесение данных 
-		$db->query_write("
-			INSERT INTO `".$pfx."sys_menu` (`menuid`, `parentmenuid`, `menutype`, `name`, `title`, `descript`, `link`, `language`, `menuorder`, `level`, `off`, `dateline`, `deldate`) VALUES
-			(1, 0, 1, '', 'Главная', 'Главная страница сайта Brick CMS', '/', 'ru', 0, 0, 0, 0, 0),
-			(2, 0, 0, 'about', 'О проекте', '', '', 'ru', 0, 0, 0, 0, 0)
-		");
-		
-		$db->query_write("
-			INSERT INTO `".$pfx."sys_page` (`pageid`, `menuid`, `brickid`, `contentid`, `pagename`, `title`, `language`, `metakeys`, `metadesc`, `usecomment`, `dateline`, `deldate`) VALUES
-			(1, 0, 0, 1, 'index', '', 'ru', '', '', 0, 1241810741, 0),
-			(2, 2, 0, 2, 'index', '', 'ru', '', '', 0, 1241845327, 0)
-		");
-
-		// Настройки по умолчанию
-		$db->query_write("
-			INSERT INTO `".$pfx."sys_phrase` (`module`, `name`, `phrase`, `language`) VALUES
-			('sys', 'style', 'default', 'ru'),
-			('sys', 'site_name', 'Brick CMS', 'ru'),
-			('sys', 'site_title', 'система управления web-контентом', 'ru'),
-			('sys', 'admin_mail', '', 'ru')
-		");
-		
-	}
-}
-
-if (version_compare($svers, "1.0.4", "<")){
-	// возможность использовать кирпичи модулей на страницах
 	$db->query_write("
-		ALTER TABLE `".$pfx."sys_page` 
-			ADD `mods` TEXT NOT NULL  AFTER `metadesc`
+		INSERT INTO `".$pfx."sys_menu` (`menuid`, `parentmenuid`, `menutype`, `name`, `title`, `descript`, `link`, `language`, `menuorder`, `level`, `off`, `dateline`, `deldate`) VALUES
+		(1, 0, 1, '', 'Главная', 'Главная страница сайта Abricos', '/', 'ru', 0, 0, 0, 0, 0),
+		(2, 0, 0, 'about', 'О проекте', '', '', 'ru', 0, 0, 0, 0, 0)
+	");
+	
+	$db->query_write("
+		INSERT INTO `".$pfx."sys_page` (`pageid`, `menuid`, `brickid`, `contentid`, `pagename`, `title`, `language`, `metakeys`, `metadesc`, `usecomment`, `dateline`, `deldate`) VALUES
+		(1, 0, 0, 1, 'index', '', 'ru', '', '', 0, 1241810741, 0),
+		(2, 2, 0, 2, 'index', '', 'ru', '', '', 0, 1241845327, 0)
+	");
+
+	// Настройки по умолчанию
+	$db->query_write("
+		INSERT INTO `".$pfx."sys_phrase` (`module`, `name`, `phrase`, `language`) VALUES
+		('sys', 'style', 'default', 'ru'),
+		('sys', 'site_name', 'Abricos', 'ru'),
+		('sys', 'site_title', 'система управления web-контентом', 'ru'),
+		('sys', 'admin_mail', '', 'ru')
 	");
 }
 
-if (version_compare($svers, "1.0.5", "<")){
-	// возможность выбирать шаблон
-	
-	// Удалить временные файлы в связи с новыми версиями js библиотек
-	$chFiles = glob(CWD."/temp/*.gz");
-	foreach ($chFiles as $rfile){
-		@unlink($rfile);
-	}
-	
-	
+// обновление для платформы Abricos версии 0.5
+if ($updateManager->isInstall() || $updateManager->serverVersion == '1.0.4'){
+
+	// Политика безопасности
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS ".$pfx."sys_permission (
+		  `permissionid` int(10) unsigned NOT NULL auto_increment,
+		  `module` varchar(50) NOT NULL DEFAULT '' COMMENT 'Имя модуля',
+		  `subject` TEXT NOT NULL COMMENT 'Группы пользователей с префиксом @, и/или пользователи, через запятую',
+		  `action` TEXT NOT NULL COMMENT 'Действия через запятую',
+		  `status` tinyint(1) unsigned NOT NULL default 0 COMMENT '1 - разрешено, 0 - запрещено',
+		  PRIMARY KEY  (`permissionid`)
+		)".$charset
+	);
+
+	CMSRegistry::$instance->modules->GetModule('user')->permission->InstallDefault();
+}
+
+if ($updateManager->isUpdate('0.5.1')){
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS ".$pfx."userconfig (
+		  `userconfigid` int(10) unsigned NOT NULL auto_increment,
+		  `userid` int(10) unsigned NOT NULL,
+		  `module` varchar(50) NOT NULL DEFAULT '' COMMENT 'Имя модуля',
+		  `optname` varchar(25) NOT NULL DEFAULT '' COMMENT 'Имя параметра',
+		  `optvalue` TEXT NOT NULL COMMENT 'Значение параметра',
+		  PRIMARY KEY  (`userconfigid`),
+		  KEY `module` (`module`),
+		  KEY `userid` (`userid`)
+	  )".$charset
+	);
 }
 
 ?>

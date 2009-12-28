@@ -3,11 +3,11 @@
  * Формирование базовых данных для работы системы BrickJSEngine
  * 
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $brick = Brick::$builder->brick;
@@ -25,6 +25,16 @@ $param->var['s'] = Brick::$session->sessionHash;
 $template = Brick::$builder->phrase->Get('sys', 'style', 'default');
 $param->var['ttname'] = $template;
 $param->var['jsyui'] = CMSModuleSys::$YUIVersion;
+
+
+if (CMSRegistry::$instance->modules->customTakelink){
+	$modsinfo = CMSRegistry::$instance->modules->modulesInfo;
+	$arr = array(); 
+	foreach ($modsinfo as $key => $value){
+		array_push($arr, "'".$key."'");
+	}
+	$param->var['enmod'] = implode($arr, ',');
+}
 
 $key = 0;
 $dir = dir(CWD."/modules");

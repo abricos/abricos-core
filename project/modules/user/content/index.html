@@ -23,12 +23,7 @@
 	</div>
 	
 	<script language='JavaScript' type='text/javascript' charset='utf-8'>
-		Brick.Loader.add({mod:[{name:'user',files:['cpanel.js']}],
-	    onSuccess: function() {
-	    	var d=#mlist#;
-	    	Brick.User.CP.Manager.initialize(d);
-		  }
-		})
+		Brick.Component.API.fire('user', 'api', 'showControlPanel', 'bk_user_cp');
 	</script> 
 	
 [/bkvar]

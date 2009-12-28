@@ -1,8 +1,8 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -27,14 +27,33 @@ $config['Server']['username'] = 'root';
 $config['Server']['password'] = '';
 
 $config['Misc']['cookieprefix'] = 'cms_';
-$config['Misc']['cookietimeout'] = 86400 * 31;
+$config['Misc']['cookietimeout'] = 86400 * 14;
 
 $config['Misc']['charset'] = "utf-8";
 $config['Misc']['language'] = "ru";
 
 $config['Misc']['brick_cache'] = false;
 
-$config['Json']['password'] = "jsonpass";
+// Режим работы платформы для разработчика 
+$config['Misc']['develop_mode'] = false;
 
+$config['JsonDB']['use'] = false;
+$config['JsonDB']['password'] = "";
+
+// Пример настройки работы модулей
+/*
+$config['Takelink'] = array(
+	"webos" => array(
+		"module" => "webos"
+	),
+	"calendar" => array(
+		"module" => "webos",
+		"enmod" => array("calendar")
+	),
+	"company" => array(
+		"enmod" => array("webos", "company", "calendar")
+	)
+);
+*/
 
 ?>

@@ -1,19 +1,19 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $mod = new CMSModuleSys();
 CMSRegistry::$instance->modules->Register($mod);
 
 /**
- * Системный модуль платформы Brick CMS
- * @package CMSBrick
+ * Системный модуль платформы Abricos
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSModuleSys extends CMSModule {
@@ -54,7 +54,7 @@ class CMSModuleSys extends CMSModule {
 	public static $YUIVersion = "2.8.0r4";
 		
 	public function CMSModuleSys(){
-		$this->version = "1.0.4";
+		$this->version = "0.5.1";
 		$this->name = "sys";
 	}
 	
@@ -75,26 +75,43 @@ class CMSModuleSys extends CMSModule {
 		$adress = $this->registry->adress;
 		$modules = $this->registry->modules;
 		
-		$modman = $this;
-		if ($adress->level > 0){
-			foreach ($modules->modulesInfo as $key => $info){
-				if ($adress->dir[0] != $info['takelink']){ continue; }
-				$modman = $modules->RegisterByName($key);
-				if (empty($modman)){
-					$this->registry->SetPageStatus(PAGESTATUS_500);
-				}
-				break;
+		$flagDevelopPage = $adress->level >= 2 && 
+			$adress->dir[1] == 'develop' &&
+			CMSRegistry::$instance->config['Misc']['develop_mode'];
+						
+		$modman = null;
+		
+		foreach ($modules->modulesInfo as $key => $info){
+			// разрешить страницу для разработчика модуля
+			if ($flagDevelopPage){
+				if ($adress->dir[0] != $key){ continue; }
+			}else{
+				if ($adress->dir[0] != $info['takelink'] || empty($info['takelink'])){ continue; }
 			}
+			$modman = $modules->RegisterByName($key);
+			if (empty($modman)){
+				$this->registry->SetPageStatus(PAGESTATUS_500);
+			}
+			break;
+		}
+		if (is_null($modman)){
+			foreach ($modules->modulesInfo as $key => $info){
+				if ($info['takelink'] == '__super'){
+					$modman = $modules->RegisterByName($key);
+					break;
+				}
+			}
+		}
+		if (is_null($modman)){
+			$modman = $this;
 		}
 		
 		// имя кирпича
-		$contentName = $modman->GetContentName();
-		
-		/*
-		if ($modman == $this && $contentName == 'index'){
-			echo($contentName);
+		if ($flagDevelopPage){
+			$contentName = 'develop';
+		}else{
+			$contentName = $modman->GetContentName();
 		}
-		/**/
 		
 		Brick::$modman = $modman;
 		
@@ -139,6 +156,15 @@ class CMSModuleSys extends CMSModule {
 	}
 	
 	public function GetContentName(){
+		$adress = $this->registry->adress;
+		
+		// разрешить страницу для разработчика модуля
+		if ($adress->level >= 1 
+			&& $adress->dir[0] == 'develop' 
+			&& $this->registry->config['Misc']['develop_mode']){
+			return 'develop';
+		}
+		
 		switch($this->registry->pageStatus){
 			case PAGESTATUS_404:
 				return '404';
@@ -193,12 +219,23 @@ class CMSModuleSys extends CMSModule {
 		}
 		return $arr;
 	}
-	
+
+	/**
+	 * Оправить сообщение на емайл
+	 * 
+	 */
+	public static function Notification($email, $subject, $message){
+		$mailer = Brick::$cms->GetMailer();
+		$mailer->Subject = $subject;
+		$mailer->MsgHTML($message);
+		$mailer->AddAddress($email);
+		$mailer->Send();
+	}
 }
 
 /**
  * Набор статичных функций SQL запросов
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSQSys {
@@ -219,12 +256,117 @@ class CMSQSys {
 	const BRICKPRM_PARAM = 9;
 	const BRICKPRM_CSSMOD = 6;
 	
+	public static function PermissionsByModule($modname){
+		$db = CMSRegistry::$instance->db;
+		$sql = "
+			SELECT 
+				permissionid as id,
+				subject as sbj,
+				action as act,
+				status as st
+			FROM ".$db->prefix."sys_permission
+			WHERE module='".bkstr($modname)."'
+		";
+		return $db->query_read($sql);
+	}
+	
+	public static function PermissionLoadRoles($user){
+		$db = CMSRegistry::$instance->db;
+		
+		$awhere = array();
+		$globalUserGroupId = $user['usergroupid'];
+		for ($i=0;$i<=$globalUserGroupId;$i++){
+			array_push($awhere, "subject LIKE '%#".$i."'");
+		}
+		
+		array_push($awhere, "subject LIKE '%$".$user['userid']."'");
+		
+		$sql = "
+			SELECT 
+				permissionid as id,
+				module as md,
+				subject as sbj,
+				action as act,
+				status as st
+			FROM ".$db->prefix."sys_permission
+			WHERE ".implode(' OR ', $awhere)."
+		";
+		return $db->query_read($sql);
+	}
+	
+	public static function PermissionInstall(CMSPermission $permission){
+		$db = CMSRegistry::$instance->db;
+		
+		foreach ($permission->defRoles as $role){
+			$subject = $role->SubjectToString();
+			$action = $role->ActionToString();
+			if (empty($subject) || empty($action)){
+				continue;
+			}
+			$sql = "
+				INSERT INTO ".$db->prefix."sys_permission (module, subject, action, status) VALUES (
+					'".$permission->module->name."',
+					'".bkstr($subject)."',
+					'".$action."',
+					'".bkint($role->status)."'
+				)
+			";
+			$db->query_write($sql);
+		}
+	}
+	
 	const FIELDS_PHRASE = "
 		phraseid as id,
 		module as mnm,
 		name as nm,
 		phrase as ph
 	";
+	
+	public static function UserConfigList(CMSDatabase $db, $module, $userid ){
+		$sql = "
+			SELECT
+				userconfigid as id,
+				optname as nm,
+				optvalue as vl
+			FROM ".$db->prefix."userconfig
+			WHERE userid=".bkint($userid)." AND module='".bkstr($module)."'
+		";
+		return $db->query_read($sql);
+	}
+	
+	public static function UserConfigInfo(CMSDatabase $db, $id){
+		$sql = "
+			SELECT
+				userid as uid,
+				optname as nm
+			FROM ".$db->prefix."userconfig
+			WHERE userconfigid=".bkint($id)."
+			LIMIT 1
+		";
+		return $db->query_first($sql);
+	}
+	
+	public static function UserConfigAppend(CMSDatabase $db, $module, $userid, $name, $value){
+		$sql = "
+			INSERT INTO ".$db->prefix."userconfig (module, userid, optname, optvalue) VALUES (
+				'".bkstr($module)."',
+				".bkint($userid).",
+				'".bkstr($name)."',
+				'".bkstr($value)."'
+			)
+		";
+		$db->query_write($sql);
+	}
+	
+	public static function UserConfigUpdate(CMSDatabase $db, $id, $name, $value){
+		$sql = "
+			UPDATE ".$db->prefix."userconfig
+			SET optname='".bkstr($name)."',
+				optvalue='".bkstr($value)."'
+			WHERE userconfigid=".bkint($id)."
+		";
+		$db->query_write($sql);
+	}
 	
 	public static function Phrase(CMSDatabase $db, $modname, $name){
 		$sql = "
@@ -731,7 +873,7 @@ class CMSQSys {
 /**
  * Набор статичных функций SQL запросов (старая версия)
  *  
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSqlQuerySys extends CMSBaseClass {
@@ -780,7 +922,7 @@ class CMSSqlQuerySys extends CMSBaseClass {
 /**
  * Элемент меню 
  * 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSMenuItem {
@@ -836,7 +978,7 @@ class CMSMenuItem {
 
 /**
  * Менеджер формирование структуры меню 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSMenuManager extends CMSMenuItem {

@@ -1,16 +1,16 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 /**
  * Элементы фразы
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSysPhraseItem {
@@ -57,7 +57,7 @@ class CMSSysPhraseItem {
  * 
  * Задача класса загружать запрашиваемые фразы. Если фразы в базе 
  * не найдены, то создание их и сохранение со значениями по умолчанию 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSysPhrase extends CMSBaseClass {

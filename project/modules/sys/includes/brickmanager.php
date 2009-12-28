@@ -1,17 +1,17 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 /**
  * Класс статичных функций и свойств. 
  * 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class Brick {
@@ -58,7 +58,7 @@ class Brick {
 	public static $modules = null;
 	
 	/**
-	 * Ядро движка Brick CMS
+	 * Ядро платформы Abricos
 	 *
 	 * @var CMSRegistry
 	 */
@@ -124,7 +124,7 @@ class Brick {
 /**
  * Конструктор страницы из кирпичей 
  * 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSysBrickBuilder {
@@ -599,7 +599,7 @@ class CMSSysBrickBuilder {
  * Загружает кирпичи и их параметры из базы данных, если они были изменены 
  * администратором сайта, либо с файловой системы
  * 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSysBrickManager {
@@ -736,7 +736,7 @@ class CMSSysBrickManager {
 /**
  * Параметры кирпича
  * 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSysBrickParam {
@@ -815,7 +815,7 @@ class CMSSysBrickParam {
 /**
  * Кирпич
  * 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSysBrick {
@@ -882,7 +882,7 @@ class CMSSysBrick {
 /**
  * Класс управления кирпичами исправленых администратором сайта
  *
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSysBrickCustomManager {

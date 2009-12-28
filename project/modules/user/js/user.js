@@ -1,224 +1,140 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos. All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-(function(){
-	Brick.namespace('User');
+/**
+ * @module User
+ * @namespace Brick.mod.user
+ */
 
-	var Dom, E,	L, W,	C, T, J, TId;
+var Component = new Brick.Component();
+Component.requires = {
+	mod:[
+	     {name: 'sys', files: ['container.js','form.js']},
+	     {name: 'user', files: ['api.js']}
+	]
+};
+Component.entryPoint = function(){
 	
-	var uniqurl = Brick.uniqurl;
-	var readScript = Brick.readScript;
-	var wWait = Brick.widget.WindowWait;
-	var elClear = Brick.elClear;
-	function connectFailure(o){ wWait.hide(); alert("CONNECTION FAILED!"); };
-	var connectCallback = {success: function(o) {	wWait.hide();	readScript(o.responseText);	}, failure: connectFailure };
-	var tSetVar = Brick.util.Template.setProperty;
-
-	Brick.Loader.add({
-    yahoo: ["connection","container"], 
-    onSuccess: function() { 
-			Dom = YAHOO.util.Dom;
-			E = YAHOO.util.Event;
-			L = YAHOO.lang;
-			W = YAHOO.widget;
-			C = YAHOO.util.Connect;
-			
-			T = Brick.util.Template['user']['user'];
-			Brick.util.Template.fillLanguage(T);
-			TId = new Brick.util.TIdManager(T);
-			
-			Brick.User.Manager.init();
-	  }
-	});
-
-	var url = '/ajax/query.html?md=user&bk=login&do=';
+	var Dom = YAHOO.util.Dom,
+		E = YAHOO.util.Event,
+		L = YAHOO.lang;
 	
-	function refreshPage(url){
-		wWait.show();
-		if (url){
-			window.location.href = url;
-			return;
-		}
-		window.location.reload(false);
-	}
-
-(function(){
+	var NS = this.namespace,
+		TMG = this.template,
+		TM = TMG.build(),
+		T = TM.data,
+		TId = TM.idManager;
 	
-	var globalPanel=null;
+	var API = NS.API;
 	
-	var loginpanel = function(obj){
-		this.fromActive = false;
-		this.init(obj);
-	};
-	loginpanel.prototype = {
-		init: function(obj){
-			
-			obj = obj || {};
-			obj['unm'] = obj['unm'] || '';
-			obj['pass'] = obj['pass'] || '';
-			obj['url'] = obj['url'] || '';
-			this.obj = obj;
+	/**
+	 * Блок информативной строки пользователя
+	 * 
+	 * @class UserBlockWidget
+	 * @constructor
+	 * @param {String} elId (optional) Идентификатор HTML элемента контейнера
+	 */
+	NS.UserBlockWidget = function(elId){
+		elId = elId || 'mod-user-userblock';
+		var div = Dom.get(elId);
+		if (L.isNull(div)){ return; }
 		
-			Brick.User.LoginPanel.active = this;
-			if (!L.isNull(globalPanel)){ globalPanel.destroy(); }
-	
-			var t = T['loginpanel'];
-	
-			var div = document.createElement('div');
-			div.innerHTML = t;
-	
-			var win = new YAHOO.widget.Panel(div, {zindex:1000, draggable: true, modal:true, visible:false});
-			win.render(document.body);
-			globalPanel = this.win = win;
-	
-			if (obj['unm'].length > 0){
-				this.el('username').value = obj['unm']; 
-				this.el('userpass').value = obj['pass'];
-				this.fromActive = true;
-			}
-			win.hideEvent.subscribe(function(){ __self.close(); });
-			win.show();
-			win.center();
-	
-			var __self = this;
-			E.on(div, 'click', function(e){
-				if (__self.clickEvent(E.getTarget(e))){ E.stopEvent(e); }
-			});
-			E.on(TId['loginpanel']['form'], 'submit', function(){ __self.send();});
-		},
-		el: function(name){
-			return Dom.get(TId['loginpanel'][name]);
-		},
-		clickEvent: function (el){
+		var usr = Brick.env.user;
+		div.innerHTML = usr.isRegistred() ? TM.replace('user',{'name': usr.name}) : T['guest'];  
+		
+		var __self = this;
+		E.on(div, 'click', function(e){
+			if (__self.onClick(E.getTarget(e))){ E.stopEvent(e); }
+		});
+	};
+	NS.UserBlockWidget.prototype = {
+		/**
+		 * Обработчик события клика мыши 
+		 * @param el
+		 * @return Boolean
+		 */
+		onClick: function (el){
 			switch(el.id){
-			case TId['loginpanel']['blogin']:
-				this.send();
+			case TId['guest']['blogin']: 
+				API.showLoginPanel(); 
 				return true;
-			case TId['loginpanel']['bcancel']:
-				this.close();
+			case TId['guest']['breg']:
+				API.showRegisterPanel();
 				return true;
-			case TId['loginpanel']['breg']:
-				Brick.User.Manager.register();
-				return true;
-			case TId['loginpanel']['bpwd']:
-				Brick.User.Manager.password();
+			case TId['user']['blogout']: 
+				API.userLogout(); 
 				return true;
 			}
 			return false;
+		}
+	};
+		
+	/**
+	 * Панель авторизации пользователя.<br>
+	 * Для авторизации использует метод <a href="Brick.mod.user.API.html#method_login">Brick.mod.user.API.login()</a>
+	 * 
+	 * @class LoginPanel
+	 * @extends Brick.widget.Panel
+	 * @constructor
+	 * @param {Object} param (optional) Дополнительные параметры панели.
+	 */
+	var LoginPanel = function(param){
+		this.param = L.merge({
+			'username': '', 'password': '', 'url': ''
+		}, param || {});
+		LoginPanel.superclass.constructor.call(this, {
+			modal: true, 
+			resize: false,
+			fixedcenter: true
+		});
+	};
+	
+	YAHOO.extend(LoginPanel, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(TId['loginpanel'][name]); },
+		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
+		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
+		initTemplate: function(){
+			return T['loginpanel'];
 		},
-		send: function(){
-			this.el('error').style.display = 'none';
-			wWait.show();
-			C.setForm(this.el('form'));
-			C.asyncRequest("POST", uniqurl(url+'login'), connectCallback);
-		},
-		result: function(d){
-			if (d.error.length > 0){
-				var err;
-				var un = this.el('username'); 
-				un.value = '';
-				un.focus();
-				this.el('userpass').value = '';
+		onLoad: function(){
+			var __self = this;
+			E.on(TId['loginpanel']['form'], 'submit', function(){ __self.send();});
+			
+			var p = this.param;
+			this.setelv('username', p['username']);
+			this.setelv('userpass', p['password']);
+			if (p['error'] > 0){
+				var lng = Brick.util.Language.getc('mod.user.loginpanel.error.srv');
 				var err = this.el('error');
 				err.style.display = "block";
-				err.innerHTML = d.error;
-			}else{
-				refreshPage(this.obj['url']);
+				err.innerHTML = lng[p['error']];
 			}
 		},
-		close: function(){
-			this.win.hide();
-		}
-	}
-	
-	Brick.User.LoginPanel = loginpanel;
-	Brick.User.LoginPanel.active = null;
-})();
-
-(function(){
-
-	Brick.User.Manager = function(){
-		return {
-			init: function(){
-				var div = Dom.get('mod-user-userblock');
-				if (L.isNull(div)){ return; }
-				
-				var usr = Brick.env.user, t=""; 
-				
-				if (usr.isRegistred()){
-					t = T['user'];
-					t = tSetVar(t, 'name', usr.name);
-					div.innerHTML = t;
-				}else{
-					div.innerHTML = T['guest'];
-				}
-				var __self = this;
-				E.on(div, 'click', function(e){
-					if (__self.clickEvent(E.getTarget(e))){ E.stopEvent(e); }
-				});
-			},
-			clickEvent: function (el){
-				switch(el.id){
-				case TId['guest']['blogin']:
-					this.login();
-					return true;
-				case TId['guest']['breg']:
-					this.register();
-					return true;
-				case TId['user']['blogout']:
-					this.logout();
-					return true;
-				}
-				return false;
-			},
-			login: function(obj){
-				new Brick.User.LoginPanel(obj);
-			},
-			logout: function(){
-				wWait.show();
-				C.asyncRequest("GET", uniqurl(url+'logout'), connectCallback); 
-			},
-			password: function(){
-				if (typeof Brick.User.Guest == 'undefined'){
-					wWait.show();
-					Brick.Loader.add({
-						mod:[{name: 'user', files: ['guest.js']}],
-				    onSuccess: function() {
-							wWait.hide();
-							Brick.User.Guest.Password.show();
-					  }
-					});
-				}else{
-					Brick.User.Guest.Password.show();
-				}
-			},
-			register: function(){
-				if (typeof Brick.User.Guest == 'undefined'){
-					wWait.show();
-					Brick.Loader.add({
-						mod:[{name: 'user', files: ['guest.js']}],
-				    onSuccess: function() {
-							wWait.hide();
-							Brick.User.Guest.Register.show();
-					  }
-					});
-				}else{
-					Brick.User.Guest.Register.show();
-				}
-			},
-			result: function(d){
-				if (d.t == 'login'){
-					Brick.User.LoginPanel.active.result(d);
-				}else if (d.t == 'logout'){
-					refreshPage(); 
-				}
+		send: function(){
+			API.userLogin(this.elv('username'), this.elv('userpass'));
+			this.close();
+		},
+		onClick: function(el){
+			var tp = TId['loginpanel']; 
+			switch(el.id){
+			case tp['blogin']:
+				this.send();
+				return true;
+			case tp['bcancel']: this.close(); return true;
+			case tp['breg']:
+				Brick.Component.API.fire('user', 'guest', 'showRegisterPanel');
+				return true;
+			case tp['bpwd']:
+				Brick.Component.API.fire('user', 'guest', 'showPwdRestPanel');
+				return true;
 			}
+			return false;
 		}
-	}();
-
-})();
-})();
+	});
+	
+	NS.LoginPanel = LoginPanel;
+	
+};

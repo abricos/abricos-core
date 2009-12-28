@@ -1,8 +1,8 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -22,7 +22,9 @@ class CMSSqlQuery extends CMSBaseClass {
 	public static function ModuleUpdateVersion(CMSDatabase $db, CMSModule $module){
 		$db->query_write("
 			UPDATE ".$db->prefix."module 
-				SET version='".bkstr($module->version)."'
+				SET 
+					version='".bkstr($module->version)."',
+					updatedate=".TIMENOW."
 			WHERE name='".bkstr($module->name)."'
 		");
 	}
@@ -31,10 +33,11 @@ class CMSSqlQuery extends CMSBaseClass {
 		$row = CMSSqlQuery::Module($db, $module->name);
 		if (empty($row)){
 			$sql = "
-				INSERT INTO ".$db->prefix."module (name, version, takelink) VALUES(
+				INSERT INTO ".$db->prefix."module (name, version, takelink, installdate) VALUES(
 					'".bkstr($module->name)."',
-					'0.0.0',
-					'".bkstr($module->takelink)."'
+					'0.0',
+					'".bkstr($module->takelink)."',
+					".TIMENOW."
 				)
 			";
 			$db->query_write($sql);
@@ -64,14 +67,33 @@ class CMSSqlQuery extends CMSBaseClass {
 			CREATE TABLE IF NOT EXISTS `".$db->prefix."module` (
 			  `moduleid` int(5) unsigned NOT NULL auto_increment,
 			  `name` varchar(50) NOT NULL default '',
-			  `version` varchar(20) NOT NULL default '0.0.0',
+			  `version` varchar(20) NOT NULL default '0.0',
 			  `disable` tinyint(1) unsigned NOT NULL default '0',
 			  `modorder` int(5) NOT NULL default 0,
 			  `takelink` varchar(50) NOT NULL default '',
+			  `installdate` int(10) unsigned NOT NULL default 0,
+			  `updatedate` int(10) unsigned NOT NULL default 0,
 			  PRIMARY KEY  (`moduleid`)
 			) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'"
 		);
-		$db->query_write("INSERT INTO cms_module (name, version, takelink) VALUES( 'sys', '0.0.0', '' )");
+		$db->query_write("
+			INSERT INTO ".$db->prefix."module (name, version, takelink, installdate) VALUES( 'sys', '0.0', '', ".TIMENOW.")
+		");
+	}
+	
+	public static function UpdateToAbricosPackage(CMSDatabase $db){
+		$db->query_write("
+			ALTER TABLE `".$db->prefix."module` 
+				ADD `installdate` int(10) unsigned NOT NULL default 0 AFTER `takelink`,
+				ADD `updatedate` int(10) unsigned NOT NULL default 0 AFTER `installdate`
+		");
+
+		$db->query_write("
+			UPDATE ".$db->prefix."module 
+				SET installdate=".TIMENOW."
+			WHERE name='sys'
+		");
+		
 	}
 	
 	public static function MenuFromAdress(CMSDatabase $db, CMSAdress $addres){

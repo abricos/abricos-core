@@ -1,16 +1,16 @@
 <?php
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 /**
  * Сессия пользователя
- * @package CMSBrick
+ * @package Abricos
  * @subpackage Sys
  */
 class CMSSysSession {
@@ -56,12 +56,24 @@ class CMSSysSession {
 	
 	public function CMSSysSession(CMSRegistry $registry){
 		$this->registry = $registry;
-		$this->sessionIdHash = md5($_SERVER['HTTP_USER_AGENT'] . $this->registry->ip_address);
+		
+		
+		// $this->sessionIdHash = md5($_SERVER['HTTP_USER_AGENT'] . $this->registry->ip_address);
+		// Изменено в связи с тем, что когда к серверу обращается flash загрузчик файлов, 
+		// то уже имеем в наличие другого пользователя 
+		$this->sessionIdHash = md5($this->registry->ip_address);
+		
 		$this->cookieTimeOut = intval($this->registry->config['Misc']['cookietimeout']);
 		$this->cookiePrefix = $this->registry->config['Misc']['cookieprefix'];
 		
 		$cookieName = $this->cookiePrefix.'sessionhash';
-		$this->sessionHash = $this->registry->input->clean_gpc('c', $cookieName, TYPE_STR);
+		// если сессия была передана GET запросом, то используем её
+		$getSession = $this->registry->input->clean_gpc('g', 'session', TYPE_STR);
+		if (empty($getSession)){
+			$this->sessionHash = $this->registry->input->clean_gpc('c', $cookieName, TYPE_STR);
+		}else{
+			$this->sessionHash = $getSession;
+		}
 		$session = CMSQSys::Session($this);
 		
 		if (empty($session)){
@@ -75,7 +87,6 @@ class CMSSysSession {
 
 		$expire = TIMENOW + $this->cookieTimeOut;
 		setcookie($cookieName, $this->sessionHash, $expire, '/');
-		// cms_setcookie($cookieName, $this->sessionHash, true, true);
 		
 		CMSQSys::SessionUserLastActiveUpdate($this);
 		$userinfo = CMSQSys::UserById($this->registry->db, $this->session['userid']);

@@ -1,8 +1,8 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -20,10 +20,12 @@ if (!defined('CWD')){
 require_once(CWD . '/includes/global_define.php');
 require_once(CWD . '/includes/functions.php');
 require_once(CWD . '/includes/cmsregistry.php');
+require_once(CWD . '/includes/cmspermission.php');
 
 $cms = new CMSRegistry();
 $cms->fetch_config();
 CMSRegistry::$instance = $cms;
+$cms->adress = new CMSAdress();
 
 if (empty($cms->config['Misc']['language'])){
 	$cms->config['Misc']['language'] = 'ru';

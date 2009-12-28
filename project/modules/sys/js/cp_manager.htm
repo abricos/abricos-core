@@ -1,12 +1,61 @@
 <!--{panel}-->
-<h1>Настройка сайта</h1>
 <div id="{i#id}" class="yui-navset">
 	<ul class="yui-nav">
 		<li class="selected"><a href="#{i#tabconfig}"><em>Общие настройки</em></a></li>
 		<li><a href="#{i#tabtemplate}"><em>Шаблон</em></a></li>
 	</ul>            
-  <div class="yui-content">
-	  <div id="{i#tabconfig}"></div>
-	  <div id="{i#tabtemplate}"></div>
+	<div class="yui-content">
+		<div id="{i#tabconfig}"></div>
+		<div id="{i#tabtemplate}"></div>
 	</div>
 </div>
+
+<!--{permission}-->
+<div class="field">
+	<h3>Настройка безопасности</h3>
+	Выберите модуль: <span id={i#mods}>загружаю список модулей...</span> 
+	<input type="button" id="{i#bconfig}" value="Настроить" class="btn" disabled="disabled" />
+</div>
+<div class="field" id="{i#perm}">
+	<i>Для настройки безопасности, необходимо выбрать модуль.</i>
+</div>
+
+<!--{permmodstable}-->
+<select id="{i#mods}">
+	{v#rows}
+</select>
+
+<!--{permmodsrow}-->
+<option value="{v#v}" >{v#t}</option>
+
+<!--{permmodwidget}-->
+<div id="{i#table}"></div>
+
+<!--{permmodtable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Subject</th>
+			<th>Action</th>
+			<th>Статус</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{permmodrowwait}-->
+<tr>
+	<td colspan="5">Идет загрузка данных...</td>
+</tr>
+
+<!--{permmodrow}-->
+<tr>
+	<td>{v#sbj}</td>
+	<td>{v#act}</td>
+	<td>{v#st}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Редактировать</a></td>
+	<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
+</tr>
+

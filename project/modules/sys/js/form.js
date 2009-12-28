@@ -1,10 +1,12 @@
-/**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+/*
+@version $Id$
+@copyright Copyright (C) 2008 Abricos. All rights reserved.
+@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
+/**
+ * @module Sys
+ */
 (function(){
 	Brick.namespace('util');
 	
@@ -86,7 +88,7 @@
 			}
 			return null;
 		}
-	}
+	};
 	
 	Brick.util.Form = new form();
 	
@@ -132,7 +134,7 @@
 		}
 	};
 
-	/**
+	/*
 	 * Менеджер проверки формы.
 	 * входные данные: элементы формы и правила их проверки.
 	 * пример:
@@ -186,7 +188,7 @@
 						fcheck: function(value){
 							return false;
 						}
-					}
+					};
 				}
 			}
 		},
@@ -233,7 +235,7 @@
 			}
 			return s;
 		}
-	}
+	};
 	
 	Brick.util.Form.Validator = validator;
 	
@@ -250,7 +252,7 @@
 	};
 
 	
-	/* * * * * * * * * * * Translite * * * * * * * * */
+	// Translite
 	Brick.util.Translite = {
 		rusBig: new Array( "Э", "Ч", "Ш", "Ё", "Ё", "Ж", "Ю", "Ю", "\Я", "\Я", "А", "Б", "В", "Г", "Д", "Е", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Щ", "Ъ", "Ы", "Ь"),
 		rusSmall: new Array("э", "ч", "ш", "ё", "ё","ж", "ю", "ю", "я", "я", "а", "б", "в", "г", "д", "е", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "щ", "ъ", "ы", "ь" ),
@@ -265,10 +267,10 @@
 		  var rett = "";
 		  if (ret) {
 		  	for (i=0; i<this.rusRegSmall.length; i++) {
-		  		ret = ret.replace(this.rusRegSmall[i], this.engSmall[i])  
+		  		ret = ret.replace(this.rusRegSmall[i], this.engSmall[i]);
 		  	}
 		    for (var i=0; i<this.rusRegBig.length; i++) {
-		    	ret = ret.replace(this.rusRegBig[i], this.engSmall[i])  
+		    	ret = ret.replace(this.rusRegBig[i], this.engSmall[i]);
 		    }
 		    rett = ret.toLowerCase();
 			}

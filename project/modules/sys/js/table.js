@@ -1,11 +1,10 @@
 /*
 @version $Id$
-@copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+@copyright Copyright (C) 2008 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 /**
  * @module Sys
- * @namespace Brick.util
  */
 (function(){
 	

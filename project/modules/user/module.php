@@ -1,11 +1,11 @@
 <?php 
 /**
  * @version $Id$
- * @package CMSBrick
+ * @package Abricos
  * @subpackage User
- * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 $modUser = new CMSModuleUser();
@@ -13,28 +13,36 @@ CMSRegistry::$instance->modules->Register($modUser);
 
 /**
  * Модуль "Пользователи" 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage User
  */
 class CMSModuleUser extends CMSModule {
 	
+	/**
+	 * @var CMSModuleUser
+	 */
+	public static $instance = null;
+	
 	private $_usermanager = null;
 	
 	function CMSModuleUser(){
-		$this->version = "1.0.1";
+		$this->version = "0.2";
 		$this->name = "user";
 		$this->takelink = "user"; 
+		
+		CMSModuleUser::$instance = $this; 
+		$this->permission = new UserPermission($this);
 	}
 	
 	/**
 	 * Получить менеджер пользователей
 	 *
-	 * @return CMSUserManager
+	 * @return UserManager
 	 */
 	public function GetUserManager(){
 		if (is_null($this->_usermanager)){
 			require_once CWD.'/modules/user/includes/manager.php';
-			$this->_usermanager = new CMSUserManager($this->registry);
+			$this->_usermanager = new UserManager($this);
 		}
 		return $this->_usermanager;
 	}
@@ -42,7 +50,6 @@ class CMSModuleUser extends CMSModule {
 	public function GetContentName(){
 		$adress = $this->registry->adress;
 		$cname = '';
-		// $baseUrl = "/".$this->takelink."/";
 		
 		if ($adress->level == 1){ // http://mysite.com/user/
 			$cname = 'index';
@@ -60,72 +67,44 @@ class CMSModuleUser extends CMSModule {
 		}
 		return $cname;
 	}
-	
-	/**
-	 * Проверить данные авторизации и вернуть номер ошибки: 0-данные валидатные, >0-номер ошибки 
-	 * 
-	 * @param $username
-	 * @param $password
-	 * @return Integer
-	 */
-	public static function UserLogin($username, $password){
-		if (empty($username) || empty($password)){ 
-			return 3; 
-		}
-	
-		if (!CMSModuleUser::UserVerifyName($username)){
-			return 1;
-		}
-		$db = CMSRegistry::$instance->db;
-		
-		$user = CMSSqlQuery::QueryGetUserInfoByUsername($db, $username);
-		if (empty($user)){
-			return 2;
-		}
-		if ($user['usergroupid'] < 4){
-			return 5;
-		}
-		$passcrypt = CMSModuleUser::UserPasswordCrypt($password, $user["salt"]);
-		if ($passcrypt != $user["password"]){
-			return 2;
-		}
-		return 0;
-	}
-	
-	public static function UserCreateSalt() {
-		$length = 3;
-		$salt = '';
-		for ($i = 0; $i < $length; $i++) {
-			$salt .= chr(rand(32, 126));
-		}
-		return $salt;
-	} 
-	
-	public static function UserVerifyName(&$username) {
-		$username = trim($username);
-		$length = strlen($username);
-		if ($length == 0) {
-			return false;
-		} else if ($length < 3) {
-			return false;
-		} else if ($length > 100) {
-			return false;
-		} else if (preg_match('/(?<!&#[0-9]{3}|&#[0-9]{4}|&#[0-9]{5});/', $username)) {
-			return false;
-		} 
-		$username = htmlspecialchars_uni($username);
-		return true;
-	}
 
-	public static function UserPasswordCrypt($password, $salt){
-		return md5(md5($password).$salt);
+}
+
+
+class UserAction {
+	/**
+	 * Регистрация пользователя
+	 * 
+	 * @var unknown_type
+	 */
+	const USER_NEWUSER_REGISTER = 30;
+	const USER_ADMIN = 50;
+}
+
+class UserPermission extends CMSPermission {
+	
+	public function UserPermission(CMSModuleUser $module){
+		
+		$defRoles = array(
+			new CMSRole(UserAction::USER_NEWUSER_REGISTER, 1, USERGROUPID_GUEST),
+			new CMSRole(UserAction::USER_ADMIN, 1, USERGROUPID_ADMINISTRATOR)
+		);
+		
+		parent::CMSPermission($module, $defRoles);
 	}
 	
+	public function GetRoles(){
+		$roles = array();
+		$roles[UserAction::USER_NEWUSER_REGISTER] = $this->CheckAction(UserAction::USER_NEWUSER_REGISTER);
+		$roles[UserAction::USER_ADMIN] = $this->CheckAction(UserAction::USER_ADMIN);
+		return $roles;
+	}
 }
+
 
 /**
  * Набор статичных функций SQL запросов 
- * @package CMSBrick
+ * @package Abricos
  * @subpackage User
  */
 class CMSQUser{
@@ -161,6 +140,7 @@ class CMSQUser{
 			SELECT 
 				".CMSQUser::FIELDS_USERPUB.",
 				email as eml,
+				'' as oldpass,
 				'' as pass
 			FROM ".$db->prefix."user
 			WHERE userid='".bkint($userid)."'
@@ -271,11 +251,79 @@ class CMSQUser{
 		";
 		return $db->query_read($sql); 
 	}
+	
+	/**
+	 * Проверить наличие пользователя в базе по логину или эл. почте.
+	 * Вернуть результат проверки:
+	 * 0 - такого пользователя нет в базе,
+	 * 1 - пользователь с таким логином уже зарегистрирован, 
+	 * 2 - пользователь с таким email уже зарегистрирован
+	 * 
+	 * @param CMSDatabase $db
+	 * @param String $username
+	 * @param String $email
+	 * @return Integer
+	 */
+	public static function UserExists(CMSDatabase $db, $username, $email){
+		$email = strtolower($email);
+		$username = htmlspecialchars_uni($username);
+		
+		$whereEMail = empty($email) ? "" : " OR email = '".bkstr($email)."'";
+		
+		$sql = "
+			SELECT userid, username 
+			FROM ".$db->prefix."user 
+			WHERE username = '".bkstr($username)."' ".$whereEMail."
+		";
+		$row = $db->query_first($sql);
+		
+		if (empty($row)){ return 0; }
+		if ($username == $row['username']){ return 1; }
+		return 2;
+	}
+	
+	/**
+	 * Добавить пользователя в базу
+	 *
+	 * @param CMSDatabase $db
+	 * @param Array $user Указатель на массив данных пользователя
+	 */
+	public static function UserAdd(CMSDatabase $db, &$user, $userGroupId = 3){
+		
+		$db->query_write("
+			INSERT INTO `".$db->prefix."user` 
+				(usergroupid, username, password, email, joindate, salt) VALUES (
+				".bkint($userGroupId).", 
+				'".bkstr($user['username'])."', 
+				'".bkstr($user['password'])."', 
+				'".bkstr($user['email'])."', 
+				'".bkstr($user['joindate'])."', 
+				'".bkstr($user['salt'])."'".
+		")");
+		if ($userGroupId > 3){
+			return;
+		}
+		
+		$usernew = CMSSqlQuery::QueryGetUserInfoByUsername($db, $user['username']);
+		$user["userid"] = $usernew["userid"];
+		$user['activateid'] = cmsrand(0, 100000000);
+
+		// информация для активации мылом
+		$db->query_write("
+			INSERT INTO `".$db->prefix."useractivate` 
+				(userid, activateid, joindate) VALUES (
+				'".bkint($user['userid'])."', 
+				'".bkstr($user['activateid'])."', 
+				'".bkstr($user['joindate'])."'
+			)"
+		);
+	}
+	
 }
 
 /**
  * Набор статичных функций SQL запросов (старая версию)
- * @package CMSBrick
+ * @package Abricos
  * @subpackage User
  */
 class CMSSqlQueryUser{
@@ -408,57 +456,7 @@ class CMSSqlQueryUser{
 		return 0;
 	}
 
-	/**
-	 * добавление пользователя в базу
-	 *
-	 * @param CMSDatabase $db
-	 * @param array $user
-	 */
-	public static function QueryAddUser(CMSDatabase $db, &$user){
-		$db->query_write("INSERT INTO `".$db->prefix."user` 
-				(usergroupid, username, password, email, joindate, salt) VALUES (3, 
-			'".bkstr($user['username'])."', 
-			'".bkstr($user['password'])."', 
-			'".bkstr($user['email'])."', 
-			'".bkstr($user['joindate'])."', 
-			'".bkstr($user['salt'])."'".
-		")");
-		
-		$usernew = CMSSqlQuery::QueryGetUserInfoByUsername($db, $user['username']);
-		$user["userid"] = $usernew["userid"];
-		$user['activateid'] = cmsrand(0, 100000000);
-
-		/* информация для активации мылом */
-		$db->query_write("
-			INSERT INTO `".$db->prefix."useractivate` 
-				(userid, activateid, joindate) VALUES (
-				'".bkint($user['userid'])."', 
-				'".bkstr($user['activateid'])."', 
-				'".bkstr($user['joindate'])."'
-			)"
-		);
-	}
 	
-	public static function QueryRegUsernameExists(CMSDatabase $db, $username, $email){
-		$email = strtolower($email);
-		$username = htmlspecialchars_uni($username);
-		
-		$sql = "
-			SELECT userid, username 
-			FROM ".$db->prefix."user 
-			WHERE username = '".bkstr($username)."' OR email = '".bkstr($email)."'
-		";
-		
-		$row = $db->query_first($sql);
-	
-		if (empty($row)){
-			return 0;
-		}
-		if ($username == $row['username']){
-			return 1;
-		}
-		return 2;
-	}
 }
 
 ?>

@@ -13,6 +13,9 @@ Brick.util.Language.add('ru',{
 				'7': 'JavaScript файл',
 				'8': 'CSS файл'
 			}
+		},
+		'permission': {
+			'title': 'Безопасность'
 		}
 	}
 });

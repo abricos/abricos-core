@@ -1,8 +1,8 @@
 <?php
 /**
 * @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+* @package Abricos
+* @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -10,7 +10,7 @@
 @error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 // example
-// http://www.cmsbrick.ru/gzip.php?file=js/yui/[версия yui]/yuiloader/yuiloader-min.js
+// http://www.abricos.org/gzip.php?file=js/yui/[версия yui]/yuiloader/yuiloader-min.js
 
 // Get input
 $files = explode(',', getParam("file", ""));
@@ -32,7 +32,7 @@ $encodings = array();
 $enc = "";
 $cacheKey = "";
 $realPath = realpath(".");
-$cachePath = $realPath."/temp";
+$cachePath = $realPath."/cache";
 $diskCacheFileKey = "";
 
 $headContentType = "Content-type: text/javascript; charset=utf-8";
@@ -135,23 +135,22 @@ if ($cacheFileExists) {
 }
 
 $content = "";
-foreach ($files as $file){
-	$content .= getFileContents($realPath."/".$basedir."/". $file);
-}
 
 if ($libType == 'mod' || $libType == 'sys'){
-	// 	Append language files
+	
+	// Append main file
 	foreach ($files as $file){
+		$content .= getFileContents($realPath."/".$basedir."/". $file);
+		
+		// 	Append language file
 		$langFile = createLangFile("/".$basedir."/".$file, $lang);
 		if (file_exists($realPath.$langFile)){
 			$content .= "(function(){";
 			$content .= getFileContents($realPath.$langFile);
 			$content .= "})();";
 		}
-	}
-
-	// Convert and Append template files
-	foreach ($files as $file){
+		
+		// Append template file
 		$tempFile = createTemplateFile($realPath."/".$basedir."/".$file);
 		if (file_exists($tempFile)){
 			
@@ -166,9 +165,8 @@ if ($libType == 'mod' || $libType == 'sys'){
 			}
 			$content .= "})();";
 		}
-	}
-	// Convert and Append css file
-	foreach ($files as $file){
+
+		// Append css file
 		$cssFile = createCssFile($realPath."/".$basedir."/".$file);
 		if (file_exists($cssFile)){
 			$content .= "
@@ -184,6 +182,19 @@ if ($libType == 'mod' || $libType == 'sys'){
 })();
 ";
 		}
+		
+		// Append initialize code
+		$content .= "
+if (typeof Component != 'undefined'){
+	Brick.add('".$module."', '".basename($file, ".js")."', Component);
+	Component = undefined;
+}	
+";
+	}
+	
+}else{
+	foreach ($files as $file){
+		$content .= getFileContents($realPath."/".$basedir."/". $file);
 	}
 }
 
@@ -279,7 +290,7 @@ header("Content-Length: " . strlen($cacheData));
 // Stream to client
 echo $cacheData;
 
-/* * * * * * * * * * * * * * * * Functions * * * * * * * * * * * * * * * * */
+/////////////////////////////// Functions /////////////////////////////// 
 
 function createCssFile($file){
 	return str_replace('.js', '.css', $file);
