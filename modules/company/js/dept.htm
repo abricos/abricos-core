@@ -1,0 +1,84 @@
+<!--{deptwidget}-->
+<span id="{i#table}"></span>
+<span id="{i#man}" style="display: none;">
+	<a href="#" id="{i#bedit}">
+		<img id="{i#beditimg}" src="/modules/company/images/edit.gif" alt="Править" />
+	</a>
+</span>
+
+<!--{depttable}-->
+<select id="{i#id}" style="width: 280px" disabled="disabled">{v#rows}</select>
+
+<!--{deptrow}-->
+<option value="{v#id}">{v#nm}</option>
+
+<!--{deptrowempty}-->
+<option value="0"></option>
+
+<!--{deptrowwait}-->
+<option value="-1">Загружаю данные...</option>
+
+
+<!--{deptlistpanel}-->
+<div class='hd'>Отделы</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+</div>
+
+<!--{deptlistwidget}-->
+<div class="field right" >
+	<input id="{i#bcreate}" type="button" value="Добавить отдел" class="btn" /> 
+</div>
+<div id='{i#table}'></div>
+
+<!--{deptlisttable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Наименование</th>
+			<th>Сортировка</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{deptlistrowwait}-->
+<tr>
+	<td colspan="5">Идет загрузка данных...</td>
+</tr>
+
+<!--{deptlistrow}-->
+<tr>
+	<td>{v#id}</td>
+	<td>{v#nm}</td>
+	<td>{v#ord}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+	<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
+</tr>
+
+<!--{depteditor}-->
+<div class='hd'>Отдел</div>
+<div class='bd'>
+
+	<div class="field">
+		<table class="fields"><tbody>
+			<tr>
+				<td>Наименование</td>
+				<td><input id="{i#nm}" type="text" style="width: 300px" /></td>
+			</tr>
+			<tr>
+				<td>Сортировка</td>
+				<td><input id="{i#ord}" type="text" style="width: 50px" value="3"/></td>
+			</tr>
+		</tbody></table>
+		 
+	 	<div class="buttons right">
+			<input id="{i#bsave}" type="button" value="Сохранить" />
+			<input id="{i#bcancel}" type="button" value="Отмена" />
+		</div>
+		 
+	</div>
+</div>

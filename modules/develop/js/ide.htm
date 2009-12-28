@@ -1,0 +1,106 @@
+<!--{developpanel}-->
+<div class='hd'>Разработка приложений</div>
+<div class='bd'>
+	{v#menubar}
+	<div id="{i#applist}" class="top"></div>
+</div>
+
+<!--{menubar}-->
+<div id="{i#id}" class="yuimenubar yuimenubarnav"><div class="bd"><ul class="first-of-type">
+	<li class="yuimenubaritem first-of-type">
+		<a class="yuimenubaritemlabel" href="#{i#file}">Файл</a>
+		<div id="{i#file}" class="yuimenu">
+		    <div class="bd"><ul>
+				<li class="yuimenuitem"><a class="yuimenuitemlabel" href="#" id="{i#newapp}">Создать приложение</a></li>
+			</ul></div>
+		</div>      
+	</li>
+	<li class="yuimenubaritem first-of-type">
+		<a class="yuimenubaritemlabel" href="#{i#help}" >Справка</a>
+		<div id="{i#help}" class="yuimenu">
+		    <div class="bd"><ul>
+				<li class="yuimenuitem"><a class="yuimenuitemlabel" href="#" id="{i#about}">О программе...</a></li>
+			</ul></div>
+		</div>      
+	</li>
+</ul></div></div>
+
+<!--{applistwidget}-->
+<div id="{i#table}"></div>
+
+<!--{applisttable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Приложение</th>
+			<th>Версия</th>
+			<th>Статус</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{applistrowwait}-->
+<tr valign="top">
+	<td colspan="5">Идет загрузка данных...</td>
+</tr>
+
+<!--{applistrow}-->
+<tr valign="top">
+	<td>{v#name}</td>
+	<td>{v#version}</td>
+	<td>{v#status}</td>
+	<td></td>
+	<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
+</tr>
+
+<!--{appinfo}-->
+<div class='hd'>Приложение</div>
+<div class='bd'>
+	<table class="fields"><tbody>
+		<tr>
+			<td>Namespace:</td>
+			<td><input id="{i#namespace}" disabled="disabled" type="text" style="width: 250px;" /></td>
+		</tr>
+		<tr>
+			<td>Имя:</td>
+			<td><input id="{i#appname}" style="width: 250px;" type="text" /></td>
+		</tr>
+		<tr>
+			<td>Краткое описание:</td>
+			<td><textarea id="{i#appdesc}" style="width: 250px; height: 100px"></textarea></td>
+		</tr>
+	</tbody></table>
+	<div class="right buttons top">
+		<input id="{i#bcreate}" type="button" value="Создать" style="display: none" />
+		<input id="{i#bsave}" type="button" value="Сохранить" style="display: none" />
+		<input id="{i#bcancel}" type="button" value="Отмена" />
+	</div>
+</div>
+
+<!--{about}-->
+<div class='hd'>О программе</div>
+<div class='bd'>
+	<table class="fields"><tbody>
+		<tr>
+			<td>Разработчик:</td>
+			<td>Александр Кузьмин</td>
+		</tr>
+		<tr>
+			<td>Email:</td>
+			<td>roosit@abricos.org</td>
+		</tr>
+		<tr>
+			<td>Сайт:</td>
+			<td><a href="http://abricos.org" target="_blank">http://abricos.org</a></td>
+		</tr>
+	</tbody></table>
+</div>
+
+<!--{tmp}-->
+		<tr valign="top">
+			<td>Версия:</td>
+			<td><input id="{i#appversion}" style="width: 250px;" type="text" value="0.1" /></td>
+		</tr>

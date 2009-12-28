@@ -1,0 +1,196 @@
+<!--{manager}-->
+<div class="field right">
+	<div id="{i#table}"></div>
+	<table class="bk-table-def" style="font-size: 11px;" >
+		<tbody>
+			<tr>
+				<td><a id="{i#bselall}" href="#">Отметить&nbsp;все</a></td>
+				<td><a id="{i#bunselall}" href="#">Снять&nbsp;отметки</a></td>
+			</tr>
+		</tbody>
+	</table>
+	<table class="bk-table-def" style="font-size: 11px;" >
+		<tbody>
+			<tr>
+				<td style="text-align: right;"><a id="{i#bconfig}" href="#">Настройки</a></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<!--{emptable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th colspan="3">Показать календарь:</th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{emprowwait}-->
+<tr>
+	<td colspan="3">Идет загрузка данных...</td>
+</tr>
+
+<!--{emprow}-->
+<tr>
+	<td style="width: 14px"><div style="width: 12px; height: 12px; border-color: rgb({v#clrtitle}); background-color: rgb({v#clrbody});"></div></td>
+	<td><input type="checkbox" id="{i#id}ch-{v#id}"></input></td>
+	<td>{v#fio}</td>
+</tr>
+
+<!--{empmyrow}-->
+<tr>
+	<td style="width: 14px"><div style="width: 12px; height: 12px; border-color: rgb({v#clrtitle}); background-color: rgb({v#clrbody});"></div></td>
+	<td><input type="checkbox" id="{i#id}"></input></td>
+	<td><b>{v#fio}</b></td>
+</tr>
+
+<!--{configpanel}-->
+<div class='hd'>Настройки</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+	<div class="field right">
+		<input id="{i#bsave}" type="button" value="Сохранить" class="btn" /> 
+		<input id="{i#bcancel}" type="button" value="Отмена" class="btn" /> 
+	</div>
+</div>
+
+<!--{config}-->
+<div class="field">
+	<table style="width: 100%"><tbody><tr>
+	
+		<td style="width: 50%; padding-right: 5px;">
+			Добавить календарь сотрудника
+			<div id="{i#tblin}" style="overflow-y: auto; overflow-x: hidden; height: 420px;"></div>
+		</td>
+		<td style="width: 50%; padding-left: 5px;">
+			Разрешить видеть мой календарь
+			<div id="{i#tblout}" style="overflow-y: auto; overflow-x: hidden; height: 420px;"></div>
+		</td>
+	
+	</tr></tbody></table>
+	<h3></h3>
+</div>
+
+<!--{table}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th></th>
+			<th>ФИО</th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{rowwait}-->
+<tr>
+	<td colspan="2">Идет загрузка данных...</td>
+</tr>
+
+<!--{row}-->
+<tr>
+	<td><input type="checkbox" id="{i#id}-{v#id}-ch" {v#ch}></input></td>
+	<td>{v#elnm} {v#efnm} {v#epnc}</td>
+</tr>
+
+<!--{taskeditwidget}-->
+<table class="fields">
+<tbody>
+	<tr>
+		<td>Тип мероприятия:</td>
+		<td>
+			<select id="{i#tasktype}" style="width: 150px">
+				<option value="0">Мероприятие</option>
+				<option value="1">Совещание</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>Уровень доступа:</td>
+		<td>
+			<select id="{i#permlevel}" style="width: 250px">
+				<option value="0">Закрыто</option>
+				<option value="1">Открыто сотрудникам из списка</option>
+				<option value="2">Открыто для всех</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>Дата: </td>
+		<td>
+			<span id="{i#bdate}"></span> — <span id="{i#edate}"></span>
+		</td>
+	</tr>
+</tbody>
+<tbody id="{i#tp}" style="display: none;">
+	<tr>
+		<td>Мероприятие</td>
+		<td>
+			<input id={i#tptitle} type="text" style="width: 400px"></input>
+		</td>
+	</tr>
+	<tr>
+		<td>Описание: </td>
+		<td><textarea id={i#tpdesc} style="width: 400px; height: 215px;"></textarea></td>
+	</tr>
+</tbody>
+<tbody id="{i#tm}">
+	<tr>
+		<td>Тема:</td>
+		<td>
+			<input id={i#tmtitle} type="text" style="width: 400px"></input>
+		</td>
+	</tr>
+	<tr>
+		<td>Описание: </td>
+		<td><textarea id={i#tmdesc} style="width: 400px; height: 45px;"></textarea></td>
+	</tr>
+	<tr>
+		<td>Пригласить:</td>
+		<td id="{i#mwidget}">
+		</td>
+	</tr>
+</tbody>
+</table>
+
+<!--{mwidget}-->
+<table style="width: 100%"><tbody><tr>
+	<td style="width: 70%">
+		<div id="{i#table}" style="height: 160px"></div>
+	</td>
+	<td id="{i#man}" class="right" style="width: 30%">
+		<input id="{i#badd}" type="button" value="Добавить" class="btn" />
+	</td>
+</tr></tbody></table>
+
+<!--{mtable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Ф. И. О.</th>
+			{v#man}
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{mtableman}-->
+<th></th><th></th>
+
+<!--{mrowwait}-->
+<tr>
+	<td>Идет загрузка данных...</td>
+</tr>
+
+<!--{mrow}-->
+<tr>
+	<td>{v#fio}</td>
+	{v#man}
+</tr>
+
+<!--{mrowman}-->
+<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>

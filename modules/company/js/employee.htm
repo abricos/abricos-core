@@ -1,0 +1,249 @@
+<!--{panel}-->
+<div class='hd'>Сотрудники</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+</div>
+
+<!--{widget}-->
+<div id="{i#man}" class="field right" style="display: none;">
+	<input id="{i#bcreate}" type="button" value="Добавить сотрудника" class="btn" /> 
+</div>
+<div id='{i#table}'></div>
+
+<!--{table}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>№ каб.</th>
+			<th>Ф. И. О.</th>
+			<th>Должность</th>
+			<th colspan="2" class="center">Телефон</th>
+			{v#man}
+		</tr>
+	</thead>
+	<thead>
+		<tr>
+			<th></th>
+			<th></th>
+			<th></th>
+			<th>городской</th>
+			<th>вн.</th>
+			{v#man}
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{tableman}-->
+<th></th><th></th>
+
+<!--{rowwait}-->
+<tr>
+	<td>Идет загрузка данных...</td>
+</tr>
+
+<!--{row}-->
+<tr>
+	<td>{v#room}</td>
+	<td>{v#elnm} {v#efnm} {v#epnc}</td>
+	<td>{v#post}</td>
+	<td>{v#ph}</td>
+	<td>{v#phin}</td>
+	{v#man}
+</tr>
+
+<!--{rowdept}-->
+<tr>
+	<td colspan="{v#colspan}" class="center"><b>{v#name}</b></td>
+</tr>
+
+<!--{rowmandept}-->
+<td></td><td></td>
+
+<!--{rowman}-->
+<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
+
+<!--{selpanel}-->
+<div class='hd'>Сотрудники</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+	<div class="field right">
+		<input id="{i#bselect}" type="button" value="Выбрать" class="btn" /> 
+		<input id="{i#bcancel}" type="button" value="Отмена" class="btn" /> 
+	</div>
+</div>
+
+<!--{selwidget}-->
+<div class="field right">
+	<table><tbody><tr>
+		<td>Фильтр</td>
+		<td style="width: 20px;">&nbsp;</td>
+		<td>
+
+			<table class="fields"><tbody>
+				<tr>
+					<td>Отдел</td>
+					<td id="{i#dept}"></td>
+				</tr>
+				<tr>
+					<td>Должность</td>
+					<td id="{i#post}"></td>
+				</tr>
+				<tr>
+					<td>Пользовательский</td>
+					<td id="{i#myfilter}"></td>
+				</tr>
+			</tbody></table>
+
+		</td>
+	</tr></tbody></table>
+</div>
+<div id='{i#table}' class="field right" style="border:1px solid #DDDDDD; height: 280px; overflow-y: scroll; overflow-x: hidden;"></div>
+
+<!--{myfilter}-->
+<div id="{i#table}" style="display: inline;"></div>
+<img id="{i#bsave}" style="cursor: pointer;" src="/modules/company/images/add.png" alt="Сохранить" title="Сохранить текущий выбор" />
+<img id="{i#bremove}" style="cursor: pointer;" src="/modules/company/images/remove.gif" alt="Удалить" title="Удалить" />
+
+<!--{myfiltertable}-->
+<select id="{i#id}" style="width: 200px">{v#rows}</select>
+
+<!--{myfilterrow}-->
+<option value="{v#id}">{v#nm}</option>
+
+<!--{myfiltersave}-->
+<div class='hd'>Добавить фильтр</div>
+<div class='bd'>
+	<div class="field">
+		Введите имя фильтра: <br />
+		<input id="{i#name}" type="text" value="" style="width: 300px;" /> 
+	</div>
+	<div class="field right">
+		<input id="{i#bsave}" type="button" value="Сохранить" class="btn" /> 
+		<input id="{i#bcancel}" type="button" value="Отмена" class="btn" /> 
+	</div>
+</div>
+
+
+<!--{seltable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th></th>
+			<th>Ф. И. О.</th>
+			<th>Должность</th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{selrowwait}-->
+<tr>
+	<td>Идет загрузка данных...</td>
+</tr>
+
+<!--{selrow}-->
+<tr>
+	<td><input type="checkbox" id="{i#id}ch-{v#id}" {v#checked}></input></td>
+	<td>{v#fio}</td>
+	<td>{v#post}</td>
+</tr>
+
+
+<!--{info}-->
+<div class='hd'>Учетная запись</div>
+<div class='bd'>
+	<div class="field">
+		<div id="{i#container}"></div>
+	</div>
+</div>
+
+<!--{employee}-->
+<div id="{i#noemp}" style="display: none;">Учетная запись в картотеке сотрудников не найдена</div>
+<table class="fields" id="{i#table}"><tbody>
+	<tr>
+		<td>Учетная запись</td>
+		<td>
+			<input id="{i#unm}" type="text" style="width: 300px" disabled="disabled" />
+			<div id="{i#userinfo}" style="display: none;">
+			 	<div class="buttons right" style="display: none;">
+					<input id="{i#buserfind}" type="button" value="Найти пользователя" />
+				</div>
+				<table class="fields"><tbody>
+					<tr>
+						<td>E-mail</td>
+						<td>
+							<input id="{i#ueml}" type="text" style="width: 200px" />
+						</td>
+					</tr>
+					<tr>
+						<td>Пароль</td>
+						<td>
+							<input id="{i#upwd}" type="password" style="width: 200px" />
+						</td>
+					</tr>
+				</tbody></table>
+			
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Фамилия</td>
+		<td><input id="{i#elnm}" type="text" style="width: 300px" /></td>
+	</tr>
+	<tr>
+		<td>Имя</td>
+		<td><input id="{i#efnm}" type="text" style="width: 300px" /></td>
+	</tr>
+	<tr>
+		<td>Отчество</td>
+		<td><input id="{i#epnc}" type="text" style="width: 300px" /></td>
+	</tr>
+	<tr>
+		<td>Должность</td>
+		<td><div id="{i#post}"></div></td>
+	</tr>
+	<tr>
+		<td>Отдел</td>
+		<td><div id="{i#dept}"></div></td>
+	</tr>
+	<tr>
+		<td>№ кабинета</td>
+		<td><input id="{i#room}" type="text" style="width: 80px" /></td>
+	</tr>
+	<tr>
+		<td>Телефон</td>
+		<td>
+			<input id="{i#ph}" type="text" style="width: 100px" />&nbsp;
+			вн.<input id="{i#phin}" type="text" style="width: 80px" />
+		</td>
+	</tr>
+</tbody></table>
+
+<!--{editor}-->
+<div class='hd'>Сотрудник</div>
+<div class='bd'>
+
+	<div class="field">
+		<div id="{i#container}"></div>
+	
+	 	<div class="buttons right">
+			<input id="{i#bsave}" type="button" value="Сохранить" />
+			<input id="{i#bcancel}" type="button" value="Отмена" />
+		</div>
+		 
+	</div>
+</div>
+
+<!--{removepanel}-->
+<div class='hd'>Удаление сотрудника</div>
+<div class='bd'>
+	<div class="field center">
+		Вы действительно хотите удалить сотрудника <b>{v#nm}</b> и все что с ним связано из системы?
+	</div>
+	<div class="field center">
+		<input id="{i#bremove}" type="button" value="Удалить" class="btn" /> 
+		<input id="{i#bcancel}" type="button" value="Отмена" class="btn" /> 
+	 </div>
+</div>

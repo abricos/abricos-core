@@ -1,0 +1,30 @@
+<!--[*]
+[tt=main]_my[/tt]
+[mcss=sys]widget.css[/mcss]
+[*]-->
+<div style="text-align: center; width: 100%;">
+	<h1>Добро пожаловать!</h1>
+	<p>
+		<span id="webos-login" style="font-size: 200%;">
+			<a href="#" id="btn-webos-login">Вход</a>
+		</span>
+		<span id="webos-wait" style="font-size: 200%; display: none">
+			Немножечко подождите, идет загрузка...
+		</span>
+	</p>
+</div>
+
+<script>
+	YAHOO.util.Event.onDOMReady(function () {
+        YAHOO.util.Event.addListener("btn-webos-login", "click", function(){
+            var elEnter = document.getElementById('webos-login');
+            var elWait = document.getElementById('webos-wait');
+            elEnter.style.display = 'none';
+            elWait.style.display = '';
+    		Brick.Component.API.fire('user', 'api', 'showLoginPanel', '', function(){
+                elEnter.style.display = '';
+                elWait.style.display = 'none';
+        	});
+		});
+    });
+</script>

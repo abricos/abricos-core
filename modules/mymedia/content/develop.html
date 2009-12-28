@@ -1,0 +1,20 @@
+<!--[*]
+[tt=main][/tt]
+[mcss=sys]widget.css[/mcss]
+[*]-->
+<h2>Модуль "MyMedia" - страница разработчика</h2>
+<h3>Загрузчик</h3>
+<input id="btn_showUploadPanel" type="button" value="Открыть панель"></input>
+
+<script>
+
+	YAHOO.util.Event.onDOMReady(function () {
+        YAHOO.util.Event.addListener("btn_showUploadPanel", "click", function(){
+    		Brick.Component.API.fireFunction('mymedia','api',function(){
+    		    Brick.mod.mymedia.API.showUploadPanel(1)
+    		})
+		});
+    });
+	
+</script>
+

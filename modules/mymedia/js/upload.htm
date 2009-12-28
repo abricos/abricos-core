@@ -1,0 +1,65 @@
+<!--{panel}-->
+<div class='hd'>Выгрузка файлов</div>
+<div class='bd'>
+	<div id="{i#swfupload}"></div>
+</div>
+
+<!--{panelold}-->
+<div class='hd'>Выгрузка файлов</div>
+<div class='bd'>
+	<div id="{i#id}" class="yui-navset">
+		<ul class="yui-nav">
+			<li class="selected"><a href="#{i#swfupload}"><em>Мульти загрузчик</em></a></li>
+			<li><a href="#{i#stdupload}"><em>Стандартный загрузчик</em></a></li>
+		</ul>            
+		<div class="yui-content">
+			<div id="{i#swfupload}"></div>
+			<div id="{i#stdupload}"></div>
+		</div>
+	</div>
+</div>
+
+<!--{swfupload}-->
+<table style="width: 99%"><tbody><tr>
+	<td style="text-align: left">
+		<div id="{i#uploader}" style="position:absolute; width: 0; height: 0"></div>
+		<input id="{i#bselect}" type="button" value="Выбрать файлы" />
+	</td>
+	<td style="text-align: right">
+		<input id="{i#bupload}" type="button" value="Выгрузить" />
+	</td>
+</tr></tbody></table>
+<div id='{i#table}' style="margin-top: 8px"></div>
+
+
+<!--{swftable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Имя файла</th>
+			<th>Размер</th>
+			<th>Процесс</th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{swfrow}-->
+<tr valign=top id="{i#id}-{v#id}">
+	<td>{v#fn}</td>
+	<td>{v#fs}</td>
+	<td id="{i#id}-{v#id}-pgs">
+		<div style='height:5px;width:100px;background-color:#CCC;'></div>
+	</td>
+</tr>
+
+<!--{swfpgs}-->
+<div style='height:5px;width:100px;background-color:#CCC;'>
+	<div style='height:5px;background-color:#F00; width: {v#width}px;'></div>
+</div>
+
+<!--{swfrowerror}-->
+<div style='color:#F00;'>{v#err}</div>
+
+<!--{swfrowok}-->
+<div style='color:green;'>OK</div>

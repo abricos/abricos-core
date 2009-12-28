@@ -1,0 +1,84 @@
+<!--{postwidget}-->
+<span id="{i#table}"></span>
+<span id="{i#man}" style="display: none;">
+	<a href="#" id="{i#bedit}">
+		<img id="{i#beditimg}" src="/modules/company/images/edit.gif" alt="Править" />
+	</a>
+</span>
+
+<!--{posttable}-->
+<select id="{i#id}" style="width: 280px" disabled="disabled">{v#rows}</select>
+
+<!--{postrow}-->
+<option value="{v#id}">{v#nm}</option>
+
+<!--{postrowempty}-->
+<option value="0"></option>
+
+<!--{postrowwait}-->
+<option value="-1">Загружаю данные...</option>
+
+
+<!--{postlistpanel}-->
+<div class='hd'>Должности</div>
+<div class='bd'>
+	<div id="{i#container}"></div>
+</div>
+
+<!--{postlistwidget}-->
+<div class="field right" >
+	<input id="{i#bcreate}" type="button" value="Добавить должность" class="btn" /> 
+</div>
+<div id='{i#table}'></div>
+
+<!--{postlisttable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Наименование</th>
+			<th>Уровень</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{postlistrowwait}-->
+<tr>
+	<td colspan="5">Идет загрузка данных...</td>
+</tr>
+
+<!--{postlistrow}-->
+<tr>
+	<td>{v#id}</td>
+	<td>{v#nm}</td>
+	<td>{v#lvl}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+	<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
+</tr>
+
+<!--{posteditor}-->
+<div class='hd'>Должность</div>
+<div class='bd'>
+
+	<div class="field">
+		<table class="fields"><tbody>
+			<tr>
+				<td>Наименование</td>
+				<td><input id="{i#nm}" type="text" style="width: 300px" /></td>
+			</tr>
+			<tr>
+				<td>Уровень</td>
+				<td><input id="{i#lvl}" type="text" style="width: 80px" value="0" /></td>
+			</tr>
+		</tbody></table>
+		 
+	 	<div class="buttons right">
+			<input id="{i#bsave}" type="button" value="Сохранить" />
+			<input id="{i#bcancel}" type="button" value="Отмена" />
+		</div>
+		 
+	</div>
+</div>
