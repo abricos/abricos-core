@@ -1,0 +1,11 @@
+<?php
+
+ob_end_clean(); // make output from autofind php code disapear
+
+$test = @include "includes/find_devutils.php";
+if ($test == 6) { 
+    include "includes/jsdoc.inc";
+} else {
+    echo "Error: JSDoc not found" . PHP_EOL;
+}
+?>

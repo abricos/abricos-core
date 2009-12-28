@@ -1,0 +1,48 @@
+<!--[*]
+[script]page.php[/script]
+[css]/modules/comment/css/comment.css[/css]
+[bkvar=h1]<h1 class="title">{v#c}</h1>[/bkvar]
+[bkvar=th]
+	<h2 class="title">
+		<a href="{v#catlink}" class="category">{v#cat}</a> 
+		&rarr; 
+		<a href="{v#subjlink}" class="subject">{v#subj}</a>
+	</h2>
+
+	<div class="body">
+		{v#intro}
+		{v#body}
+	</div>
+
+	<ul class="tags">{v#tags}</ul>
+	<div class="info">
+		<span class="date">{v#date}</span>
+		<span class="user">
+			<a href="#" title="автор текста">{v#user}</a>
+		</span>
+		<a id="bk-bg-comt-{v#ctid}" class="blog-comments">комментарии ({v#cmt})</a>
+	</div>
+	<div class="delim"></div>
+[/bkvar]
+[bkvar=tag]<li><a href="/blog/tag/{v#link}/">{v#tag}</a></li>[/bkvar]
+
+[bkvar=more]
+	<div id="bk-bg-topbody-{v#id}" class="blog-readmore">
+		<a href="{v#ltop}">Читать дальше</a>
+		<span id="bk-bg-topload-c-{v#id}" style="display: none"> или <a id="bk-bg-topload-{v#id}" href="#">Открыть продолжение здесь</a></span>
+	</div>
+[/bkvar]
+
+[bkvar=tb]<div class="blog-intro">[/bkvar]
+[bkvar=te]</div>[/bkvar]
+[bkvar=ts]
+<script language="JavaScript" type="text/javascript" charset="utf-8">
+window.bReady.on(function(){Brick.Blog.TopList.init([#clst#],[#tlst#])});
+</script>
+[/bkvar]
+[mjs=blog]blog.js[/mjs]
+[*]-->
+<div class="mod-blog">
+	{v#result}
+</div>
+[mod]sitemap:p_paginator[/mod]

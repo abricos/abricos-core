@@ -1,0 +1,24 @@
+<!--[*]
+[tt=main][/tt]
+[script]view.php[/script]
+[bkvar=date][/bkvar]
+[bkvar=notpub]{#news.notpub}[/bkvar]
+[bkvar=source]
+<div class="t80 additional bk_news_source">{#news.source}: <a href="#srclnk#" class="additional">#srcnm#</a></div>
+[/bkvar]
+[bkvar=image]<img src='/filemanager/file.html?i=#id#' />[/bkvar]
+[bkvar=title][/bkvar]
+[bkvar=intro][/bkvar]
+[bkvar=body][/bkvar]
+[bkvar=fedit]<input type="button" onclick="Brick.mod.news.api.edit({v#id});" value="{#news.viewbedit}" />[/bkvar]
+[bkvar=feditbody][/bkvar]
+[*]-->
+
+<h1>[bkvar]title[/bkvar]</h1>
+<div class="t80 additional">[bkvar]date[/bkvar]</div>
+<div class="bk_news_body">
+[bkvar]image[/bkvar]
+[bkvar]intro[/bkvar]
+[bkvar]body[/bkvar]
+[bkvar]source[/bkvar]
+</div>

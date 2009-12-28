@@ -1,0 +1,41 @@
+<!--{standart}-->
+<div class='hd'>{v#header}</div>
+<div class='bd'>
+	<div id="{i#widget}"></div>
+	<div class="buttons right">
+		<input id='{i#bsave}' type="button" value="{#mod.faq.user.form.bsend}" />
+		<input id='{i#bcancel}' type="button" value="{#mod.faq.user.form.bcancel}" />
+	</div>
+</div>
+
+<!--{panel}-->
+<div id="{i#widget}"></div>
+<div class="buttons right">
+	<input id='{i#bsave}' type="button" value="{#mod.faq.user.form.bsend}" />
+</div>
+<div id="msg" style="display: none">
+	<p>
+		<label id="{i#msg}-lbl">{#mod.faq.user.msg.send_ok}</label>
+	</p>
+</div>
+
+<!--{widget}-->
+<div class="field linespace-1" id="faq" style="width: 500px">
+	<h3>{v#title}</h3>
+	<p>
+		<label id="{i#fio}-lbl">{#mod.faq.user.form.fname}:</label>
+		<input type="text" id="{i#fio}" value="" style="width: 250px" />
+	</p>
+	<p style="display: {v#phonehide}">
+		<label id="{i#phone}-lbl">{#mod.faq.user.form.fphone}:</label>
+		<input type="text" id="{i#phone}" value="" style="width: 150px" />
+	</p>
+	<p>
+		<label id="{i#email}-lbl">{#mod.faq.user.form.femail}:</label>
+		<input type="text" id="{i#email}" value="" style="width: 150px" />
+	</p>
+	<p style="display: {v#messagehide}">
+		<label id="{i#message}-lbl">{#mod.faq.user.form.fmessage}:</label><br /> 
+		<textarea id="{i#message}" style="width: 480px; height: 200px"></textarea>
+	</p>
+</div>

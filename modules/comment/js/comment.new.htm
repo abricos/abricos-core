@@ -1,0 +1,52 @@
+<!--{panel}-->
+<div id="mod-comment" class="mod-comment">
+	<h2>{#comment.new.panel.hd}<span id="{i#count}">(0)</span> 
+		<a href="#" title="{#comment.new.panel.refresh}" id="{i#refresh}">
+			<img id="{i#refreshimg}" alt="{#comment.new.panel.refresh}" src="/images/refresh.png" />
+		</a>
+	</h2>
+	<div id="{i#list}"></div>
+	<div class="info">
+		<div id="{i#replycont}">
+			<a id="{i#breplyroot}" href="#">{#comment.new.panel.writecom}</a>
+		</div>
+		<div id="{i#reply}"></div>
+		<span id="{i#replyrootnone}">{#comment.new.panel.note}</span>
+	</div>
+</div>
+
+<!--{spam}-->
+<strong>{#comment.new.spam}</strong>
+
+<!--{list}-->
+<ul id="{i#id}-{v#id}">{v#list}</ul>
+
+<!--{comment}-->
+<li class="item">
+	<div class="meta">
+		<a title="{v#unm}" href="#">
+			<img class="user" src="/tt/{v#ttname}/images/stub-user-small.gif" alt="{v#unm}" />
+		</a>
+		<a class="bk-comt-url" href="#">{v#unm}</a>
+		<abbr title="{v#de}">{v#de}</abbr>
+		<a href="#" title="{#comment.new.comment}">#</a>
+	</div>
+	<div class="content">
+		{v#bd}
+		{v#reply}
+	</div>
+	<div id="{i#child}-{v#id}"></div>
+</li>
+
+<!--{reply}-->
+<p id="{i#contbtn}-{v#id}"><a href="#" id="{i#id}-{v#id}">{#comment.new.reply}</a></p>
+<div id="{i#reply}-{v#id}"></div>
+
+<!--{replypanel}-->
+<div id="{i#editor}"></div>
+<p>
+	<input type="button" id="{i#bpreview}" value="{#comment.new.replypanel.preview}" />
+	<input type="button" id="{i#bsend}" value="{#comment.new.replypanel.sendcom}" />
+	<input type="button" id="{i#bcancel}" value="{#comment.new.replypanel.cancel}" />
+</p>
+<div id="{i#preview}"></div>

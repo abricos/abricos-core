@@ -1,0 +1,31 @@
+<!--[*]
+[script]pub_commentlive.php[/script]
+[bkvar=lst][/bkvar]
+[bkvar=t]<ul>#c#</ul>[/bkvar]
+[bkvar=ti]<li>#c#</li>[/bkvar]
+[bkvar=tu]<a title="#unm#" href="#">#unm#</a>[/bkvar]
+[bkvar=tc]<a class="url" href="#lnk#">#ph#</a>&nbsp;&#8594;&nbsp;[/bkvar]
+[bkvar=tt]<a class="topic" href="#lnk#">#tl#</a>[/bkvar]
+[bkvar=tcmt]<span><a id="bk-bg-comtonl-#cid#">(#cnt#)</a></span>[/bkvar]
+[bkvar=ids][/bkvar]
+[bkvar=s]
+<script language="JavaScript" type="text/javascript" charset="utf-8">
+	window.bReady.on(function(){ Brick.Blog.CmtOnline.set([#ids#])});
+</script>
+[/bkvar]
+[bkvar=s2]
+<script language="JavaScript" type="text/javascript" charset="utf-8">
+	Brick.Blog.CmtOnline.set([#ids#]);
+</script>
+[/bkvar]
+[mjs=blog]blog.js[/mjs]
+[*]-->
+<div class="out">
+	<div class="in">
+		<h2>{#blog.pubcommentlivehd} <a id="mod-blog-commentlive-refresh" title="{#blog.pubcommentliverefresh}"><img src="/images/refresh.png" alt="{#blog.pubcommentliverefresh}"/></a></h2>
+		<div class="mod-blog-commentlive">
+			[bkvar]lst[/bkvar]
+		</div>
+	</div>
+</div>
+[bkvar]s[/bkvar]

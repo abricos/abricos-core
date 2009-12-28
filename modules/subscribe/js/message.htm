@@ -1,0 +1,144 @@
+<!--{panel}-->
+<div class='hd'>{#subscribe.panel.hd}</div>
+<div class='bd'>
+	<div style="margin-top:6px; text-align: right" >
+		<input id='{i#bfinpreview}' type="button" value="{#subscribe.panel.bfinpreview}" />
+		&nbsp;&nbsp;&nbsp;
+		{v#btn}
+		&nbsp;&nbsp;&nbsp;
+		<input id='{i#bcancel}' type="button" value="{#subscribe.panel.bcancel}" />
+	</div>
+	<table class="scb-msg-preview">
+		<tr><td><strong>{#subscribe.panel.template}</strong> {v#template}</td></tr>
+		<tr><td><strong>{#subscribe.panel.subject}</strong> {v#subject}</td></tr>
+		<tr><td>
+			<strong>{#subscribe.panel.body}</strong><br />
+			<div class="scb-msg-preview body">{v#body}</div>
+		</td></tr>
+	</table>
+</div>
+
+<!--{badd}-->
+<input id='{i#id}' type="button" value="{#subscribe.badd}" />
+
+<!--{bsend}-->
+<input id='{i#idtest}' type="button" value="{#subscribe.bsendtest}" />
+&nbsp;&nbsp;&nbsp;
+<input id='{i#id}' type="button" value="{#subscribe.bsend}" />
+
+<!--{msgsend}-->
+<div class='hd'>{#subscribe.msgsend.hd}</div>
+<div class='bd'>
+	<div class="field linespace-1">
+		<h3>{#subscribe.msgsend.question}</h3>
+		<p>
+			{#subscribe.msgsend.cnt}<strong>{v#cnt}</strong>.
+		</p>
+		<p>
+			{#subscribe.msgsend.note}
+		</p> 
+	</div>
+	<div class="buttons right">
+		<input id='{i#bsend}' type="button" value="{#subscribe.msgsend.bsend}" />
+		<input id='{i#bcancel}' type="button" value="{#subscribe.msgsend.bcancel}" />
+	</div>
+</div>
+
+<!--{msgtestsend}-->
+<div class='hd'>{#subscribe.msgtestsend.hd}</div>
+<div class='bd'>
+	<div style="font-size: 150%">
+		{#subscribe.msgtestsend.hd2}<br /><br />
+	</div>
+		{#subscribe.msgtestsend.email}
+		<input type="text" id="{i#email}" style="width: 370px" value="{v#email}" />
+		<br /><br />
+	<div style="font-size: 100%">
+		{#subscribe.msgtestsend.note}
+	</div>
+	<div class="buttons right">
+		<input id='{i#bsend}' type="button" value="{#subscribe.msgtestsend.bsend}" />
+		<input id='{i#bcancel}' type="button" value="{#subscribe.msgtestsend.bcancel}" />
+	</div>
+</div>
+
+<!--{sender}-->
+<div class='hd'>{#subscribe.sender.hd}</div>
+<div class='bd'>
+	<div style="font-size: 150%">
+	    {#subscribe.sender.wait}
+	</div>
+</div>
+
+<!--{msgeditor}-->
+<div class='hd'>{v#title}</div>
+<div class='bd'>
+
+	<div class="scb-editor">
+		{#subscribe.msgeditor.template}<br />
+		<select id="{i#template}" style="width: 350px">
+			<option value="0">{#subscribe.msgeditor.choosetpl}</option>
+			{v#tplist}
+		</select>
+		<br />
+		{#subscribe.msgeditor.subject}<br />
+		<input id="{i#subject}" type="text" style="width: 350px" /><br />
+		<table>
+			<tr>
+				<td>{#subscribe.msgeditor.message}</td>
+				<td width="150px">{#subscribe.msgeditor.files}</td>
+			</tr>
+			<tr>
+				<td>
+					<div id="{i#editor}"></div>
+				</td>
+				<td>
+					<div id="{i#attach}"></div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<br />
+	
+	<div class="buttons right">
+		<input id="{i#bok}" type="button" value="{v#bok}" />
+		<input id="{i#bcancel}" type="button" value="{#button.cancel}" />
+	</div>
+</div>
+
+<!--{msgrowtp}-->
+<option value="{v#id}"> {v#nm}</option>
+
+
+<!--{senderreport}-->
+<div class='hd'>{#subscribe.senderreport.hd}</div>
+<div class='bd'>
+
+	<div class="field linespace-1" >
+		<h3>{#subscribe.senderreport.hd2}</h3>
+		<div class="{gi#srpanel}">
+			<p>
+				{#subscribe.senderreport.sendcnt}<b>{v#count}</b> <br />
+				{#subscribe.senderreport.errorsend}<b>{v#error}</b>
+			</p>
+			<p>
+				{v#mllist}
+			</p>
+		</div>
+	</div>
+	<div class="buttons right">
+		<input id='{i#bclose}' type="button" value="{#subscribe.senderreport.bclose}" />
+	</div>
+</div>
+
+<!--{senderreportrow}-->
+{v#ml} <br />
+
+<!--{css}-->
+.{gi#srpanel}{
+	width: 380px;
+	height: 200px;
+	border:1px solid #CBCBCB;
+	overflow-y:auto; 
+}
+

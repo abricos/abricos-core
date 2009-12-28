@@ -1,0 +1,71 @@
+<!--{editor}-->
+<div class='hd'>{#news.admin.editor.hd}</div>
+<div class='bd' style="width: 780px">
+
+	<div class="buttons-top right">
+		<input id="{i#bpub}" type="button" value="{#news.admin.editor.bpub}" />
+		<input id="{i#bdraft}" type="button" value="{#news.admin.editor.bdraft}" />
+		<input id="{i#bsave}" type="button" value="{#news.admin.editor.bsave}" />
+		<input id="{i#bcancel}" type="button" value="{#news.admin.editor.bcancel}" />
+	</div>
+	
+	<table>
+	<tr>
+		<td valign=top>
+			<div class="field linespace-1">
+				<p>
+					{#news.admin.editor.title} 
+					<input id="{i#title}" type="text" size="30" style="font-size: 1.2em; width: 450px;" />
+				</p>
+				<p>{#news.admin.editor.bodyint}</p>
+				<div id="{i#bodyint}"></div>
+				<p>{#news.admin.editor.bodyman}</p>
+				<div id="{i#bodyman}"></div>
+			</div>
+		</td>
+		<td valign="top">
+			<div class="field linespace-1">
+				<div class="{gi#panel}">
+					<p>{#news.admin.editor.image}</p>
+					<div  class="{gi#image}">
+						<img id="{i#image}" src="/images/clear.gif" />
+					</div>
+					<div style="text-align: center; padding: 4px 0">
+						<input id="{i#bimgsel}" type="button" value="{#news.admin.editor.bimgsel}" />
+						<input id="{i#bimgdel}" type="button" value="{#news.admin.editor.bimgdel}" />
+					</div>
+				</div>
+				<br />
+				<div class="{gi#panel}">
+					<p>{#news.admin.editor.source}</p>
+					<p>
+						{#news.admin.editor.srcname}<br />
+						<input id="{i#srcname}" type="text" style="width: 150px" />
+						{#news.admin.editor.srclink}<br />
+						<input id="{i#srclink}" type="text" style="width: 150px" />
+					</p>
+				</div>
+			</div>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<!--{css}-->
+.{gi#panel}{
+	width: 175px;
+	border:1px solid #CBCBCB;
+}
+.{gi#panel} input{
+	margin: 0
+}
+.{gi#panel} .{gi#image}{
+	overflow-y:auto; 
+	width: 175px; height: 170px;
+	border-color: #CBCBCB; 
+	border-style: solid; 
+	border-width: 1px 0;
+}
+
+
+

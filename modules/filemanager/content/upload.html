@@ -1,0 +1,91 @@
+<!--[*]
+[tt=window]_sys[/tt]
+[script]upload.php[/script]
+[bkvar=fid][/bkvar]
+[bkvar=onload][/bkvar]
+[bkvar=onloads]
+	window.opener.Brick.mod.filemanager.currentBrowser.uploadOK(#fid#);
+	self.close();
+[/bkvar]
+[bkvar=ftypelst][/bkvar]
+[bkvar=ftypelsti]<tr align="center"><td>#1</td><td>#2</td><td>#3</td></tr>[/bkvar]
+[bkvar=err][/bkvar]
+[bkvar=err1]{#filemanager.upload_unknowntype}[/bkvar]
+[bkvar=err2]{#filemanager.upload_filesizelimit}[/bkvar]
+[bkvar=err3]{#filemanager.upload_servererror}[/bkvar]
+[bkvar=err4]{#filemanager.upload_piclimit}[/bkvar]
+[bkvar=err5]{#filemanager.upload_profilelimit}[/bkvar]
+[bkvar=errt]
+	<div align="center"><font color="red">
+		{#filemanager.upload_file}<b>#2</b>{#filemanager.upload_notload}<br />
+		"#1".
+	</font></div>
+[/bkvar]
+[bkvar=uploadokt]
+	<div align="center"><font color="red">
+		{#filemanager.upload_file}<b>#1</b> {#filemanager.upload_loadok}
+	</font></div>
+[/bkvar]
+[bkvar=freespace][/bkvar]
+[*]-->
+<div>
+{#filemanager.upload_freespace} [bkvar]freespace[/bkvar]
+</div> 
+<form id="bk-fm-upload-form" enctype="multipart/form-data" action="/filemanager/upload.html?do=upload&folderid=[bkvar]fid[/bkvar]" method="post">
+
+<table border="0" width="100%" >
+<tr>
+	<td>
+		<span style="float:right">
+			<a href="#" onclick="self.close()">{#filemanager.upload_close}</a>
+		</span>
+		<strong>{#filemanager.upload_fileman}</strong>
+	</td>
+</tr>
+<tr>
+	<td>
+		<input type="hidden" name="MAX_FILE_SIZE" value="2097152" />
+		<fieldset>
+			<legend>{#filemanager.upload_loadfile}</legend>
+			<table border="0" width="100%">
+				<tr valign="top">
+					<td>
+						<input id='bk-fm-upload-file' type="file" name="uploadfile" size="30" />
+					</td>
+					<td align="right">
+						<input id='bk-fm-upload-btn' type="submit" class="button" name="upload" value="{#filemanager.upload_load}" />
+					</td>
+				</tr>
+			</table>
+		</fieldset>
+		<div align="center" id="uploaderrs">
+			[bkvar]err[/bkvar]
+		</div>
+		<table border="0" width="100%" cellpadding="0" cellspacing="0">
+			<tr>
+				<td> 
+			    	{#filemanager.upload_key}
+					<div id="ftypelist">
+						<table border="1" width="100%">
+						<tr align="center">
+							<td>{#filemanager.upload_filetype}</td>
+							<td>{#filemanager.upload_maxfsize}</td>
+							<td>{#filemanager.upload_maxpsize}</td>
+						</tr>
+						[bkvar]ftypelst[/bkvar]
+						</table>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div align="center" style="margin-top:10px">
+			<input type="button" class="button" value="{#filemanager.upload_close}" onclick="window.close();" />
+		</div>	
+	</td>
+</tr>
+</table>
+</form>
+<script type="text/javascript">
+	window.opener.Brick.mod.filemanager.currentBrowser.setUploader(this);
+	[bkvar]onload[/bkvar]
+</script>

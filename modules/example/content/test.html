@@ -1,0 +1,112 @@
+<!--[*]
+[tt=main][/tt]
+
+[*]-->
+<h1>Изучаем JavaScript</h1>
+
+<div id="mydiv"></div>
+
+<script>
+
+	Brick.Loader.add({
+	  yahoo: ["dom"],
+		mod:[{name: 'feedback', files: ['form.js']}],
+	  onSuccess: function() { 
+	  
+			var Dom = YAHOO.util.Dom;
+			
+			var mydiv = Dom.get('mydiv');
+			mydiv.innerHTML = "Результат";
+	  } 
+	});
+
+</script>
+
+<script>
+	var myclass = function(pparam){
+
+		this.event = pparam.event;
+		this.mycalc = pparam.calc;
+		
+		this.calc = function(){
+			
+			for (var i=0;i<100;i++){
+				if (i == 20 || i == 40 || i == 60){
+					if (typeof this.event == 'function' && typeof this.mycalc == 'function'){
+						this.event(this.mycalc(i));
+					}
+				}
+			}
+		};
+	};
+
+	var res = "";
+
+	var event = function(val){
+		res += val+"\n";
+	};
+
+	var calc = function(val1){
+		return val1 + 5;
+	}; 
+
+	var param = {
+		event: event,
+		calc: calc,
+		overobj: {
+			newcalc: function(){
+				alert('newcalc');
+			}
+		}
+	};
+
+	var o = new myclass(param);
+	o.calc();
+	// alert(res);
+	// param.overobj.newcalc();
+
+</script>
+
+<script>
+
+	var d = function(m){
+		this.val = m;
+
+		this.ex2 = function(){
+			this.val += 2;
+		};
+
+		var priv = function(parent){
+			parent.val += 5;
+		};
+
+		this.ex4 = function(){
+			priv(this);
+		};
+
+	};
+	d.prototype = {
+		ex1: function(){
+			this.val += 1;
+		},
+		ex5: function(p1, f1){
+			p1 += this.val;
+			if (typeof f1 == 'function'){
+				f1(p1);
+			};
+		}
+	};
+
+	d.prototype.ex3 = function(){
+		this.val += 3;
+	};
+	
+	var md = new d(10);
+
+	md.ex5(100, function(res){
+		// alert(res);
+	});
+	
+	// alert(md.val);
+
+</script>

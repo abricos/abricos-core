@@ -1,0 +1,52 @@
+<!--[*]
+[tt=window]_sys[/tt]
+[script]upload.php[/script]
+[bkvar=url][/bkvar]
+// загрузка завершена, закрываем окно, данные передаем в редактор
+[bkvar=ok]
+	window.opener.Brick.Catalog.Element.activeEditor.imageUploadComplete(#data#);
+	self.close();
+[/bkvar]
+[bkvar=command][/bkvar]
+[*]-->
+<form enctype="multipart/form-data" action="[bkvar]url[/bkvar]" method="post">
+	<input type="hidden" name="MAX_FILE_SIZE" value="2097152" />
+	<input type="hidden" name="act" value="upload" />
+	<table width=100%>
+	<tbody>
+		<tr>
+			<td>Основная фотография&nbsp;&nbsp;</td>
+			<td><input type="file" name="file0" size="30" /></td>
+		</tr>
+		<tr>
+			<td>Доп. фото 1</td>
+			<td><input type="file" name="file1" size="30" /></td>
+		</tr>
+		<tr>
+			<td>Доп. фото 2</td>
+			<td><input type="file" name="file2" size="30" /></td>
+		</tr>
+		<tr>
+			<td>Доп. фото 3</td>
+			<td><input type="file" name="file3" size="30" /></td>
+		</tr>
+		<tr>
+			<td>Доп. фото 4</td>
+			<td><input type="file" name="file4" size="30" /></td>
+		</tr>
+		<tr>
+			<td>Доп. фото 5</td>
+			<td><input type="file" name="file5" size="30" /></td>
+		</tr>
+		<tr>
+			<td colspan="2" align="right">
+				<br />
+				<input type="submit" value="Загрузить" />
+			</td>
+		</tr>
+	</tbody>
+	</table>
+</form>
+<script type="text/javascript">
+	[bkvar]command[/bkvar]
+</script>

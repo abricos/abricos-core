@@ -1,0 +1,41 @@
+<!--{panel}-->
+<div class="attach">
+	<div class="files" id="{i#table}"></div>
+	<div class="right">
+		<input id="{i#addfile}" type="button" value="{#subscribe.attachment.panel.addfile}" />
+	</div>
+	<!-- 
+	<div class="smallfonts">
+		<a href="#">{#subscribe.attachment.panel.checkall}</a>&nbsp;/&nbsp;<a href="#">{#subscribe.attachment.panel.uncheckall}</a>
+	</div>
+	 -->
+</div>
+
+<!--{table}-->
+<table>
+	<thead>
+		<tr>
+			<th>{#subscribe.attachment.table.name}</th>
+			<th>{#subscribe.attachment.table.pr}</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	{v#rows}
+	</tbody>
+</table>
+
+<!--{row}-->
+<tr>
+	<td><a href="#" id="{i#add}-{v#id}" title="{#subscribe.attachment.row.size}">{v#nm}</a></td>
+	<td>
+		<input type="checkbox" value="{v#id}" id="{i#fsvr}-{v#id}" />
+	</td>
+	<td>
+		<a href="#">
+			<img src="/images/icon-remove.gif" title="{#subscribe.attachment.row.remove}" alt="{#subscribe.attachment.row.remove}" id="{i#remove}-{v#id}" />
+		</a>
+	</td>
+</tr>
+
+

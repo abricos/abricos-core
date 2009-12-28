@@ -1,0 +1,95 @@
+<!--[*]
+[tt=main][/tt]
+[mod=sys]shcode[/mod]
+[*]-->
+<h1>Пример №1</h1>
+<p>
+	Данный пример демонстрирует возможности технологии <a href="http://trac.abricos.org/wiki/BrickJSEngine">BrickJSEngine</a>, 
+	а именно возможность использовать BrickJSComponent, в данном случае простая панель, 
+	на любых страницах сайта. При этом нет необходимости следить за тем, какие еще нужны 
+	компоненты для работы этого компонента, достаточно подключить его, а он уже в свою очередь
+	подгрузит все необходимое.  
+</p>
+<p>
+	Вызвать компонент можно как минимум двумя способами:
+</p>
+<ul>
+	<li>1. Статический метод</li>
+	<li>2. Динамический метод</li>
+</ul>
+<h2>Статический метод</h2>
+<p>
+	Данный метод позволяет загрузить необходимый компонент, описав его вызов в	кирпиче. 
+	Для этого необходимо согласно <a href="http://trac.abricos.org/wiki/Brick">правилам 
+	формирования кирпича</a> установить параметр вызова компонента:
+</p>
+<pre class="brush: html">
+...
+[mjs=example]example1.js[/mjs]
+...
+</pre>
+<p>
+	тогда при сборке страницы будет добавлен метод загрузки этого компонента. 
+</p>
+<p>
+	Просмотреть пример в действии можно <a href="/example/simpledialog.html" target="_blank">здесь</a>.
+</p>
+
+<h2>Динамический метод</h2>
+<p>
+	Данный метод позволяет вызвать необходимый компонент по требованию предварительно загрузив его и 
+	все необходимые компоненты для его работы.
+</p>
+<p>
+	Для того, чтобы открыть тестовую панель диалога, нажмите кнопку 
+	<input type="button" onClick="ShowExampleSimpleDialog(); return false;" value="Открыть панель диалога"/>
+</p>
+<p>Исходный код: Кнопка "Открыть панель диалога"</p>
+<pre class="brush: html">
+	<input type="button" onClick="ShowExampleSimpleDialog(); return false;" value="Открыть панель диалога"/>
+</pre>
+<p>Исходный код: Функция <strong>ShowExampleSimpleDialog</strong></p>
+<pre class="brush: js">
+	function ShowExampleSimpleDialog(){
+
+		// открыть панель "Идет загрузка"
+		Brick.widget.WindowWait.show();
+
+		// Вызвать загрузчик компонентов, по окончанию загрузки, открыть панель диалога
+		Brick.Loader.add({
+			// указать загрузчику загружать компонент example1.js из модуля example
+			mod:[{name: 'example', files: ['example1.js']}],
+			onSuccess: function() {
+
+				// закрыть панель "Идет загрузка"
+				Brick.widget.WindowWait.hide();
+
+				// открыть панель диалога
+				new Brick.mod.example.SimpleDialog();			
+			}
+		});
+	};
+</pre>
+
+<script>
+	function ShowExampleSimpleDialog(){
+
+		// открыть панель "Идет загрузка"
+		Brick.widget.WindowWait.show();
+
+		// Вызвать загрузчик компонентов, по окончанию загрузки, открыть панель диалога
+		Brick.Loader.add({
+			// указать загрузчику загружать компонент example1.js из модуля example
+			mod:[{name: 'example', files: ['example1.js']}],
+			onSuccess: function() {
+
+				// закрыть панель "Идет загрузка"
+				Brick.widget.WindowWait.hide();
+
+				// открыть панель диалога
+				new Brick.mod.example.SimpleDialog();			
+			}
+		});
+	};
+</script>
+[mod]sys:shcode[/mod]

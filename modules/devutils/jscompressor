@@ -1,0 +1,12 @@
+<?php
+
+ob_end_clean(); // make output from autofind php code disapear
+
+$test = @include "includes/find_devutils.php";
+if ($test == 6) { 
+    // find_jscompile.php returns 6
+    include "includes/jscompressor.inc";
+} else {
+    echo "Error: JSCompressor not found" . PHP_EOL;
+}
+?>

@@ -1,0 +1,46 @@
+/*FAST EDIT ICONS*/
+div.adm-icons	{
+position: absolute; top: 0; right: 0;
+}
+div.adm-icons div {
+background-position:2px 1px;
+background-repeat:no-repeat;
+background-color: #ccc;
+border: 1px solid #666;
+margin-left: 4px;
+height:19px;
+overflow:hidden;
+width:19px;
+cursor:pointer;
+float: left;
+}
+.adm-edit	{
+background-image:url(/modules/catalog/images/edit.gif);
+}
+.adm-delete	{
+background-image:url(/modules/catalog/images/remove.gif);
+}
+div.adm-icons div.adm-over	{
+background-color: #000;
+}
+/*FAST EDIT ICONS END*/
+
+
+.imgdiv	{
+position: relative;
+width: 80px;
+height: 60px;
+float:left;
+margin:0 10px 10px 0;
+}
+.clearfloat {
+clear:both;
+font-size:1px;
+height:0;
+line-height:0;
+}
+div p label	{
+display:block;
+float:left;
+width:209px;
+}

@@ -1,0 +1,60 @@
+<!--{editor}-->
+<div class='hd'>Создание/редактирование записи</div>
+<div class='bd'>
+
+	<table width="100%">
+		<tr>
+			<td style="align: left; valign: top">
+				Рубрика: <br />
+				<input id="{i#category}" readonly type="text" style="font-size: 1.6em; width: 300px;"/>&nbsp;
+				<input id="{i#bcategory}" type="button" value="Выбрать" /> 
+			</td>
+			<td style="align: right">
+				<div style="text-align: right">
+					{v#buttons}
+					<input id="{i#bcancel}" type="button" value="Отмена" />
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	<table width="100%">
+		<tr>
+			<td style="align: left; valign: top">
+				Заголовок: <br />
+				<input id="{i#title}" type="text" style="font-size: 1.6em; width: 99%" />
+			</td>
+		</tr>
+		<tr>
+			<td style="align: left; valign: top">
+				Анонс: <br />
+				<div id="{i#bodyint}""></div>
+			</td>
+		</tr>
+		<tr>
+			<td style="align: left; valign: top">
+				Основная запись: <br />
+				<div id="{i#bodyman}"></div>
+			</td>
+		</tr>
+		<tr>
+			<td style="align: left; valign: top">
+				Метки (ключевые слова разделенные запятой): <br />
+				<input id="{i#tags}" type="text" style="width: 97%;" />
+				<div id="{i#tagscont}" style="position: relative;"></div>
+			</td>
+		</tr>
+	</table>
+	<br /><br />
+	
+</div>
+
+<!--{btnpub}-->
+<input id="{i#id}" type="button" value="Опубликовать" />&nbsp;&nbsp;
+
+<!--{btndraft}-->
+<input id="{i#id}" type="button" value="Сохранить как черновик" />&nbsp;&nbsp;
+
+<!--{btnsave}-->
+<input id="{i#id}" type="button" value="Сохранить изменения" />&nbsp;&nbsp;
+

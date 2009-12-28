@@ -1,0 +1,64 @@
+<!--{panel}-->
+<div id='{i#table}'></div>
+
+<!--{table}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>{#feedback.cp_message.table.date}</th>
+			<th>{#feedback.cp_message.table.contact}</th>
+			<th>{#feedback.cp_message.table.phone}</th>
+			<th>{#feedback.cp_message.table.message}</th>
+			<th>{#feedback.cp_message.table.src}</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+
+<!--{row}-->
+<tr valign="top">
+	<td>{v#dl}</td>
+	<td>{v#fio}</td>
+	<td>{v#phn}</td>
+	<td>{v#msg}</td>
+	<td>{v#own}</td>
+	<td><a href="#" id="{i#view}-{v#id}">{#feedback.cp_message.row.preview}</a></td>
+	<td><a href="#" id="{i#remove}-{v#id}">{#feedback.cp_message.row.remove}</a></td>
+</tr>
+
+<!--{view}-->
+<div class='hd'>{#feedback.cp_message.view.hd}</div>
+<div class='bd'>
+	<div class="field linespace-1">
+		<h3>{#feedback.cp_message.view.num}<label id="{i#id}"></label></h3>
+		<p>{#feedback.cp_message.view.date}<label id="{i#dl}"></label></p>
+		<p>{#feedback.cp_message.view.fio}<label id="{i#fio}"></label></p>
+		<p>{#feedback.cp_message.view.phone}<label id="{i#phn}"></label></p>
+		<textarea id="{i#msg}" style="width: 480px; height: 200px"></textarea>
+		
+	 	<div class="buttons right">
+			<input id="{i#breply}" type="button" value="{#feedback.cp_message.view.reply}" />
+			<input id="{i#bcancel}" type="button" value="{#feedback.cp_message.view.close}" />
+		</div>
+		 
+	</div>
+</div>
+
+<!--{reply}-->
+<div class='hd'>{#feedback.cp_message.reply.hd}</div>
+<div class='bd'>
+	<div class="field linespace-1">
+		<h3>{#feedback.cp_message.reply.hd} №<label id="{i#id}"></label>{#feedback.cp_message.reply.from}<label id="{i#dl}"></label></h3>
+		<p>{#feedback.cp_message.reply.fio}<label id="{i#fio}"></label></p>
+		<p>{#feedback.cp_message.reply.phone}<label id="{i#phn}"></label></p>
+		<textarea id="{i#msg}" style="width: 600px; height: 200px"></textarea>
+		
+	 	<div class="buttons right">
+			<input id="{i#breply}" type="button" value="{#feedback.cp_message.reply.reply}" />
+			<input id="{i#bcancel}" type="button" value="{#feedback.cp_message.reply.cancel}" />
+		</div>
+	</div>
+</div>

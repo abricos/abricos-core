@@ -1,0 +1,28 @@
+<!--{panel}-->
+<div id='{i#table}'></div>
+
+<!--{table}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>{#feedback.cp_arhive.table.date}</th>
+			<th>{#feedback.cp_arhive.table.contact}</th>
+			<th>{#feedback.cp_arhive.table.phone}</th>
+			<th>{#feedback.cp_arhive.table.message}</th>
+			<th></th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+
+<!--{row}-->
+<tr valign="top">
+	<td>{v#dl}</td>
+	<td>{v#fio}</td>
+	<td>{v#phn}</td>
+	<td>{v#msg}</td>
+	<td><a href="#" id="{i#view}-{v#id}">{#feedback.cp_arhive.row.preview}</a></td>
+	<td><a href="#" id="{i#remove}-{v#id}">{#feedback.cp_arhive.row.remove}</a></td>
+</tr>
