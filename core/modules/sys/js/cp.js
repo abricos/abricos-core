@@ -23,7 +23,14 @@ Component.entryPoint = function(){
 	menuItem.entryComponent = 'api';
 	menuItem.entryPoint = 'Brick.mod.sys.API.showManagerWidget';
 	cp.MenuManager.add(menuItem);
-	
+
+	var menuItem = new cp.MenuItem(this.moduleName, 'modules');
+	menuItem.icon = '/modules/sys/images/cp_icon.gif';
+	menuItem.titleId = 'sys.modules.title';
+	menuItem.entryComponent = 'api';
+	menuItem.entryPoint = 'Brick.mod.sys.API.showModulesWidget';
+	cp.MenuManager.add(menuItem);
+
 	// TODO: Временно отключено
 	return;
 	var menuItem = new cp.MenuItem(this.moduleName, 'permission');

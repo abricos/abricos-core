@@ -16,6 +16,8 @@ $brick = Brick::$builder->brick;
 $mod = Brick::$modules->GetModule('sys');
 $ds = $mod->getDataSet();
 
+$manager = $mod->GetManager();
+
 $ret = new stdClass();
 $ret->_ds = array();
 
@@ -171,7 +173,9 @@ if (Brick::$session->IsAdminMode()){
 				case 'permission_mod':
 					$rows = CMSQSys::PermissionsByModule($tsrs->p->module);
 					break;
-				
+				case 'modules':
+					$rows = $manager->ModuleList();
+					break;
 			}
 			if (!is_null($rows)){
 				if ($qcol){

@@ -44,6 +44,13 @@ Component.entryPoint = function(){
 		});
 	};
 
+	API.showModulesWidget = function(container){
+		API.fn('cp_modules', function(){
+			new NS.ModulesWidget(container);
+			API.dsRequest();
+		});
+	};
+
 	/**
 	 * Запросить DataSet произвести обновление данных.
 	 * 

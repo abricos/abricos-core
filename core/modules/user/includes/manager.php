@@ -277,28 +277,6 @@ class UserManager {
 		return md5(md5($password).$salt);
 	}
 	
-	
-	/**
-	 * Получить список модулей
-	 */
-	public function ModuleList(){
-		if (!$this->IsAdminRole()){ return null; }
-		
-		$this->registry->modules->RegisterAllModule();
-		$modules = $this->registry->modules->GetModules();
-		$ret = array();
-		foreach ($modules as $name => $mod){
-			if ($name == 'user' || $name == 'ajax'){ continue; }
-			array_push($ret, array(
-				"id" => $name,
-				"nm" => $name,
-				"vs" => $mod->version,
-				"rv" => $mod->revision
-			));
-		}
-		return $ret;
-	}
-	
 	/**
 	 * Получить полную информацию о пользователе.
 	 * Информация доступна владельцу и администратору.

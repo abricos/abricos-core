@@ -7,9 +7,6 @@ Brick.util.Language.add('ru',{
 				},
 				'users':{
 					'title': 'Пользователи'
-				},
-				'modules':{
-					'title': 'Модули'
 				}
 			}
 		}

@@ -16,6 +16,9 @@ Brick.util.Language.add('ru',{
 		},
 		'permission': {
 			'title': 'Безопасность'
+		},
+		'modules':{
+			'title': 'Модули'
 		}
 	}
 });

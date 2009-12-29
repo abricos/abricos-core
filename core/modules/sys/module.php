@@ -52,7 +52,9 @@ class CMSModuleSys extends CMSModule {
 	public $session = null;
 	
 	public static $YUIVersion = "2.8.0r4";
-		
+	
+	private $_manager = null;
+	
 	public function CMSModuleSys(){
 		$this->version = "0.5.1";
 		$this->name = "sys";
@@ -66,6 +68,20 @@ class CMSModuleSys extends CMSModule {
 		
 		$this->session = new CMSSysSession($this->registry);
 	}
+	
+	/**
+	 * Получить менеджер 
+	 *
+	 * @return SysManager
+	 */
+	public function GetManager(){
+		if (is_null($this->_manager)){
+			require_once CWD.'/modules/sys/includes/manager.php';
+			$this->_manager = new SysManager($this);
+		}
+		return $this->_manager;
+	}
+	
 	
 	/**
 	 * Сборка вывода клиенту
