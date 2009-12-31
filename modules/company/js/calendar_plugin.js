@@ -80,7 +80,7 @@ Component.entryPoint = function(){
 
 	var CalTaskEditWidget = CAL.TaskEditWidget;
 	
-	var _savedTPL = 0, _savedTTP = 0;
+	var _savedTPL = 1, _savedTTP = 0;
 	
 	var TaskEditWidget = function(container, task){
 		TaskEditWidget.superclass.constructor.call(this, container, task);
