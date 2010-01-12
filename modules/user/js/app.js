@@ -24,7 +24,7 @@ Component.entryPoint = function(){
 	
 	
 	app = new os.Application(this.moduleName, 'user-exit');
-	app.icon = '/modules/user/images/app_icon.gif';
+	app.icon = '/modules/user/images/app_icon_logout.gif';
 	app.titleId = 'mod.user.app.title.exit';
 	app.entryComponent = 'api';
 	app.entryPoint = 'Brick.mod.user.API.userLogout';
