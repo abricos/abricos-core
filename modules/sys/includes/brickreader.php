@@ -60,8 +60,8 @@ class CMSSysBrickReader {
 		$mods = $this->registry->modules->GetModules();
 		foreach ($mods as $module){
 			$files = array();
-			$files1 = glob(CWD."/modules/".$module->name."/brick/pub_*.html");
-			$files2 = glob(CWD."/modules/".$module->name."/brick/p_*.html");
+			$files1 = globa(CWD."/modules/".$module->name."/brick/pub_*.html");
+			$files2 = globa(CWD."/modules/".$module->name."/brick/p_*.html");
 			
 			if (!empty($files1)){
 				foreach ($files1 as $file){
@@ -107,7 +107,7 @@ class CMSSysBrickReader {
 		
 		$mods = $this->registry->modules->GetModules();
 		foreach ($mods as $module){
-			$files = glob(CWD."/modules/".$module->name."/content/*.html");
+			$files = globa(CWD."/modules/".$module->name."/content/*.html");
 			foreach ($files as $file){
 				$bname = basename($file, ".html");
 				$key = $module->name.".".$bname;
@@ -145,7 +145,7 @@ class CMSSysBrickReader {
 			if ($dirname == "." || $dirname == ".." || empty($dirname)){ continue; }
 			if ($dirname == "_sys" || $dirname == "_my"){ continue; }
 
-			$files = glob(CWD."/tt/".$dirname."/*.html");
+			$files = globa(CWD."/tt/".$dirname."/*.html");
 			foreach ($files as $file){
 				$bname = basename($file, ".html");
 				$key = $dirname.".".$bname;

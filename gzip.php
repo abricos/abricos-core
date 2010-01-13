@@ -222,7 +222,7 @@ if ($libType == 'sys'){
 			$jsdir = $realPath."/modules/".$entry."/js";
 		}
 		
-		$jsfiles = glob($jsdir."/*.js");
+		$jsfiles = globa($jsdir."/*.js");
 		if (empty($jsfiles)){ continue; 	}
 		$content .="\nv=[];\n"; 
 		
@@ -270,13 +270,13 @@ if ($compress) {
 
 // Write gz file
 if ($diskCache && $cacheKey != ""){
-	$chFiles = glob($cachePath."/*");
+	$chFiles = globa($cachePath."/*");
 	if (count($chFiles) >= $cacheLimitCount){
 		foreach ($chFiles as $rfile){
 			@unlink($rfile);
 		}
 	}else{
-		$chFiles = glob($cachePath."/".$diskCacheFileKey."*");
+		$chFiles = globa($cachePath."/".$diskCacheFileKey."*");
 		foreach ($chFiles as $rfile){
 			if (!strpos($rfile, $cacheFileName))
 				@unlink($rfile);
@@ -291,6 +291,11 @@ header("Content-Length: " . strlen($cacheData));
 echo $cacheData;
 
 /////////////////////////////// Functions /////////////////////////////// 
+
+function globa($pattern, $flag = 0){
+	$res = glob($pattern, $flag);
+	return $res ? $res : array();
+}
 
 function createCssFile($file){
 	return str_replace('.js', '.css', $file);

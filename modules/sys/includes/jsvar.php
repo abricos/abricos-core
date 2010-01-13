@@ -45,12 +45,12 @@ while (false !== ($entry = $dir->read())) {
 	
 	$jsdir = CWD."/modules/".$entry."/js";
 	
-	$files = glob($jsdir."/*.js");
+	$files = globa($jsdir."/*.js");
 	foreach ($files as $file){
 		$key += filemtime($file)+filesize($file)+1;
 	}
 
-	$files = glob($jsdir."/*.htm");
+	$files = globa($jsdir."/*.htm");
 	foreach ($files as $file){
 		// если есть перегруженый шаблон, то чтение его версии
 		$override = CWD."/tt/".$template."/override/".$entry."/js/".basename($file);
@@ -62,19 +62,19 @@ while (false !== ($entry = $dir->read())) {
 		}
 	}
 
-	$files = glob($jsdir."/langs/*.js");
+	$files = globa($jsdir."/langs/*.js");
 	foreach ($files as $file){
 		$key += filemtime($file)+filesize($file)+1;
 	}
 
-	$files = glob($jsdir."/*.css");
+	$files = globa($jsdir."/*.css");
 	foreach ($files as $file){
 		$key += filemtime($file)+filesize($file)+1;
 	}
 }
 
 // js модули шаблона
-$files = glob(CWD."/tt/".$template."/jsmod/*.js");
+$files = globa(CWD."/tt/".$template."/jsmod/*.js");
 foreach ($files as $file){
 	$key += filemtime($file)+filesize($file)+1;
 }

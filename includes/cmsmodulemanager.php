@@ -407,7 +407,7 @@ class CMSModuleManager {
 
 		$this->updateManager = null;
 		// Удалить временные файлы
-		$chFiles = glob(CWD."/temp/*.gz");
+		$chFiles = globa(CWD."/temp/*.gz");
 		foreach ($chFiles as $rfile){
 			@unlink($rfile);
 		}

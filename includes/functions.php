@@ -6,6 +6,10 @@
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
+function globa($pattern, $flag = 0){
+	$res = glob($pattern, $flag);
+	return $res ? $res : array();
+}
 
 function bkstr($value){
 	return addslashes($value);
