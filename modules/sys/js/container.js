@@ -18,6 +18,7 @@ Component.entryPoint = function(){
 	Brick.namespace('widget');
 
 	var Dom = YAHOO.util.Dom,
+		UA = YAHOO.env.ua,
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
 
@@ -33,6 +34,8 @@ Component.entryPoint = function(){
 	
 	// счетчик глобального идентификатора каждой панели 
 	var _globalIdCounter = 0;
+	
+	YAHOO.widget.Overlay.VIEWPORT_OFFSET = 0;
 	
 	/**
 	 * Панель
@@ -57,7 +60,6 @@ Component.entryPoint = function(){
             visible: false,
             autofillheight: "body", 
             constraintoviewport:true,
-            // menubar: "",
             template: "",
             elbody: null,
             parentNode: document.body
@@ -269,42 +271,52 @@ Component.entryPoint = function(){
 		
 		_savedState: Panel.STATE_NORMAL,
 		_savedX: 0, _savedY: 0, _savedW: 0, _savedH: 0,
+		_savedShowState: Panel.STATE_NORMAL,
 
 		_setState: function(val){
 			var cfg = this.cfg,
 				el = this.element;
 			
+			if (val == this._savedState){ return; }
+			
+			if (this._savedState == Panel.STATE_MINIMIZED){
+				this._showPanel();
+				this._savedState = this._savedShowState;
+				return;
+			}
 			if (val == Panel.STATE_MAXIMIZED){
+				this._savedShowState = val;
 				if (this._savedState == Panel.STATE_NORMAL){
-					this._savedState = val;
-					this._savedX = cfg.getProperty('x'); 
-					this._savedY = cfg.getProperty('y'); 
+					this._savedX = cfg.getProperty('x') || 0; 
+					this._savedY = cfg.getProperty('y') || 0; 
 					this._savedW = cfg.getProperty('width'); 
 					this._savedH = cfg.getProperty('height');
 				}
 
 				var rg = Dom.getRegion(el.parentNode);
-				var w = rg.width - 20;
-				var h = rg.height - 20;
+				var w = rg.width;
+				var h = rg.height;
 
-				Dom.setX(el, 0);
 				cfg.setProperty("xy", [0, 0]);
 				cfg.setProperty("width", w+'px');
 				cfg.setProperty("height", h+'px');
 				cfg.setProperty('draggable', false);
 				cfg.setProperty('resize', false);
-			}else if (val == Panel.STATE_NORMAL && this._savedState != Panel.STATE_NORMAL){
-				this._savedState = val;
+			}else if (val == Panel.STATE_NORMAL){
+				this._savedShowState = val;
 				cfg.setProperty("x", this._savedX);
 				cfg.setProperty("y", this._savedY);
 				cfg.setProperty("width", this._savedW);
-				cfg.setProperty("height", this._savedY);
+				cfg.setProperty("height", this._savedH);
 				cfg.setProperty('draggable', true);
 				cfg.setProperty('resize', true);
 				if (cfg.getProperty('fixedcenter')){
 					this.center();
 				}
+			}else if (val == Panel.STATE_MINIMIZED){
+				this._hidePanel();
 			}
+			this._savedState = val;
 		},
 		
         configState: function (type, args, obj) {
@@ -430,12 +442,15 @@ Component.entryPoint = function(){
 
 		_doMinimized: function(e){
             E.preventDefault(e);
-            this.minimize();
+			this.cfg.setProperty('state', Panel.STATE_MINIMIZED);
 		},
 		
 		_doMaximized: function(e){
             E.preventDefault(e);
-            this.maximize();
+            
+			var state = this._savedState == Panel.STATE_NORMAL ? 
+					Panel.STATE_MAXIMIZED : Panel.STATE_NORMAL; 
+			this.cfg.setProperty('state', state);
 		},
 		
 		_doClose: function(e){
@@ -443,22 +458,43 @@ Component.entryPoint = function(){
             this.close();
 		},
 		
-		minimize: function(){
+		_showPanel: function(){
+			Panel.superclass.show.call(this);
+			this.onShow();
+		},
+		
+		_hidePanel: function(){
+			Panel.superclass.hide.call(this);
+			this.onHide();
+		},
+		
+		center: function(){
+			if (this.cfg.getProperty('state') != Panel.STATE_NORMAL){
+				return;
+			}
+			Panel.superclass.center.call(this);
+		},
+
+		show: function(){
+			this.cfg.setProperty('state', this._savedShowState);
+		},
+
+		hide: function(){
 			this.cfg.setProperty('state', Panel.STATE_MINIMIZED);
 		},
 		
-		maximize: function(){
-			var state = this._savedState == Panel.STATE_NORMAL ? 
-					Panel.STATE_MAXIMIZED : Panel.STATE_NORMAL; 
-			this.cfg.setProperty('state', state);
-		},
+		closeEvent: null,
 		
 		close: function(){
+			this.closeEvent.fire(this);
+			this.onClose();
 			this.destroy();
 		},
 		
 		init: function(el, config){
 			Panel.superclass.init.call(this, el, config);
+			
+			this.closeEvent = new YAHOO.util.CustomEvent();
 			
 	        var __self = this;
 	        
@@ -475,10 +511,8 @@ Component.entryPoint = function(){
 			this.onLoad();
 			
             setTimeout(function () {
-    			__self.show();
-    			__self.onShow();
+            	__self._showPanel();
             }, 100);
-
 		},
 		
 		_buildPanel: function(config){
@@ -489,27 +523,10 @@ Component.entryPoint = function(){
 			});
 			return div;
 		},
-		
-		/*
-		_initMenuBar: function(el, config){
-			var elMenuBar = Dom.get(config.menubar);
-			if (L.isNull(elMenuBar)){ return; }
-			var oMenuBar = new YAHOO.widget.MenuBar(config.menubar, { 
-			    autosubmenudisplay: true, 
-			    hidedelay: 750, 
-			    lazyload: true 
-			});
-			oMenuBar.render();
-			
-			this.menuBar = oMenuBar;
-		},*/
-		
+
 		resizeManager: null,
 		
 		destroy: function(){
-			/*if (!L.isNull(this.menuBar)){
-				this.menuBar.destroy();
-			}*/
 			if (!L.isNull(this.resizeManager)){
 				this.resizeManager.destroy();
 			}
@@ -555,7 +572,17 @@ Component.entryPoint = function(){
 		 * @method onClose
 		 */
 		onClose: function(){},
+
+		/**
+		 * Абстрактный метод, который будет вызван когда панель
+		 * будет скрыта.
+		 * 
+		 * @method onHide
+		 */
+		onHide: function(){},
 		
+		onStateChange: function(){},
+
 		/**
 		 * Заблокировать элементы панели на клик, при этом, все элементы типа
 		 * INPUT будут выставлены в disabled. 
