@@ -42,7 +42,7 @@ class CMSInputCleaner extends CMSBaseClass {
 		}
 
 		// reverse the effects of magic quotes if necessary
-		if (get_magic_quotes_gpc())		{
+		// if (get_magic_quotes_gpc())		{
 			$this->stripslashes_deep($_REQUEST); // needed for some reason (at least on php5 - not tested on php4)
 			$this->stripslashes_deep($_GET);
 			$this->stripslashes_deep($_POST);
@@ -54,9 +54,9 @@ class CMSInputCleaner extends CMSBaseClass {
 				}
 				$this->stripslashes_deep($_FILES);
 			}
-		}
-		set_magic_quotes_runtime(0);
-		@ini_set('magic_quotes_sybase', 0);
+		// }
+		// set_magic_quotes_runtime(0);
+		// @ini_set('magic_quotes_sybase', 0);
 
 		foreach (array('_GET', '_POST') AS $arrayname) {
 			if (isset($GLOBALS["$arrayname"]['do'])){

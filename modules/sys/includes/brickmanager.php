@@ -385,7 +385,7 @@ class CMSSysBrickBuilder {
 		
 		if (empty($mathes)){
 			if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE){
-				$ca = split("\[tt\]content\[\/tt\]", $content);
+				$ca = explode("[tt]content[/tt]", $content);
 				print $ca[0];
 				print $this->PagePrint($brickContent);
 				print $ca[1];
@@ -399,7 +399,7 @@ class CMSSysBrickBuilder {
 		foreach ($mathes as $value){
 			$replstr = $value[0][0];
 			$count = $value[0][1]-$position;
-			$sa = split(":", $value[1][0]);
+			$sa = explode(":", $value[1][0]);
 			$id = count($sa) == 3 ? $sa[2] : 0;
 			$mods = $brick->param->module[$sa[0]];
 			if (empty($mods)){ continue; }
@@ -410,7 +410,7 @@ class CMSSysBrickBuilder {
 				if ($sa[1] != $mbrick->name){ continue; }
 				$content = substr($brick->content, $position, $count);
 				if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE && $contentPos >= $position && $contentPos <= $count+$position){
-					$ca = split("\[tt\]content\[\/tt\]", $content);
+					$ca = explode("[tt]content[/tt]", $content);
 					print $ca[0];
 					print $this->PagePrint($brickContent);
 					print $ca[1];
@@ -433,7 +433,7 @@ class CMSSysBrickBuilder {
 		$count = strlen($brick->content)-$position;
 		$content = substr($brick->content, $position, $count);
 		if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE && $contentPos >= $position && $contentPos <= $count+$position){
-			$ca = split("\[tt\]content\[\/tt\]", $content);
+			$ca = explode("[tt]content[/tt]", $content);
 			print $ca[0];
 			print $this->PagePrint($brickContent);
 			print $ca[1];
