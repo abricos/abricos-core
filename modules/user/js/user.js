@@ -83,13 +83,15 @@ Component.entryPoint = function(){
 	 */
 	var LoginPanel = function(param){
 		this.param = L.merge({
-			'username': '', 'password': '', 'url': ''
+			'username': '', 'password': '', 'url': '',
+			'hideClose': false,
+			'panelConfig': {}
 		}, param || {});
-		LoginPanel.superclass.constructor.call(this, {
-			modal: true, 
-			resize: false,
-			fixedcenter: true
-		});
+		var config = L.merge({
+			modal: true, resize: false, fixedcenter: true
+			// ,width: '400px'
+		}, this.param.panelConfig || {});
+		LoginPanel.superclass.constructor.call(this, config);
 	};
 	
 	YAHOO.extend(LoginPanel, Brick.widget.Panel, {
@@ -111,6 +113,9 @@ Component.entryPoint = function(){
 				var err = this.el('error');
 				err.style.display = "block";
 				err.innerHTML = lng[p['error']];
+			}
+			if (p.hideClose){
+				this.el('bcancel').style.display = 'none';
 			}
 		},
 		send: function(){
