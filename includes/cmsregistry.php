@@ -111,7 +111,7 @@ final class CMSRegistry {
 		
 		// временное решение в связи с переходом на платформу Abricos
 		if (!empty($modsinfo['sys']) && empty($modsinfo['sys']['installdate'])){
-			CMSSqlQuery::UpdateToAbricosPackage($db);
+			CMSSqlQuery::UpdateToAbricosPackage($this->db);
 		}
 		$this->modules->RegisterByName('sys');
 		
