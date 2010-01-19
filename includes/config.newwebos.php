@@ -1,6 +1,6 @@
 <?php
 /**
-* @version $Id$
+* @version $Id: config.new.php 270 2009-12-28 13:24:34Z roosit $
 * @package Abricos
 * @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
@@ -39,6 +39,12 @@ $config['Misc']['develop_mode'] = false;
 
 $config['JsonDB']['use'] = false;
 $config['JsonDB']['password'] = "";
+
+$config['Takelink'] = array(
+	"__super" => array(
+		"module" => "webos"
+	)
+);
 
 // Пример тонкой настройки работы модулей
 /*
