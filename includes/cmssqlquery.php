@@ -76,9 +76,6 @@ class CMSSqlQuery extends CMSBaseClass {
 			  PRIMARY KEY  (`moduleid`)
 			) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'"
 		);
-		$db->query_write("
-			INSERT INTO ".$db->prefix."module (name, version, takelink, installdate) VALUES( 'sys', '0.0', '', ".TIMENOW.")
-		");
 	}
 	
 	public static function UpdateToAbricosPackage(CMSDatabase $db){

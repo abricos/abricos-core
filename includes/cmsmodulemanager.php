@@ -371,10 +371,11 @@ class CMSModuleManager {
 	 * @param CMSModule $module
 	 */
 	public function Register(CMSModule $module){
+		$modName = $module->name; 
 		if (empty($module)){ return; }
 
 		$module->registry = $this->registry;
-		$this->table[$module->name] = &$module;
+		$this->table[$modName] = &$module;
 		
 		if (!$this->LoadLanguage($module, LNG)){ // загрузка фраз языка
 			if (LNG != 'ru'){ // загрузка не удалась, попытка загрузить русский язык по умолчанию
@@ -383,14 +384,14 @@ class CMSModuleManager {
 		}
 
 		/* зарегистрирован ли этот модуль в БД */
-		$info = $this->modulesInfo[$module->name];
+		$info = $this->modulesInfo[$modName];
 
 		if (empty($info)){
 			CMSSqlQuery::ModuleAdd($this->db, $module);
 			$this->FetchModulesInfo();
 		}
 		
-		$info = $this->modulesInfo[$module->name];
+		$info = $this->modulesInfo[$modName];
 		
 		$serverVersion = $info['version'];
 		$newVersion = $module->version;
@@ -399,12 +400,13 @@ class CMSModuleManager {
 		
 		$this->updateManager = new CMSUpdateManager($module, $info);
 		
-		$shema = CWD."/modules/".$module->name."/includes/shema.php";
+		$shema = CWD."/modules/".$modName."/includes/shema.php";
 		if (file_exists($shema)){
 			require_once($shema);
 		}
 		CMSSqlQuery::ModuleUpdateVersion($this->db, $module);
-
+		$this->FetchModulesInfo();
+		
 		$this->updateManager = null;
 		// Удалить временные файлы
 		$chFiles = globa(CWD."/temp/*.gz");
@@ -412,8 +414,6 @@ class CMSModuleManager {
 			@unlink($rfile);
 		}
 	}
-	
-	
 	
 	/**
 	 * Получить модуль 

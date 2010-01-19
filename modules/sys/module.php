@@ -56,7 +56,7 @@ class CMSModuleSys extends CMSModule {
 	private $_manager = null;
 	
 	public function CMSModuleSys(){
-		$this->version = "0.5.1";
+		$this->version = "0.5.2";
 		$this->name = "sys";
 	}
 	
@@ -187,7 +187,9 @@ class CMSModuleSys extends CMSModule {
 			case PAGESTATUS_500:
 				return '500';
 		}
-		return 'index'; 
+		// return 'index';
+		// системный модуль не отдает контент 
+		return '404'; 
 	}
 	
 	private $brickReader = null;
