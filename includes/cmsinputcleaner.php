@@ -41,22 +41,23 @@ class CMSInputCleaner extends CMSBaseClass {
 			die('<strong>Fatal Error:</strong> Invalid URL.');
 		}
 
-		// reverse the effects of magic quotes if necessary
-		// if (get_magic_quotes_gpc())		{
-			$this->stripslashes_deep($_REQUEST); // needed for some reason (at least on php5 - not tested on php4)
-			$this->stripslashes_deep($_GET);
-			$this->stripslashes_deep($_POST);
-			$this->stripslashes_deep($_COOKIE);
-
-			if (is_array($_FILES)) {
-				foreach ($_FILES AS $key => $val) {
-					$_FILES["$key"]['tmp_name'] = str_replace('\\', '\\\\', $val['tmp_name']);
+		if (function_exists('get_magic_quotes_gpc') && -1 == version_compare(PHP_VERSION, '5.2.99')) {
+			if (get_magic_quotes_gpc()){
+				$this->stripslashes_deep($_REQUEST);
+				$this->stripslashes_deep($_GET);
+				$this->stripslashes_deep($_POST);
+				$this->stripslashes_deep($_COOKIE);
+	
+				if (is_array($_FILES)) {
+					foreach ($_FILES AS $key => $val) {
+						$_FILES["$key"]['tmp_name'] = str_replace('\\', '\\\\', $val['tmp_name']);
+					}
+					$this->stripslashes_deep($_FILES);
 				}
-				$this->stripslashes_deep($_FILES);
 			}
-		// }
-		// set_magic_quotes_runtime(0);
-		// @ini_set('magic_quotes_sybase', 0);
+			set_magic_quotes_runtime(0);
+			@ini_set('magic_quotes_sybase', 0);
+		}
 
 		foreach (array('_GET', '_POST') AS $arrayname) {
 			if (isset($GLOBALS["$arrayname"]['do'])){
@@ -230,6 +231,10 @@ class CMSInputCleaner extends CMSBaseClass {
 	}
 
 	function stripslashes_deep(&$value) {
+	    static $recursive_counter = 0;
+	    if (++$recursive_counter > 1000) {
+	        die('possible deep recursion attack');
+	    }
 		if (is_array($value)) {
 			foreach ($value AS $key => $val)  {
 				if (is_string($val)) {
@@ -239,6 +244,7 @@ class CMSInputCleaner extends CMSBaseClass {
 				}
 			}
 		}
+    	$recursive_counter--;
 	}
 
 	function convert_shortvars(&$array) {
