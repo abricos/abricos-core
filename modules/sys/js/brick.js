@@ -108,7 +108,7 @@ Brick.cleanScript = function(el){
 				s += c.innerHTML;
 				el.removeChild(c);
 			}else{
-				s += cleanScript(c);
+				s += Brick.cleanScript(c);
 			}
 		}
 	}
