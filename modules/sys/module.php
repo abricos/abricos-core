@@ -809,10 +809,13 @@ class CMSQSys {
 	public static function SessionAppend(CMSSysSession $sm){
 		$db = $sm->registry->db;
 		
-		$sm->registry->db->query_write("
+		$sql = "
 			DELETE FROM ".$db->prefix."session 
-			WHERE lastactivity < ".(TIMENOW - $sm->cookieTimeOut)."
-		", true);
+			WHERE 
+				(lastactivity < ".(TIMENOW - $sm->cookieTimeOut)." and userid > 0) OR
+				(lastactivity < ".(TIMENOW - 3600)." and userid = 0)
+		";
+		$sm->registry->db->query_write($sql, true);
 		
 		$sm->registry->db->query_write("
 			INSERT INTO ".$db->prefix."session (sessionhash, idhash, lastactivity)
