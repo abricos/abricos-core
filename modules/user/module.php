@@ -109,6 +109,19 @@ class UserPermission extends CMSPermission {
  */
 class CMSQUser{
 	
+	public static function UserOnline(CMSDatabase $db){
+		$sql = "
+			SELECT count( * ) AS cnt
+			FROM (
+				SELECT idhash
+				FROM ".$db->prefix."session
+				WHERE lastactivity > ".(TIMENOW-60*5)."
+				GROUP BY idhash
+			)a		
+		";
+		return $db->query_read($sql);
+	}
+	
 	const FIELDS_USERPUB = "
 		userid as id, 
 		username as unm,

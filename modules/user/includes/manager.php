@@ -61,6 +61,11 @@ class UserManager {
 		return $this->module->permission->CheckAction(UserAction::USER_ADMIN) > 0;
 	}
 	
+	public function UserOnline(){
+		if (!$this->IsAdminRole()){ return null; }
+		return CMSQUser::UserOnline($this->db);
+	}
+	
 	public function ChangeProfile($d){
 		if (!$this->IsRegister()){ return; }
 		

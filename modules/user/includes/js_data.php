@@ -55,6 +55,9 @@ foreach ($ds->ts as $ts){
 			case 'usercount':
 				$rows = $userManager->UserCount();
 				break;
+			case 'online':
+				$rows = $userManager->UserOnline();
+				break;
 		}
 		if (!is_null($rows)){
 			if ($qcol){

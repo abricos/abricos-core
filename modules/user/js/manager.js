@@ -52,6 +52,14 @@ Component.entryPoint = function(){
     	initTemplate: function(){
     		return this._T['panel'];
     	},
+    	init: function(el, config){
+    		DATA.get('online', true);
+    		UserListWidget.superclass.init.call(this, el, config);    
+    	},
+    	refresh: function(){
+    		DATA.get('online').clear();
+    		UserListWidget.superclass.refresh.call(this);    
+    	},
     	renderTableAwait: function(){
     		this._TM.getEl("panel.table").innerHTML = this._TM.replace('table', {'rows': this._T['rowwait']});
     	},
@@ -67,7 +75,16 @@ Component.entryPoint = function(){
 			});
     	},
     	renderTable: function(lst){
-    		this._TM.getEl("panel.table").innerHTML = this._TM.replace('table', {'rows': lst}); 
+    		var TM = this._TM;
+    		TM.getEl("panel.table").innerHTML = TM.replace('table', {'rows': lst});
+    		var rows = DATA.get('usercount').getRows(); 
+    		if (rows.count() == 1){
+    			TM.getEl('panel.count').innerHTML = rows.getByIndex(0).cell['cnt'];
+    		}
+    		rows = DATA.get('online').getRows(); 
+    		if (rows.count() == 1){
+    			TM.getEl('panel.online').innerHTML = rows.getByIndex(0).cell['cnt'];
+    		}
     	}, 
     	onClick: function(el){
     		if (el.id == this._TM.getElId("panel.refresh")){

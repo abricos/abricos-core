@@ -134,7 +134,7 @@ Component.entryPoint = function(){
 			this._sendParam = {'page': page, 'limit': this._rowlimit};
 			
 			this.rows = this.tables[this._tableList].getRows(this._sendParam);
-			this.tables[this._tableListCount].getRows(this._sendParam);
+			this.tables[this._tableListCount].getRows();
 			if (this._DATA.isFill(this.tables)){
 				this.render();
 			}else{
@@ -158,7 +158,7 @@ Component.entryPoint = function(){
 			var table = DATA.get(this._tableList);
 			var rows = table.getRows(param);
 			var page = param['page']*1; 
-			var total = DATA.get(this._tableListCount).getRows(param).getByIndex(0).cell['cnt']*1;
+			var total = DATA.get(this._tableListCount).getRows().getByIndex(0).cell['cnt']*1;
 			
 			var cfg = { page: page, totalRecords: total };
 			for(var n in this._paginators){
