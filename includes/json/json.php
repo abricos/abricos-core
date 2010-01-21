@@ -2,116 +2,116 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 /**
-* Converts to and from JSON format.
-*
-* JSON (JavaScript Object Notation) is a lightweight data-interchange
-* format. It is easy for humans to read and write. It is easy for machines
-* to parse and generate. It is based on a subset of the JavaScript
-* Programming Language, Standard ECMA-262 3rd Edition - December 1999.
-* This feature can also be found in  Python. JSON is a text format that is
-* completely language independent but uses conventions that are familiar
-* to programmers of the C-family of languages, including C, C++, C#, Java,
-* JavaScript, Perl, TCL, and many others. These properties make JSON an
-* ideal data-interchange language.
-*
-* This package provides a simple encoder and decoder for JSON notation. It
-* is intended for use with client-side Javascript applications that make
-* use of HTTPRequest to perform server communication functions - data can
-* be encoded into JSON notation for use in a client-side javascript, or
-* decoded from incoming Javascript requests. JSON format is native to
-* Javascript, and can be directly eval()'ed with no further parsing
-* overhead
-*
-* All strings should be in ASCII or UTF-8 format!
-*
-* LICENSE: Redistribution and use in source and binary forms, with or
-* without modification, are permitted provided that the following
-* conditions are met: Redistributions of source code must retain the
-* above copyright notice, this list of conditions and the following
-* disclaimer. Redistributions in binary form must reproduce the above
-* copyright notice, this list of conditions and the following disclaimer
-* in the documentation and/or other materials provided with the
-* distribution.
-*
-* THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
-* WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-* MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
-* NO EVENT SHALL CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-* BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-* TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
-* USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-* DAMAGE.
-*
-* @category
-* @package     Services_JSON
-* @author      Michal Migurski <mike-json@teczno.com>
-* @author      Matt Knapp <mdknapp[at]gmail[dot]com>
-* @author      Brett Stimmerman <brettstimmerman[at]gmail[dot]com>
-* @copyright   2005 Michal Migurski
-* @version     CVS: $Id: JSON.php,v 1.1 2008/01/17 17:33:46 davglass Exp $
-* @license     http://www.opensource.org/licenses/bsd-license.php
-* @link        http://pear.php.net/pepr/pepr-proposal-show.php?id=198
-*/
+ * Converts to and from JSON format.
+ *
+ * JSON (JavaScript Object Notation) is a lightweight data-interchange
+ * format. It is easy for humans to read and write. It is easy for machines
+ * to parse and generate. It is based on a subset of the JavaScript
+ * Programming Language, Standard ECMA-262 3rd Edition - December 1999.
+ * This feature can also be found in  Python. JSON is a text format that is
+ * completely language independent but uses conventions that are familiar
+ * to programmers of the C-family of languages, including C, C++, C#, Java,
+ * JavaScript, Perl, TCL, and many others. These properties make JSON an
+ * ideal data-interchange language.
+ *
+ * This package provides a simple encoder and decoder for JSON notation. It
+ * is intended for use with client-side Javascript applications that make
+ * use of HTTPRequest to perform server communication functions - data can
+ * be encoded into JSON notation for use in a client-side javascript, or
+ * decoded from incoming Javascript requests. JSON format is native to
+ * Javascript, and can be directly eval()'ed with no further parsing
+ * overhead
+ *
+ * All strings should be in ASCII or UTF-8 format!
+ *
+ * LICENSE: Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met: Redistributions of source code must retain the
+ * above copyright notice, this list of conditions and the following
+ * disclaimer. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
+ * NO EVENT SHALL CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+ * DAMAGE.
+ *
+ * @category
+ * @package     Services_JSON
+ * @author      Michal Migurski <mike-json@teczno.com>
+ * @author      Matt Knapp <mdknapp[at]gmail[dot]com>
+ * @author      Brett Stimmerman <brettstimmerman[at]gmail[dot]com>
+ * @copyright   2005 Michal Migurski
+ * @version     CVS: $Id: JSON.php 292911 2010-01-02 04:04:10Z alan_k $
+ * @license     http://www.opensource.org/licenses/bsd-license.php
+ * @link        http://pear.php.net/pepr/pepr-proposal-show.php?id=198
+ */
 
 /**
-* Marker constant for Services_JSON::decode(), used to flag stack state
-*/
+ * Marker constant for Services_JSON::decode(), used to flag stack state
+ */
 define('SERVICES_JSON_SLICE',   1);
 
 /**
-* Marker constant for Services_JSON::decode(), used to flag stack state
-*/
+ * Marker constant for Services_JSON::decode(), used to flag stack state
+ */
 define('SERVICES_JSON_IN_STR',  2);
 
 /**
-* Marker constant for Services_JSON::decode(), used to flag stack state
-*/
+ * Marker constant for Services_JSON::decode(), used to flag stack state
+ */
 define('SERVICES_JSON_IN_ARR',  3);
 
 /**
-* Marker constant for Services_JSON::decode(), used to flag stack state
-*/
+ * Marker constant for Services_JSON::decode(), used to flag stack state
+ */
 define('SERVICES_JSON_IN_OBJ',  4);
 
 /**
-* Marker constant for Services_JSON::decode(), used to flag stack state
-*/
+ * Marker constant for Services_JSON::decode(), used to flag stack state
+ */
 define('SERVICES_JSON_IN_CMT', 5);
 
 /**
-* Behavior switch for Services_JSON::decode()
-*/
+ * Behavior switch for Services_JSON::decode()
+ */
 define('SERVICES_JSON_LOOSE_TYPE', 16);
 
 /**
-* Behavior switch for Services_JSON::decode()
-*/
+ * Behavior switch for Services_JSON::decode()
+ */
 define('SERVICES_JSON_SUPPRESS_ERRORS', 32);
 
 /**
-* Converts to and from JSON format.
-*
-* Brief example of use:
-*
-* <code>
-* // create a new instance of Services_JSON
-* $json = new Services_JSON();
-*
-* // convert a complexe value to JSON notation, and send it to the browser
-* $value = array('foo', 'bar', array(1, 2, 'baz'), array(3, array(4)));
-* $output = $json->encode($value);
-*
-* print($output);
-* // prints: ["foo","bar",[1,2,"baz"],[3,[4]]]
-*
-* // accept incoming POST data, assumed to be in JSON notation
-* $input = file_get_contents('php://input', 1000000);
-* $value = $json->decode($input);
-* </code>
-*/
+ * Converts to and from JSON format.
+ *
+ * Brief example of use:
+ *
+ * <code>
+ * // create a new instance of Services_JSON
+ * $json = new Services_JSON();
+ *
+ * // convert a complexe value to JSON notation, and send it to the browser
+ * $value = array('foo', 'bar', array(1, 2, 'baz'), array(3, array(4)));
+ * $output = $json->encode($value);
+ *
+ * print($output);
+ * // prints: ["foo","bar",[1,2,"baz"],[3,[4]]]
+ *
+ * // accept incoming POST data, assumed to be in JSON notation
+ * $input = file_get_contents('php://input', 1000000);
+ * $value = $json->decode($input);
+ * </code>
+ */
 class Services_JSON
 {
    /**
@@ -224,7 +224,7 @@ class Services_JSON
     }
 
    /**
-    * encodes an arbitrary variable into JSON format
+    * encodes an arbitrary variable into JSON format (and sends JSON Header)
     *
     * @param    mixed   $var    any number, boolean, string, array, or object to be encoded.
     *                           see argument 1 to Services_JSON() above for array-parsing behavior.
@@ -236,6 +236,44 @@ class Services_JSON
     */
     function encode($var)
     {
+        header('Content-type: application/json');
+        return $this->encodeUnsafe($var);
+    }
+    /**
+    * encodes an arbitrary variable into JSON format without JSON Header - warning - may allow CSS!!!!)
+    *
+    * @param    mixed   $var    any number, boolean, string, array, or object to be encoded.
+    *                           see argument 1 to Services_JSON() above for array-parsing behavior.
+    *                           if var is a strng, note that encode() always expects it
+    *                           to be in ASCII or UTF-8 format!
+    *
+    * @return   mixed   JSON string representation of input var or an error if a problem occurs
+    * @access   public
+    */
+    function encodeUnsafe($var)
+    {
+        // see bug #16908 - regarding numeric locale printing
+        $lc = setlocale(LC_NUMERIC, 0);
+        setlocale(LC_NUMERIC, 'C');
+        $ret = $this->_encode($var);
+        setlocale(LC_NUMERIC, $lc);
+        return $ret;
+        
+    }
+    /**
+    * PRIVATE CODE that does the work of encodes an arbitrary variable into JSON format 
+    *
+    * @param    mixed   $var    any number, boolean, string, array, or object to be encoded.
+    *                           see argument 1 to Services_JSON() above for array-parsing behavior.
+    *                           if var is a strng, note that encode() always expects it
+    *                           to be in ASCII or UTF-8 format!
+    *
+    * @return   mixed   JSON string representation of input var or an error if a problem occurs
+    * @access   public
+    */
+    function _encode($var) 
+    {
+         
         switch (gettype($var)) {
             case 'boolean':
                 return $var ? 'true' : 'false';
@@ -248,7 +286,7 @@ class Services_JSON
 
             case 'double':
             case 'float':
-                return (float) $var;
+                return  (float) $var;
 
             case 'string':
                 // STRINGS ARE EXPECTED TO BE IN ASCII OR UTF-8 FORMAT
@@ -295,6 +333,12 @@ class Services_JSON
                         case (($ord_var_c & 0xE0) == 0xC0):
                             // characters U-00000080 - U-000007FF, mask 110XXXXX
                             // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                            if ($c+1 >= $strlen_var) {
+                                $c += 1;
+                                $ascii .= '?';
+                                break;
+                            }
+                            
                             $char = pack('C*', $ord_var_c, ord($var{$c + 1}));
                             $c += 1;
                             $utf16 = $this->utf82utf16($char);
@@ -302,17 +346,27 @@ class Services_JSON
                             break;
 
                         case (($ord_var_c & 0xF0) == 0xE0):
+                            if ($c+2 >= $strlen_var) {
+                                $c += 2;
+                                $ascii .= '?';
+                                break;
+                            }
                             // characters U-00000800 - U-0000FFFF, mask 1110XXXX
                             // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
                             $char = pack('C*', $ord_var_c,
-                                         ord($var{$c + 1}),
-                                         ord($var{$c + 2}));
+                                         @ord($var{$c + 1}),
+                                         @ord($var{$c + 2}));
                             $c += 2;
                             $utf16 = $this->utf82utf16($char);
                             $ascii .= sprintf('\u%04s', bin2hex($utf16));
                             break;
 
                         case (($ord_var_c & 0xF8) == 0xF0):
+                            if ($c+3 >= $strlen_var) {
+                                $c += 3;
+                                $ascii .= '?';
+                                break;
+                            }
                             // characters U-00010000 - U-001FFFFF, mask 11110XXX
                             // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
                             $char = pack('C*', $ord_var_c,
@@ -327,6 +381,11 @@ class Services_JSON
                         case (($ord_var_c & 0xFC) == 0xF8):
                             // characters U-00200000 - U-03FFFFFF, mask 111110XX
                             // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+                            if ($c+4 >= $strlen_var) {
+                                $c += 4;
+                                $ascii .= '?';
+                                break;
+                            }
                             $char = pack('C*', $ord_var_c,
                                          ord($var{$c + 1}),
                                          ord($var{$c + 2}),
@@ -338,6 +397,11 @@ class Services_JSON
                             break;
 
                         case (($ord_var_c & 0xFE) == 0xFC):
+                        if ($c+5 >= $strlen_var) {
+                                $c += 5;
+                                $ascii .= '?';
+                                break;
+                            }
                             // characters U-04000000 - U-7FFFFFFF, mask 1111110X
                             // see http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
                             $char = pack('C*', $ord_var_c,
@@ -352,8 +416,7 @@ class Services_JSON
                             break;
                     }
                 }
-
-                return '"'.$ascii.'"';
+                return  '"'.$ascii.'"';
 
             case 'array':
                /*
@@ -390,7 +453,7 @@ class Services_JSON
                 }
 
                 // treat it like a regular array
-                $elements = array_map(array($this, 'encode'), $var);
+                $elements = array_map(array($this, '_encode'), $var);
 
                 foreach($elements as $element) {
                     if(Services_JSON::isError($element)) {
@@ -433,13 +496,13 @@ class Services_JSON
     */
     function name_value($name, $value)
     {
-        $encoded_value = $this->encode($value);
+        $encoded_value = $this->_encode($value);
 
         if(Services_JSON::isError($encoded_value)) {
             return $encoded_value;
         }
 
-        return $this->encode(strval($name)) . ':' . $encoded_value;
+        return $this->_encode(strval($name)) . ':' . $encoded_value;
     }
 
    /**
@@ -666,7 +729,7 @@ class Services_JSON
                                 // element in an associative array,
                                 // for now
                                 $parts = array();
-
+                                
                                 if (preg_match('/^\s*(["\'].*[^\\\]["\'])\s*:\s*(\S.*),?$/Uis', $slice, $parts)) {
                                     // "name":value pair
                                     $key = $this->decode($parts[1]);
@@ -802,5 +865,4 @@ if (class_exists('PEAR_Error')) {
     }
 
 }
-
-?>
+   

@@ -22,23 +22,19 @@ function bkdouble($value){
 	return doubleval($value);
 }
 
-
 function json_encode_ext($arr){
-	global $cms;
-	return $cms->GetJSON()->encode($arr);
+	return CMSRegistry::$instance->GetJSON()->encode($arr);
 }
 
 if (!function_exists('json_decode')){
 	function json_decode($str){
-		global $cms;
-		return $cms->GetJSON()->decode($str);
+		return CMSRegistry::$instance->GetJSON()->decode($str);
 	}
 }
 
 if ( ! function_exists('json_encode')){
 	function json_encode($arr){
-		global $cms;
-		return $cms->GetJSON()->encode($arr);
+		return CMSRegistry::$instance->GetJSON()->encode($arr);
 	}
 }
 
