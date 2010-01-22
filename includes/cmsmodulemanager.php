@@ -260,15 +260,16 @@ class CMSModuleManager {
 		$cfg = $this->registry->config["Takelink"];
 		$adress = $this->registry->adress;
 		$link = $adress->level === 0 ? "__super" : $adress->dir[0];
+		$mainLink = null;
 		if (!empty($cfg) && count($cfg) > 0 && !empty($link)){
 			$cfglink = $cfg[$link];
 			$modname = $cfglink["module"];
 			$enmod = is_array($cfglink["enmod"]) > 0 ? $cfglink["enmod"] : array();
-			// print_r($enmod); exit; 
 			while(($row = $this->db->fetch_array($rows))){
 				$name = $row['name'];
 				if ($name == $modname){
 					$row["takelink"] = $link;
+					$mainLink = $row;
 				}
 				if ($name != "sys" && $name != "ajax" && $name != "user"
 					&& count($enmod) > 0 && $modname != $name){
@@ -289,6 +290,13 @@ class CMSModuleManager {
 				}
 			}
 			$this->customTakelink = true;
+			if (!is_null($mainLink)){
+				foreach ($this->modulesInfo as &$row){
+					if ($mainLink['name'] != $row['name'] && $mainLink['takelink'] == $row['takelink']){
+						$row['takelink'] = '';
+					}
+				}
+			}
 		}else{
 			while(($row = $this->db->fetch_array($rows))){
 				$name = $row['name'];
