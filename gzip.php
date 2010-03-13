@@ -20,6 +20,7 @@ $lang = getParam("lang", "ru");
 $libType = getParam("type", "");
 $templateName = getParam("tt", "default");
 $module = getParam("module", "");
+$mime = getParam("mime", "js");
 
 $diskCache = getParam("diskcache", "true") == "true";
 $compress = getParam("compress", "true") == "true";
@@ -35,7 +36,14 @@ $realPath = realpath(".");
 $cachePath = $realPath."/cache";
 $diskCacheFileKey = "";
 
-$headContentType = "Content-type: text/javascript; charset=utf-8";
+switch($mime){
+	case "js":
+		$headContentType = "Content-type: text/javascript; charset=utf-8";
+		break;
+	case "css":
+		$headContentType = "Content-type: text/css; charset=utf-8";
+		break;
+}
 
 if ($libType == 'sys'){
 	$files = array('/modules/sys/js/brick.js');
@@ -130,7 +138,7 @@ if ($cacheFileExists) {
 
 	header("Content-Length: " . filesize($cacheFile));
 		
-	echo getFileContents($cacheFile);
+	echo getFileContents($cacheFile, true);
 	die();
 }
 
@@ -355,9 +363,19 @@ function getParam($name, $def = false) {
 	return preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $ret); 
 }
 
-function getFileContents($path) {
+function getFileContents($path, $notcheck = false) {
 	$path = realpath($path);
-
+	$fi = pathinfo($path);
+	
+	if (!$notcheck){
+		$extension = strtolower($fi["extension"]);
+		switch($extension){
+			case "css": case "htm": case "js": break;
+			default:
+				die("Hacker?");
+				return;
+		}
+	}
 	if (!$path || !@is_file($path))
 		return "";
 
