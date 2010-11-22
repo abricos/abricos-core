@@ -14,9 +14,24 @@
 
 С наилучшими пожеланиями,
  Администрация %3$s[/ph]
-[*]-->
-<div id="bk_user">Пожалуйста, подождите, идет загрузка данных...</div>
+ 
+[bkvar=ok]
+	<p>
+		Ваш пароль был переустановлен и выслан вам на email: {v#email}. <br />
+		Проверьте вашу почту.
+	</p>
+[/bkvar]
 
-<script language='JavaScript' type='text/javascript' charset='utf-8'>
-	Brick.Component.API.fire('user', 'api', 'showPwdRestResult', [bkvar]result[/bkvar]);
-</script> 
+[bkvar=err]
+	<p>
+		Системе не удалось распознать идентификатор восстановления пароля.<br />
+		Возможно это связанно с истечением срока отведенного под изменение пароля.<br />
+		Если вы все еще хотите запросить инструкцию по восстановлению пароля, <br />
+		то воcпользуйтесь процедурой <a href="#" onclick="Brick.f('user', 'api', 'showPwdRestPanel'); return false;">восстановления пароля</a> 
+	</p>
+[/bkvar]
+ 
+[*]-->
+<div class='bd'>
+	[bkvar]result[/bkvar]
+</div>

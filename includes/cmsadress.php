@@ -6,7 +6,7 @@
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-class CMSAdress extends CMSBaseClass{
+class CMSAdress {
 	/**
 	 * Директории разложенные в массив
 	 *
@@ -22,7 +22,9 @@ class CMSAdress extends CMSBaseClass{
 	public $contentName = "index";
 
 	/**
-	 * Уровень 
+	 * Уровень.
+	 * Например: /product/soft/ - уровень будет равен двум 
+	 * @var integer
 	 */
 	public $level = 0;
 
@@ -39,8 +41,14 @@ class CMSAdress extends CMSBaseClass{
 	
 	public $host = "";
 	
-	public function CMSAdress(){
-		$this->Build(fetch_uri());
+	public function CMSAdress($uri = null){
+		if (is_null($uri)){
+			$uri = fetch_uri();
+		}else{
+			$a = parse_url($uri);
+			$uri = $a['path'];
+		}
+		$this->Build($uri);
 	}
 	
 	/**

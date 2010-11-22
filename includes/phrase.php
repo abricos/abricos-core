@@ -60,7 +60,7 @@ class CMSSysPhraseItem {
  * @package Abricos
  * @subpackage Sys
  */
-class CMSSysPhrase extends CMSBaseClass {
+class CMSSysPhrase {
 	
 	/**
 	 * Ядро
@@ -104,7 +104,7 @@ class CMSSysPhrase extends CMSBaseClass {
 	 */
 	public function PreloadByModule($module){
 		$db = $this->registry->db;
-		$rows = CMSQSys::PhraseListByModule($db, $module);
+		$rows = CoreQuery::PhraseListByModule($db, $module);
 		$this->_preload($rows);
 		$this->Save();
 	}
@@ -117,7 +117,7 @@ class CMSSysPhrase extends CMSBaseClass {
 	 */
 	public function Preload($list){
 		$db = $this->registry->db;
-		$rows = CMSQSys::PhraseList($db, $list);
+		$rows = CoreQuery::PhraseList($db, $list);
 		$this->_preload($rows);
 		foreach ($list as $key=>$value){
 			$sa = explode(":", $key);
@@ -164,7 +164,7 @@ class CMSSysPhrase extends CMSBaseClass {
 			$phrase = null;
 			// возможно эта фраза не была выбрана из БД, проверочный запрос
 			if ($checkindb)
-				$phrase = CMSQSys::Phrase($this->registry->db, $modname, $name);
+				$phrase = CoreQuery::Phrase($this->registry->db, $modname, $name);
 			if (empty($phrase)){
 				$item = new CMSSysPhraseItem($modname, $name, $value);
 				$item->isnew = true;
@@ -203,12 +203,10 @@ class CMSSysPhrase extends CMSBaseClass {
 			$phrase->isupdate = false;
 		}
 		if (!empty($arrnew)){
-			CMSQSys::PhraseListAppend($this->registry->db, $arrnew);
-			// echo("append\n");
+			CoreQuery::PhraseListAppend($this->registry->db, $arrnew);
 		}
 		if (!empty($arrupdate)){
-			CMSQSys::PhraseListUpdate($this->registry->db, $arrupdate);
-			// echo("update\n");
+			CoreQuery::PhraseListUpdate($this->registry->db, $arrupdate);
 		}
 	}
 }

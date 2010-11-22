@@ -14,7 +14,7 @@ abstract class CMSModule {
 	/**
 	 * Политика безопасности
 	 * 
-	 * @var CMSPermission
+	 * @var AbricosPermission
 	 */
 	public $permission = null;
 	
@@ -55,7 +55,7 @@ abstract class CMSModule {
 	public $registry = null;
 	
 	/**
-	 * Массив фраз
+	 * Локализация - массив фраз
 	 *
 	 * @var mixed
 	 */
@@ -67,16 +67,70 @@ abstract class CMSModule {
 	public $defaultCSS = "";
 	
 	/**
-	 * Получить имя кирпича данного модуля для сборки вывода
+	 * Получить имя стартового кирпича для сборки страницы
 	 *
-	 * @return unknown
+	 * @return string
 	 */
 	public function GetContentName(){
 		return $this->registry->adress->contentName; 
 	}
 	
-	public function GetBaseDir(){
-		return CWD."/modules/".$this->name;
+	/**
+	 * Явно указать информацию о шаблоне, тем самым игнорируя шаблон 
+	 * указанный в стартовом кирпиче.
+	 * Для определения необходимо возвращать массив в формате:
+	 * array(
+	 *   'owner' => 'имя стиля',
+	 *   'name' => 'имя шаблона'
+	 * )
+	 *  
+	 * @return null || array 
+	 */
+	public function GetTemplate(){
+		return null;
+	}
+	
+	/**
+	 * Получить менеджер модуля
+	 * 
+	 * @return ModuleManager
+	 */
+	public function GetManager(){
+		return null;
+	}
+}
+
+abstract class ModuleManager {
+	
+	/**
+	 * Ядро
+	 *
+	 * @var CMSRegistry
+	 */
+	public $core = null;
+	
+	/**
+	 * База данных
+	 *
+	 * @var CMSDatabase
+	 */
+	public $db = null;
+	
+	/**
+	 * Модуль
+	 * @var CMSModule
+	 */
+	public $module = null;
+	
+	public function ModuleManager(CMSModule $module){
+		$this->module = $module;
+		$this->core = $module->registry;
+		$this->db = $module->registry->db;
+		 
+	}
+	
+	public function AJAX($data){
+		return "";
 	}
 }
 
@@ -101,6 +155,8 @@ class CMSUpdateManager {
 	
 	public $modinfo;
 	
+	private $_isInstall = null;
+	
 	public function CMSUpdateManager($module, $info){
 		$this->module = $module;
 		$this->modinfo = $info;
@@ -113,13 +169,16 @@ class CMSUpdateManager {
 	 * @return Boolean
 	 */
 	public function isInstall(){
+		if (!is_null($this->_isInstall)){ return $this->_isInstall; }
 		$aSV = $this->ParseVersion($this->serverVersion);
 		$cnt = count($aSV);
 		for ($i=0;$i<$cnt;$i++){
 			if ($aSV[$i]>0){
+				$this->_isInstall = false;
 				return false;
 			}
 		}
+		$this->_isInstall = true;
 		return true;
 	}
 	
@@ -226,6 +285,8 @@ class CMSModuleManager {
 	 */
 	public $updateManager = null;
 	
+	private $_firstError = false;
+	
 	/**
 	 * Конструктор
 	 *
@@ -244,18 +305,18 @@ class CMSModuleManager {
 	public function FetchModulesInfo(){
 		$db = $this->db;
 		$this->modulesInfo = array();
-		$rows = CMSSqlQuery::ModulesInfo($db);
-
-		if ($db->IsError()){ // возникла ошибка, вероятнее всего идет первый запуск движка
+		$rows = CoreQuery::ModuleList($db);
+		if ($db->IsError() && !$this->_firstError){ // возникла ошибка, вероятнее всего идет первый запуск движка
 			$db->ClearError();
-			CMSSqlQuery::ModuleCreateTable($db);
+			CoreQuery::ModuleCreateTable($db);
 			if (!$db->IsError()){ // таблица была создана успешно, значит можно регистрировать все модули
-				$rows = CMSSqlQuery::ModulesInfo($db);
+				$rows = CoreQuery::ModuleList($db);
 			}else{ 
 				// проблемы в настройках сайта или коннекта с БД
 				die('<strong>Configuration</strong>: DataBase error<br />'.$db->errorText);
 			}
 		}
+		$this->_firstError = true;
 		
 		$cfg = $this->registry->config["Takelink"];
 		$adress = $this->registry->adress;
@@ -395,7 +456,7 @@ class CMSModuleManager {
 		$info = $this->modulesInfo[$modName];
 
 		if (empty($info)){
-			CMSSqlQuery::ModuleAdd($this->db, $module);
+			CoreQuery::ModuleAppend($this->db, $module);
 			$this->FetchModulesInfo();
 		}
 		
@@ -412,7 +473,7 @@ class CMSModuleManager {
 		if (file_exists($shema)){
 			require_once($shema);
 		}
-		CMSSqlQuery::ModuleUpdateVersion($this->db, $module);
+		CoreQuery::ModuleUpdateVersion($this->db, $module);
 		$this->FetchModulesInfo();
 		
 		$this->updateManager = null;
@@ -448,6 +509,169 @@ class CMSModuleManager {
 	 */
 	public function &GetModules(){
 		return $this->table;
+	}
+}
+
+abstract class AbricosPermission {
+	
+	private static $permission = null;
+	
+	/**
+	 * Модуль
+	 * 
+	 * @var CMSModule
+	 */
+	public $module = null;
+	public $defRoles = null;
+	
+	public function __construct(CMSModule $module, $defRoles = array()){
+		$this->module = $module;
+		$this->defRoles = $defRoles;
+	}
+
+	/**
+	 * @return UserManager
+	 */
+	public function GetUserManager(){
+		return CMSRegistry::$instance->modules->GetModule('user')->GetManager();
+	}
+	
+	public function Install(){
+		$this->GetUserManager();
+		UserQueryExt::PermissionInstall(CMSRegistry::$instance->db, $this);
+	}
+	
+	public function Reinstall(){
+		$this->GetUserManager();
+		UserQueryExt::PermissionRemove(CMSRegistry::$instance->db, $this);
+		UserQueryExt::PermissionInstall(CMSRegistry::$instance->db, $this);
+	}
+	
+	/**
+	 * Абстрактный метод. Запрос ролей по умолчанию
+	 */
+	public function GetRoles(){
+		return null;
+	}
+
+	/**
+	 * Проверить роль текущего пользователя
+	 * 
+	 * @param integer $action идентификатор действия в текущем модуле
+	 */
+	public function CheckAction($action){
+		if (is_null(AbricosPermission::$permission)){
+			$this->LoadRoles();
+		}
+		$mname = $this->module->name;
+		if (isset(AbricosPermission::$permission[$mname][$action])){
+			return AbricosPermission::$permission[$mname][$action];
+		}
+		return -1;
+	}
+	
+	private function LoadRoles(){
+		$modUser = CMSRegistry::$instance->modules->GetModule('user');
+		$db = CMSRegistry::$instance->db;
+		
+		$rows = UserQuery::UserRole($db, $modUser->info);
+		$perm = array();
+		while (($row = $db->fetch_array($rows))){
+			$mod = $row['md'];
+			if (!$perm[$mod]){
+				$perm[$mod] = array();
+			}
+			$perm[$mod][$row['act']] = $row['st'];
+		}
+		AbricosPermission::$permission = $perm;
+	}
+}
+
+	
+abstract class CMSPermission extends AbricosPermission {
+	
+	// потдержка предыдущих версий ядра
+	public function CMSPermission(CMSModule $module, $defRoles = array()){
+		
+		$old = $defRoles;
+		$defRoles = array();
+		
+		foreach ($old as $role){
+			$groupkey = '';
+			switch ($role->userid){
+			case User::UG_GUEST: $groupkey = UserGroup::GUEST; break;
+			case User::UG_REGISTERED: $groupkey = UserGroup::REGISTERED; break;
+			case User::UG_ADMIN: $groupkey = UserGroup::ADMIN; break;
+			}
+			if (empty($groupkey)){ continue; }
+			
+			array_push($defRoles, new AbricosRole($role->action, $groupkey, $role->status));
+		}
+		
+		parent::__construct($module, $defRoles);
+	}
+}
+
+class AbricosRole {
+	
+	/**
+	 * Действие
+	 * @var integer
+	 */
+	public $action = 0;
+	
+	/**
+	 * Статус: 0-запретить, 1-разрешить.
+	 * 
+	 * @var Integer
+	 */
+	public $status = 0;
+	
+	/**
+	 * Идентификатор группы модуля в ядре
+	 * @var string
+	 */
+	public $groupkey = "";
+	
+	public function __construct($action, $groupkey, $status = 1){
+		$this->action = $action;
+		$this->groupkey = $groupkey;
+		$this->status = $status;
+	}
+}
+
+class CMSRole {
+	
+	/**
+	 * Действие
+	 * @var integer
+	 */
+	public $action = 0;
+	
+	/**
+	 * Статус: 0-запретить, 1-разрешить.
+	 * 
+	 * @var Integer
+	 */
+	public $status = 0;
+
+	/**
+	 * Идентификатор группы/пользователя
+	 * 
+	 * @var integer
+	 */
+	public $userid = 0;
+	
+	/**
+	 * Статус идентификатор $userid: 0-группа, 1-пользователь
+	 * @var integer
+	 */
+	public $usertype = 0;
+	
+	public function CMSRole($action, $status = 0, $groupid = 0){
+		$this->action = $action;
+		$this->status = $status;
+		$this->userid = $groupid;
 	}
 }
 ?>

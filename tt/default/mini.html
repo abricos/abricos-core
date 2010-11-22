@@ -7,10 +7,7 @@
 [bkvar=js][/bkvar]
 [bkvar=css][/bkvar]
 [mod=sys]jsvar[/mod]
-[mod=news]newsblock[/mod]
-[mod=sitemap]vmenu,breadcrumb[/mod]
 [mod=user]userblock[/mod]
-[mod=rss]meta[/mod]
 [var=version][/var]
 [var=jsyui]2.8.0r4[/var]
 [mcss=sys]widget.css[/mcss]
@@ -21,41 +18,25 @@
 	<meta name="keywords" content="[var]meta_keys[/var]" />
 	<meta name="description" content="[var]meta_desc[/var]" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	[mod]rss:meta[/mod]
 	<link rel="stylesheet" href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=0.3" type="text/css" />
 	[bkvar]css[/bkvar]
-
 	[mod]sys:jsvar[/mod]
 	[bkvar]js[/bkvar]
-	
 </head>
 <body class="yui-skin-sam">
-	<div id="doc3" class="yui-t3">
+	<div id="doc3" class="yui-t7">
 		<div id="hd">
 			<span class="tl">[ph]sys:site_name[/ph]</span>
 			<p class="dsc">[ph]sys:site_title[/ph]</p>
-			[mod]sitemap:breadcrumb[/mod]
 		</div>
 		<div id="bd">
-			<div id="yui-main">
-				<div class="yui-b">
-					<div class="yui-g box">
-						[tt]content[/tt]
-					</div>
-				</div>
-			</div>
-			<div class="yui-b">
-				[mod]sitemap:vmenu[/mod]
-				[mod]news:newsblock[/mod]
+			<div class="yui-g box">
+				[tt]content[/tt]
 			</div>
 		</div>
 		<div id="ft">
 			<p>&#169; [ph]sys:site_name[/ph] - все права защищены. Работает на <a href="http://abricos.org">Abricos</a> [var]version[/var]</p>
 		</div>
 	</div>
-	<div class="small">
-		[mod]user:userblock[/mod]
-	</div>
 </body>
-
 </html>

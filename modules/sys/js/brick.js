@@ -144,24 +144,6 @@ Brick.elCreate = function(tag, parent){
 };
 
 /**
- * Получить уникальный URL добавлением к существующему уникальную сессию.
- * 
- * @method uniqurl
- * @static
- * @param {String} url URL 
- * @return {String} 
- */
-Brick.uniqurl = function(url){
-	if (typeof Brick.uniqurl.querycount == 'undefined'){
-		Brick.uniqurl.querycount = 0;
-	}
-	Brick.uniqurl.querycount++;
-	var d = new Date();
-	url += '&uniqurl='+Brick.uniqurl.querycount+d.getTime();
-	return url;
-};
-
-/**
  * Выполнить JavaScript text
  * 
  * @method readScript
@@ -176,12 +158,8 @@ Brick.readScript = function(text){
 };
 
 Brick.console = function(obj){
-	if (!console){ 
-		return;
-	}
-	if (typeof console['log'] != 'function'){
-		return;
-	}
+	if (!console){ return; }
+	if (typeof console['log'] != 'function'){ return; }
 	console.log(obj);
 };
 
@@ -536,6 +514,9 @@ Brick.console = function(obj){
 		}
 	};
 	
+	Brick.f = Brick.Component.API.fire;
+	Brick.ff = Brick.Component.API.fireFunction;
+	
 	var templateId = 1;
 	var templates = {};
 	
@@ -738,7 +719,11 @@ Brick.console = function(obj){
 			if (arr.length != 2){
 				return null;
 			}
-			return this.idManager[arr[0]][arr[1]];
+			var idM = this.idManager;
+			if (!idM[arr[0]] || !idM[arr[0]][arr[1]]){
+				return null;
+			}
+			return idM[arr[0]][arr[1]];
 		},
 		
 		/**
@@ -783,7 +768,6 @@ Brick.console = function(obj){
 	 * @param {String} url (optional) URL открываемой страницы 
 	 */
 	Brick.Page.reload = function(url){
-		Brick.widget.WindowWait.show();
 		if (url){
 			window.location.href = url;
 			return;
@@ -869,37 +853,23 @@ Brick.USERGROUP = {
 	 * Группа пользователей "Гости"
 	 * @property GUEST
 	 * @type Integer
-	 * @default 2
+	 * @default 1
 	 */
-	GUEST: 2,
-	/**
-	 * Группа пользователей "Заблокированные"
-	 * @property BLOCKED
-	 * @type Integer
-	 * @default 3
-	 */
-	BLOCKED: 3,
+	GUEST: 1,
 	/**
 	 * Группа пользователей "Авторизованные"
 	 * @property USER
 	 * @type Integer
-	 * @default 4
+	 * @default 2
 	 */
-	USER: 4,
-	/**
-	 * Группа пользователей "Модераторы"
-	 * @property MODERATOR
-	 * @type Integer
-	 * @default 5
-	 */
-	MODERATOR: 5,
+	USER: 2,
 	/**
 	 * Группа пользователей "Администраторы"
 	 * @property ADMIN
 	 * @type Integer
-	 * @default 6
+	 * @default 3
 	 */
-	ADMIN: 6		
+	ADMIN: 3		
 };
 
 /**
@@ -930,19 +900,17 @@ Brick.env.user = {
 	session: '',
 	
 	/**
-	 * Идентификатор группы:
+	 * Входит в группы:
 	 *      <dl>
-	 *      <dt>2</dt> <dd>Гость</dd>
-	 *      <dt>3</dt> <dd>Заблокирован</dd>
-	 *      <dt>4</dt> <dd>Авторизован</dd>
-	 *      <dt>5</dt> <dd>Модератор</dd>
-	 *      <dt>6</dt> <dd>Администратор</dd>
+	 *      <dt>1</dt> <dd>Гость</dd>
+	 *      <dt>2</dt> <dd>Авторизован</dd>
+	 *      <dt>3</dt> <dd>Администратор</dd>
 	 *      </dl>
 	 * @property group
-	 * @type Integer
+	 * @type Array
 	 * @default 2
 	 */
-	group: 2,
+	group: ['1'],
 	
 	/**
 	 * Вернуть True, если пользователь является администратором
@@ -950,7 +918,13 @@ Brick.env.user = {
 	 * @static
 	 * @return {Boolean}
 	 */
-	isAdmin: function(){ return Brick.env.user.group >= 6; },
+	isAdmin: function(){
+		var g = Brick.env.user.group;
+		for (var i=0;i<g.length;i++){
+			if (g[i] == 3){ return true; }
+		}
+		return false; 
+	},
 
 	/**
 	 * Вернуть True, если пользователь является модератором
@@ -958,7 +932,9 @@ Brick.env.user = {
 	 * @static
 	 * @return {Boolean}
 	 */
-	isModerator: function(){ return Brick.env.user.group >= 5; },
+	isModerator: function(){ 
+		alert('error in Brick.env.user.isModerator()'); 
+	},
 	
 	/**
 	 * Вернуть True, если пользователь авторизовался
@@ -966,7 +942,13 @@ Brick.env.user = {
 	 * @static
 	 * @return {Boolean}
 	 */
-	isRegister: function(){ return Brick.env.user.group >= 4; },
+	isRegister: function(){ 
+		var g = Brick.env.user.group;
+		for (var i=0;i<g.length;i++){
+			if (g[i] > 1){ return true; }
+		}
+		return false; 
+	},
 	
 	isRegistred: function(){ return Brick.env.user.isRegister(); }
 };
@@ -1413,23 +1395,8 @@ Brick.namespace('util');
 				var nm, fp, type;
 				for (i=0;i<elib.length;i++){
 					nm = elib[i].name;
-					type = 'js';
-					switch(nm){
-					case 'accordionview':
-						fp = "/gzip.php?file=/js/yui/"+Brick.env.lib.yui+"/accordionview/accordionview-min.js";
-						loader.addModule({
-							name: "accordionview-css", type: "css", 
-							fullpath: "/js/yui/"+Brick.env.lib.yui+"/accordionview/assets/skins/sam/accordionview.css"});
-						loader.require("accordionview-css");
-						loader.calculate({require: "button"});
-						loader.calculate({require: "animation"});
-						break;
-					default:
-						fp = elib[i].fullpath;
-						type = elib[i].type;
-					}
 					l[l.length] = nm;
-					loader.addModule({name: nm, type: type, fullpath: fp});
+					loader.addModule({name: nm, type: elib[i].type, fullpath: elib[i].fullpath});
 				}				
 				loader.require(l);
 			}
@@ -1518,90 +1485,36 @@ Brick.namespace('util');
 
 	YAHOO.util.Event.onDOMReady(function(){
 		var old = Brick.Loader;
-		// alert(YAHOO.lang.dump(old.mods));
-
 		Brick.Loader = new loader();
 		Brick.Loader.addRange(old.mods);
 	});
 })();
 
-Brick.namespace('widget');
-
-/**
- * Панель "Ожидание процесса"
- * 
- * @class WindowWait
- * @namespace Brick.widget
- * @static
- */
-Brick.widget.WindowWait = function(){
-	var win = null;
-	return {
-		
-		/**
-		 * Показать панель "Ожидание процесса"
-		 * 
-		 * @method show
-		 * @static
-		 */
-		show: function(){
-			var wWait = new YAHOO.widget.Panel("wait",{ 
-				width:"280px", 
-				fixedcenter:true, close:false, draggable:false, 
-				zindex:1001, modal:true, visible:false
-			});
-			
-			wWait.setHeader("Идет загрузка...");
-			wWait.setBody('<center><img src="/images/loading_line.gif" /></center>');
-			wWait.render(document.body);
-			wWait.show();
-			win = wWait;
-		},
-		
-		/**
-		 * Скрыть панель "Ожидание процесса"
-		 * 
-		 * @method hide
-		 * @static
-		 */
-		hide: function(){
-			if (YAHOO.lang.isNull(win)){ return; }
-			win.destroy();
-			win = null;
-		}
-	};
-}();
-
-
 (function(){
 	
-	var uniqurl = Brick.uniqurl;
-	var wWait = Brick.widget.WindowWait;
+	var querycount = 0; 
+	var uniqurl = function(){
+		querycount++;
+		return (querycount++) + (new Date().getTime());
+	};
+
 	var readScript = Brick.readScript;
 
 	var sendPost = function(module, brick, cfg ){
-
 		cfg = cfg || {};
 		cfg['json'] = cfg['json'] || {};
-		var hidden = cfg['hidden'] || false;
 
 		var post = "json="+encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['json']));
-		if (!hidden){
-			wWait.show();
-		}
 		YAHOO.util.Connect.asyncRequest("POST", 
-			uniqurl('/ajax/query.html?md='+module+'&bk='+brick), 
-			{
+			'/ajax/' + module + '/' + brick +'/'+ uniqurl()+'/', {
 				success: function(o) {
-					if (!hidden){wWait.hide();} 
 					readScript(o.responseText);
 					if (typeof cfg.success == 'function'){
 						cfg.success(o);
 					}
 				}, 
 				failure: function(o){ 
-					if (!hidden){wWait.hide();} 
-					alert("CONNECTION FAILED!"); 
+					// alert("CONNECTION FAILED!"); 
 				}
 			}, 
 			post
@@ -1609,7 +1522,7 @@ Brick.widget.WindowWait = function(){
 	};
 	
 	/**
-	 * Менеджер AJAX запросов платформе Abricos
+	 * Менеджер AJAX запросов
 	 * 
 	 * @class Connection
 	 * @namespace Brick.util
@@ -1630,23 +1543,93 @@ Brick.widget.WindowWait = function(){
 	 */
 	Brick.util.Connection.sendCommand = function(module, brick, cfg){
 		if (typeof YAHOO.util.Connect == 'undefined' || typeof YAHOO.lang.JSON == 'undefined'){
-			if (!cfg['hidden']){
-				wWait.show();
-			}
 			Brick.Loader.add({
 			    yahoo: ['connection', 'json'],
 			    onSuccess: function() {
-					wWait.hide();
 					sendPost(module, brick, cfg);
 				},
 				onFailure: function(){
-					wWait.hide();
 				}
 			});
 		}else{
 			sendPost(module, brick, cfg);
 		}
 	};
+})();
+
+// типизированный AJAX
+(function(){
+	
+	var querycount = 0; 
+	var uniqurl = function(){
+		querycount++;
+		return (querycount++) + (new Date().getTime());
+	};
+	
+	var complete = function(module, cfg, o, failure){
+		if (!YAHOO.lang.isFunction(cfg['event'])){
+			return;
+		}
+		cfg['type'] = cfg['type'] || 'json';  
+		failure = failure || false;
+
+		var data;
+		try{
+			if (cfg['type'] == 'json'){
+				var json = YAHOO.lang.JSON.parse(o.responseText);
+				data = json.data || null; 
+			}else{
+				o.jsonParseError = true;
+			}
+		}catch(e){
+			data = null;
+			o.jsonParseError = true;
+		}
+		o.responseJSON = o.data = data;
+		cfg['event'](o);
+	};
+
+	var sendPost = function(module, cfg){
+		cfg = cfg || {};
+
+		var post = "data="+encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['data'] || {}));
+		YAHOO.util.Connect.asyncRequest("POST", 
+			'/tajax/' + module + '/' + uniqurl()+'/', {
+				success: function(o){complete(module, cfg, o, false);}, 
+				failure: function(o){complete(module, cfg, o, true);}
+			}, 
+			post
+		);
+	};
+	
+	/**
+	 * Отправить типизированный запрос серверу. 
+	 * Принцип работы: клиент формирует запрос с параметрами определенному модулю, 
+	 * отправляет его, при этом помечает его номером сессии. Ответ полученный от сервера
+	 * передает в функцию предварительно указанную в параметрах.
+	 * 
+	 * Структура объекта cfg:
+	 * cfg.data {Object|null} данные
+	 * cfg.event {Function|null} событие обработчик
+	 * 
+	 * @namespace Brick
+	 * @method sendCommand
+	 * @static
+	 * @param {String} module Имя модуля
+	 * @param {Object} cfg Параметры запроса
+	 */
+	Brick.ajax = function(module, cfg){
+		if (typeof YAHOO.util.Connect == 'undefined' || typeof YAHOO.lang.JSON == 'undefined'){
+			Brick.Loader.add({
+			    yahoo: ['connection', 'json'],
+			    onSuccess: function() {sendPost(module, cfg);},
+				onFailure: function(o){complete(module, cfg, o, true);}
+			});
+		}else{
+			sendPost(module, cfg);
+		}
+	};
+	
 })();
 
 
@@ -1680,21 +1663,30 @@ Brick.dateExt = function(){
 	};
 	
 	return {
-		convert: function(udate, type){
+		convert: function(udate, type, hideTime){
 			if (udate*1 == 0){
 				return "";
 			}
+			hideTime = hideTime || false;
 			var msec = udate*1000;
 			var cd = new Date(msec);
 			
 			var day = z(cd.getDate());
-			var mon = z(cd.getMonth());
+			var mon = z(cd.getMonth()+1);// +1 т.к. нумерация идет с 0
 			var mons= mp[cd.getMonth()];
 			var min = z(cd.getMinutes()+1);
 			var hour = z(cd.getHours());
 			
 			if (type == 1){
-				return day+'.'+mon+'.'+cd.getFullYear()+', '+hour+':'+(min);
+				var s = day+'.'+mon+'.'+cd.getFullYear();
+				if (!hideTime){
+					s += ', '+hour+':'+(min);
+				}
+				return s;
+			}
+			//Добавлена возможность отображения даты в виде дд.мм.гггг
+			else if (type == 2){
+					return day+'.'+mon+'.'+cd.getFullYear();
 			}else{
 				var ld = new Date(), s;
 				ld = new Date(ld.getFullYear(), ld.getMonth(), ld.getDate());
@@ -1708,7 +1700,10 @@ Brick.dateExt = function(){
 					s = day+' '+mp[cd.getMonth()]+' '+cd.getFullYear();
 				}
 				var tm = hour +':'+(min);
-				return s+', '+tm;
+				if (!hideTime){
+					s += ', ' + tm; 
+				}
+				return s;
 			}
 		},
 		unixToArray: function(udate){

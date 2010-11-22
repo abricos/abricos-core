@@ -45,6 +45,9 @@ Component.entryPoint = function(){
 		
 			var __self = this;
 			container.innerHTML = T['panel'];
+			E.on(container, 'click', function(e){
+				if (__self.onClick(E.getTarget(e))){ E.stopEvent(e); }
+			});
 			
 			this.tables = {
 				'bricks': DATA.get('bricks', true)

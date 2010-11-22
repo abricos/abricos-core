@@ -2,7 +2,7 @@
 /**
  * Схема таблиц данного модуля.
  * 
- * @version $Id: shema.php 270 2009-12-28 13:24:34Z roosit $
+ * @version $Id$
  * @package Abricos
  * @subpackage Sys
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
@@ -38,18 +38,8 @@ if ($updateManager->isInstall()){
 		  `username` varchar(150) NOT NULL default '',
 		  `password` varchar(32) NOT NULL default '',
 		  `email` varchar(100) NOT NULL default '',
-		  `realname` varchar(150) NOT NULL default '',
-		  `sex` TINYINT(1) NOT NULL default '0' COMMENT 'Пол: 0-не указан,1-мужской,2-женский',
-		  `homepagename` varchar(150) NOT NULL default '' COMMENT 'Название сайта',
-		  `homepage` varchar(100) NOT NULL default '' COMMENT 'Адрес сайта',
-		  `icq` varchar(20) NOT NULL default '',
-		  `aim` varchar(20) NOT NULL default '',
-		  `yahoo` varchar(32) NOT NULL default '',
-		  `msn` varchar(100) NOT NULL default '',
-		  `skype` varchar(32) NOT NULL default '',
 		  `joindate` int(10) unsigned NOT NULL default '0',
 		  `lastvisit` int(10) unsigned NOT NULL default '0',
-		  `birthday` int(10) unsigned NOT NULL default '0',
 		  `ipadress` varchar(15) NOT NULL default '',
 		  `salt` char(3) NOT NULL default '',
 		  `deldate` int(10) NOT NULL default '0',
@@ -65,14 +55,6 @@ if ($updateManager->isInstall()){
 		  `activateid` int(10) unsigned NOT NULL,
 		  `joindate` int(10) unsigned NOT NULL,
 		  PRIMARY KEY  (`useractivateid`)
-		)".$charset
-	);
-	$db->query_write("
-		CREATE TABLE IF NOT EXISTS `".$pfx."usergroup` (
-		  `usergroupid` int(4) unsigned NOT NULL auto_increment,
-		  `name` varchar(100) NOT NULL default '',
-		  `levelpermission` int(4) NOT NULL default '0',
-		  PRIMARY KEY  (`usergroupid`)
 		)".$charset
 	);
 	$db->query_write("
@@ -96,8 +78,7 @@ if ($updateManager->isInstall()){
 
 // обновление для платформы Abricos версии 0.5
 if ($updateManager->isInstall() || $updateManager->serverVersion === '1.0.1'){
-	
-	CMSRegistry::$instance->modules->GetModule('user')->permission->InstallDefault();
+	$updateManager->serverVersion = '0.2';
 	
 	$db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."userconfig (
@@ -111,6 +92,113 @@ if ($updateManager->isInstall() || $updateManager->serverVersion === '1.0.1'){
 		  KEY `userid` (`userid`)
 	  )".$charset
 	);
+}
+
+if ($updateManager->isUpdate('0.2.1')){
+
+	$db->query_write("DROP TABLE IF EXISTS `".$pfx."usergroup`");
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS `".$pfx."group` (
+		  `groupid` int(5) unsigned NOT NULL auto_increment,
+		  `groupname` varchar(100) NOT NULL default '' COMMENT 'Наименование группы',
+		  `groupkey` varchar(32) NOT NULL DEFAULT '' COMMENT 'Идентификатор группы в ядре',
+		  PRIMARY KEY  (`groupid`)
+		)".$charset
+	);
+	
+	// заполнение таблицы групп пользователей
+	$db->query_write("
+		INSERT INTO `".$pfx."group` (`groupid`, `groupname`, `groupkey`) VALUES
+		(1, 'Guest', 			'guest'),
+		(2, 'Registered', 		'register'),
+		(3, 'Administrator', 	'admin')
+	");
+
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS `".$pfx."usergroup` (
+		  `usergroupid` int(5) unsigned NOT NULL auto_increment,
+		  `userid` int(10) unsigned NOT NULL,
+		  `groupid` int(5) unsigned NOT NULL,
+		  PRIMARY KEY  (`usergroupid`),
+		  UNIQUE KEY `usergroup` (`userid`,`groupid`)
+		)".$charset
+	);
+	
+	$db->query_write("
+		INSERT IGNORE INTO `".$pfx."usergroup` (`userid`, `groupid`)  
+		SELECT 
+			userid, 
+			CASE usergroupid WHEN 6 THEN 3 ELSE 2 END
+		FROM `".$pfx."user`
+	");
+	$db->query_write("ALTER TABLE `".$pfx."user` DROP `usergroupid`");  
+	
+	$db->query_write("ALTER TABLE `".$pfx."user` ADD `emailconfirm` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `email`");  
+	$db->query_write("
+		UPDATE `".$pfx."user`
+		SET
+			`emailconfirm`=1
+		WHERE lastvisit > 0 OR userid=1
+	");  
+	
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS ".$pfx."userrole (
+		  `roleid` int(10) unsigned NOT NULL auto_increment,
+		  `modactionid` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'Идентификатор действия',
+		  `usertype` tinyint(1) unsigned NOT NULL default 0 COMMENT '0 - группа, 1 - пользователь',
+		  `userid` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'Идентификатор пользователя/группы в зависимости от usertype',
+		  `status` tinyint(1) unsigned NOT NULL default 0 COMMENT '1 - разрешено, 0 - запрещено',
+		  PRIMARY KEY  (`roleid`),
+		  KEY `userid` (`userid`),
+		  UNIQUE KEY `userrole` (`modactionid`,`userid`,`usertype`)
+		)".$charset
+	);
+	CMSRegistry::$instance->modules->GetModule('user')->permission->Install();
+	
+	$db->query_write("ALTER TABLE `".$pfx."user` DROP INDEX `username`, ADD UNIQUE `username` ( `username` )");  
+}
+
+if ($updateManager->isUpdate('0.2.2')){
+	// удалить все второстепенные поля, для работы новой технологии 
+	// хранения этих полей, такие как Фамилия, Имя и т.п.
+	// по умолчанию таблица пользователей будет содержать только основные 
+	// рабочие поля
+
+	$rows = $db->query_read("SHOW COLUMNS FROM ".$pfx."user");
+	$cols = array();
+	while (($row = $db->fetch_array($rows))){
+		$cols[$row['Field']] = $row; 
+	}
+	if (!empty($cols['realname']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `realname`");  
+	if (!empty($cols['sex']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `sex`");  
+	if (!empty($cols['homepagename']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `homepagename`");  
+	if (!empty($cols['homepage']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `homepage`");  
+	if (!empty($cols['icq']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `icq`");  
+	if (!empty($cols['aim']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `aim`");  
+	if (!empty($cols['yahoo']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `yahoo`");  
+	if (!empty($cols['msn']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `msn`");  
+	if (!empty($cols['skype']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `skype`");  
+	if (!empty($cols['birthday']))
+		$db->query_write("ALTER TABLE `".$pfx."user` DROP `birthday`");
+}
+if ($updateManager->isUpdate('0.2.3') && !$updateManager->isInstall()){
+	$db->query_write("
+		ALTER TABLE `".$pfx."group` ADD `groupkey` varchar(32) NOT NULL DEFAULT '' COMMENT 'Глобальный идентификатор группы в ядре'
+	");
+
+	$db->query_write("UPDATE `".$pfx."group` SET groupkey='guest' WHERE groupid=1");
+	$db->query_write("UPDATE `".$pfx."group` SET groupkey='register' WHERE groupid=2");
+	$db->query_write("UPDATE `".$pfx."group` SET groupkey='admin' WHERE groupid=3");
+	
 }
 
 ?>

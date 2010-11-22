@@ -10,23 +10,13 @@ Component.requires = {
 };
 Component.entryPoint = function(){
 	
-	if (!Brick.env.user.isRegister()){ return; }
-	
-	var cp = Brick.mod.user.cp;
-
-	var menuItem = new cp.MenuItem(this.moduleName, 'myprofile');
-	menuItem.icon = '/modules/user/css/images/cp_icon.gif';
-	menuItem.titleId = 'mod.user.cp.profile.title';
-	menuItem.entryComponent = 'api';
-	menuItem.entryPoint = 'Brick.mod.user.API.showMyProfileWidget';
-	cp.MenuManager.add(menuItem);
-	
 	if (!Brick.env.user.isAdmin()){ return; }
+	var cp = Brick.mod.user.cp;
 
 	var menuItem = new cp.MenuItem(this.moduleName, 'manager');
 	menuItem.icon = '/modules/user/css/images/cp_icon.gif';
-	menuItem.titleId = 'mod.user.cp.users.title';
+	menuItem.titleId = 'mod.user.cp.title';
 	menuItem.entryComponent = 'api';
-	menuItem.entryPoint = 'Brick.mod.user.API.showUserListWidget';
+	menuItem.entryPoint = 'Brick.mod.user.API.showManagerWidget';
 	cp.MenuManager.add(menuItem);
 };

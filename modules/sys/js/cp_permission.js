@@ -9,10 +9,7 @@
  */
 var Component = new Brick.Component();
 Component.requires = {
-	yahoo: ["tabview"],
-	mod:[
-		{name: 'sys', files: ['api.js', 'data.js', 'cp_template.js', 'cp_config.js']}
-	]
+	mod:[{name: 'sys', files: ['api.js', 'data.js']}]
 };
 Component.entryPoint = function(){
 	
@@ -24,49 +21,11 @@ Component.entryPoint = function(){
 	var NS = this.namespace,
 		TMG = this.template;
 	
-	if (!Brick.objectExists('Brick.mod.sys.data')){
-		Brick.mod.sys.data = new Brick.util.data.byid.DataSet('sys');
+	if (!NS.data){
+		NS.data = new Brick.util.data.byid.DataSet('sys');
 	}
-	var DATA = Brick.mod.sys.data;
-	
-	var API = NS.API;
-
-(function(){
-	
-	var ManagerWidget = function(container){
-		this.init(container);
-	};
-	ManagerWidget.prototype = {
-		pages: null,
-		init: function(container){
-			var TM = TMG.build('panel'),
-				T = TM.data,
-				TId = TM.idManager;
-			
-			container.innerHTML = T['panel'];
-			
-			var tabView = new YAHOO.widget.TabView(TId['panel']['id']);
-			this.tabView = tabView;
-			
-			var pages = {};
-			pages['config'] = new NS.ConfigWidget(Dom.get(TId['panel']['tabconfig']));
-			pages['template'] = new NS.TemplateWidget(Dom.get(TId['panel']['tabtemplate']));
-			this.pages = pages;
-	
-			var __self = this;
-			E.on(container, 'click', function(e){
-				if (__self.onClick(E.getTarget(e))){ E.stopEvent(e); }
-			});
-		},
-		onClick: function(el){
-			for (var n in this.pages){
-				if (this.pages[n].onClick(el)){ return true; }
-			}
-			return false;
-		}
-	};
-	NS.ManagerWidget = ManagerWidget;
-})();	
+	var DATA = NS.data,
+		API = NS.API;
 
 (function(){
 	
@@ -77,8 +36,7 @@ Component.entryPoint = function(){
 		modPermissionWidget: null,
 		init: function(container){
 			var TM = TMG.build('permission,permmodstable,permmodsrow'),
-				T = TM.data,
-				TId = TM.idManager;
+				T = TM.data, TId = TM.idManager;
 			this._TM = TM; this._T = T; this._TId = TId;
 			
 			container.innerHTML = T['permission'];
@@ -149,8 +107,7 @@ Component.entryPoint = function(){
 	ModulePermissionWidget.prototype = {
 		init: function(module, container){
 			var TM = TMG.build('permmodwidget,permmodtable,permmodrowwait,permmodrow'),
-				T = TM.data,
-				TId = TM.idManager;
+				T = TM.data, TId = TM.idManager;
 			this._TM = TM; this._T = T; this._TId = TId;
 			
 			container.innerHTML = T['permmodwidget'];
@@ -230,10 +187,41 @@ Component.entryPoint = function(){
 			TM.getEl('permmodwidget.table').innerHTML = TM.replace('permmodtable', {
 				'rows': lst
 			});
+		},
+		onClick: function(el){
+			
+			return false;
 		}
+		
 	};
 	NS.ModulePermissionWidget = ModulePermissionWidget;
 
+})();
+
+(function(){
+	
+	var PermissionEditor = function(){
+		
+		PermissionEditor.superclass.constructor.call(this, {
+			modal: true,
+			fixedcenter: true
+		});
+	};
+	YAHOO.extend(PermissionEditor, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(this._TId['editor'][name]); },
+		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
+		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
+		initTemplate: function(){
+			var TM = TMG.build('permeditor'), T = TM.data, TId = TM.idManager;
+			this._TM = TM; this._T = T; this._TId = TId;
+			
+			return T['permeditor'];
+		},
+		onLoad: function(){
+			
+		}
+	});
+	
 })();
 
 };

@@ -6,7 +6,7 @@
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-class CMSInputCleaner extends CMSBaseClass {
+class CMSInputCleaner {
 	public $shortvars = array();
 
 	public $superglobal_lookup = array(

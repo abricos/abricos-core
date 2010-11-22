@@ -16,6 +16,23 @@
  */
 class Brick {
 	
+	const BRICKTYPE_BRICK = 0;
+	const BRICKTYPE_TEMPLATE = 1;
+	const BRICKTYPE_CONTENT = 2;
+	
+	const BRICKPRM_VAR = 0;
+	const BRICKPRM_GLOBALVAR = 1;
+	const BRICKPRM_MODULE = 2;
+	const BRICKPRM_TEMPLATE = 3;
+	const BRICKPRM_PHRASE = 4;
+	const BRICKPRM_SCRIPT = 5;
+	const BRICKPRM_JSMOD = 6;
+	const BRICKPRM_JSFILE = 7;
+	const BRICKPRM_CSS = 8;
+	const BRICKPRM_PARAM = 9;
+	const BRICKPRM_CSSMOD = 6;
+	
+	
 	/**
 	 * Текущий стиль, содержащий шаблоны, для сборок страниц
 	 * @var string
@@ -115,10 +132,18 @@ class Brick {
 	
 	/**
 	 * Сессия текущего пользователя
+	 * TODO: на удаление
 	 *
-	 * @var CMSSysSession
+	 * @var User
 	 */
 	public static $session = null;
+	
+	/**
+	 * Текущий пользователь
+	 * 
+	 * @var User
+	 */
+	public static $user = null;
 }
 
 /**
@@ -245,7 +270,7 @@ class CMSSysBrickBuilder {
 			}
 		}
 		if (isset($this->_globalVar['jsyui'])){
-			$this->_globalVar['jsyui'] = CMSModuleSys::$YUIVersion;
+			$this->_globalVar['jsyui'] = SystemModule::$YUIVersion;
 		}
 		
 		// установка версии
@@ -275,7 +300,7 @@ class CMSSysBrickBuilder {
 	public function LoadBrick(CMSModule $module, $name, CMSSysBrick $parent = null, $overparam = null){
 		
 		$bm = new CMSSysBrickManager($this->registry, false);
-		$brick = $bm->BuildOutput($module->name, $name, CMSQSys::BRICKTYPE_BRICK, $parent);
+		$brick = $bm->BuildOutput($module->name, $name, Brick::BRICKTYPE_BRICK, $parent);
 		
 		$this->SetUseModule($module->name);
 		
@@ -348,103 +373,104 @@ class CMSSysBrickBuilder {
 		$this->_cssfile[$file] = $file;
 	}
 	
-	private function SetVar($brick, $search, $replace){
+	private function SetVar(CMSSysBrick $brick, $search, $replace){
 		$brick->content = str_replace($search, $replace, $brick->content);
 	}
 	
-	private $_setheader = false;
-	
-	private function PagePrint(CMSSysBrick $brick){
-		if (!$this->_setheader){
-			header("Content-Type: text/html; charset=utf-8");
-			header("Expires: Mon, 26 Jul 2005 15:00:00 GMT");
-			header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-			header("Cache-Control: no-store, no-cache, must-revalidate");
-			header("Cache-Control: post-check=0, pre-check=0", false);
-			header("Pragma: no-cache");
-			$this->_setheader = true;
-		}
-		
-		$contentPos = -1;
-		$brickContent = null;
-		if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE){
-			$contentPos = strpos($brick->content, "[tt]content[/tt]");
-			foreach ($brick->child as $cbrick){
-				if ($cbrick->type == CMSQSys::BRICKTYPE_CONTENT){
-					$brickContent = $cbrick;
-					break;
-				}
-			}
-		}
+	private function PagePrint(CMSSysBrick $tplBrick){
+		header("Content-Type: text/html; charset=utf-8");
+		header("Expires: Mon, 26 Jul 2005 15:00:00 GMT");
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate");
+		header("Cache-Control: post-check=0, pre-check=0", false);
+		header("Pragma: no-cache");
 
-		$name = "mod";
-		$pattern = "#\[".$name."\](.+?)\[/".$name."\]#is";
-		
-		$mathes = array();
-		preg_match_all($pattern, $brick->content, $mathes, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
-		
-		if (empty($mathes)){
-			if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE){
-				$ca = explode("[tt]content[/tt]", $content);
-				print $ca[0];
-				print $this->PagePrint($brickContent);
-				print $ca[1];
-			}else{
-				print $brick->content;
+		$contentBrick = null;
+		foreach ($tplBrick->child as $cbrick){
+			if ($cbrick->type == Brick::BRICKTYPE_CONTENT){
+				$contentBrick = $cbrick;
+				break;
 			}
-			return;
 		}
 		
+		$sa = explode("[tt]content[/tt]", $tplBrick->content);
+		
+		$this->PrintBrick($tplBrick, $sa[0]);
+		$this->PrintBrick($contentBrick, $contentBrick->content);
+		$this->PrintBrick($tplBrick, $sa[1]);
+	}
+	
+	public function PrintBrick(CMSSysBrick $brick, $content){
+		// Поиск в $content запросы на вставку данных из дочерних кирпичей $brick, 
+		// результат будет занесен в $mathes, для последующей обработки. 
+		$mathes = array();
+		preg_match_all(	"#\[mod\](.+?)\[/mod\]#is", 
+						$content, $mathes, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+
 		$position = 0;
 		foreach ($mathes as $value){
-			$replstr = $value[0][0];
-			$count = $value[0][1]-$position;
+			// Пример $value: 
+			//	Array (
+    		// 		[0] => Array (
+            //			[0] => [mod]sitemap:vmenuf:0[/mod]	- найденый запрос
+            //			[1] => 134 							- позиция
+            //		)
+    		//		[1] => Array (
+            //			[0] => sitemap:vmenuf:0
+            //			[1] => 139
+        	//		)
+			//	)
+			
 			$sa = explode(":", $value[1][0]);
-			$id = count($sa) == 3 ? $sa[2] : 0;
-			$mods = $brick->param->module[$sa[0]];
-			if (empty($mods)){ continue; }
+			$modName = $sa[0];
+			$modBrickName = $sa[1];
+			$modId = count($sa) == 3 ? $sa[2] : 0;
 			
-			// echo("id=".$id."<br>");
+			// $mods = $brick->param->module[$sa[0]];
+			// if (empty($mods)){ continue; }
 			
-			foreach ($mods as $mbrick){
-				if ($sa[1] != $mbrick->name){ continue; }
-				$content = substr($brick->content, $position, $count);
-				if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE && $contentPos >= $position && $contentPos <= $count+$position){
-					$ca = explode("[tt]content[/tt]", $content);
-					print $ca[0];
-					print $this->PagePrint($brickContent);
-					print $ca[1];
-				}else{
-					print $content;
+			$printBrick = null;
+			foreach ($brick->child as $cbrick){
+				if ($cbrick->owner != $modName || $cbrick->name != $modBrickName || ($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)){
+						continue; 
 				}
-				$position = $value[0][1]+strlen($replstr);
-				foreach ($brick->child as $cbrick){
-					
-					if ($cbrick->owner == $sa[0] && $cbrick->name == $mbrick->name && $cbrick->type != CMSQSys::BRICKTYPE_CONTENT) {
-						if($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $id){
-							continue; 
-						}
-						$this->PagePrint($cbrick);
+				$printBrick = $cbrick;
+				/*
+				print substr($content, $position, $value[0][1]-$position);
+				$this->PrintBrick($cbrick, $cbrick->content);
+				$position = $value[0][1]+strlen($value[0][0]);
+				$isPrint = true;
+				/**/
+				break;
+			}
+			if (!is_null($printBrick)){
+				print substr($content, $position, $value[0][1]-$position);
+				$this->PrintBrick($printBrick, $printBrick->content);
+				$position = $value[0][1]+strlen($value[0][0]);
+			}else{
+				/*
+				// кирпич модуля заявлен в контенте кирпича родителя, но не вывиден
+				// возможно модуль просто не добавлен в систему, значит необходимо
+				// вывести пустое значение 
+				// TODO: необходимо добавить настройку, не выводить пустое значение, если нет кирпича модуля, но он заявлен в кирпиче родителя
+				$mods = $brick->param->module[$sa[0]];
+				foreach ($mods as $mod){
+					if ($mod->name == $modBrickName 
+							//|| ($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)
+						){
+						$position = $value[0][1]+strlen($value[0][0]);
 						break;
-					}
+					} 
 				}
+				/**/
 			}
 		}
-		$count = strlen($brick->content)-$position;
-		$content = substr($brick->content, $position, $count);
-		if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE && $contentPos >= $position && $contentPos <= $count+$position){
-			$ca = explode("[tt]content[/tt]", $content);
-			print $ca[0];
-			print $this->PagePrint($brickContent);
-			print $ca[1];
-		}else{
-			print $content;
-		}
+		print substr($content, $position, strlen($content)-$posiiton);
 	}
 	
 	private function FetchVars(CMSSysBrick $brick){
 
-		if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE){
+		if ($brick->type == Brick::BRICKTYPE_TEMPLATE){
 			$list = array();
 			foreach ($this->_jsmod as $key => $mod){
 				$files = array();
@@ -527,7 +553,7 @@ class CMSSysBrickBuilder {
 	 * @param CMSSysBrick $brick
 	 */
 	private function TakeGlobalParam(CMSSysBrick $brick){
-		if ($brick->type != CMSQSys::BRICKTYPE_TEMPLATE){
+		if ($brick->type != Brick::BRICKTYPE_TEMPLATE){
 			$this->SetUseModule($brick->owner);
 		}
 		$p = $brick->param;
@@ -571,7 +597,7 @@ class CMSSysBrickBuilder {
 		}
 		foreach ($p->script as $script){
 			$path = CWD;
-			if ($brick->type == CMSQSys::BRICKTYPE_TEMPLATE){
+			if ($brick->type == Brick::BRICKTYPE_TEMPLATE){
 				$path .= "/includes/over/";
 			}else{
 				$path .= "/modules/".$brick->owner."/includes/";
@@ -639,13 +665,13 @@ class CMSSysBrickManager {
 		$recache = false;
 		
 		// Если это кирпичь модуля, то необходимо проверить наличие модуля в системе
-		if ($brickType == CMSQSys::BRICKTYPE_BRICK){
+		if ($brickType == Brick::BRICKTYPE_BRICK){
 			$mod = $this->registry->modules->GetModule($owner);
 			if (empty($mod)){ return null; }
 		}
 		
 		// кеш, применим только к шаблону
-		if ($brickType == CMSQSys::BRICKTYPE_TEMPLATE){
+		if ($brickType == Brick::BRICKTYPE_TEMPLATE){
 			if (CMSRegistry::$instance->config['Misc']['brick_cache']){
 				$time = TIMENOW-5*360;
 				$cache = CMSQSys::Cache($db, $owner, $brickName);
@@ -685,6 +711,40 @@ class CMSSysBrickManager {
 		
 		// обработка вложенных кирпичей
 		if (!empty($p->template)){
+			if (!empty($this->registry->config["Template"]) && $p->template['owner'] != "_sys"){
+				$uri = $this->registry->adress->requestURI;
+				$cfg = &$this->registry->config["Template"];
+				$find = false;
+				
+				if (!empty($cfg["ignore"])){
+					foreach($cfg["ignore"] as &$exp){
+						$find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
+						if ($find){
+							break;
+						}
+					}
+				}
+				if (!$find && !empty($cfg["exp"])){
+					foreach($cfg["exp"] as &$exp){
+						$find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
+						if ($find){
+							$p->template["owner"] = $exp["owner"]; 
+							$p->template["name"] = $exp["name"];
+							break;
+						}
+					}
+				}
+				if (!$find && !empty($cfg["default"])){
+					$p->template = $cfg["default"];
+				}
+			}
+			// шаблон определенный администратором
+			$mod = $this->registry->modules->GetModule($owner);
+			$ttpl = $mod->GetTemplate();
+			if (!is_null($ttpl)){
+				$p->template["owner"] = $ttpl["owner"]; 
+				$p->template["name"] = $ttpl["name"];
+			}
 			if (empty($p->template["owner"])){
 				$towner = Brick::$builder->phrase->Get('sys', 'style', 'default');
 				if (!file_exists(CWD."/tt/".$towner."/main.html")){
@@ -694,19 +754,19 @@ class CMSSysBrickManager {
 					$p->template["owner"] = $towner;
 				}
 			}
-			$childBrick = $this->BuildOutput($p->template["owner"], $p->template['name'], CMSQSys::BRICKTYPE_TEMPLATE, $brick);
+			$childBrick = $this->BuildOutput($p->template["owner"], $p->template['name'], Brick::BRICKTYPE_TEMPLATE, $brick);
 			array_push($brick->child, $childBrick);
 		}
 		if (!empty($p->module)){
 			foreach($p->module as $key => $value){
 				foreach ($value as $obj){
-					$childBrick = $this->BuildOutput($key, $obj->name, CMSQSys::BRICKTYPE_BRICK, $brick, $obj->param);
+					$childBrick = $this->BuildOutput($key, $obj->name, Brick::BRICKTYPE_BRICK, $brick, $obj->param);
 					if (is_null($childBrick)){ continue; }
 					array_push($brick->child, $childBrick);
 				}
 			}
 		}
-		if ($brickType == CMSQSys::BRICKTYPE_TEMPLATE && $recache){
+		if ($brickType == Brick::BRICKTYPE_TEMPLATE && $recache){
 			if (empty($cache)){
 				CMSQSys::CacheAppend($db, $owner, $brickName, serialize($brick));
 			}else{
@@ -846,7 +906,7 @@ class CMSSysBrick {
 	 *
 	 * @var integer
 	 */
-	public $type = CMSQSys::BRICKTYPE_BRICK;
+	public $type = Brick::BRICKTYPE_BRICK;
 	
 	/**
 	 * Имя кирпича
@@ -895,13 +955,13 @@ class CMSSysBrickCustomManager {
 	 */
 	public function __construct(CMSRegistry $registry){
 		$db = $registry->db;
-		$rows = CMSQSys::BrickListCustom($db);
+		$rows = CoreQuery::BrickListCustom($db);
 		while (($row = $db->fetch_array($rows))){
 			$key = $row['own'].$row['nm'].$row['tp'];
 			$this->bricks[$key] = $row;
 		}
 
-		$rows = CMSQSys::BrickParamListCustom($db);
+		$rows = CoreQuery::BrickParamListCustom($db);
 		while (($row = $db->fetch_array($rows))){
 			$k1 = $row['bown'].$row['bnm'].$row['btp'];
 			if (!is_array($this->params[$k1])){

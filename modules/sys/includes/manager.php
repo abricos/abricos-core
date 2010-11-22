@@ -1,6 +1,6 @@
 <?php
 /**
- * @version $Id: manager.php 270 2009-12-28 13:24:34Z roosit $
+ * @version $Id$
  * @package Abricos
  * @subpackage Sys
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
@@ -13,7 +13,7 @@
  * @package Abricos
  * @subpackage Sys
  */
-class SysManager {
+class SystemManager {
 	
 	/**
 	 * Ядро
@@ -21,13 +21,6 @@ class SysManager {
 	 * @var CMSRegistry
 	 */
 	public $registry = null;
-	
-	/**
-	 * Сессия пользователя
-	 *
-	 * @var CMSSysSession
-	 */
-	public $session = null;
 	
 	/**
 	 * База данных
@@ -39,26 +32,25 @@ class SysManager {
 	/**
 	 * Модуль
 	 * 
-	 * @var CMSModuleSys
+	 * @var SystemModule
 	 */
 	public $module = null;
 	
 	public $user = null;
 	
-	public function SysManager(CMSModuleSys $module){
+	public function SystemManager(SystemModule $module){
 		$this->module = $module;
 		$this->registry = $module->registry;
-		$this->session = $module->registry->session;
-		$this->user = $this->session->userinfo;
 		$this->db = $module->registry->db;
+		$this->user = $this->registry->user->info;
 	}
 	
 	public function IsRegister(){
-		return $this->session->IsRegistred();
+		return $this->registry->user->IsRegistred();
 	}
 	
 	public function IsAdminRole(){
-		return $this->session->IsAdminMode();
+		return $this->registry->user->IsAdminMode();
 	}
 
 	/**

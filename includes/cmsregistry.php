@@ -11,6 +11,10 @@ define('PAGESTATUS_404', 			404);
 define('PAGESTATUS_500',			500);
 
 final class CMSRegistry {
+
+	// TODO: Временное решение для отладки старой версии, после перевода, необходимо убрать
+	private $session = null;
+	private $ip_address;
 	
 	/**
 	 * Экземляр ядра
@@ -45,29 +49,12 @@ final class CMSRegistry {
 	 */
 	public $db;
 	
-	public $ip_address;
-	
-	/**
-	 * Enter description here...
-	 *
-	 * @var CMSSysSession
-	 */
-	public $session;
-	
 	/**
 	 * Get,Post,Cookie
 	 *
 	 * @var array
 	 */
 	public $GPC = array();
-	
-	/**
-	 * Временное хранилище объектов.
-	 * Используется для передачи объектов между кирпичами
-	 *
-	 * @var array
-	 */
-	public $VarData = array();
 	
 	/**
 	 * Менеджер модулей
@@ -91,18 +78,45 @@ final class CMSRegistry {
 	public $configs = null;
 	
 	/**
-	 * @var CMSMailer
+	 * Системный модуль
+	 * @var SystemModule
 	 */
-	private $mailer = null;
+	public $system = null;
+	
+	/**
+	 * Модуль пользователя
+	 * @var User
+	 */
+	public $user = null;
 	
 	private $json = null;
 	
 	public function CMSRegistry(){
 		$this->input = new CMSInputCleaner($this);
-		$this->ip_address = $this->fetch_alt_ip();
-	}
-	
-	public function Init(){
+		
+		$this->fetch_config();
+		
+		CMSRegistry::$instance = $this;
+		$this->adress = new CMSAdress();
+		
+		if (empty($this->config['Misc']['language'])){
+			$this->config['Misc']['language'] = 'ru';
+		}
+		
+		define('LNG', $this->config['Misc']['language']);
+		
+		$db = new CMSMySqlDB($this);
+		$db->connect(
+			$this->config['Database']['dbname'],
+			$this->config['Server']['servername'],
+			$this->config['Server']['port'],
+			$this->config['Server']['username'],
+			$this->config['Server']['password']
+		);
+		$db->readonly = $this->config['Database']['readonly'];
+		
+		$this->db = $db;
+		
 		$this->modules = new CMSModuleManager($this);
 		
 		$this->modules->FetchModulesInfo();
@@ -111,9 +125,10 @@ final class CMSRegistry {
 		
 		// временное решение в связи с переходом на платформу Abricos
 		if (!empty($modsinfo['sys']) && empty($modsinfo['sys']['installdate'])){
-			CMSSqlQuery::UpdateToAbricosPackage($this->db);
+			CoreQuery::UpdateToAbricosPackage($this->db);
 		}
 		$this->modules->RegisterByName('sys');
+		$this->modules->RegisterByName('user');
 		
 		// проверка на наличие нового модуля в движке
 		$smoddir = CWD."/modules/";
@@ -145,7 +160,7 @@ final class CMSRegistry {
 	 */
 	public function GetUserTextManager(){
 		if (is_null($this->_userTextManager)){
-			require_once CWD.'/includes/cmsusertext.php';
+			require_once ('cmsusertext.php');
 			$this->_userTextManager = new CMSUserText();
 		}
 		return $this->_userTextManager;
@@ -173,13 +188,6 @@ final class CMSRegistry {
 		return $this->json;
 	}
 	
-	/**
-	 * @return CMSMailer
-	 */
-	public function GetMailer(){
-		return new CMSMailer($this);
-	}
-	
 	function fetch_config()	{
 		
 		if (!file_exists(CWD. '/includes/config.php')) {
@@ -187,35 +195,47 @@ final class CMSRegistry {
 		}
 		$config = array();
 		include(CWD . '/includes/config.php');
-		$this->config =& $config;
 		
-		if (!$this->config['JsonDB']['use']){
-			$this->config['JsonDB']['password'] = TIMENOW;
+		if (!isset($config['JsonDB']['use']) || !$config['JsonDB']['use']){
+			$config['JsonDB']['password'] = TIMENOW;
 		}
+		$this->config =& $config;
 	}
 	
-	function fetch_ip(){
-		return $_SERVER['REMOTE_ADDR'];
-	}
+
+	private $_notification = null;
 	
-	function fetch_alt_ip()	{
-		if (isset($_SERVER['HTTP_CLIENT_IP'])){
-			$alt_ip = $_SERVER['HTTP_CLIENT_IP'];
-		} else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) AND preg_match_all('#\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}#s', $_SERVER['HTTP_X_FORWARDED_FOR'], $matches)) {
-			// make sure we dont pick up an internal IP defined by RFC1918
-			foreach ($matches[0] AS $ip) {
-				if (!preg_match("#^(10|172\.16|192\.168)\.#", $ip)){
-					$alt_ip = $ip;
-					break;
-				}
-			}
-		} else if (isset($_SERVER['HTTP_FROM'])) {
-			$alt_ip = $_SERVER['HTTP_FROM'];
-		} else {
-			$alt_ip = $_SERVER['REMOTE_ADDR'];
+	/**
+	 * Менеджер сообщений.
+	 * 
+	 * @return Notification
+	 */
+	public function GetNotification(){
+		if(!is_null($this->_notification)){
+			return $this->_notification;
 		}
-		return $alt_ip;
+		$modNotify = $this->modules->GetModule('notify');
+		if (empty($modNotify)){
+			$this->_notification = new Notification();
+		}else{
+			$this->_notification = $modNotify->GetManager();
+		}
+		return $this->_notification;
 	}
+}
+
+class Notification {
+	
+	/**
+	 * Отправить EMail пользователю
+	 * 
+	 * @param string $email
+	 * @param string $subject
+	 * @param string $message
+	 * @return boolean true - если сообщение отправлено
+	 */
+	public function SendMail($email, $subject, $message){ }
+	
 }
 
 ?>

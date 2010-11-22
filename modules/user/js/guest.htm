@@ -1,13 +1,38 @@
-<!--{panel}-->
-<div style="font-size: 120%">
-	<h1>Страница пользователя</h1>
-	
-	Если вы регистрировались на этом сайте, пожалуйста <a href="#" id="{i#blogin}">авторизуйтесь</a>.
-	<br /><br />
-	Если вы не имеете логин для доступа к авторизованным частям сайта, то вы можете 
-	<a href="#" id="{i#breg}">пройти регистрацию</a>, чтобы получить его.
-	<br /><br />
-	Если вы забыли логин или пароль, воспользуйтесь процедурой <a href="#" id="{i#bpwd}">восстановления пароля</a>.
+<!--{loginpanel}-->
+<div class='hd'>Вход на сайт</div>
+<div class='bd'>
+	<form name="userloginform" id="{i#form}" method="post" action="#" onSubmit="return false;">
+		<div id="{i#error}" style="color: red; display: none;" ></div>
+		<div class="field">
+			<table cellpadding="2" cellspacing="2" border="0">
+			<tr>
+				<td><label>Имя</label>&nbsp;</td>
+				<td>
+					<input name="username" id="{i#username}" type="text" style="font-size: 160%" size="10"/>
+				</td>
+			</tr>
+			<tr>
+				<td><label>Пароль</label>&nbsp;</td>
+				<td><input name="userpassword" id="{i#userpass}" type="password" style="font-size: 160%" size="10" /></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center">
+					<div class="right">
+						<input id="{i#blogin}" type="button" value="Войти" class="btn"/>
+						<input id="{i#bcancel}" type="button" value="Отмена" class="btn"/>
+					</div>
+					<input id="{i#bloginsub}" type="submit" value="Войти" style="display: none" />
+				</td>
+			</tr>
+			<tr><td colspan="2">
+			    <a href="#" id="{i#breg}" title="Регистрация нового пользователя">Зарегистрироваться</a>
+			</td></tr>
+			<tr><td colspan="2">
+			    <a href="#" id="{i#bpwd}" title="Восстановление пароля">Забыли пароль?</a>
+			</td></tr>
+			</table>
+		</div>
+	</form>
 </div>
 
 <!--{password}-->
@@ -32,33 +57,6 @@
 	<div style="font-size: 120%">
 		Инструкция по восстановлению пароля была отправлена вам на email: "{v#email}".<br />
 		Проверьте вашу почту.
-		<div style="margin-top:6px; text-align: right" >
-			<input id="{i#bclose}" type="button" value="Закрыть" />
-		</div>
-	</div>
-</div>
-
-<!--{pwdchangeok}-->
-<div class='hd'>Восстановление пароля</div>
-<div class='bd'>
-	<div style="font-size: 120%">
-		Ваш пароль был переустановлен и выслан вам на email. <br />
-		Проверьте вашу почту.
-		<div style="margin-top:6px; text-align: right" >
-			<input id="{i#blogin}" type="button" value="Авторизация" />&nbsp;&nbsp;
-			<input id="{i#bclose}" type="button" value="Отмена" />
-		</div>
-	</div>
-</div>
-
-<!--{pwdchangeerror}-->
-<div class='hd'>Восстановление пароля</div>
-<div class='bd'>
-	<div style="font-size: 120%">
-		Системе не удалось распознать идентификатор восстановления пароля.<br />
-		Возможно это связанно с истечением срока отведенного под изменение пароля.<br />
-		Если вы все еще хотите запросить инструкцию по восстановлению пароля, <br />
-		то возпользуйтесь процедурой <a href="#" id="{i#bpwd}">восстановления пароля</a> 
 		<div style="margin-top:6px; text-align: right" >
 			<input id="{i#bclose}" type="button" value="Закрыть" />
 		</div>
@@ -130,27 +128,4 @@
 			<input id="{i#bclose}" type="button" value="Закрыть" />
 		</div>
 	</div>
-</div>
-
-<!--{activate}-->
-<div class='hd'>Активация</div>
-<div class='bd'>
-	<div style="font-size: 120%">
-		{v#body}
-	</div>
-</div>
-
-<!--{activok}-->
-Активация пользователя прошла успешно.<br />
-Имя пользователя: {v#unm}
-<div style="margin-top:6px; text-align: right" >
-	<input id="{i#blogin}" type="button" value="Авторизация" />&nbsp;&nbsp;
-	<input id="{i#bclose}" type="button" value="Закрыть" />
-</div>
-
-<!--{activerror}-->
-Ошибка активации пользователя:<br />
-{v#err}
-<div style="margin-top:6px; text-align: right" >
-	<input id="{i#bclose}" type="button" value="Закрыть" />
 </div>

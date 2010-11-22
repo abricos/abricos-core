@@ -12,7 +12,7 @@
 var Component = new Brick.Component();
 Component.requires = {
 	mod:[
-	     {name: 'sys', files: ['container.js','form.js']},
+	     {name: 'sys', files: ['container.js','form.js','wait.js']},
 	     {name: 'user', files: ['api.js']}
 	]
 };
@@ -30,56 +30,75 @@ Component.entryPoint = function(){
 		T = TM.data,
 		TId = TM.idManager;
 	
-	var tSetVar = Brick.util.Template.setProperty;
-	
 	/**
-	 * Элемент блока пользователя
+	 * Панель авторизации пользователя.<br>
+	 * Для авторизации использует метод <a href="Brick.mod.user.API.html#method_login">Brick.mod.user.API.login()</a>
 	 * 
-	 * @class GuestBlockWidget
+	 * @class LoginPanel
+	 * @extends Brick.widget.Panel
 	 * @constructor
-	 * @param {String} elId (optional) Идентификатор HTML элемента контейнера
+	 * @param {Object} param (optional) Дополнительные параметры панели.
 	 */
-	NS.GuestBlockWidget = function(elId){
-		elId = elId || 'mod-user-userblock';
-		var div = Dom.get(elId);
-		if (L.isNull(div)){ return; }
-		
-		var usr = Brick.env.user, t=""; 
-		
-		if (usr.isRegistred()){
-			t = T['user'];
-			t = tSetVar(t, 'name', usr.name);
-			div.innerHTML = t;
-		}else{
-			div.innerHTML = T['guest'];
-		}
-		var __self = this;
-		E.on(div, 'click', function(e){
-			if (__self.onClick(E.getTarget(e))){ E.stopEvent(e); }
-		});
+	var LoginPanel = function(param){
+		this.param = L.merge({
+			'username': '', 'password': '', 'url': '',
+			'hideClose': false,
+			'panelConfig': {}
+		}, param || {});
+		var config = L.merge({
+			modal: true, resize: false, fixedcenter: true
+			// ,width: '400px'
+		}, this.param.panelConfig || {});
+		LoginPanel.superclass.constructor.call(this, config);
 	};
 	
-	NS.GuestBlockWidget.prototype = {
-		/**
-		 * Обработчик события клика мыши 
-		 * @param el
-		 * @return
-		 */
-		onClick: function (el){
+	YAHOO.extend(LoginPanel, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(TId['loginpanel'][name]); },
+		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
+		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
+		initTemplate: function(){
+			return T['loginpanel'];
+		},
+		onLoad: function(){
+			var __self = this;
+			E.on(TId['loginpanel']['form'], 'submit', function(){ __self.send();});
+			
+			var p = this.param;
+			this.setelv('username', p['username']);
+			this.setelv('userpass', p['password']);
+			if (p['error'] > 0){
+				var lng = Brick.util.Language.getc('mod.user.loginpanel.error.srv');
+				var err = this.el('error');
+				err.style.display = "block";
+				err.innerHTML = lng[p['error']];
+			}
+			if (p.hideClose){
+				this.el('bcancel').style.display = 'none';
+			}
+		},
+		send: function(){
+			API.userLogin(this.elv('username'), this.elv('userpass'));
+			this.close();
+		},
+		onClick: function(el){
+			var tp = TId['loginpanel']; 
 			switch(el.id){
-			case TId['guest']['blogin']: 
-				API.showLoginPanel(); 
+			case tp['blogin']:
+				this.send();
 				return true;
-			case TId['guest']['breg']:
-				Brick.Component.API.fire('user', 'guest', 'showRegisterPanel');
+			case tp['bcancel']: this.close(); return true;
+			case tp['breg']:
+				API.showRegisterPanel();
 				return true;
-			case TId['user']['blogout']: 
-				API.logout(); 
+			case tp['bpwd']:
+				API.showPwdRestPanel();
 				return true;
 			}
 			return false;
 		}
-	};
+	});
+	
+	NS.LoginPanel = LoginPanel;
 	
 	/**
 	 * Панель регистрации пользователя
@@ -151,12 +170,47 @@ Component.entryPoint = function(){
 			if (pass.value != passconf.value){ alert(lng['passconf']); return; }
 			if (email.value != emailconf.value){ alert(lng['emailconf']); return; }
 			
-			API.userRegister(unm.value, pass.value, email.value);
+			var __self = this;
+			var lw = new Brick.widget.LayWait(TM.getEl('register.breg').parentNode, true);
+			Brick.ajax('user', {
+				'data': {
+					'do': 'register',
+					'username': unm.value,
+					'password': pass.value,
+					'email': email.value
+				},
+				'event': function(r){
+					lw.hide();
+					__self._setResult(r.data);
+
+				}
+			});
+		},
+		_setResult: function(error){
+			if (error > 0){
+				var lng = Brick.util.Language.getc('mod.user.register.error.srv');
+				alert(lng[error]);
+				return;
+			}
+			var email = this.el('email').value;
+			setTimeout(function(){
+				new RegisterSendEmailPanel({'email': email});
+    		}, 300);
 			this.close();
 		}
 	});
-	
 	NS.RegisterPanel = RegisterPanel;
+	
+	/**
+	 * Отобразить панель "Регистрация пользователя".
+	 * 
+ 	 * @class API
+	 * @method showRegisterPanel
+	 * @static
+	 */
+	API.showRegisterPanel = function(param){
+		return new NS.RegisterPanel(param);
+	};
 	
 	/**
 	 * Панель "Регистрация - отправлен email для подверждения"
@@ -193,66 +247,6 @@ Component.entryPoint = function(){
 	});
 	
 	NS.RegisterSendEmailPanel = RegisterSendEmailPanel;
-	
-
-	/**
-	 * Панель "Активация зарегистрированного пользователя"
-	 * 
-	 * @class RegActivatePanel
-	 * @extends Brick.widget.Panel
-	 * @constructor
-	 * @param {Object} param 
-	 */
-	var RegActivatePanel = function(param){
-		this.param = L.merge({
-			'username': '', 'error': '0'
-		}, param || {});
-		
-		this._showLogin = false;
-
-		RegActivatePanel.superclass.constructor.call(this, {
-			modal: true, resize: false,
-			fixedcenter: true
-		});
-	};
-	YAHOO.extend(RegActivatePanel, Brick.widget.Panel, {
-		el: function(name){ return Dom.get(TId['activate'][name]); },
-		initTemplate: function(){
-			var t = T['activate'];
-			var body = "";
-			var p = this.param;
-			if (p['error']>0){
-				var lng = Brick.util.Language.getc('mod.user.activate.error');
-				body = tSetVar(T['activerror'], 'err', lng[p['error']]);
-			}else{
-				body = tSetVar(T['activok'], 'unm', p['username']);
-			}
-			return tSetVar(t, 'body', body);
-		},
-		onClose: function(){
-			if (this._showLogin){
-				API.showLoginPanel();
-			}
-		},
-		onClick: function(el){
-			switch(el.id){
-			case TId['activerror']['bclose']:
-				this._showLogin = this.param['error'] == 2;
-				this.close(); 
-				return true;
-			case TId['activok']['blogin']:
-				this._showLogin = true;
-				this.close(); 
-				return true;
-			case TId['activok']['bclose']:
-				this.close(); 
-				return true;
-			}
-			return false;
-		}
-	});
-	
-	NS.RegActivatePanel = RegActivatePanel;
 
 	/**
 	 * Панель "Восстановление пароля"
@@ -303,75 +297,17 @@ Component.entryPoint = function(){
 	};
 	YAHOO.extend(PwdRestSendEmailPanel, Brick.widget.Panel, {
 		initTemplate: function(){
-			var t = T['pwdokpanel'];
-			return tSetVar(t, 'email', this.param['email']);
+			return TM.replace('pwdokpanel', {
+				'email': this.param['email']
+			}); 
 		},
 		onClick: function(el){
 			switch(el.id){
-			case TId['pwdokpanel']['bcancel']: this.close(); return true;
+			case TId['pwdokpanel']['bclose']: this.close(); return true;
 			}
 			return false;
 		}
 	});
 	NS.PwdRestSendEmailPanel = PwdRestSendEmailPanel;
 	
-	
-	/**
-	 * Панель "Восстановление пароля - новый пароль отправлен на email"
-	 * 
-	 * @class PwdRestChangeOkPanel
-	 * @extends Brick.widget.Panel
-	 */
-	var PwdRestChangeOkPanel =  function (){
-		PwdRestChangeOkPanel.superclass.constructor.call(this, {
-			modal: true, resize: false,
-			fixedcenter: true
-		});
-	};
-	YAHOO.extend(PwdRestChangeOkPanel, Brick.widget.Panel, {
-		initTemplate: function(){
-			return T['pwdchangeok'];
-		},
-		onClick: function(el){
-			switch(el.id){
-			case TId['pwdchangeok']['bclose']: this.close(); return true;
-			case TId['pwdchangeok']['blogin']:
-				NS.API.showLoginPanel();
-				this.close(); 
-				return true;
-			}
-			return false;
-		}
-	});
-	NS.PwdRestChangeOkPanel = PwdRestChangeOkPanel;
-	
-	/**
-	 * Панель "Восстановление пароля - ошибка"
-	 * 
-	 * @class PwdRestChangeErrorPanel
-	 * @extends Brick.widget.Panel
-	 */
-	var PwdRestChangeErrorPanel =  function (){
-		PwdRestChangeErrorPanel.superclass.constructor.call(this, {
-			modal: true, resize: false,
-			fixedcenter: true
-		});
-	};
-	YAHOO.extend(PwdRestChangeErrorPanel, Brick.widget.Panel, {
-		initTemplate: function(){
-			return T['pwdchangeerror'];
-		},
-		onClick: function(el){
-			switch(el.id){
-			case TId['pwdchangeerror']['bclose']: this.close(); return true;
-			case TId['pwdchangeerror']['bpwd']:
-				NS.API.showPwdRestPanel();
-				this.close(); 
-				return true;
-			}
-			return false;
-		}
-	});
-	NS.PwdRestChangeErrorPanel = PwdRestChangeErrorPanel;
-
 };

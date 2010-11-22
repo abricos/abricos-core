@@ -21,50 +21,6 @@ $manager = $mod->GetManager();
 $ret = new stdClass();
 $ret->_ds = array();
 
-foreach ($ds->ts as $ts){
-	$table = new stdClass();
-	$table->nm = $ts->nm;
-	// нужно ли запрашивать колонки таблицы
-	$qcol = false;
-	foreach($ts->cmd as $cmd){ if ($cmd == 'i'){ $qcol = true; } }
-	
-	$table->rs = array();
-	foreach ($ts->rs as $tsrs){
-		$rows = null;
-		switch ($ts->nm){
-			case 'permission':
-				$rows = array();
-				CMSRegistry::$instance->modules->RegisterAllModule();
-				$mods = CMSRegistry::$instance->modules->GetModules();
-				foreach ($mods as $modname => $module){
-					if (is_null($module->permission)){
-						continue;
-					}
-					$roles = $module->permission->GetRoles();
-					if (is_null($roles)){
-						continue;
-					}
-					$row = array();
-					$row['nm'] = $modname;
-					$row['roles'] = $roles;
-					array_push($rows, $row);
-				}
-				break;
-		}
-		if (!is_null($rows)){
-			if ($qcol){
-				$table->cs = $mod->columnToObj($rows);
-				$qcol = false;
-			}
-			$rs = new stdClass();
-			$rs->p = $tsrs->p;
-			$rs->d = is_array($rows) ? $rows : $mod->rowsToObj($rows);
-			array_push($table->rs, $rs);
-		}
-	}
-	array_push($ret->_ds, $table);
-}
-
 if (Brick::$session->IsAdminMode()){ 
 	
 	// Первым шагом необходимо выполнить все комманды по добавлению/обновлению таблиц
@@ -75,7 +31,7 @@ if (Brick::$session->IsAdminMode()){
 		}
 		switch ($ts->nm){
 			case 'bricks':
-				if ($rcclear){ CMSQSys::BrickRecycleClear(Brick::$db); }
+				if ($rcclear){ CoreQuery::BrickRecycleClear(Brick::$db); }
 				break;
 		}
 		foreach ($ts->rs as $tsrs){
@@ -94,24 +50,24 @@ if (Brick::$session->IsAdminMode()){
 					break;
 				case 'brick':
 					foreach ($tsrs->r as $r){
-						if ($r->f == 'u'){ CMSQSys::BrickSave(Brick::$db, $r->d); }
+						if ($r->f == 'u'){ CoreQuery::BrickSave(Brick::$db, $r->d); }
 					}
 					break;
 				case 'brickparam':
 					foreach ($tsrs->r as $r){
 						if ($r->f == 'a'){
-							CMSQSys::BrickParamAppend(Brick::$db, $r->d);
+							CoreQuery::BrickParamAppend(Brick::$db, $r->d);
 						}else if ($r->f == 'u'){
-							CMSQSys::BrickParamSave(Brick::$db, $r->d);
+							CoreQuery::BrickParamSave(Brick::$db, $r->d);
 						}else if ($r->f == 'd'){
-							CMSQSys::BrickParamRemove(Brick::$db, $r->d->id);
+							CoreQuery::BrickParamRemove(Brick::$db, $r->d->id);
 						}
 					}
 					break;
 				case 'bricks':
 					foreach ($tsrs->r as $r){
-						if ($r->f == 'd'){ CMSQSys::BrickRemove(Brick::$db, $r->d->id); }
-						if ($r->f == 'r'){ CMSQSys::BrickRestore(Brick::$db, $r->d->id); }
+						if ($r->f == 'd'){ CoreQuery::BrickRemove(Brick::$db, $r->d->id); }
+						if ($r->f == 'r'){ CoreQuery::BrickRestore(Brick::$db, $r->d->id); }
 					}
 					break;
 			}
@@ -149,13 +105,13 @@ if (Brick::$session->IsAdminMode()){
 					$rows = Brick::$builder->phrase->GetArray($tsrs->p->mod);
 					break;
 				case 'bricks':
-					$rows = CMSQSys::BrickList(Brick::$db, $tsrs->p->tp, 'yes');
+					$rows = CoreQuery::BrickList(Brick::$db, $tsrs->p->tp, 'yes');
 					break;
 				case 'brick':
-					$rows = CMSQSys::BrickById(Brick::$db, $tsrs->p->bkid, true);
+					$rows = CoreQuery::BrickById(Brick::$db, $tsrs->p->bkid, true);
 					break;
 				case 'brickparam':
-					$rows = CMSQSys::BrickParamList(Brick::$db, $tsrs->p->bkid);
+					$rows = CoreQuery::BrickParamList(Brick::$db, $tsrs->p->bkid);
 					break;
 				case 'permission_mods':
 					$rows = array();
@@ -171,7 +127,7 @@ if (Brick::$session->IsAdminMode()){
 					}
 					break;
 				case 'permission_mod':
-					$rows = CMSQSys::PermissionsByModule($tsrs->p->module);
+					$rows = CoreQuery::PermissionsByModule($tsrs->p->module);
 					break;
 				case 'modules':
 					$rows = $manager->ModuleList();

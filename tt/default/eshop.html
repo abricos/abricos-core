@@ -1,19 +1,20 @@
 <!--[*]
 [var=meta_title][/var][var=meta_keys][/var][var=meta_desc][/var]
 [ph=sys:meta_title][/ph][ph=sys:meta_keys][/ph][ph=sys:meta_desc][/ph]
-[ph=sys:site_name]Abricos[/ph]
-[ph=sys:site_title]система управления web-контентом[/ph]
+[ph=sys:site_name]Мой магазин[/ph]
+[ph=sys:site_title]интернет-магазин абрикосовых товаров[/ph]
 [bkvar=ttowner]default[/bkvar]
 [bkvar=js][/bkvar]
 [bkvar=css][/bkvar]
 [mod=sys]jsvar[/mod]
 [mod=news]newsblock[/mod]
-[mod=sitemap]vmenu,breadcrumb[/mod]
+[mod=sitemap]vmenu,vmenuf|mods=eshop|from=eshop,breadcrumb[/mod]
 [mod=user]userblock[/mod]
 [mod=rss]meta[/mod]
 [var=version][/var]
 [var=jsyui]2.8.0r4[/var]
 [mcss=sys]widget.css[/mcss]
+[mod=eshop]cartsm,userblock[/mod]
 [*]--><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru" dir="ltr">
 <head>
@@ -34,6 +35,7 @@
 		<div id="hd">
 			<span class="tl">[ph]sys:site_name[/ph]</span>
 			<p class="dsc">[ph]sys:site_title[/ph]</p>
+			[mod]eshop:cartsm[/mod]
 			[mod]sitemap:breadcrumb[/mod]
 		</div>
 		<div id="bd">
@@ -46,6 +48,7 @@
 			</div>
 			<div class="yui-b">
 				[mod]sitemap:vmenu[/mod]
+				[mod]sitemap:vmenuf[/mod]
 				[mod]news:newsblock[/mod]
 			</div>
 		</div>

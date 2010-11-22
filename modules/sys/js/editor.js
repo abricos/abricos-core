@@ -15,7 +15,10 @@ var Component = new Brick.Component({
 	buildTemplate: false
 });
 Component.requires = { 
-	yahoo: ['element', 'button'] 
+	yahoo: ['element', 'button'], 
+	mod:[
+	     {name: 'user', files: ['permission.js']}
+		]
 };
 Component.entryPoint = function(){
 	
@@ -25,6 +28,16 @@ Component.entryPoint = function(){
 
 	var TM = this.template,
 		BU = Brick.util;
+
+	var isFileUploadRole = false;
+
+	var loadRoles = function(callback){
+		Brick.Permission.load(function(){
+			isFileUploadRole = Brick.Permission.check('filemanager', '30') == 1;
+			callback();
+		});
+	};
+
 
 (function(){
 	
@@ -127,6 +140,9 @@ Component.entryPoint = function(){
 		 * не зарегистрирован. 
 		 */
 		loadEngine: function(name, callback){
+			if (L.isNull(name)){
+				name = Brick.widget.Editor.CURRENT_VISUAL_EDITOR;
+			}
 			var fire = function(){
 				callback({
 					'name': name,
@@ -140,7 +156,17 @@ Component.entryPoint = function(){
 			}else{
 				fire();
 			}
+		},
+		preloadVisualEditor: function(name, callback){
+			EditorManager.loadEngine(name, function(oArgs){
+	    		if (L.isNull(oArgs.engine)){
+	    			callback();
+	    		}else{
+	    			oArgs.engine.preload(callback);
+	    		}
+	    	});
 		}
+		
 	};
 	
 	EditorManager.findEditors();
@@ -148,10 +174,8 @@ Component.entryPoint = function(){
 	Brick.widget.EditorManager = EditorManager;
 })();
 
-	var EM = Brick.widget.EditorManager;
-	
-	var _T = {};
-	var _TId = {};
+	var EM = Brick.widget.EditorManager, 
+		_T = {}, _TId = {};
 
 	/**
      * @class Editor
@@ -167,8 +191,10 @@ Component.entryPoint = function(){
             element: el,
             attributes: attrs || {}
         };
-
-        Editor.superclass.constructor.call(this, oConfig.element, oConfig.attributes);    
+        var __self = this;
+        loadRoles(function(){
+            Editor.superclass.constructor.call(__self, oConfig.element, oConfig.attributes);    
+        });
 	};
 	
 	/**
@@ -249,6 +275,17 @@ Component.entryPoint = function(){
         }
         return null;
     };
+    
+	/**
+	 * Предварительно подгрузить визуальный редактор
+	 * @method preload
+	 * @static
+	 * @param {Function} Функция callback
+	 */
+	Editor.preload = function(callback){
+		if (!L.isFunction(callback)){ return; }
+		callback();
+	};
 	
     YAHOO.extend(Editor, YAHOO.util.Element, {
     	
@@ -341,15 +378,17 @@ Component.entryPoint = function(){
 	    			__self.set('toolbar', Editor.TOOLBAR_MINIMAL);
 	    		}
 	    	});
-	    	this._buttons['filemanager'] = new EditorButton(this, {
-	    		name: 'filemanager',
-	    		image: '/modules/sys/images/ed_filemanager.gif',
-	    		onClick: function(){
-		    		Brick.Component.API.fire('filemanager', 'api', 'showFileBrowserPanel', function(result){
-		    			__self.insertValue(result['html']);
-		        	});
-	    		}
-	    	});
+	    	if (isFileUploadRole){
+		    	this._buttons['filemanager'] = new EditorButton(this, {
+		    		name: 'filemanager',
+		    		image: '/modules/sys/images/ed_filemanager.gif',
+		    		onClick: function(){
+			    		Brick.Component.API.fire('filemanager', 'api', 'showFileBrowserPanel', function(result){
+			    			__self.insertValue(result['html']);
+			        	});
+		    		}
+		    	});
+	    	}
 	    	this._updateButtons();
 	    },
 	    
@@ -380,8 +419,9 @@ Component.entryPoint = function(){
 		    		showOrHide(true, 'code,tb_full,tb_standart,tb_minimal');
 		    	}
 		    	
-	    		showOrHide(this.get('fileManager'), 'filemanager');
-		    	
+		    	if (isFileUploadRole){
+		    		showOrHide(this.get('fileManager'), 'filemanager');
+		    	}
 	    	} else {
 	    		for (var n in btns){
 	    			btns[n].hide();
@@ -550,7 +590,7 @@ Component.entryPoint = function(){
              * @default true
              */
             this.setAttributeConfig('fileManager',{
-            	value: attr.fileManager || true,
+            	value: L.isBoolean(attr.fileManager) ? attr.fileManager : true,
             	validator: function(value){
             		if (!value){
             			return false;
@@ -601,14 +641,14 @@ Component.entryPoint = function(){
 	    },
     	
     	/**
-    	 * Получить текст из текстового редактора.
+    	 * Получить значение текстового редактора.
     	 * 
     	 * @method getContent
     	 * @return {String}
     	 */
     	getContent: function(){
 	    	if (L.isNull(this._ve)){
-	    		this.get('element').value;
+	    		return this.get('element').value;
 	    	}else{
 	    		return this._ve.getContent();
 	    	}

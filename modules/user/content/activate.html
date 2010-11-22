@@ -2,9 +2,22 @@
 [tt=main][/tt]
 [script]activate.php[/script]
 [bkvar=result][/bkvar]
-[*]-->
-<div id="bk_user">Пожалуйста, подождите, идет загрузка данных...</div>
 
-<script language='JavaScript' type='text/javascript' charset='utf-8'>
-	Brick.Component.API.fire('user', 'api', 'showRegActivatePanel', [bkvar]result[/bkvar]);
-</script> 
+[bkvar=ok]
+	Активация пользователя прошла успешно.<br />
+	Имя пользователя: {v#unm}
+[/bkvar]
+
+[bkvar=err]
+	Ошибка активации пользователя:<br />
+	{v#err}
+[/bkvar]
+
+[bkvar=err1]Пользователь не найден[/bkvar]
+[bkvar=err2]Пользователь уже активирован[/bkvar]
+[bkvar=err3]Неизвестная ошибка[/bkvar]
+
+[*]-->
+<div class='bd'>
+	[bkvar]result[/bkvar]
+</div>

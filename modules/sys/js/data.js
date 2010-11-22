@@ -12,9 +12,15 @@ Brick.namespace('util.data.byid');
 
 var Component = new Brick.Component();
 Component.requires = {
-	mod:[{name: 'sys', files: ['data.js']}]
+	yahoo: ['dom']
 };
 Component.entryPoint = function(){
+
+	var Dom = YAHOO.util.Dom,
+		E = YAHOO.util.Event,
+		L = YAHOO.lang;
+	
+	var NS = this.namespace;
 	
 	/**
 	 * Менеджер таблиц DataSet. 
@@ -53,19 +59,21 @@ Component.entryPoint = function(){
 		this.tables = {};
 		
 	    /**
-	     * Событие, вызывает, когда данные приходят с сервера в запросе и
+	     * Событие onComplete вызывает, когда данные приходят с сервера в запросе и
 	     * заполняют таблицы 
 	     *
 	     * @event onComplete
 	     */
 		this.onComplete = new YAHOO.util.CustomEvent("onComplete");
+
+		this.onStart = new YAHOO.util.CustomEvent("onStart");
 		
 		this.session =  Math.round((new Date()).getTime()/1000);
 	};
 	DataSet.prototype = {
 		
 		/**
-		 * Получить объект данных подготовелных для отправки в запросе серверу
+		 * Получить объект данных подготовленых для отправки в запросе серверу
 		 * 
 		 * @method _getPostData
 		 * @param tables {Brick.util.data.byid.Table[]} (optional) Массив таблиц, если не указан, 
@@ -113,6 +121,14 @@ Component.entryPoint = function(){
 			delete this.tables[name];
 		},
 		
+		removeAll: function(){
+			var ts = this.tables;
+			for(var n in ts){
+				delete this.tables[n];
+			}
+			this.tables = {};
+		},
+		
 		/**
 		 * Добавляет массив таблиц в коллекцию
 		 * 
@@ -141,6 +157,18 @@ Component.entryPoint = function(){
 		},
 		
 		/**
+		 * Являются ли таблицы заполнеными
+		 * 
+		 * @method isFill
+		 * @param tables {Brick.util.data.byid.Table[]} (optional) Массив таблиц
+		 * @return {Boolean} Если False, то таблицы нуждаются в обновлении данных с сервера
+		 */
+		isFill: function(tables){
+			var ts = this._getPostData(tables);
+			return YAHOO.lang.isNull(ts); 
+		},
+		
+		/**
 		 * Обновить данные в таблицах, которые сервер вернул в запросе, 
 		 * а так же выполнить событие onComplete
 		 * 
@@ -149,31 +177,9 @@ Component.entryPoint = function(){
 		 * @return {Boolean} 
 		 */
 		update: function(obj){
-			
-			var checker = function(rq){
-				this.check = function(tables){
-					for (var i=0;i<tables.length;i++){
-						if (rq[tables[i]]){ return true; }
-					}
-					return false;
-				};
-				
-				this.checkWithParam = function(tname, param){
-					if (!rq[tname]){
-						return false;
-					}
-					var fromKey = Rows.getParamHash(param);
-					var arr = rq[tname];
-					for (var i=0;i<arr.length;i++){
-						if (fromKey == Rows.getParamHash(arr[i])){ return true; }
-					}
-					return false;
-				};
-			};
 			var updtbls = {};
-			var i, di, isempty, table;
-			for (i=0; i<obj['_ds'].length; i++){
-				di = obj['_ds'][i];
+			for (var i=0; i<obj['_ds'].length; i++){
+				var di = obj['_ds'][i];
 				
 				updtbls[di['nm']] = function(){
 					var lst = [];
@@ -184,6 +190,7 @@ Component.entryPoint = function(){
 				}();
 				this.get(di['nm'], true).update(di);
 			}
+
 			this.onComplete.fire(new checker(updtbls));
 		},
 		
@@ -194,33 +201,63 @@ Component.entryPoint = function(){
 		 * @method request
 		 * @param hidden {Boolean} Если True, то запрос осуществить в фоновом режиме
 		 */
-		request: function(hidden){
+		request: function(hidden, callback){
 			hidden = hidden || false;
 			var ts = this._getPostData(this.tables, true);
 			if (YAHOO.lang.isNull(ts)){ return; }
+			
+			var f = function(di){
+				var lst = [], rs = di['rs'];
+				for (var ii=0;ii<rs.length;ii++){
+					var p = rs[ii];
+					lst[lst.length] = p['p'];
+				}
+				return lst;
+			};
+
+			var updtbls = {}, nm, di;
+			for (var i=0;i<ts.length;i++){
+				di = ts[i];
+				updtbls[di['nm']] = f(ts[i]);
+			}
+			
+			this.onStart.fire(new checker(updtbls));
+
 			Brick.util.Connection.sendCommand(this.name, 'js_data', {
 				hidden: hidden,
+				success: callback,
 				json: {
 					'_ds': {
-					'pfx': this.prefix,
-					'ss': this.session,
-					'ts': ts
+						'pfx': this.prefix,
+						'ss': this.session,
+						'ts': ts
+					}
 				}
-			}});
-		},
-		
-		/**
-		 * Являются ли таблицы заполнеными
-		 * 
-		 * @method isFill
-		 * @param tables {Brick.util.data.byid.Table[]} (optional) Массив таблиц
-		 * @return {Boolean} Если False, то таблицы нуждаются в обновлении данных с сервера
-		 */
-		isFill: function(tables){
-			var ts = this._getPostData(tables);
-			return YAHOO.lang.isNull(ts); 
+			});
 		}
 	};
+	
+	var checker = function(rq){
+		this.check = function(tables){
+			for (var i=0;i<tables.length;i++){
+				if (rq[tables[i]]){ return true; }
+			}
+			return false;
+		};
+		
+		this.checkWithParam = function(tname, param){
+			if (!rq[tname]){
+				return false;
+			}
+			var fromKey = Rows.getParamHash(param);
+			var arr = rq[tname];
+			for (var i=0;i<arr.length;i++){
+				if (fromKey == Rows.getParamHash(arr[i])){ return true; }
+			}
+			return false;
+		};
+	};
+
 	
 	/**
 	 * Таблица 
@@ -376,6 +413,21 @@ Component.entryPoint = function(){
 		this.resetFlags = function(){
 			_rowsparam.resetFlags();
 		};
+		
+		/**
+		 * Получить row осуществляя поиск во всех коллекциях по заданному идентификатору
+		 * 
+		 * @method getRowById
+		 */
+		this.getRowById = function(id){
+			var arows = _rowsparam.getAllRows();
+			for(var nn in arows){
+				var row = arows[nn].getById(id);
+				if (!L.isNull(row)){ return row; }
+			}
+			return null;
+		};
+
 	};
 	
 	var Column = function(name){ 
@@ -905,6 +957,11 @@ Component.entryPoint = function(){
 				return null;
 			};
 			
+			this.isFill = function(){
+				var pd = this.getPostData();
+				return YAHOO.lang.isNull(pd); 
+			};
+			
 			this.update = function(data){
 				this.clear();
 				var i, row;
@@ -1095,203 +1152,75 @@ Component.entryPoint = function(){
 
 		}
 	};
-
+	
 	
 	Brick.util.data.byid.DataSet = DataSet;
 	Brick.util.data.byid.Table = Table;
-	Brick.util.data.byid.Row = Row;	
-
-};
-
-// Реализация первых версий
-(function(){
-	Brick.namespace('util.Data');
+	Brick.util.data.byid.Row = Row;
 	
-	var Table = function(name){
-		this.init(name);
-	};
-	Table.prototype = {
-		init: function(name){
-			this.data = [];
-			this.name = name;
-			this.lastUpdate = null;
-			this.onUpdate = new YAHOO.util.CustomEvent("onUpdate"); 
-		},
-		isFill: function(){
-			return !YAHOO.lang.isNull(this.lastUpdate);
-		},
-		setReloadFlag: function(){
-			this.lastUpdate = null;
-		},
-		update: function(data, session){
-			session = session || 1;
-			this.lastUpdate = new Date();
-			this.data = data;
-			this.onUpdate.fire({data: this.data, session: session});
-		},
-		find: function(name, value){
-			var i, di;
-			for (i=0;i<this.data.length;i++){
-				di = this.data[i];
-				if (di[name] == value){
-					return di;
-				}
-			}
-			return null;
-		},
-		count: function(){
-			return this.data.length;
-		},
-		filter: function(name, value){
-			var ret = [], i, di;
-			for (i=0;i<this.data.length;i++){
-				di = this.data[i];
-				if (di[name] == value){
-					ret[ret.length] = di;
-				}
-			}
-			return ret;
+	
+	var TablesManager = function(ds, list, cfg){
+		if (L.isString(list)){
+			list = [list];
 		}
+		cfg = L.merge({
+			'owner': null
+		}, cfg || {});
+		this.init(ds, list, cfg);
 	};
-	Brick.util.Data.Table = Table;
-
-	var loader = function(parent, moduleName, mmPrefix){
-		this.init(parent, moduleName, mmPrefix);
-	};
-	loader.prototype = {
-		init: function(parent, moduleName, mmPrefix){
-			this.moduleName = moduleName;
-			this.parent = parent;
-			this.moduleManagerPrefix = mmPrefix;
+	TablesManager.prototype = {
+		init: function(ds, list, cfg){
+			this.ds = ds;
+			this.list = list;
+			this.cfg = cfg;
+			
+			ds.onStart.subscribe(this.dsEvent, this, true);
+			ds.onComplete.subscribe(this.dsEvent, this, true);
+			
+			var tables = {};
+			for (var i=0;i<list.length;i++){
+				var tname = list[i];
+				tables[tname] = ds.get(tname, true);
+			}
+			ds.isFill(tables) ? this.onDataLoadComplete() : this.onDataLoadWait();
+			this.tables = tables;
 		},
-		add: function(tableName){
-			var table = this.parent.get(tableName, true);
-			table.lastUpdate = null;
-		},
-		getJSON: function(){
-			var obj = [], send = false, table;
-			for (var n in this.parent.ds){
-				table = this.parent.ds[n];
-				if (!table.isFill()){
-					obj[obj.length] = table.name;
-					send = true;
+		dsEvent: function(type, args){
+			for (var i=0;i<this.list.length;i++){
+				var tname = this.list[i];
+				if (args[0].checkWithParam(tname)){
+					type == 'onComplete' ? this.onDataLoadComplete() : this.onDataLoadWait();
+					return;
 				}
 			}
-			if (!send){ return null; }
-
-			var json = {
-				'__data': {
-					'session':  Math.round((new Date()).getTime()/1000), 
-					'dictlist': obj
-				}
-			};
-			if (this.moduleManagerPrefix){
-				json['__data']['mmprefix'] = this.moduleManagerPrefix; 
-			}
-			return json;
+		},
+		destroy: function(){
+			this.ds.onComplete.unsubscribe(this.dsEvent);
+			this.ds.onStart.unsubscribe(this.dsEvent);
+		},
+		onDataLoadComplete: function(){
+			var owner = this.cfg.owner;
+			if (L.isNull(owner) || !L.isFunction(owner['onDataLoadComplete'])){ return; }
+			owner.onDataLoadComplete(this);
+		},
+		onDataLoadWait: function(){
+			var owner = this.cfg.owner;
+			if (L.isNull(owner) || !L.isFunction(owner['onDataLoadWait'])){ return; }
+			owner.onDataLoadWait(this);
+		},
+		get: function(tname){
+			return this.ds.get(tname);
+		},
+		foreach: function(tname, fn, prms){
+			prms = prms || {};
+			this.get(tname).getRows(prms).foreach(fn);
 		},
 		request: function(){
-			var json = this.getJSON();
-			if (YAHOO.lang.isNull(json)){
-				return;
-			}
-			Brick.util.Connection.sendCommand(this.moduleName, 'js_data', { json: json });
+			this.ds.request();
 		}
 	};
 	
-	var DataSet = function(moduleName, mmPrefix){
-		this.init(moduleName, mmPrefix);
-	};
-	DataSet.prototype = {
-		init: function(moduleName, mmPrefix){
-			this.ds = {};
-			if (moduleName){
-				this.loader = new loader(this, moduleName, mmPrefix);
-			}
-			this.onComplete = new YAHOO.util.CustomEvent("onComplete"); 
-		}, 
-		update: function(name, data, session){
-			session = session || 1;
-			var table = this.get(name, true);
-			table.update(data, session);
-		},
-		setReloadFlag: function(tables){
-			tables = tables || [];
-			var i, table;
-			for (i=0;i<tables.length;i++){
-				table = this.get(tables[i], true);
-				table.setReloadFlag();
-			}
-		},
-		get: function(name, createIfNotExists){
-			if (!createIfNotExists){
-				return this.ds[name];
-			}
-			var table;
-			if (!this.ds[name]){
-				table = new Table(name);
-				this.ds[name] = table;
-			}else{
-				table = this.ds[name];
-			}
-			return table;
-		},
-		isFill: function(){
-			for (var tn in this.ds){
-				if (!this.ds[tn].isFill()){
-					return false;
-				}
-			}
-			return true;
-		},
-		complete: function(){
-			this.onComplete.fire();
-		}
-	};
+	NS.TablesManager = TablesManager;
 	
-	Brick.util.Data.DataSet = DataSet;
 
-	var TreeNode = function(id, pid, data){
-		this.init(id, pid, data);
-	};
-	TreeNode.prototype = {
-		init: function(id, pid, data){
-			this.id = id;
-			this.pid = pid;
-			this.data = data;
-			this.parent = null;
-			this.child = {};
-		},
-		setChild: function(node){
-			this.child[node['id']] = node;
-			node['parent'] = this;
-		}
-	};
-	
-	var Tree = function(cfg){
-		this.init(cfg);
-	};
-	Tree.prototype = {
-		init: function(cfg){
-			this.cfg = YAHOO.lang.merge({id: 'id', pid: 'pid', root: {}}, cfg || {});
-			this.root = new TreeNode(0, -1, this.cfg['root']);
-		},
-		update: function(d){
-			this.root = new TreeNode(0, -1, this.cfg['root']);
-			this.build(this.root, d);
-		}, 
-		build: function(node, d){
-			var c = this.cfg, cnode, di;
-			for (var i=0;i<d.length;i++){
-				di = d[i];
-				if (node['id'] == di[c['pid']]){
-					cnode = new TreeNode(di[c['id']], di[c['pid']], di);
-					node.setChild(cnode);
-				}
-			}
-		}
-	};
-	
-	Brick.util.Data.Tree = Tree;
-
-})();
+};

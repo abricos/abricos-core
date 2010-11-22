@@ -14,7 +14,7 @@ $brick = Brick::$builder->brick;
 
 $mod = Brick::$modules->GetModule('sys');
 $modUser = Brick::$modules->GetModule('user');
-$userManager = $modUser->GetUserManager();
+$manager = $modUser->GetManager();
 $ds = $mod->getDataSet();
 
 $ret = new stdClass();
@@ -24,13 +24,7 @@ $ret->_ds = array();
 foreach ($ds->ts as $ts){
 	foreach ($ts->rs as $tsrs){
 		if (empty($tsrs->r)){continue; }
-		switch ($ts->nm){
-			case 'user':
-				foreach ($tsrs->r as $r){
-					if ($r->f == 'u'){ $userManager->ChangeProfile($r->d); }
-				}
-				break;
-		}
+		$manager->DSProcess($ts->nm, $tsrs);
 	}
 }
 
@@ -44,35 +38,18 @@ foreach ($ds->ts as $ts){
 	
 	$table->rs = array();
 	foreach ($ts->rs as $tsrs){
-		$rows = null;
-		switch ($ts->nm){
-			case 'user':
-				$rows = $userManager->UserInfo($tsrs->p->id, $tsrs->p->unm);
-				break;
-			case 'userlist':
-				$rows = $userManager->UserList($tsrs->p->page, $tsrs->p->limit);
-				break;
-			case 'usercount':
-				$rows = $userManager->UserCount();
-				break;
-			case 'online':
-				$rows = $userManager->UserOnline();
-				break;
+		$rows = $manager->DSGetData($ts->nm, $tsrs);
+		if (is_null($rows)){
+			$rows = array(array('id'=>0));
 		}
-		if (!is_null($rows)){
-			if ($qcol){
-				$table->cs = $mod->columnToObj($rows);
-				$qcol = false;
-			}
-			$rs = new stdClass();
-			$rs->p = $tsrs->p;
-			if (is_array($rows)){
-				$rs->d = $rows;
-			}else{
-				$rs->d = $mod->rowsToObj($rows);
-			}
-			array_push($table->rs, $rs);
+		if ($qcol){
+			$table->cs = $mod->columnToObj($rows);
+			$qcol = false;
 		}
+		$rs = new stdClass();
+		$rs->p = $tsrs->p;
+		$rs->d = is_array($rows) ? $rows : $mod->rowsToObj($rows);
+		array_push($table->rs, $rs);
 	}
 	array_push($ret->_ds, $table);
 }

@@ -36,7 +36,7 @@ Component.entryPoint = function(){
 	var _globalIdCounter = 0;
 	
 	YAHOO.widget.Overlay.VIEWPORT_OFFSET = 0;
-	
+
 	/**
 	 * Панель
 	 * 
@@ -62,7 +62,8 @@ Component.entryPoint = function(){
             constraintoviewport:true,
             template: "",
             elbody: null,
-            parentNode: document.body
+            parentNode: document.body,
+            zindex: Brick.DEFAULT_ZINDEX || null
         }, config || {});
 		
 		var el = this._buildPanel(config);
@@ -302,6 +303,7 @@ Component.entryPoint = function(){
 				cfg.setProperty("height", h+'px');
 				cfg.setProperty('draggable', false);
 				cfg.setProperty('resize', false);
+	            this.onResize();
 			}else if (val == Panel.STATE_NORMAL){
 				this._savedShowState = val;
 				cfg.setProperty("x", this._savedX);
@@ -313,6 +315,7 @@ Component.entryPoint = function(){
 				if (cfg.getProperty('fixedcenter')){
 					this.center();
 				}
+	            this.onResize();
 			}else if (val == Panel.STATE_MINIMIZED){
 				this._hidePanel();
 			}
@@ -515,12 +518,14 @@ Component.entryPoint = function(){
             }, 100);
 		},
 		
+		doCenterOnDOMEvent: function(){
+			// Panel.superclass.doCenterOnDOMEvent.call(this);
+		},
+		
 		_buildPanel: function(config){
 			var div = document.createElement('DIV');
 			div.id = Dom.generateId();
-			div.innerHTML = TM.replace('panel', {
-				'body': config.template || this.initTemplate()
-			});
+			div.innerHTML = (config.template || this.initTemplate()) + "<div class='ft'></div>"; 
 			return div;
 		},
 

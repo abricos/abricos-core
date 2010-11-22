@@ -21,9 +21,16 @@ Component.entryPoint = function(){
 	menuItem.icon = '/modules/sys/images/cp_icon.gif';
 	menuItem.titleId = 'sys.title';
 	menuItem.entryComponent = 'api';
-	menuItem.entryPoint = 'Brick.mod.sys.API.showManagerWidget';
+	menuItem.entryPoint = 'Brick.mod.sys.API.showConfigWidget';
 	cp.MenuManager.add(menuItem);
 
+	var menuItem = new cp.MenuItem(this.moduleName, 'templates');
+	menuItem.icon = '/modules/sys/images/cp_icon.gif';
+	menuItem.titleId = 'sys.templates.title';
+	menuItem.entryComponent = 'api';
+	menuItem.entryPoint = 'Brick.mod.sys.API.showTemplateWidget';
+	cp.MenuManager.add(menuItem);
+	
 	var menuItem = new cp.MenuItem(this.moduleName, 'modules');
 	menuItem.icon = '/modules/sys/images/cp_icon.gif';
 	menuItem.titleId = 'sys.modules.title';

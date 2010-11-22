@@ -99,31 +99,28 @@ if ($updateManager->isInstall()){
 		('sys', 'site_title', 'система управления web-контентом', 'ru'),
 		('sys', 'admin_mail', '', 'ru')
 	");
-
 }
 
 // обновление для платформы Abricos версии 0.5
 if ($updateManager->isInstall() || $updateManager->serverVersion == '1.0.4'){
+	$updateManager->serverVersion = '0.5';
+}
 
-	// Политика безопасности
+if ($updateManager->isUpdate('0.5.3')){
+	$db->query_write("DROP TABLE IF EXISTS `".$pfx."sys_permission`");
+	
 	$db->query_write("
-		CREATE TABLE IF NOT EXISTS ".$pfx."sys_permission (
-		  `permissionid` int(10) unsigned NOT NULL auto_increment,
+		CREATE TABLE IF NOT EXISTS ".$pfx."sys_modaction (
+		  `modactionid` int(10) unsigned NOT NULL auto_increment,
 		  `module` varchar(50) NOT NULL DEFAULT '' COMMENT 'Имя модуля',
-		  `subject` TEXT NOT NULL COMMENT 'Группы пользователей с префиксом @, и/или пользователи, через запятую',
-		  `action` TEXT NOT NULL COMMENT 'Действия через запятую',
-		  `status` tinyint(1) unsigned NOT NULL default 0 COMMENT '1 - разрешено, 0 - запрещено',
-		  PRIMARY KEY  (`permissionid`)
+		  `action` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'Действие',
+		  PRIMARY KEY  (`modactionid`),
+		  UNIQUE KEY `modaction` (`module`,`action`)
 		)".$charset
 	);
 }
 
-if ($updateManager->isUpdate('0.5.2')){
-	$db->query_write("
-		UPDATE ".$pfx."module
-			SET takelink='__super'
-		WHERE name='sitemap' 
-	");
-}
+// TODO: временное решение вызвать модуль user для установки таблиц
+CMSRegistry::$instance->modules->GetModule('user');
 
 ?>

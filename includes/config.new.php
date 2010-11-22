@@ -12,12 +12,6 @@
  */
 $config['Database']['readonly'] = false;
 
-/**
- * Идентификатор пользователя имеющий статус "Супер администратора".
- * Примечание: статус "Супер администратор" позволяет игнорировать настройку readonly 
- */
-$config['superadmin'] = '';
-
 $config['Database']['dbtype'] = 'mysql';
 $config['Database']['dbname'] = 'cms';
 
@@ -37,8 +31,51 @@ $config['Misc']['brick_cache'] = false;
 // Режим работы платформы для разработчика 
 $config['Misc']['develop_mode'] = false;
 
+// Показать информацию работы сервера (скорость сборки страницы, кол-во запросов к БД)
+$config['Misc']['showbuildinfo'] = false;
+
 $config['JsonDB']['use'] = false;
 $config['JsonDB']['password'] = "";
+
+/**
+ * Идентификатор пользователя имеющий статус "Супер администратора".
+ * Примечание: статус "Супер администратор" позволяет игнорировать настройку readonly 
+ */
+$config['superadmin'] = '';
+
+// Пример правил применения шаблонов для страниц сайта
+/*
+$config['Template'] = array(
+	// по умолчанию использовать шаблон blog из стиля default
+	"default" => array(
+		"owner" => "default", 
+		"name" => "blog"
+	),
+	// не применять правила для страниц в разделе http://domain.tld/price/...
+	"ignore" => array(
+		array(
+			"pattern" => "/^\/price\//i", 
+			"regexp" => true
+		)
+	), 
+	"exp" => array(
+		// использовать шаблон main из стиля default для главной страницы сайта
+		array(
+			"pattern" => "/", 
+			"regexp" => false,
+			"owner" => "default", 
+			"name" => "main"
+		),
+		// использовать шаблон news из стиля default для новостей 
+		array(
+			"pattern" => "/^\/news\//i", 
+			"regexp" => true,
+			"owner" => "default", 
+			"name" => "news"
+		)
+	) 
+);
+/**/
 
 // Пример тонкой настройки работы модулей
 /*

@@ -372,8 +372,8 @@ function getFileContents($path, $notcheck = false) {
 		switch($extension){
 			case "css": case "htm": case "js": break;
 			default:
-				die("Hacker?");
-				return;
+				// die("Hacker?");
+				return "";
 		}
 	}
 	if (!$path || !@is_file($path))

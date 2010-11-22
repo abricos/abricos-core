@@ -1,13 +1,12 @@
-/*
-* { outline: 2px dotted red; }
-* * { outline: 2px dotted green; }
-* * * { outline: 2px dotted orange; }
-* * * * { outline: 2px dotted blue; }
-* * * * * { outline: 1px solid red; }
-* * * * * * { outline: 1px solid green; }
-* * * * * * * { outline: 1px solid orange; }
-* * * * * * * * { outline: 1px solid blue; }
-/**/
+
+/* YUI Reset CSS */
+html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}input,button,textarea,select,optgroup,option{font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;}input,button,textarea,select{*font-size:100%;}
+
+/* YUI Fonts CSS */
+body{font:13px/1.231 arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;}select,input,button,textarea,button{font:99% arial,helvetica,clean,sans-serif;}table{font-size:inherit;font:100%;}pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
+
+/* YUI Grids CSS */
+body{text-align:center;}#doc,#doc2,#doc3,#doc4,.yui-t1,.yui-t2,.yui-t3,.yui-t4,.yui-t5,.yui-t6,.yui-t7{margin:auto;text-align:left;width:57.69em;*width:56.25em;}#doc2{width:73.076em;*width:71.25em;}#doc3{margin:auto 10px;width:auto;}#doc4{width:74.923em;*width:73.05em;}.yui-b{position:relative;}.yui-b{_position:static;}#yui-main .yui-b{position:static;}#yui-main,.yui-g .yui-u .yui-g{width:100%;}.yui-t1 #yui-main,.yui-t2 #yui-main,.yui-t3 #yui-main{float:right;margin-left:-25em;}.yui-t4 #yui-main,.yui-t5 #yui-main,.yui-t6 #yui-main{float:left;margin-right:-25em;}.yui-t1 .yui-b{float:left;width:12.30769em;*width:12.00em;}.yui-t1 #yui-main .yui-b{margin-left:13.30769em;*margin-left:13.05em;}.yui-t2 .yui-b{float:left;width:13.8461em;*width:13.50em;}.yui-t2 #yui-main .yui-b{margin-left:14.8461em;*margin-left:14.55em;}.yui-t3 .yui-b{float:left;width:23.0769em;*width:22.50em;}.yui-t3 #yui-main .yui-b{margin-left:24.0769em;*margin-left:23.62em;}.yui-t4 .yui-b{float:right;width:13.8456em;*width:13.50em;}.yui-t4 #yui-main .yui-b{margin-right:14.8456em;*margin-right:14.55em;}.yui-t5 .yui-b{float:right;width:18.4615em;*width:18.00em;}.yui-t5 #yui-main .yui-b{margin-right:19.4615em;*margin-right:19.125em;}.yui-t6 .yui-b{float:right;width:23.0769em;*width:22.50em;}.yui-t6 #yui-main .yui-b{margin-right:24.0769em;*margin-right:23.62em;}.yui-t7 #yui-main .yui-b{display:block;margin:0 0 1em 0;}#yui-main .yui-b{float:none;width:auto;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf,.yui-gc .yui-u,.yui-gd .yui-g,.yui-g .yui-gc .yui-u,.yui-ge .yui-u,.yui-ge .yui-g,.yui-gf .yui-g,.yui-gf .yui-u{float:right;}.yui-g div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first,.yui-ge div.first,.yui-gf div.first,.yui-g .yui-gc div.first,.yui-g .yui-ge div.first,.yui-gc div.first div.first{float:left;}.yui-g .yui-u,.yui-g .yui-g,.yui-g .yui-gb,.yui-g .yui-gc,.yui-g .yui-gd,.yui-g .yui-ge,.yui-g .yui-gf{width:49.1%;}.yui-gb .yui-u,.yui-g .yui-gb .yui-u,.yui-gb .yui-g,.yui-gb .yui-gb,.yui-gb .yui-gc,.yui-gb .yui-gd,.yui-gb .yui-ge,.yui-gb .yui-gf,.yui-gc .yui-u,.yui-gc .yui-g,.yui-gd .yui-u{width:32%;margin-left:1.99%;}.yui-gb .yui-u{*margin-left:1.9%;*width:31.9%;}.yui-gc div.first,.yui-gd .yui-u{width:66%;}.yui-gd div.first{width:32%;}.yui-ge div.first,.yui-gf .yui-u{width:74.2%;}.yui-ge .yui-u,.yui-gf div.first{width:24%;}.yui-g .yui-gb div.first,.yui-gb div.first,.yui-gc div.first,.yui-gd div.first{margin-left:0;}.yui-g .yui-g .yui-u,.yui-gb .yui-g .yui-u,.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u,.yui-ge .yui-g .yui-u,.yui-gf .yui-g .yui-u{width:49%;*width:48.1%;*margin-left:0;}.yui-g .yui-g .yui-u{width:48.1%;}.yui-g .yui-gb div.first,.yui-gb .yui-gb div.first{*margin-right:0;*width:32%;_width:31.7%;}.yui-g .yui-gc div.first,.yui-gd .yui-g{width:66%;}.yui-gb .yui-g div.first{*margin-right:4%;_margin-right:1.3%;}.yui-gb .yui-gc div.first,.yui-gb .yui-gd div.first{*margin-right:0;}.yui-gb .yui-gb .yui-u,.yui-gb .yui-gc .yui-u{*margin-left:1.8%;_margin-left:4%;}.yui-g .yui-gb .yui-u{_margin-left:1.0%;}.yui-gb .yui-gd .yui-u{*width:66%;_width:61.2%;}.yui-gb .yui-gd div.first{*width:31%;_width:29.5%;}.yui-g .yui-gc .yui-u,.yui-gb .yui-gc .yui-u{width:32%;_float:right;margin-right:0;_margin-left:0;}.yui-gb .yui-gc div.first{width:66%;*float:left;*margin-left:0;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf .yui-u{margin:0;}.yui-gb .yui-gb .yui-u{_margin-left:.7%;}.yui-gb .yui-g div.first,.yui-gb .yui-gb div.first{*margin-left:0;}.yui-gc .yui-g .yui-u,.yui-gd .yui-g .yui-u{*width:48.1%;*margin-left:0;}.yui-gb .yui-gd div.first{width:32%;}.yui-g .yui-gd div.first{_width:29.9%;}.yui-ge .yui-g{width:24%;}.yui-gf .yui-g{width:74.2%;}.yui-gb .yui-ge div.yui-u,.yui-gb .yui-gf div.yui-u{float:right;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf div.first{float:left;}.yui-gb .yui-ge .yui-u,.yui-gb .yui-gf div.first{*width:24%;_width:20%;}.yui-gb .yui-ge div.first,.yui-gb .yui-gf .yui-u{*width:73.5%;_width:65.5%;}.yui-ge div.first .yui-gd .yui-u{width:65%;}.yui-ge div.first .yui-gd div.first{width:32%;}#hd:after,#bd:after,#ft:after,.yui-g:after,.yui-gb:after,.yui-gc:after,.yui-gd:after,.yui-ge:after,.yui-gf:after{content:".";display:block;height:0;clear:both;visibility:hidden;}#hd,#bd,#ft,.yui-g,.yui-gb,.yui-gc,.yui-gd,.yui-ge,.yui-gf{zoom:1;}
 
 html {
 	background: #fff url(../images/bg_top.gif) repeat-x scroll 0 0;
@@ -20,122 +19,194 @@ body {
 table, tr, td, div, ul, ol, li, p, h1, h2, h3, h4, h5, h6	{
 	text-align: left;
 }
-#hd .logo {
+a, a:link {
+	color: #6a7398;
+}
+a:hover {
+	color: #f00;
+}
+a:active, a:visited {
+	color: #6a7398;
+}
+h1, h2, h3, h4, h5 {
+	font-weight: bold;
+	color: #333;
+	padding-bottom: 0.5em;
+}
+h1 { 
+	font-size: 125%;
+}
+h2 {
+	font-size: 120%;
+}
+h3 {
+	font-size: 110%;
+}
+h4, h5 {
+	font-size: 100%;
+}
+
+#hd {
 	color: #090;
 	margin: 30px 0 10px 10px; *
 	margin: 15px 0 5px 5px;
 	padding: 0 0 0 20px;
+}
+#hd .tl {
+	font-weight: bold;
 	font-size: 200%;
 }
-#hd .logo .tl {
-	font-weight: bold;
-}
-#hd .logo .desc {
+#hd .dsc {
+	font-size: 105%;
 	color: #999;
-	font-size: 50%;
 	margin: 0;
 	padding: 0;
 }
-
 #ft {
 	background: #333 none repeat scroll 0 0;
 	color: #fff;
 }
-
 #ft p {
 	font-size: 90%;
 	text-align: center;
 	padding: 0.6em;
 }
 
-#content {
+#yui-main {
 	font-family: Verdana, Tahoma, Arial;
 	font-weight: normal;
 	line-height: 1.6;
 }
 
-
-div.out {
-	border: 1px solid #EEF1F2;
-	padding: 0;
-	margin: 0 0 10px 0;
+.yui-g {
+	padding: 10px 10px 15px 10px;
 	overflow: hidden;
+	min-height: 10px;
+	margin-bottom: 10px;
 }
-
-div.in {
+.box {
+	border: 1px solid #dee2e3; 
 	background: #fff url(../images/bg.gif) repeat-x;
-	margin: 1px; *
-	margin-left: 0.09em; /*IE fix*/
-	padding: 4px 10px;
-	overflow: hidden;
+}
+.yui-b .box {
+	padding:4px 10px;
+	margin-bottom: 10px;
+}
+.hide {
+	display: none;
 }
 
-
-h1, h2 {
-	font-weight: bold;
-	color: #333;
-	font-size: 120%;
-	padding-bottom: 0.4em;
-}
-
-h3,h4,h5 {
-	font-weight: bold;
-	color: #333;
-	padding-bottom: 0.4em;
-}
-
-h3 {
-	font-size: 110%;
-}
-
-h4,h5 {
-	font-size: 100%;
-}
-
-a,a:link {
-	color: #6a7398;
-}
-
-a:hover {
-	color: #f00;
-}
-
-a:active,a:visited {
-	color: #6a7398;
-}
-
-p {
+#bd .bd p {
 	padding-bottom: .5em;
 }
-
-.body ul, .body ol {
+#bd .bd i, 
+#bd .bd em {
+	font-style:italic;
+}
+#bd .bd b, 
+#bd .bd strong {
+	font-weight: bolder;
+}
+#bd .bd ul, 
+#bd .bd ol {
 	margin:1.5em 1em 1.5em 3em;
 	padding:0;
 }
-
-.body ol li, .body ol li {
-		list-style-type: decimal;
+#bd .bd ol li {
+	list-style-type: decimal;
 }
-
-.body li {
+#bd .bd li {
 	list-style-type: disc;
 }
-
-.body i, .body em{
-	font-style:italic;
+#bd .bd img {
+	margin: 5px;
 }
 
-.body b, .body strong {
-	font-weight:bolder;
+.breadcrumb {
+	margin-left: 26.09em;
+	*margin-left: 25.62em;
 }
 
-/**
- * User
- */
-#mod-user-userblock {
-	position: absolute; 
-	right: 15px; 
-	top: 5px;
+#userblock {
+	color:#666666;
+	text-align: left;
+}
+#userblock form{
+	clear: both;
 }
 
+.big #userblock {
+	margin: 10px;
+	line-height: 1em;
+}
+.big #userblock .atd span {
+	display: block;
+}
+.big #userblock .autologin {
+	display: block;
+}
+.big #userblock .autologin span {
+	display: inline;
+}
+.big #userblock #chk-autologin {
+	margin: 0 5px 0 0;
+}
+.big #userblock #txt-login,
+.big #userblock #txt-password {
+	font-family:Tahoma;
+	font-size: 2em;
+	margin-bottom: 10px;
+	width:300px;
+}
+.big #userblock .btn-authorize {
+	font-size: 1.5em;
+	padding: 0 6px;
+	display: block;
+	margin-top: 5px;
+}
+.big #userblock ul li {
+	float:left;
+}
+.big #userblock .register ,
+.big #userblock .recpwd {
+	padding: 10px 10px 0 0;
+}
 
+.small #userblock {
+	position:absolute;
+	top:10px;
+	right:25px;
+	font-size:90%;
+}
+
+.small #userblock .login,
+.small #userblock .password,
+.small #userblock .autologin {
+		margin: 0 15px 0 0;
+}
+.small #userblock .btn-authorize {
+	padding: 0 6px;
+}
+.small #userblock #txt-login,
+.small #userblock #txt-password {
+	color:#666666;
+	font-family:Tahoma;
+	margin-left: 8px;
+	padding:1px 2px;
+	width:112px;
+}
+.small #userblock #chk-autologin {
+	margin: 0 5px 0 0;
+}
+.small #userblock ul {
+	padding-left: 170px;
+}
+.small #userblock ul li {
+	float:left;
+	line-height:120%;
+}
+
+.small #userblock .register ,
+.small #userblock .recpwd {
+	padding:3px 1px 0 10px;
+}

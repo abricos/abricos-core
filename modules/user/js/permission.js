@@ -1,5 +1,5 @@
 /*
-@version $Id: cp.js 180 2009-11-18 07:18:48Z roosit $
+@version $Id$
 @copyright Copyright (C) 2008 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
@@ -7,7 +7,6 @@
 /**
  * @module Sys
  */
-
 var Component = new Brick.Component();
 Component.requires = {
 	mod:[{name: 'sys', files: ['data.js']}]
@@ -15,12 +14,13 @@ Component.requires = {
 Component.entryPoint = function(){
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
-		L = YAHOO.lang;
+		L = YAHOO.lang,
+		NS = this.namespace;
 
-	if (!Brick.objectExists('Brick.mod.sys.data')){
-		Brick.mod.sys.data = new Brick.util.data.byid.DataSet('sys');
+	if (!NS.data){
+		NS.data = new Brick.util.data.byid.DataSet('user');
 	}
-	var DATA = Brick.mod.sys.data;
+	var DATA = NS.data;
 	
 (function(){
 	
@@ -66,6 +66,9 @@ Component.entryPoint = function(){
 		};
 		
 		var roles = permData[module];
+		if (!roles){
+			return -1;
+		}
 		
 		if (!roles[action]){
 			return -1;

@@ -12,7 +12,10 @@
 var Component = new Brick.Component();
 Component.requires = {
     yahoo: ['connection','container','json','cookie'],
-	mod:[{name: 'sys', files: ['container.js','permission.js']}]
+	mod:[
+         {name: 'sys', files: ['container.js']},
+         {name: 'user', files: ['permission.js']}
+	]
 };
 Component.entryPoint = function(){
 	
@@ -22,7 +25,7 @@ Component.entryPoint = function(){
 	
 	var TMG = this.template,
 		NS = this.namespace,
-		API = this.namespace.API;
+		API = NS.API;
 
 	Brick.namespace('Brick.mod.user.cp');
 	
@@ -185,6 +188,13 @@ Component.entryPoint = function(){
 		 * @param {String} id Идентификатор элемента меню
 		 */
 		selectMenuItem: function(id){
+			var __self = this;
+			
+			var waitsh = function(show){
+				__self.el('wait').style.display = show ? '' : 'none';
+			};
+			
+			waitsh(false);
 
 			var item = MenuManager.getById(id);
 			if (L.isNull(item)){ return; }
@@ -206,7 +216,11 @@ Component.entryPoint = function(){
 				div.id = Dom.generateId();
 				this.pages[id] = div;
 				this.el('modbody').appendChild(div);
-				item.fireEntryPoint(div);
+
+				waitsh(true);
+				item.fireEntryPoint(div, function(){
+					waitsh(false);
+				});
 			}
 			
 			var d = new Date();
@@ -319,8 +333,10 @@ Component.entryPoint = function(){
 		 * @method fireEntryPoint
 		 * @param {Object} container HTML элемент - контейнер, будет 
 		 * указан в параметрах функции entryPoint
+		 * @param {Function} callback выполнить функцию, когда все необходимые элементы 
+		 * будут загружены
 		 */
-		this.fireEntryPoint = function(container){
+		this.fireEntryPoint = function(container, callback){
 			
 			var __self = this;
 			
@@ -330,6 +346,9 @@ Component.entryPoint = function(){
 					fn = __self.entryPoint;
 				}else{
 					fn = Brick.convertToObject(__self.entryPoint); 
+				}
+				if (L.isFunction(callback)){
+					callback();
 				}
 				fn(container);
 			};

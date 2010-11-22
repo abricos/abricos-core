@@ -1,5 +1,5 @@
 /*
-@version $Id: cpanel.js 155 2009-11-09 06:41:35Z roosit $
+@version $Id$
 @copyright Copyright (C) 2008 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */

@@ -11,7 +11,7 @@
 var Component = new Brick.Component();
 Component.requires = {
 	mod:[
-	 	{name: 'sys', files: ['api.js','data.js','form.js']}
+	 	{name: 'sys', files: ['api.js','data.js','form.js','wait.js']}
 	]
 };
 Component.entryPoint = function(){
@@ -37,14 +37,18 @@ Component.entryPoint = function(){
 	};
 	ConfigWidget.prototype = {
 		init: function(container){
-			var TM = TMG.build(),
-				T = TM.data,
-				TId = TM.idManager;
-			this._T = T;
-			this._TId = TId;
+			var TM = TMG.build(), T = TM.data, TId = TM.idManager;
+			
+			this._TM = TM; this._T = T; this._TId = TId;
+			
+			this.wait = new Brick.widget.WaitManager();
 		
 			var __self = this;
 			container.innerHTML = T['panel'];
+			E.on(container, 'click', function(e){
+				if (__self.onClick(E.getTarget(e))){ E.stopEvent(e); }
+			});
+			this.container = container;
 			
 			this.tables = {
 				'config': DATA.get('config', true),
@@ -53,13 +57,26 @@ Component.entryPoint = function(){
 			this.rows = {
 				'config': this.tables['config'].getRows({'mod': 'sys'})
 			};
+			DATA.onStart.subscribe(this.onDSUpdate, this, true);
 			DATA.onComplete.subscribe(this.onDSUpdate, this, true);
 			if (DATA.isFill(this.tables)){
 				this.render();
 			}
 		},
-		onDSUpdate: function(type, args){if (args[0].check(['config','styles'])){ this.render(); }},
-		destroy: function(){DATA.onComplete.unsubscribe(this.onDSUpdate, this);},
+		onDSUpdate: function(type, args){
+			if (args[0].check(['config','styles'])){
+				if (type == 'onStart'){
+					this.wait.show(this.container);
+				}else{
+					this.wait.hide();
+					this.render(); 
+				}
+			}
+		},
+		destroy: function(){
+			DATA.onComplete.unsubscribe(this.onDSUpdate, this);
+			DATA.onStart.unsubscribe(this.onDSUpdate, this);
+		},
 		el: function(name){ return Dom.get(this._TId['panel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
@@ -71,24 +88,19 @@ Component.entryPoint = function(){
 			return false;
 		},
 		render: function(){
-			var T = this._T, TId = this._TId;
+			var TM = this._TM, T = this._T, TId = this._TId;
 			
 			var __self = this;
 			var lst = "";
 			this.tables['styles'].getRows().foreach(function(row){
 				var di = row.cell;
-				var t = T['option'];
-				t = tSetVar(t, 'id', di['nm']);
-				t = tSetVar(t, 'tl', di['nm']);
-				lst += t;
+				lst += TM.replace('option', {'id': di['nm'], 'tl': di['nm']});
 			});
-			lst = tSetVar(T['select'], 'list', lst);
-			this.el('styles').innerHTML = lst;
+			this.el('styles').innerHTML = TM.replace('select', {'list': lst});
 			this.rows['config'].foreach(function(row){
 				var di = row.cell;
 				if (di['nm'] == 'style'){
-					var el = Dom.get(TId['select']['id']);
-					Brick.util.Form.setValue(el, di['ph']);
+					Brick.util.Form.setValue(TM.getEl('select.id'), di['ph']);
 					return;
 				}
 				var el = __self.el(di['nm']);

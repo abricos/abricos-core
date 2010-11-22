@@ -1,17 +1,32 @@
-<!--{panel}-->
-<h3>Пользователи <a href="#"><img id="{i#refresh}" src="/modules/user/css/images/refresh.png" title="Обновить"/></a></h3>
+<!--{manager}-->
+<div id="{i#id}" class="yui-navset">
+	<ul class="yui-nav">
+		<li class="selected"><a href="#{i#users}"><em>Пользователи</em></a></li>
+		<li><a href="#{i#groups}"><em>Группы пользователей</em></a></li>
+	</ul>            
+	<div class="yui-content">
+		<div id="{i#users}"></div>
+		<div id="{i#groups}"></div>
+	</div>
+</div>
+
+<!--{users}-->
+<div class="field buttons right">
+	<input id="{i#badd}" type="button" value="Добавить пользователя" class="btn" />
+	<input id="{i#refresh}" type="button" value="Обновить" class="btn" />
+</div>
 <div id='{i#pagtop}'></div>
 <div id='{i#table}'></div>
 <div id='{i#pagbot}'></div>
-
-<div class="field linespace-1">
-<p>
-	<b>Статистика</b><br />
-	Зарегистрированных всего: <span id="{i#count}">0</span><br /> 
-	Сейчас на сайте: <span id="{i#online}">0</span>
-</p>
+<div class="field linespace-1" style="display: none;">
+	<p>
+		<b>Статистика</b><br />
+		Зарегистрированных всего: <span id="{i#count}">0</span><br /> 
+		Сейчас на сайте: <span id="{i#online}">0</span>
+	</p>
 </div>
-<!--{table}-->
+
+<!--{utable}-->
 <table class="bk-table-def">
 	<thead>
 		<tr>
@@ -20,19 +35,20 @@
 			<th>E-mail</th>
 			<th>Регистрация</th>
 			<th>Визит</th>
-			<th>Статус</th>
+			<th>Группа</th>
+			<th></th>
 			<th></th>
 		</tr>
 	</thead>
 	<tbody>{v#rows}</tbody>
 </table>
 
-<!--{rowwait}-->
+<!--{urowwait}-->
 <tr>
-	<td colspan="7">Идет загрузка данных...</td>
+	<td colspan="8">Идет загрузка данных...</td>
 </tr>
 
-<!--{row}-->
+<!--{urow}-->
 <tr>
 	<td>{v#id}</td>
 	<td>{v#unm}</td>
@@ -40,8 +56,12 @@
 	<td>{v#dl}</td>
 	<td>{v#vst}</td>
 	<td>{v#ugp}</td>
-	<td><a href="#" id="{i#edit}-{v#id}">Редактировать</a></td>
+	<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
+	<td><a href="#" id="{i#profile}-{v#id}" style="display: {v#dis};">Профиль</a></td>
 </tr>
+
+<!--{urowgrp}-->
+<span>{v#nm}</span>
 
 <!--{editor}-->
 <div class='hd'>Редактор пользователя</div>
@@ -57,30 +77,144 @@
 			<input id="{i#eml}" type="text" style="width: 300px" />
 		</p>
 		<p>
-			Статус:
-			<span id="{i#ugrpcont}">
-				&nbsp;<label id="{i#ugrplbl}"></label>&nbsp;<input id="{i#bugrpch}" value="Сменить" type="button" />
-			</span>
-		</p>
-		<p id="{i#ugrpcontch}" style="display: none;">
-			<label for="{i#ugrp1}"><input type="radio" id="{i#ugrp1}" name="usergroup" value="1" />Заблокирован</label><br />
-			<label for="{i#ugrp3}"><input type="radio" id="{i#ugrp3}" name="usergroup" value="3" />Ожидает активацию</label><br />
-			<label for="{i#ugrp4}"><input type="radio" id="{i#ugrp4}" name="usergroup" value="4" />Зарегистрирован</label><br />
-			<label for="{i#ugrp5}"><input type="radio" id="{i#ugrp5}" name="usergroup" value="5" />Модератор</label><br />
-			<label for="{i#ugrp6}"><input type="radio" id="{i#ugrp6}" name="usergroup" value="6" />Администратор</label>
-		</p>
-		<p>
 			Пароль: <input id="{i#bpass}" type="button" value="Сменить" />
 		</p>
-		<p id="{i#passcont}" style="display: none;">
-			Пароль: <input id="{i#pass}" type="password" style="width: 150px" /><br />
-			Еще раз: <input id="{i#passconf}" type="password" style="width: 150px" />
-		</p>
+		<div id="{i#passcont}" style="display: none;">
+			<table>
+				<tr><td>Пароль:&nbsp;</td><td><input id="{i#pass}" type="password" style="width: 150px" /></td></tr>
+				<tr>
+					<td>Еще раз:&nbsp;</td>
+					<td><input id="{i#passconf}" type="password" style="width: 150px" /></td>
+				</tr>
+			</table>
+		</div>
+		<h3>Группа</h3>
+		<div id="{i#group}"></div>
 		 
-	 	<div class="buttons right">
+	 	<div class="buttons right top">
 			<input id="{i#bsave}" type="button" value="Сохранить" />
 			<input id="{i#bcancel}" type="button" value="Отмена" />
 		</div>
 		 
 	</div>
 </div>
+
+<!--{ugwidget}-->
+<div id="{i#selgroups}"></div>
+<div id="{i#table}"></div>
+
+<!--{ugstable}-->
+<select id="{i#id}" style="width: 300px;" >{v#rows}</select>
+<input id="{i#badd}" type="button" value="Добавить" />
+
+<!--{ugsrow}-->
+<option value="{v#id}">{v#nm}</option>
+
+<!--{ugsrowwait}-->
+<option>Идет загрузка...</option>
+
+<!--{ugtable}-->
+<table class="bk-table-def" style="width: 450px;  margin-top: 5px;">
+	<thead>
+		<tr>
+			<th>Группа</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{ugrowwait}-->
+<tr>
+	<td colspan="2">Идет загрузка данных...</td>
+</tr>
+
+<!--{ugrow}-->
+<tr>
+	<td>{v#nm}</td>
+	<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
+</tr>
+
+<!--{groups}-->
+<div class="field buttons right">
+	<input id="{i#badd}" type="button" value="Добавить группу" class="btn" />
+</div>
+<div id='{i#pagtop}'></div>
+<div id='{i#table}'></div>
+<div id='{i#pagbot}'></div>
+
+<!--{gtable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Имя</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{growwait}-->
+<tr>
+	<td colspan="3">Идет загрузка данных...</td>
+</tr>
+
+<!--{grow}-->
+<tr>
+	<td>{v#id}</td>
+	<td>{v#nm}</td>
+	<td><a href="#" id="{i#edit}-{v#id}">Редактировать</a></td>
+</tr>
+
+<!--{geditor}-->
+<div class='hd'>Редактор группы</div>
+<div class='bd'>
+	<div class="field linespace-1">
+		<p>
+			Имя: <input id="{i#gnm}" type="text" style="width: 300px" />
+		</p>
+		
+		<div id="{i#roles}"></div>
+		 
+	 	<div class="buttons right">
+			<input id="{i#bsave}" type="button" value="Сохранить" style="display: none;" />
+			<input id="{i#badd}" type="button" value="Добавить" style="display: none;" />
+			<input id="{i#bcancel}" type="button" value="Отмена" />
+		</div>
+		 
+	</div>
+</div>
+
+<!--{roles}-->
+<h3>Правила</h3>
+<div id="{i#table}"  style="height: 300px; overflow-y: auto"></div>
+
+
+<!--{rltable}-->
+<table class="bk-table-def">
+	<thead>
+		<tr>
+			<th>Модуль</th>
+			<th>Разрешения</th>
+		</tr>
+	</thead>
+	<tbody>{v#rows}</tbody>
+</table>
+
+<!--{rlrowwait}-->
+<tr>
+	<td colspan="2">Идет загрузка данных...</td>
+</tr>
+
+<!--{rlrow}-->
+<tr>
+	<td>{v#nm}</td>
+	<td>{v#lst}</td>
+</tr>
+
+<!--{rlaction}-->
+<p>
+	<input type="checkbox" id="{i#id}-{v#id}" value="{v#id}" />
+	<label id="{i#id}-{v#md}{v#id}-lbl" for="{i#id}-{v#id}">&nbsp;{v#title}</label>
+</p>

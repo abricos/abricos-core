@@ -1,5 +1,5 @@
 /*
-@version $Id: api.js 55 2009-09-20 11:57:32Z roosit $
+@version $Id$
 @copyright Copyright (C) 2008 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
@@ -23,6 +23,7 @@ Component.entryPoint = function(){
 	// Добавить в список страницы запрещенных на перезагрузку
 	Brick.Page.addNotOverloadPage("/user/activate");
 	Brick.Page.addNotOverloadPage("/user/recpwd");
+	Brick.Page.addNotOverloadPage("/user/login");
 	
 	/**
 	 * Типы запросов сервера
@@ -92,43 +93,17 @@ Component.entryPoint = function(){
 		});
 	};
 	
-	/**
-	 * Показать на странице виджет <a href="Brick.mod.user.UserBlockWidget.html">UserBlockWidget</a>
-	 * - блок информативной строки пользователя.
-	 *  
-	 * @method showUserBlockWidget
-	 * @static
-	 * @param {String} elId (optional) Идентификатор HTML элемента. 
-	 * Если параметр не указан, то elId = 'mod-user-userblock'  
-	 */
-	API.showUserBlockWidget = function(elId){
-		API.fn('user', function(){
-			elId = elId || 'mod-user-userblock';
-			var el = Dom.get(elId);
-			if (L.isNull(el)) { return; }
-			API.addWidget('UserBlockWidget', new NS.UserBlockWidget());
-		});
-	};
-	
-	API.showMyProfileWidget = function(container){
-		API.fn('profile', function(){
-			var widget = new NS.MyProfileWidget(container);
-			API.addWidget('MyProfileWidget', widget);
-			API.dsRequest();
-		});
-	};
-	
-	API.showUserListWidget = function(container){
+	API.showManagerWidget = function(container){
 		API.fn('manager', function(){
-			var widget = new NS.UserListWidget(container);
-			API.addWidget('UserListWidget', widget);
+			var widget = new NS.ManagerWidget(container);
+			API.addWidget('manager', widget);
 			API.dsRequest();
 		});
 	};
 
-	API.showUserEditorPanel = function(userid){
+	API.showUserEditorPanel = function(userid, callback){
 		API.fn('manager', function(){
-			var widget = new NS.UserEditorPanel(userid);
+			var widget = new NS.UserEditorPanel(userid, callback);
 			API.addWidget('UserEditorPanel', widget);
 			API.dsRequest();
 		});
@@ -142,22 +117,9 @@ Component.entryPoint = function(){
 	 * @param {Object} param (optional) Дополнительные параметры панели
 	 */
 	API.showLoginPanel = function(param){
-		API.fn('user', function(){
+		API.fn('guest', function(){
 			var widget = new Brick.mod.user.LoginPanel(param);
 			API.addWidget('LoginPanel', widget);
-		});
-	};
-	
-	/**
-	 * Отобразить панель "Регистрация пользователя"
-	 * 
-	 * @method showRegisterPanel
-	 * @static
-	 */
-	API.showRegisterPanel = function(param){
-		API.fn('guest', function(){
-			var widget = new NS.RegisterPanel(param);
-			API.addWidget('RegisterPanel', widget);
 		});
 	};
 	
@@ -172,20 +134,6 @@ Component.entryPoint = function(){
 		API.fn('guest', function(){
 			var widget = new NS.RegisterSendEmailPanel(param);
 			API.addWidget('RegisterSendEmailPanel', widget);
-		});
-	};
-	
-	/**
-	 * Отобразить панель "Активация зарегистрированного пользователя"
-	 * 
-	 * @method showRegActivatePanel
-	 * @static
-	 * @param {Object} param 
-	 */
-	API.showRegActivatePanel = function(param){
-		API.fn('guest', function(){
-			var widget = new Brick.mod.user.RegActivatePanel(param);
-			API.addWidget('RegActivatePanel', widget);
 		});
 	};
 	
@@ -216,49 +164,6 @@ Component.entryPoint = function(){
 		});
 	};
 
-	/**
-	 * Отобразить панель "Изменение пароля" в зависимости от результата сервера 
-	 * 
-	 * @method showPwdRestResult
-	 * @static
-	 * @param {Object} param 
-	 */
-	API.showPwdRestResult = function(param){
-		API.fn('guest', function(){
-			if (param['error']>0){
-				API.showPwdRestChangeErrorPanel();
-			}else{
-				API.showPwdRestChangeOkPanel();
-			}
-		});
-	};
-	
-	/**
-	 * Отобразить панель "Восстановление пароля - новый пароль отправлен на email"
-	 * 
-	 * @method showPwdRestChangeOkPanel
-	 * @static
-	 */
-	API.showPwdRestChangeOkPanel = function(){
-		API.fn('guest', function(){
-			var widget = new NS.PwdRestChangeOkPanel();
-			API.addWidget('PwdRestChangeOkPanel', widget);
-		});
-	};
-	
-	/**
-	 * Отобразить панель "Восстановление пароля - ошибка"
-	 * 
-	 * @method showPwdRestChangeErrorPanel
-	 * @static
-	 */
-	API.showPwdRestChangeErrorPanel = function(){
-		API.fn('guest', function(){
-			var widget = new NS.PwdRestChangeErrorPanel();
-			API.addWidget('PwdRestChangeErrorPanel', widget);
-		});
-	};
-	
 	/**
 	 * Отправить запрос серверу.<br>
 	 * На стороне сервера запрос обрабатывает кирпич /modules/user/brick/js_api.html<br>
@@ -326,11 +231,17 @@ Component.entryPoint = function(){
 	 * @static
 	 * @param {String} username Имя пользователя
 	 * @param {String} password Пароль
+	 * @param {Function} (optional) fmsg Обработчик события
 	 */
-	API.userLogin = function(username, password){
-		API.sendResponse(REQUEST_TYPE.LOGIN, {
-			'username': username,
-			'password': password
+	API.userLogin = function(username, password, autologin, fmsg){
+		Brick.ajax('user', {
+			'data': {
+				'do': REQUEST_TYPE.LOGIN,
+				'username': username,
+				'password': password,
+				'autologin': autologin || 0
+			},
+			'event': fmsg
 		});
 	};
 	
@@ -341,19 +252,6 @@ Component.entryPoint = function(){
 	 */
 	API.userLogout = function(){
 		API.sendResponse(REQUEST_TYPE.LOGOUT);
-	};
-	
-	/**
-	 * Зарегистрировать пользователя
-	 * @method register
-	 * @static
-	 */
-	API.userRegister = function(username, password, email){
-		API.sendResponse(REQUEST_TYPE.REGISTER, {
-			'username': username,
-			'password': password,
-			'email': email
-		});
 	};
 	
 	API.userPasswordRestore = function(email){
@@ -368,9 +266,7 @@ Component.entryPoint = function(){
 	 * @method dsRequest
 	 */
 	API.dsRequest = function(){
-		if (!Brick.objectExists('Brick.mod.user.data')){
-			return;
-		}
-		Brick.mod.user.data.request(true);
+		if (!NS.data){ return; }
+		NS.data.request(true);
 	};
 };

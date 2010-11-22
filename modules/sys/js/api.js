@@ -1,5 +1,5 @@
 /*
-@version $Id: api.js 55 2009-09-20 11:57:32Z roosit $
+@version $Id$
 @copyright Copyright (C) 2008 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
@@ -9,13 +9,7 @@
  * @namespace Brick.mod.sys
  */
 var Component = new Brick.Component();
-Component.requires = {
-	yahoo: ['dom']
-};
 Component.entryPoint = function(){
-	var Dom = YAHOO.util.Dom,
-		E = YAHOO.util.Event,
-		L = YAHOO.lang;
 	
 	var NS = this.namespace;
 	
@@ -28,16 +22,24 @@ Component.entryPoint = function(){
 	 */
 	var API = NS.API;
 	
-	API.showManagerWidget = function(container){
-		API.fn('cp_manager', function(){
-			var widget = new NS.ManagerWidget(container);
-			API.addWidget('ManagerWidget', widget);
+	API.showConfigWidget = function(container){
+		API.fn('cp_config', function(){
+			var widget = new NS.ConfigWidget(container);
+			API.addWidget('ConfigWidget', widget);
+			API.dsRequest();
+		});
+	};
+
+	API.showTemplateWidget = function(container){
+		API.fn('cp_template', function(){
+			var widget = new NS.TemplateWidget(container);
+			API.addWidget('TemplateWidget', widget);
 			API.dsRequest();
 		});
 	};
 	
 	API.showPermissionWidget = function(container){
-		API.fn('cp_manager', function(){
+		API.fn('cp_permission', function(){
 			var widget = new NS.PermissionWidget(container);
 			API.addWidget('PermissionWidget', widget);
 			API.dsRequest();

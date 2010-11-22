@@ -23,6 +23,48 @@ Component.entryPoint = function(){
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
+	
+	//Изменение значений next, prev, first, last пагинатора
+	YAHOO.widget.Paginator.ui.FirstPageLink.init = function (p) {
+	    p.setAttributeConfig('firstPageLinkLabel', {
+	        value : '&lt;&lt;',//&lt;&lt; первый
+	        validator : L.isString
+	    });
+	    p.setAttributeConfig('firstPageLinkClass', {
+	        value : 'yui-pg-first',
+	        validator : L.isString
+	    });
+	};
+	YAHOO.widget.Paginator.ui.LastPageLink.init = function (p) {
+	    p.setAttributeConfig('lastPageLinkLabel', {
+	        value : '&gt;&gt;',//последний &gt;&gt;
+	        validator : L.isString
+	    });
+	    p.setAttributeConfig('lastPageLinkClass', {
+	        value : 'yui-pg-last',
+	        validator : L.isString
+	    });
+	};
+	YAHOO.widget.Paginator.ui.NextPageLink.init = function (p) {
+	    p.setAttributeConfig('nextPageLinkLabel', {
+	        value : '&gt;',//следующий &gt
+	        validator : L.isString
+	    });
+	    p.setAttributeConfig('nextPageLinkClass', {
+	        value : 'yui-pg-next',
+	        validator : L.isString
+	    });
+	};
+	YAHOO.widget.Paginator.ui.PreviousPageLink.init = function (p) {
+	    p.setAttributeConfig('previousPageLinkLabel', {
+	        value : '&lt;',//&lt; предыдущий
+	        validator : L.isString
+	    });
+	    p.setAttributeConfig('previousPageLinkClass', {
+	        value : 'yui-pg-previous',
+	        validator : L.isString
+	    });
+	};
 
 /////////////////////////////////////////////////////////////////////
 //                             TablePage                           //
@@ -44,20 +86,23 @@ Component.entryPoint = function(){
 	};
 	
 	TablePage.prototype = {
-		
-		_tableList: '',
-		_tableListCount: '',
-		_rowlimit: 10,
-		_DATA: null,
-		_paginators: {},
 		_handlePagination: function(state){
 			this.setPage(state.page);
 			this._DATA.request(true);
 		},
 			
 		init: function(el, config){
-			
+
+			this._tableList = '';
+			this._tableListCount = '';
+			this._rowlimit = 10;
+			this._DATA = null;
+			this._paginators = {};
+			this._filter = {};
+
 			config = L.merge({
+				// загружать таблицу полностью, без деления ее на страницы
+				fulldata: false,
 				rowlimit: 10,
 				tables: {
 					'list': '',
@@ -65,13 +110,17 @@ Component.entryPoint = function(){
 				},
 				tm: null,
 				paginators: [], 
-				DATA: null
+				DATA: null,
+				autohidepaginator: true,
+				filter: {}
 			}, config || {});
+			this.config = config;
 			
 			this._rowlimit = config.rowlimit;
 			this._DATA = config.DATA;
 			this._tableList = config.tables.list;
 			this._tableListCount = config.tables.count;
+			this._filter = config.filter;
 			
 			var template = this.initTemplate();
 			
@@ -86,6 +135,7 @@ Component.entryPoint = function(){
 					pagEl = Dom.get(pagId);
 				}
 				var pag = this._paginators[pagId] = new YAHOO.widget.Paginator({containers : pagEl, rowsPerPage: config.rowlimit});
+				pag.containerNode = pagEl; 
 				pag.subscribe('changeRequest', this._handlePagination, this, true);
 			}
 			
@@ -103,17 +153,22 @@ Component.entryPoint = function(){
 			this.tables[this._tableList] = this._DATA.get(this._tableList, true);
 			this.tables[this._tableListCount] = this._DATA.get(this._tableListCount, true);
 			
-			this._DATA.onComplete.subscribe(this.dsComplete, this, true);
+			this._DATA.onStart.subscribe(this.dsEvent, this, true);
+			this._DATA.onComplete.subscribe(this.dsEvent, this, true);
+
 			this.setPage(1);
 		},
 		
 		destroy: function(){
-			this._DATA.onComplete.unsubscribe(this.dsComplete);
+			this._DATA.onStart.unsubscribe(this.dsEvent);
+			this._DATA.onComplete.unsubscribe(this.dsEvent);
 		},
 		
-		dsComplete: function(type, args){
-			if (args[0].checkWithParam(this._tableList, this._sendParam)){ 
-				this.render(); 
+		dsEvent: function(type, args){
+			var prm = this.config.fulldata ? {} : this._sendParam;
+
+			if (args[0].checkWithParam(this._tableList, prm)){
+				type == 'onComplete' ? this.render() : this.renderTableAwait(); 
 			}
 		},
 		
@@ -121,20 +176,46 @@ Component.entryPoint = function(){
 			return this.rows;
 		},
 		
-		refresh: function(){
+		refresh: function(notRequest){
 			for (var n in this.tables){
 				this.tables[n].clear();
 			}
 
 			this.setPage(this._sendParam.page);
-			this._DATA.request(true);
+			if (!notRequest){
+				this._DATA.request(true);
+			}
+		},
+		
+		initTables: function(){
+			var prm = this.config.fulldata ? {} : this._sendParam;
+			this.rows = this.tables[this._tableList].getRows(prm);
+			this.tables[this._tableListCount].getRows(prm);
+		},
+		
+		getParam: function(){
+			return this._sendParam;
+		},
+		
+		buildSendParam: function(page){
+			var prm = {};
+			for (var nn in this._filter){
+				prm[nn] = this._filter[nn];
+			}
+			prm['page'] = page;
+			prm['limit'] = this._rowlimit;
+			
+			return prm;
+		},
+		
+		setFilter: function(filter){
+			this._filter = filter;
+			this.setPage(this._sendParam.page);
 		},
 		
 		setPage: function(page){
-			this._sendParam = {'page': page, 'limit': this._rowlimit};
-			
-			this.rows = this.tables[this._tableList].getRows(this._sendParam);
-			this.tables[this._tableListCount].getRows();
+			this._sendParam = this.buildSendParam(page);
+			this.initTables();
 			if (this._DATA.isFill(this.tables)){
 				this.render();
 			}else{
@@ -153,26 +234,48 @@ Component.entryPoint = function(){
 		},
 		
 		render: function(){
+			var cfg = this.config;
 			var param = this._sendParam;
 			var DATA = this._DATA;
 			var table = DATA.get(this._tableList);
-			var rows = table.getRows(param);
+			var rows = table.getRows(cfg.fulldata ? {} : this._sendParam);
 			var page = param['page']*1; 
-			var total = DATA.get(this._tableListCount).getRows().getByIndex(0).cell['cnt']*1;
+			var total = DATA.get(this._tableListCount).getRows(cfg.fulldata ? {} : this._sendParam).getByIndex(0).cell['cnt']*1;
 			
-			var cfg = { page: page, totalRecords: total };
+			var param = { page: page, totalRecords: total };
 			for(var n in this._paginators){
-				this._paginators[n].setState(cfg);
-				this._paginators[n].render();
+				var pg = this._paginators[n]; 
+				
+				pg.setState(param);
+				pg.render();
+				
+				if (total > cfg.rowlimit){
+					pg.containerNode.style.display = '';
+				}else if (cfg.autohidepaginator && total < cfg.rowlimit){
+					pg.containerNode.style.display = 'none';
+				}
 			}
 			
 			var dateExt = Brick.dateExt;
 			
 			var __self = this;
 			var lst = "";
-			rows.foreach(function(row){
-				lst += __self.renderRow(row.cell);
-			});
+			if (cfg.fulldata){
+				var counter = 0,
+					ipage = page-1,
+					begin = ipage*cfg.rowlimit,
+					end = (ipage+1)*cfg.rowlimit;
+				rows.foreach(function(row){
+					if (begin <= counter && counter < end){
+						lst += __self.renderRow(row.cell);
+					}
+					counter++;
+				});
+			}else{
+				rows.foreach(function(row){
+					lst += __self.renderRow(row.cell);
+				});
+			}
 			this.renderTable(lst);
 		},
 		
@@ -193,7 +296,7 @@ Component.entryPoint = function(){
 		onLoad: function(){},
 		
 		onClick: function(el){ return false; }
-		
+
 		
 	};
 	

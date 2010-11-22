@@ -19,6 +19,9 @@ Brick.util.Language.add('ru',{
 		},
 		'modules':{
 			'title': 'Модули'
+		},
+		'templates': {
+			'title': 'Шаблоны'
 		}
 	}
 });

@@ -10,22 +10,19 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$brick = Brick::$builder->brick;
-$db = Brick::$db;
-$param = $brick->param;
+$param = Brick::$builder->brick->param;
 
 $modSys = Brick::$modules->GetModule('sys');
-$user = Brick::$session->userinfo;
-
-$param->var['g'] = $user['usergroupid'];
+$modUser = CMSRegistry::$instance->user; 
+$user = $modUser->info;
+$param->var['g'] = json_encode($user['group']);
 $param->var['uid'] = $user['userid'];
 $param->var['unm'] = $user['username'];
-$param->var['s'] = Brick::$session->sessionHash;
+$param->var['s'] = $modUser->session->key;
 
 $template = Brick::$builder->phrase->Get('sys', 'style', 'default');
 $param->var['ttname'] = $template;
-$param->var['jsyui'] = CMSModuleSys::$YUIVersion;
-
+$param->var['jsyui'] = SystemModule::$YUIVersion;
 
 if (CMSRegistry::$instance->modules->customTakelink){
 	$modsinfo = CMSRegistry::$instance->modules->modulesInfo;

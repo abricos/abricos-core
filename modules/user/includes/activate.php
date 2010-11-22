@@ -18,13 +18,20 @@ $brick = Brick::$builder->brick;
 $adress = Brick::$cms->adress;
 $p_userid = bkint($adress->dir[2]);
 $p_actid =  bkint($adress->dir[3]);
-$ret->error = 0;
-		
-$ret->error = CMSSqlQueryUser::QueryRegUserActivate(Brick::$db, $p_userid, $p_actid); 
-if ($ret->error == 0){
-	$user = CMSQUser::UserById(Brick::$db, $p_userid);
-	$ret->username = $user['username'];
+
+$userManager = CMSRegistry::$instance->user->GetManager(); 
+
+$result = $userManager->RegistrationActivate($p_userid, $p_actid);
+
+if ($result->error > 0){
+	$brick->param->var['result'] = Brick::ReplaceVarByData($brick->param->var['err'], array(
+		"err" => $brick->param->var['err'.$result->error]
+	)); 
+}else{
+	$brick->param->var['result'] = Brick::ReplaceVarByData($brick->param->var['ok'], array(
+		"unm" => $result->username
+	)); 
 }
-$brick->param->var['result'] = json_encode($ret); 
+
 
 ?>

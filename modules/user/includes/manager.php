@@ -8,188 +8,289 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
+require_once 'dbquery.php';
+
 /**
  * Менеджер управления пользователями
  * @package Abricos
  * @subpackage User
  */
-class UserManager {
-	
-	/**
-	 * Ядро
-	 *
-	 * @var CMSRegistry
-	 */
-	public $registry = null;
-	
-	/**
-	 * Сессия пользователя
-	 *
-	 * @var CMSSysSession
-	 */
-	public $session = null;
-	
-	/**
-	 * База данных
-	 *
-	 * @var CMSDatabase
-	 */
-	public $db = null;
+class UserManager extends ModuleManager {
 	
 	/**
 	 * Модуль
 	 * 
-	 * @var CMSModuleUser
+	 * @var User
 	 */
 	public $module = null;
 	
 	public $user = null;
+	public $userid = 0;
 	
-	public function UserManager(CMSModuleUser $module){
-		$this->module = $module;
-		$this->registry = $module->registry;
-		$this->session = $module->registry->session;
-		$this->user = $this->session->userinfo;
-		$this->db = $module->registry->db;
+	private $_disableRoles = false;
+	
+	public function UserManager(User $module){
+		parent::ModuleManager($module);
+		
+		
+		$this->user = $module->info;
+		$this->userid = $this->user['userid'];
 	}
 	
-	public function IsRegister(){
-		return $this->session->IsRegistred();
+	/**
+	 * Отключить проверку всех ролей в текущей сессии пользователя
+	 */
+	public function DisableRoles(){
+		$this->_disableRoles = true;
 	}
 	
+	/**
+	 * Включить проверку всех ролей в текущей сессии пользователя (по умолчанию - включено)
+	 */
+	public function EnableRoles(){
+		$this->_disableRoles = false;
+	}
+
+	/**
+	 * Имеет ли пользователь доступ к административным функциям.
+	 * 
+	 * @return boolean
+	 */
 	public function IsAdminRole(){
+		if ($this->_disableRoles){ return true; }
 		return $this->module->permission->CheckAction(UserAction::USER_ADMIN) > 0;
 	}
 	
-	public function UserOnline(){
-		if (!$this->IsAdminRole()){ return null; }
-		return CMSQUser::UserOnline($this->db);
+	/**
+	 * Имеет ли пользователь полный доступ к профилю пользователя 
+	 * 
+	 * @param integer $userid 
+	 * @return boolean
+	 */
+	public function IsChangeUserRole($userid){
+		return $this->userid == $userid || $this->IsAdminRole();
 	}
 	
-	public function ChangeProfile($d){
-		if (!$this->IsRegister()){ return; }
+	public function AJAX($d){
+		switch($d->do){
+			case "login":
+				return $this->Login($d->username, $d->password, $d->autologin);
+			case "register":
+				return $this->Register($d->username, $d->password, $d->email, true);
+			case "user":
+				return $this->UserInfo($d->userid);
+			case "usersave":
+				return $this->UserUpdate($d);
+			case "passwordchange":
+				return $this->UserPasswordChange($d->userid, $d->pass, $d->passold);
+		}
+		return -1;
+	}
+	
+	private $_newGroupId = 0;
+	
+	public function DSProcess($name, $rows){
+		$p = $rows->p;
+		$db = $this->db;
+		if ($this->IsAdminRole()){
+			switch ($name){
+				case 'grouplist':
+					foreach ($rows->r as $r){
+						if ($r->f == 'a'){ 
+							$this->_newGroupId = UserQueryExt::GroupAppend($db, $r->d->nm); 
+						}
+						if ($r->f == 'u'){ 
+							UserQueryExt::GroupUpdate($this->db, $r->d);
+						}
+					}
+					return;
+				case 'rolelist':
+					foreach ($rows->r as $r){
+						if ($r->f == 'a'){
+							if (intval($p->groupid) == 0 && intval($this->_newGroupId) > 0){
+								$p->groupid = $this->_newGroupId;
+							} 
+							UserQueryExt::RoleAppend($db, $p->groupid, $r->d);
+						}
+						if ($r->f == 'd'){ 
+							UserQueryExt::RoleRemove($this->db, $r->d->id);
+						}
+					}
+					return;
+			}
+		}
+	}
+	
+	public function DSGetData($name, $rows){
+		$p = $rows->p;
+		$db = $this->db;
+
+		// Запросы доступные всем
+		switch ($name){
+			/////// Пользователь //////
+			case 'user':
+				return array($this->UserInfo($p->userid));
+			
+			case 'permission':
+				return $this->Permission();
+			
+			case 'modactionlist':
+				return UserQueryExt::ModuleActionList($this->db);
+		}
 		
-		$user = CMSQUser::UserById($this->db, $d->id);
-		if (empty($user)){ return; }
-		
-		if (!$this->IsAdminRole()){
-			if ($user['userid'] != $this->user['userid']){
-				return;
+		// Запросы уровня администратора
+		if ($this->IsAdminRole()){
+			switch ($name){
+
+				/////// Постраничный список пользователей //////
+				case 'userlist':
+					return UserQueryExt::UserList($db, $p->page, $p->limit);
+				case 'usercount':
+					return UserQueryExt::UserCount($db);
+				case 'usergrouplist':
+					return UserQueryExt::UserGroupList($db, $p->page, $p->limit);
+					
+				/////// Постраничный список групп //////
+				case 'grouplist':
+					return UserQueryExt::GroupList($db);
+				case 'groupcount':
+					return UserQueryExt::GroupCount($db);
+	
+				/////// Роли //////
+				case 'rolelist':
+					return UserQueryExt::RoleList($db, $p->groupid); 
+					
 			}
 		}
 		
+		return null;
+	}
+
+	
+	////////////////////////////////////////////////////////////////////
+	//                       Общедоступные запросы                    //
+	////////////////////////////////////////////////////////////////////
+	
+	public function Permission(){
+		$rows = array();
+		CMSRegistry::$instance->modules->RegisterAllModule();
+		$mods = CMSRegistry::$instance->modules->GetModules();
+		foreach ($mods as $modname => $module){
+			if (is_null($module->permission)){
+				continue;
+			}
+			$roles = $module->permission->GetRoles();
+			if (is_null($roles)){ continue; }
+			array_push($rows, array(
+				"nm" => $modname,
+				"roles" => $roles
+			));
+		}
+		return $rows;
+	}
+	
+	////////////////////////////////////////////////////////////////////
+	//                      Административные функции                  //
+	////////////////////////////////////////////////////////////////////
+	
+	public function UserInfo($userid){
+		if (!$this->IsChangeUserRole($userid)){
+			$user = UserQueryExt::UserPublicInfo($this->db, $userid, true); 
+		}else{
+			$user = UserQueryExt::UserPrivateInfo($this->db, $userid, true);
+		}
+		if (empty($user)){ return array('id' => $userid); }
+		$groups = UserQuery::GroupByUserId($this->db, $userid);
+		$user['gp'] = implode(",", $groups); 
+		
+		return $user;
+	}
+	
+	public function UserUpdate($d){
+		
+		if (!$this->IsChangeUserRole($d->userid)){ 
+			// haker?
+			return -1;
+		}
+		
+		if ($d->userid == 0){
+			if (!$this->IsAdminRole()){
+				return -1;
+			}
+			// зарегистрировать пользователя
+			$err = $this->Register($d->unm, $d->pass, $d->eml, false, false);
+			if ($err > 0){ 
+				return $err;
+			}
+			$user = UserQueryExt::UserByName($this->db, $d->unm);
+			$d->userid = $user['userid'];
+		} else {
+		
+			$user = UserQuery::User($this->db, $d->userid, true);
+			
+			// данные для внесения в бд
+			$data = array();
+	
+			// смена пароля
+			if (!empty($d->pass)){
+				if ($this->IsAdminRole()){
+					$data['password'] = $this->UserPasswordCrypt($d->pass, $user['salt']);
+				}else{
+					$passcrypt = $this->UserPasswordCrypt($d->oldpass, $user["salt"]);
+					if ($passcrypt == $user["password"]){ 
+						$data['password'] = $this->UserPasswordCrypt($d->pass, $user['salt']);
+					}
+				}
+			}
+			
+			// смена емайл
+			if ($this->IsAdminRole()){
+				$data['email'] = $d->eml;
+			}
+			
+			UserQueryExt::UserUpdate($this->db, $d->userid, $data);
+		}
+		if (!$this->IsAdminRole()){ return; }
+		UserQueryExt::UserGroupUpdate($this->db, $d->userid, explode(',', $d->gp));
+		return 0;
+	}
+	
+	public function UserPasswordChange($userid, $newpassword, $oldpassword = ''){
+		if (!$this->IsChangeUserRole($userid)){ 
+			return 1; // нет доступа на изменение пароля
+		}
+		
+		$user = UserQuery::User($this->db, $userid, true);
+
 		// данные для внесения в бд
 		$data = array();
 
 		// смена пароля
-		if (!empty($d->pass)){
-			if ($this->IsAdminRole()){
-				$data['password'] = $this->UserPasswordCrypt($d->pass, $user['salt']);
+		if (empty($newpassword) || strlen($newpassword) < 4){
+			return 2; // короткий пароль
+		}
+		if ($newpassword == $user['username']){
+			return 3; // пароль совпадает с логином
+		}
+		if ($this->IsAdminRole() && false){ // отключено
+			$data['password'] = $this->UserPasswordCrypt($newpassword, $user['salt']);
+		}else{
+			$passcrypt = $this->UserPasswordCrypt($oldpassword, $user["salt"]);
+			if ($passcrypt == $user["password"]){ 
+				$data['password'] = $this->UserPasswordCrypt($newpassword, $user['salt']);
 			}else{
-				$passcrypt = $this->UserPasswordCrypt($d->oldpass, $user["salt"]);
-				if ($passcrypt == $user["password"]){ 
-					$data['password'] = $this->UserPasswordCrypt($d->pass, $user['salt']);
-				}
+				return 4; // старый пароль ошибочный
 			}
 		}
-		
-		if ($this->IsAdminRole()){
-			// смена емайл
-			$data['email'] = $d->eml;
-			$data['usergroupid'] = $d->ugp;
-		}else{
-			if ($this->session->userinfo['userid'] != $d->id){
-				// haker?
-				return;
-			}
-		}
-		$data['realname'] = $d->rnm;
-		$data['sex'] = $d->sex;
-		$data['birthday'] = $d->bday;
-		$data['homepagename'] = $d->hpnm;
-		$data['homepage'] = $d->hp;
-		$data['icq'] = $d->icq;
-		$data['skype'] = $d->skype;
-		CMSQUser::UserSave($this->db, $d->id, $data);
-	}
-	
-	/**
-	 * Добавить пользователя в базу без подверждения email
-	 *  
-	 * @param string $username
-	 * @param string $password
-	 * @param string $email
-	 * @return Integer
-	 */
-	public function UserAppend($username, $password, $email){
-		if (!$this->UserVerifyName($username)){
-			return 3;
-		}else{
-			$retcode = CMSQUser::UserExists($this->db, $username, $email);
-			if ($retcode > 0){ return $retcode; }
-		}
-
-		$salt = $this->UserCreateSalt();
-		
-		$user = array();
-		$user["username"] = $username;
-		$user["joindate"] = TIMENOW;
-		$user["salt"] = $salt;
-		$user["password"] = $this->UserPasswordCrypt($password, $salt);
-		$user["email"] = $email;
-		
-		// Добавление юзера в базу
-		CMSQUser::UserAdd($this->db, $user, USERGROUPID_REGISTERED);
-	}
-	
-	/**
-	 * Зарегистрировать пользователя, в случае неудачи вернуть
-	 * номер ошибки:
-	 * 0 - ошибки нет, пользователь успешно зарегистрирован,
-	 * 1 - пользователь с таким логином уже зарегистрирован, 
-	 * 2 - пользователь с таким email уже зарегистрирован
-	 * 3 - ошибка в имени пользователя,
-	 * 
-	 * @param String $username
-	 * @param String $password
-	 * @param String $email
-	 * @param Boolean $sendMail
-	 * @return Integer
-	 */
-	public function UserRegister($username, $password, $email, $sendMail = true){
-		
-		if (!$this->UserVerifyName($username)){
-			return 3;
-		}else{
-			$retcode = CMSQUser::UserExists($this->db, $username, $email);
-			if ($retcode > 0){ return $retcode; }
-		}
-
-		$salt = $this->UserCreateSalt();
-		
-		$user = array();
-		$user["username"] = $username;
-		$user["joindate"] = TIMENOW;
-		$user["salt"] = $salt;
-		$user["password"] = $this->UserPasswordCrypt($password, $salt);
-		$user["email"] = $email;
-		
-		// Добавление юзера в базу
-		CMSQUser::UserAdd($this->db, $user);
-		
-		if (!$sendMail){ return 0; }
-			
-		$host = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];
-		$link = "http://".$host."/user/activate/".$user["userid"]."/".$user["activateid"];
-		
-		$sitename = Brick::$builder->phrase->Get('sys', 'site_name');
-		$subject = Brick::$builder->phrase->Get('user', 'reg_mailconf_subj'); 
-		$message = sprintf(nl2br(Brick::$builder->phrase->Get('user', 'reg_mailconf')), $user['username'], $link, $sitename);
-		
-		CMSModuleSys::Notification($email, $subject, $message);
+		UserQueryExt::UserUpdate($this->db, $userid, $data);
 		
 		return 0;
 	}
+	
+	
+	////////////////////////////////////////////////////////////////////
+	//      Функции: регистрации/авторизации пользователя     //
+	////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * Проверить данные авторизации и вернуть номер ошибки: 
@@ -200,11 +301,11 @@ class UserManager {
 	 * 4 - пользователь заблокирован,
 	 * 5 - пользователь не прошел верификацию email
 	 * 
-	 * @param String $username
-	 * @param String $password
+	 * @param String $username имя пользователя
+	 * @param String $password пароль
 	 * @return Integer
 	 */
-	public function UserLogin($username, $password){
+	public function Login($username, $password, $autologin = false){
 		$username = trim($username);
 		$password = trim($password);
 		
@@ -212,55 +313,41 @@ class UserManager {
 	
 		if (!$this->UserVerifyName($username)){ return 1; }
 		
-		$user = CMSSqlQuery::QueryGetUserInfoByUsername($this->db, $username);
+		$user = UserQuery::UserByName($this->db, $username);
 		if (empty($user)){ return 2; }
-		if ($user['usergroupid'] == 1){ return 4; }
-		if ($user['usergroupid'] < 4){ return 5; }
+
+		if ($user['emailconfirm'] < 1) { return 5; }
+		
 		$passcrypt = $this->UserPasswordCrypt($password, $user["salt"]);
 		if ($passcrypt != $user["password"]){ return 2; }
-		return 0;
-	}
-	
-	/**
-	 * Запросить систему восстановить пароль и вернуть номер ошибки:
-	 * 0 - нет ошибки,
-	 * 1 - пользователь не найден,
-	 * 2 - письмо подверждения восстановить пароль уже отправлено
-	 * 
-	 * @param string $email E-mail пользователя
-	 * @return Integer
-	 */
-	public function UserPasswordRestore($email){
-		$user = CMSSqlQueryUser::UserByEMail($this->db, $email);
-		if (empty($user)){ return 1; } // пользователь не найден
 		
-		$countsend = CMSSqlQueryUser::PwdCountSend($this->db, $user['userid']);
-		if ($countsend > 0){ return 2; } // письмо уже отправлено
-			
-		$hash = md5(microtime());
-		CMSSqlQueryUser::PwdReqCreate($this->db, $user['userid'], $hash);
-				
-		$host = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];
-		$link = "http://".$host."/user/recpwd/".$hash;
-	
-		$sitename = Brick::$builder->phrase->Get('sys', 'site_name');
+		$session = $this->module->session; 
+		$session->Set('userid', $user['userid']);
 		
-		$subject = sprintf(Brick::$builder->phrase->Get('user', 'pwd_mail_subj'), $sitename);
-		$message = sprintf(nl2br(Brick::$builder->phrase->Get('user', 'pwd_mail')), $email, $link, $user['username'], $sitename);
-		
-		CMSModuleSys::Notification($email, $subject, $message);
-		
-		return 0;
-	}
-	
-	public function UserCreateSalt() {
-		$length = 3;
-		$salt = '';
-		for ($i = 0; $i < $length; $i++) {
-			$salt .= chr(rand(32, 126));
+		if ($autologin){
+			// установить куки для автологина
+			$privateKey = $this->module->GetSessionPrivateKey();
+			$sessionKey = md5(TIMENOW.$privateKey.cmsrand(1, 1000000));
+			setcookie($session->cookieName, $sessionKey, TIMENOW + $session->sessionTimeOut, $session->sessionPath);
+			UserQuery::SessionAppend($this->db, $user['userid'], $sessionKey, $privateKey);
 		}
-		return $salt;
-	} 
+		
+		return 0;
+	}
+	
+	public function Logout(){
+		$session = $this->module->session;
+		$sessionKey = CMSRegistry::$instance->input->clean_gpc('c', $session->cookieName, TYPE_STR);
+		setcookie($session->cookieName, '', TIMENOW, $session->sessionPath);
+		UserQuery::SessionRemove($this->db, $sessionKey);
+		$this->module->session->Drop('userid');
+		$this->module->info = array(
+			"userid"	=>	0,
+			"group"		=> array(1),
+			"username"	=> "Guest"
+		);
+	}
+	
 	
 	public function UserVerifyName(&$username) {
 		$username = trim($username);
@@ -282,29 +369,236 @@ class UserManager {
 		return md5(md5($password).$salt);
 	}
 	
-	/**
-	 * Получить полную информацию о пользователе.
-	 * Информация доступна владельцу и администратору.
-	 *
-	 * @param Integer $userid
-	 * @return resource
-	 */
-	public function UserInfo($userid, $username){
-		if ($this->IsAdminRole() || $userid == $this->session->userinfo['userid']){
-			return CMSQUser::UserPrivateInfo($this->db, $userid);
-		}else{
-			return CMSQUser::UserPublicInfo($this->db, $username);
+	public function UserCreateSalt() {
+		$salt = '';
+		for ($i = 0; $i < 3; $i++) {
+			$salt .= chr(rand(32, 126));
+		}
+		return $salt;
+	}
+
+	public static function EmailValidate($address) {
+		if (function_exists('filter_var')) { //Introduced in PHP 5.2
+			if(filter_var($address, FILTER_VALIDATE_EMAIL) === FALSE) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return preg_match('/^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9_](?:[a-zA-Z0-9_\-](?!\.)){0,61}[a-zA-Z0-9_-]?\.)+[a-zA-Z0-9_](?:[a-zA-Z0-9_\-](?!$)){0,61}[a-zA-Z0-9_]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/', $address);
 		}
 	}
 	
-	public function UserList($page, $limit){
-		if (!$this->IsAdminRole()){ return null; }
-		return CMSQUser::UserList($this->db, $page, $limit);
+	
+	public function RegisterCheck($username, $email, $checkMail = true){
+		if ($checkMail && !UserManager::EmailValidate($email)){
+			return 4;
+		}
+		if (!$this->UserVerifyName($username)){
+			return 3;
+		}else{
+			$retcode = UserQueryExt::UserExists($this->db, $username, $email);
+			if ($retcode > 0){ return $retcode; }
+		}
+		
+		return 0;		
 	}
 	
-	public function UserCount(){
-		if (!$this->IsAdminRole()){ return null; }
-		return CMSQUser::UserCount($this->db);
+	/**
+	 * Зарегистрировать пользователя, в случае неудачи вернуть номер ошибки:
+	 * 0 - ошибки нет, пользователь успешно зарегистрирован,
+	 * 1 - пользователь с таким логином уже зарегистрирован, 
+	 * 2 - пользователь с таким email уже зарегистрирован
+	 * 3 - ошибка в имени пользователя,
+	 * 4 - ошибка в emial
+	 * 
+	 * @param String $username
+	 * @param String $password
+	 * @param String $email
+	 * @param Boolean $sendMail
+	 * @return Integer
+	 */
+	public function Register($username, $password, $email, $sendMail = true, $checkMail = true){
+		$retcode = $this->RegisterCheck($username, $email, $checkMail);
+		if ($retcode > 0){ return $retcode; }
+
+		$salt = $this->UserCreateSalt();
+		
+		$user = array();
+		$user["username"] = $username;
+		$user["joindate"] = TIMENOW;
+		$user["salt"] = $salt;
+		$user["password"] = $this->UserPasswordCrypt($password, $salt);
+		$user["email"] = $email;
+		
+		// Добавление пользователя в базу
+		if ($this->IsAdminRole()){
+			UserQueryExt::UserAppend($this->db, $user, User::UG_REGISTERED);
+		}else{
+			UserQueryExt::UserAppend($this->db, $user);
+		}
+		
+		if (!$sendMail){ 
+			return 0; 
+		}
+			
+		$host = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];
+		$link = "http://".$host."/user/activate/".$user["userid"]."/".$user["activateid"];
+		
+		$brick = Brick::$builder->LoadBrickS('user', 'templates', null, null);
+		
+		$subject = $brick->param->var['reg_mailconf_subj'];
+		$body = nl2br(Brick::ReplaceVarByData($brick->param->var['reg_mailconf'], array(
+			"username" => $user['username'],
+			"link" => $link,
+			"sitename" => Brick::$builder->phrase->Get('sys', 'site_name')
+		)));
+		
+		$this->core->GetNotification()->SendMail($email, $subject, $body);
+		
+		return 0;
+	}
+	
+	/**
+	 * Активировать нового пользователя. Возврашает объект в котором св-во error содержит 
+	 * код ошибки:
+	 * 0 - ошбики нет,
+	 * 1 - пользователь не найден,
+	 * 2 - пользователь уже активирован 
+	 * 
+	 * @param integer $userid идентификатор пользователя
+	 * @param integer $activeid код активации
+	 * @return stdClass
+	 */
+	public function RegistrationActivate($userid, $activeid){
+		$ret = new stdClass();
+		$ret->error = 0;
+		$user = UserQuery::User($this->db, $userid);
+		if (empty($user)){
+			$ret->error = 1;
+		}else if ($user['emailconfirm'] == 1){
+			$ret->error = 2;
+		}else{
+			$ret->username = $user['username'];
+			$ret->error = UserQueryExt::RegistrationActivate($this->db, $userid, $activeid);
+		}
+		return $ret;
+	}
+	
+	/**
+	 * Запросить систему восстановить пароль и вернуть номер ошибки:
+	 * 0 - нет ошибки,
+	 * 1 - пользователь не найден,
+	 * 2 - письмо подверждения восстановить пароль уже отправлено
+	 * 
+	 * @param string $email E-mail пользователя
+	 * @return Integer
+	 */
+	public function PasswordRestore($email){
+		$user = UserQueryExt::UserByEmail($this->db, $email);
+		if (empty($user)){ return 1; } // пользователь не найден
+		
+		$sendcount = UserQueryExt::PasswordSendCount($this->db, $user['userid']);
+		if ($sendcount > 0){ return 2; } // письмо уже отправлено
+			
+		$hash = md5(microtime());
+		UserQueryExt::PasswordRequestCreate($this->db, $user['userid'], $hash);
+				
+		$host = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];
+		$link = "http://".$host."/user/recpwd/".$hash;
+	
+		$sitename = Brick::$builder->phrase->Get('sys', 'site_name');
+		
+		$brick = Brick::$builder->LoadBrickS('user', 'templates', null, null);
+		
+		$subject = Brick::ReplaceVarByData($brick->param->var['pwd_mail_subj'], array(
+			"sitename" => $sitename
+		));
+		$body = nl2br(Brick::ReplaceVarByData($brick->param->var['pwd_mail'], array(
+			"email"=> $email,
+			"link" => $link,
+			"username" => $user['username'],
+			"sitename" => $sitename
+		)));
+		
+		$this->core->GetNotification()->SendMail($email, $subject, $body);
+		
+		return 0;
+	}
+	
+	public function PasswordRequestCheck($hash){
+		$ret = new stdClass();
+		$ret->error = 0;
+		
+		$pwdreq = UserQueryExt::PasswordRequestCheck($this->db, $hash);
+		if (empty($pwdreq)){
+			$ret->error = 1; 
+			sleep(1);
+			return $ret;
+		}
+		$userid = $pwdreq['userid'];
+		$user = UserQuery::User($this->db, $userid);
+		$ret->email = $user['email'];
+
+		$newpass = cmsrand(100000, 999999);
+		$passcrypt = $this->UserPasswordCrypt($newpass, $user['salt']);
+		UserQueryExt::PasswordChange($this->db, $userid, $passcrypt);
+
+		$ph = Brick::$builder->phrase;
+		$sitename = $ph->Get('sys', 'site_name');
+		
+		$subject = sprintf($ph->Get('user','pwdres_changemail_subj'), $sitename);
+				
+		$emlmsg = nl2br($ph->Get('user','pwdres_changemail'));
+		$message = sprintf($emlmsg, $user['username'], $newpass, $sitename);
+		
+		$this->core->GetNotification()->SendMail($user['email'], $subject, $message);
+		
+		return $ret;
+	}
+	
+	public function UserConfigList($userid, $modname){
+		if (!$this->IsChangeUserRole($userid)){ return null; }
+		
+		return UserQueryExt::UserConfigList($this->db, $userid, $modname);
+	}
+	
+	public function UserConfigAppend($userid, $modname, $cfgname, $cfgval){
+		if (!$this->IsChangeUserRole($userid)){ return null; }
+		
+		UserQueryExt::UserConfigAppend($this->db, $userid, $modname, $cfgname, $cfgval);
+	}
+
+	public function UserConfigUpdate($userid, $cfgid, $cfgval){
+		if (!$this->IsChangeUserRole($userid)){ return null; }
+		
+		UserQueryExt::UserConfigUpdate($this->db, $userid, $cfgid, $cfgval);
+	}
+	
+	private $_userFields = null;
+	public function UserFieldList(){
+		if (!is_null($this->_userFields)){ return $this->_userFields; }
+		$rows = UserQueryExt::UserFieldList($this->db);  
+		$cols = array();
+		while (($row = $this->db->fetch_array($rows))){
+			$cols[$row['Field']] = $row; 
+		}
+		$this->_userFields = $cols;
+		return $this->_userFields;
+	}
+	
+	public function UserFieldCacheClear(){
+		$this->_userFields = null;
+	}
+	
+	public function UserField($fieldName){
+		$fields = $this->UserFieldList();
+		return $fields[$fieldName];
+	}
+	
+	public function UserFieldCheck($fieldName){
+		$field = $this->UserField($fieldName);
+		return !empty($field);
 	}
 	
 }

@@ -35,9 +35,9 @@
 <table class="bk-table-def">
 	<thead>
 		<tr>
-			<th>Subject</th>
-			<th>Action</th>
+			<th>Действие</th>
 			<th>Статус</th>
+			<th>Subject</th>
 			<th></th>
 			<th></th>
 		</tr>
@@ -52,10 +52,28 @@
 
 <!--{permmodrow}-->
 <tr>
-	<td>{v#sbj}</td>
 	<td>{v#act}</td>
 	<td>{v#st}</td>
+	<td>{v#sbj}</td>
 	<td><a href="#" id="{i#edit}-{v#id}">Редактировать</a></td>
 	<td><a href="#" id="{i#remove}-{v#id}">Удалить</a></td>
 </tr>
+
+<!--{permeditor}-->
+<div class='hd'>Редактор разрешений</div>
+<div class='bd'>
+	<div class="field">
+		<table class="fields"><tbody>
+			<tr>
+				<td>Модуль:</td>
+				<td><span id="{i#modname}"></span></td>
+			</tr>
+		</tbody></table>
+		<div class="buttons right">
+			<input id="{i#bnewproject}" type="button" value="Создать проект" class="btn" />
+		</div>
+		<h3>Список проектов</h3>
+		<div id="{i#applist}" class="top"></div>
+	</div>
+</div>
 

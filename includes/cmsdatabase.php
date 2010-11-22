@@ -104,7 +104,7 @@ abstract class CMSDatabase {
 	*
 	* @var integer 
 	*/
-	protected $querycount = 0;
+	public $querycount = 0;
 
 	/**
 	 * Префикс таблиц
@@ -196,7 +196,7 @@ abstract class CMSDatabase {
 	protected abstract function select_db_pt($database = '');
 	
 	private function &execute_query(){
-		$this->querycount = $this->querycount + 1;
+		$this->querycount++;
 		$result = $this->execute_query_pt();
 		if (!$result){
 			$this->SetError(CMSDatabase::ERROR_EXECUTE_QUERY);

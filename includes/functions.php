@@ -344,19 +344,6 @@ function htmlspecialchars_uni($text, $entities = true){
 	);
 }
 
-/*
-[bkvar=w1]Понедельник[/bkvar]
-[bkvar=w2]Вторник[/bkvar]
-[bkvar=w3]Среда[/bkvar]
-[bkvar=w4]Четверг[/bkvar]
-[bkvar=w5]Пятница[/bkvar]
-[bkvar=w6]Суббота[/bkvar]
-[bkvar=w7]Воскресенье[/bkvar]
-[bkvar=sd-yd]Вчера[/bkvar]
-[bkvar=sd-td]Сегодня[/bkvar]
-[bkvar=sd-tm]Завтра[/bkvar]
-/**/
-
 function rusMonth($dt, $socr = false){
 	if ($socr){
 		$rusdtph = array(
@@ -440,4 +427,6 @@ function translateruen($p_text){
 	
 	return $t;
 }
+
+
 ?>

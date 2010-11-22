@@ -1,5 +1,5 @@
 /**
-* @version $Id: main.css 564 2008-12-23 14:11:20Z AKuzmin $
+* @version $Id$
 * @package Abricos
 * @copyright Copyright (C) 2008 Abricos. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
@@ -11,7 +11,8 @@ html, body	{
 }
 body {
 	font: 80% arial,sans-serif; 
-	color: #333
+	color: #333;
+	overflow: hidden;
 }
 h1, h2, h3, h4, h5, h6 {
 	font-weight: normal;
@@ -48,7 +49,7 @@ b, strong	{
 	text-align: right;
 }
 
-#mod-user-userblock {
+#userblock {
 	position: absolute; 
 	right: 15px; 
 	top: 5px;

@@ -17,8 +17,8 @@ class CMSUserText {
 	
 	public function CMSUserText(){
 		
-		require_once CWD.'/includes/jevix/jevix.class.php';
-		require_once CWD.'/includes/geshi/geshi.php';
+		require_once 'jevix/jevix.class.php';
+		require_once 'geshi/geshi.php';
 		
 		$this->JevixConfigure();
 	}

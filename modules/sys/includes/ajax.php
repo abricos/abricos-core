@@ -10,11 +10,10 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$cms = Brick::$cms;
+$adress = CMSRegistry::$instance->adress;
 
-$p_module = Brick::$input->clean_gpc('g', 'md', TYPE_STR);
-$p_brick = Brick::$input->clean_gpc('g', 'bk', TYPE_STR);
-$p_js = Brick::$input->clean_gpc('g', 'js', TYPE_STR);
+$p_module = $adress->dir[1];
+$p_brick = $adress->dir[2];
 
 $mod = Brick::$modules->GetModule($p_module);
 if (empty($mod)){

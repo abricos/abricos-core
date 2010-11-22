@@ -2,7 +2,7 @@
 /**
  * JSON данные на запросы стороних сервисов
  * 
- * @version $Id: json.php 94 2009-10-14 07:58:03Z roosit $
+ * @version $Id$
  * @package Abricos
  * @subpackage User
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
@@ -23,21 +23,20 @@ if ($p_jsonPassword != $jsonPassword){
 	return;
 }
 
+$userManager = CMSRegistry::$instance->modules->GetModule('user')->GetManager(); 
 $p_do = $in->clean_gpc('p', 'do', TYPE_STR);
 
 $result = "";
 if ($p_do == "user"){
 	$p_username	= trim($in->clean_gpc('p', 'username', TYPE_STR));
-	$userinfo = CMSQUser::UserPrivateInfoByUserName(Brick::$db, $p_username, true);
+	$userinfo = UserQuery::UserByName(Brick::$db, $p_username);
 	if (empty($userinfo)){ return; }
 	$result = json_encode($userinfo);
 }else if  ($p_do == "login"){
 	$p_username	= trim($in->clean_gpc('p', 'username', TYPE_STR));
 	$p_password	= trim($in->clean_gpc('p', 'password', TYPE_STR));
 	
-	$userManager = CMSRegistry::$instance->modules->GetModule('user')->GetUserManager(); 
-	
-	$error = $userManager->UserLogin($p_username, $p_password);
+	$error = $userManager->Login($p_username, $p_password);
 	if ($error > 0){
 		sleep(1);
 	}
@@ -45,7 +44,7 @@ if ($p_do == "user"){
 	// $info = array("error" => $error, "pass"=>$p_password, "user"=>$p_username);
 	$result = json_encode($info);
 }else if ($p_do == "userlist"){
-	$rows = CMSQUser::UserListAll(Brick::$db);
+	$rows = UserQueryExt::UserListAll(Brick::$db);
 	$list = array();
 	while (($row = Brick::$db->fetch_array($rows))){
 		$r = array();
