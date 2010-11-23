@@ -448,7 +448,7 @@ Component.entryPoint = function(){
 	var GroupEditorPanel = function(groupid){
 		this.groupid = groupid || 0;
 		GroupEditorPanel.superclass.constructor.call(this, {
-			modal: true, fixedcenter: true
+			modal: true, fixedcenter: true, width: '600px'
 		});
 	};
 	YAHOO.extend(GroupEditorPanel, Brick.widget.Panel, {
