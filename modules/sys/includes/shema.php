@@ -15,7 +15,12 @@ $updateManager = CMSRegistry::$instance->modules->updateManager;
 $db = CMSRegistry::$instance->db;
 $pfx = $db->prefix;
 
-if ($updateManager->isInstall()){
+if ($updateManager->isInstall() || $updateManager->serverVersion == '1.0.1.1'){
+	
+	if ($updateManager->serverVersion == '1.0.1.1'){
+		$updateManager->serverVersion = '0.5';
+	}
+	
 	$db->query_write("
 		CREATE TABLE IF NOT EXISTS `".$pfx."content` (
 		  `contentid` int(8) unsigned NOT NULL auto_increment,

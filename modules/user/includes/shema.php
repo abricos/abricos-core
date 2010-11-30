@@ -93,7 +93,7 @@ if ($updateManager->isInstall() || $updateManager->serverVersion === '1.0.1'){
 	  )".$charset
 	);
 }
-
+$createGroupTable = false;
 if ($updateManager->isUpdate('0.2.1')){
 
 	$db->query_write("DROP TABLE IF EXISTS `".$pfx."usergroup`");
@@ -113,6 +113,7 @@ if ($updateManager->isUpdate('0.2.1')){
 		(2, 'Registered', 		'register'),
 		(3, 'Administrator', 	'admin')
 	");
+	$createGroupTable = true;
 
 	$db->query_write("
 		CREATE TABLE IF NOT EXISTS `".$pfx."usergroup` (
@@ -191,9 +192,11 @@ if ($updateManager->isUpdate('0.2.2')){
 		$db->query_write("ALTER TABLE `".$pfx."user` DROP `birthday`");
 }
 if ($updateManager->isUpdate('0.2.3') && !$updateManager->isInstall()){
-	$db->query_write("
-		ALTER TABLE `".$pfx."group` ADD `groupkey` varchar(32) NOT NULL DEFAULT '' COMMENT 'Глобальный идентификатор группы в ядре'
-	");
+	if (!$createGroupTable){
+		$db->query_write("
+			ALTER TABLE `".$pfx."group` ADD `groupkey` varchar(32) NOT NULL DEFAULT '' COMMENT 'Глобальный идентификатор группы в ядре'
+		");
+	}
 
 	$db->query_write("UPDATE `".$pfx."group` SET groupkey='guest' WHERE groupid=1");
 	$db->query_write("UPDATE `".$pfx."group` SET groupkey='register' WHERE groupid=2");
