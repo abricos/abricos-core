@@ -190,8 +190,10 @@ Component.entryPoint = function(){
 				}();
 				this.get(di['nm'], true).update(di);
 			}
-
-			this.onComplete.fire(new checker(updtbls));
+			try{
+				this.onComplete.fire(new checker(updtbls));
+			}catch(e){
+			}
 		},
 		
 		
@@ -1174,9 +1176,20 @@ Component.entryPoint = function(){
 			this.list = list;
 			this.cfg = cfg;
 			
+			// TODO: в наследуемых классах методы и св-тва обработчика событий необходимо объявлять в процессе инициализации объекта
+			this.dsEvent = function(type, args){
+				for (var i=0;i<this.list.length;i++){
+					var tname = this.list[i];
+					if (args[0].checkWithParam(tname)){
+						type == 'onComplete' ? this.onDataLoadComplete() : this.onDataLoadWait();
+						return;
+					}
+				}
+			};
+			
 			ds.onStart.subscribe(this.dsEvent, this, true);
 			ds.onComplete.subscribe(this.dsEvent, this, true);
-			
+
 			var tables = {};
 			for (var i=0;i<list.length;i++){
 				var tname = list[i];
@@ -1184,15 +1197,6 @@ Component.entryPoint = function(){
 			}
 			ds.isFill(tables) ? this.onDataLoadComplete() : this.onDataLoadWait();
 			this.tables = tables;
-		},
-		dsEvent: function(type, args){
-			for (var i=0;i<this.list.length;i++){
-				var tname = this.list[i];
-				if (args[0].checkWithParam(tname)){
-					type == 'onComplete' ? this.onDataLoadComplete() : this.onDataLoadWait();
-					return;
-				}
-			}
 		},
 		destroy: function(){
 			this.ds.onComplete.unsubscribe(this.dsEvent);
