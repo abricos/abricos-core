@@ -29,7 +29,7 @@ Component.entryPoint = function(){
 	 * @submodule Data
 	 * @namespace Brick.util.data.byid
 	 * @constructor
-	 * @param name {String} Имя модуля платформы BrickCMS с которым происходит обмен данными
+	 * @param name {String} Имя модуля платформы Abricos с которым происходит обмен данными
 	 * @param prefix {String} (optional) Префикс
 	 */
 	var DataSet = function(name, prefix){
@@ -1175,14 +1175,34 @@ Component.entryPoint = function(){
 			this.ds = ds;
 			this.list = list;
 			this.cfg = cfg;
+			this._params = {};
+			
+			this.get = function(tname){
+				return ds.get(tname);
+			};
+			
+			this.foreach = function(tname, fn, prms){
+				prms = prms || {};
+				ds.get(tname).getRows(prms).foreach(fn);
+			};
+			
+			this.request = function(){
+				ds.request();
+			};
 			
 			// TODO: в наследуемых классах методы и св-тва обработчика событий необходимо объявлять в процессе инициализации объекта
 			this.dsEvent = function(type, args){
 				for (var i=0;i<this.list.length;i++){
 					var tname = this.list[i];
-					if (args[0].checkWithParam(tname)){
-						type == 'onComplete' ? this.onDataLoadComplete() : this.onDataLoadWait();
-						return;
+					var ps = this._params[tname] || [];
+					if (ps.length == 0){
+						ps[ps.length] = {};
+					}
+					for (var ii=0;ii<ps.length;ii++){
+						if (args[0].checkWithParam(tname, ps[ii])){
+							type == 'onComplete' ? this.onDataLoadComplete() : this.onDataLoadWait();
+							return;
+						}
 					}
 				}
 			};
@@ -1212,19 +1232,14 @@ Component.entryPoint = function(){
 			if (L.isNull(owner) || !L.isFunction(owner['onDataLoadWait'])){ return; }
 			owner.onDataLoadWait(this);
 		},
-		get: function(tname){
-			return this.ds.get(tname);
-		},
-		foreach: function(tname, fn, prms){
-			prms = prms || {};
-			this.get(tname).getRows(prms).foreach(fn);
-		},
-		request: function(){
-			this.ds.request();
+		setParam: function(tname, param){
+			var ps = this._params; 
+			ps[tname] = ps[tname] || [];
+			var a = ps[tname];
+			a[a.length] = param;
+			this.ds.get(tname, true).getRows(param);
 		}
 	};
 	
 	NS.TablesManager = TablesManager;
-	
-
 };
