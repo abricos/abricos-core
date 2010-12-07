@@ -1166,7 +1166,8 @@ Component.entryPoint = function(){
 			list = [list];
 		}
 		cfg = L.merge({
-			'owner': null
+			'owner': null,
+			'disableCheckFill': false
 		}, cfg || {});
 		this.init(ds, list, cfg);
 	};
@@ -1202,12 +1203,17 @@ Component.entryPoint = function(){
 				var tname = list[i];
 				tables[tname] = ds.get(tname, true);
 			}
-			ds.isFill(tables) ? this.onDataLoadComplete() : this.onDataLoadWait();
 			this.tables = tables;
+			if (!cfg['disableCheckFill']){
+				this.checkFill();
+			}
 		},
 		destroy: function(){
 			this.ds.onComplete.unsubscribe(this.dsEvent);
 			this.ds.onStart.unsubscribe(this.dsEvent);
+		},
+		checkFill: function(){
+			this.ds.isFill(this.tables) ? this.onDataLoadComplete() : this.onDataLoadWait();
 		},
 		onDataLoadComplete: function(){
 			var owner = this.cfg.owner;
