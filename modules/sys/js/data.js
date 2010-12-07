@@ -1177,19 +1177,6 @@ Component.entryPoint = function(){
 			this.cfg = cfg;
 			this._params = {};
 			
-			this.get = function(tname){
-				return ds.get(tname);
-			};
-			
-			this.foreach = function(tname, fn, prms){
-				prms = prms || {};
-				ds.get(tname).getRows(prms).foreach(fn);
-			};
-			
-			this.request = function(){
-				ds.request();
-			};
-			
 			// TODO: в наследуемых классах методы и св-тва обработчика событий необходимо объявлять в процессе инициализации объекта
 			this.dsEvent = function(type, args){
 				for (var i=0;i<this.list.length;i++){
@@ -1231,6 +1218,16 @@ Component.entryPoint = function(){
 			var owner = this.cfg.owner;
 			if (L.isNull(owner) || !L.isFunction(owner['onDataLoadWait'])){ return; }
 			owner.onDataLoadWait(this);
+		},
+		foreach: function(tname, fn, prms){
+			prms = prms || {};
+			this.ds.get(tname).getRows(prms).foreach(fn);
+		},
+		get: function(tname){
+			return this.ds.get(tname);
+		},
+		request: function(){
+			this.ds.request();
 		},
 		setParam: function(tname, param){
 			var ps = this._params; 
