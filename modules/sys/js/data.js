@@ -775,6 +775,7 @@ Component.entryPoint = function(){
 			var _rows = {};
 			var _count = 0;
 			var _lastUpdate = 0;
+			var _chrome = [];
 			
 			this.lastUpdateTime = function(){ return _lastUpdate; };
 			
@@ -802,11 +803,24 @@ Component.entryPoint = function(){
 			 * @param {Row} row запись.
 			 */
 			this.add = function(row){
-				if (!_rows[row.id]){ _count++; }
+				if (!_rows[row.id]){
+					_chrome[_count] = row.id;
+					_count++; 
+				}
 				_rows[row.id] = row;
 			};
 			
-			this.remove = function(row){ delete _rows[row.id]; };
+			this.remove = function(row){
+				delete _rows[row.id];
+				var nCount = 0, nChrome = [];
+				for (var i=0;i<_chrome.length;i++){
+					if (_rows[_chrome[i]]){
+						nChrome[nCount++] = _chrome[i];
+					}
+				}
+				_chrome = nChrome;
+				_count = nCount;
+			};
 			
 			/**
 			 * Получить запись из коллекции по идентификатор row.id.
@@ -895,10 +909,10 @@ Component.entryPoint = function(){
 				var fname = "__rows_foreach"+(globalForeachId++);
 				owner = owner || {};
 				owner[fname] = func;
-				var i = 0;
-				for (var id in _rows){
+				
+				for (var i=0;i<_chrome.length;i++){
+					var id = _chrome[i];
 					owner[fname](_rows[id], i);
-					i++;
 				}
 				delete owner[fname];
 			};
