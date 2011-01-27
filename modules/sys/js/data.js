@@ -788,6 +788,7 @@ Component.entryPoint = function(){
 				_rows = {};
 				_count = 0;
 				_lastUpdate = 0;
+				_chrome = [];
 			};
 			
 			/**
@@ -819,7 +820,7 @@ Component.entryPoint = function(){
 					}
 				}
 				_chrome = nChrome;
-				_count = nCount;
+				_count = nChrome.length;
 			};
 			
 			/**
