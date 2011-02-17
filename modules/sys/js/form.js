@@ -7,7 +7,10 @@
 /**
  * @module Sys
  */
-(function(){
+var Component = new Brick.Component();
+Component.requires = { };
+Component.entryPoint = function(){
+	
 	Brick.namespace('util');
 	
 	var form = function(){};
@@ -280,6 +283,4 @@
 	    return rett;
 		}
 	};
-
-	
-})();
+};

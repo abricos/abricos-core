@@ -19,23 +19,18 @@ CMSRegistry::$instance->modules->Register($mod);
 class SystemModule extends CMSModule {
 	
 	/**
-	 * @var CMSMenuManager
-	 */
-	private $menu;
-	
-	/**
 	 * Идентификатор страницы в БД
 	 *
 	 * @var Integer
 	 */
-	public $pageId = 0;
+	private $pageId = 0;
 	
 	/**
 	 * Идентификатор раздела к которому принадлежит страница
 	 *
 	 * @var Integer
 	 */
-	public $menuId = 0;
+	private $menuId = 0;
 	
 	/**
 	 * Адрес, на основе которого собрано меню.
@@ -44,9 +39,7 @@ class SystemModule extends CMSModule {
 	 */
 	public $adress = null;
 	
-	private $session = null;
-	
-	public static $YUIVersion = "2.8.0r4";
+	public static $YUIVersion = "2.8.1r1";
 	
 	private $_manager = null;
 	

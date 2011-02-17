@@ -215,6 +215,78 @@ Brick.console = function(obj){
 		return components[moduleName] && components[moduleName][componentName];
 	};
 	
+	Brick.componentRegistered = function(moduleName, componentName){
+		var cp = components[moduleName] && components[moduleName][componentName];
+		if (!cp){ return false; }
+		return cp.isRegistered;
+	};
+
+	
+	var RegEngine = function(moduleName, componentName, component){
+		this.init(moduleName, componentName, component);
+	};
+	RegEngine.prototype = {
+		init: function(mName, cName, component){
+			this.id = mName+':'+cName;
+			this.mName = mName; 
+			this.cName = cName;
+			this.component = component;
+			this.isReg = false;
+		},
+		buildId: function(mName, cName){
+			return mName+':'+cName;
+		},
+		isLoadDep: function(){
+			var rq = this.component.requires;
+			var mods = rq.mod || [];
+			for (var i=0;i<mods.length;i++){
+				var mod = mods[i];
+				var files = mod.files || [];
+				for (var ii=0;ii<files.length;ii++){
+					var ccName = files[ii].replace(/\.js$/, '');
+					if (!Brick.componentRegistered(mod.name, ccName)){
+						// Brick.console('Нехватает: '+mod.name+':'+ ccName);
+						return false;
+					}
+				}
+			}
+			return true;
+		},
+		register: function(){
+			if (this.isReg){ return; }
+			this.isReg = true;
+			
+			var moduleName = this.mName,
+				componentName = this.cName,
+				component = this.component;
+				
+			var namespace = 'mod.'+moduleName;
+			var NS = component.namespace = Brick.namespace(namespace);
+			if (!Brick.objectExists(namespace+'.API')){
+				NS.API = new Brick.Component.API(moduleName);
+			}
+
+			component.entryPoint(NS);
+
+			/*
+			try{
+				component.entryPoint(NS);
+			}catch(e){
+				Brick.console(components);
+				Brick.console(e);
+				asdf;
+			}/**/
+			delete component.entryPoint;
+			component.isRegistered = true;
+			component.onLoad();
+
+			fireChecker(component);
+			Brick.Component.registerEvent.fire(component);
+		}
+	};
+	
+	var waiter = [], counter = 0;
+	
 	/**
 	 * Инициализация и регистрация JS компонента указанного модуля платформы Abricos
 	 * @method add
@@ -232,27 +304,38 @@ Brick.console = function(obj){
 			return;
 		}
 		
+		component.isRegistered = false;
+		
 		components[moduleName][componentName] = component;
 		component.moduleName = moduleName;
 		component.name = componentName;
 
 		component.template = new Brick.Template(component);
+		component._counter = counter++;
 		
-		var loadinfo = component.requires || {};
+		component.requires = component.requires || {};
+		var loadinfo = component.requires;
+		
+		var rg = new RegEngine(moduleName, componentName, component);
+		waiter[waiter.length] = rg;
 		
 		loadinfo.onSuccess = function() {
 			
-			var namespace = 'mod.'+moduleName;
-			var NS = component.namespace = Brick.namespace(namespace);
-			if (!Brick.objectExists(namespace+'.API')){
-				NS.API = new Brick.Component.API(moduleName);
-			}
-			component.entryPoint(NS);
-			delete component.entryPoint;
-			component.onLoad();
-
-			fireChecker(component);
-			Brick.Component.registerEvent.fire(component);
+			// проверить, все ли вложенные компоненты прогружены
+			var isReg = false;
+			do {
+				isReg = false;
+				for (var i=waiter.length-1;i>=0;i--){
+					var r = waiter[i];
+					if (!r.isReg){ // еще не загружался
+						if (r.isLoadDep()){ // зависимости все загружены
+							r.register();
+							isReg = true;
+						}
+					}
+				}
+				
+			} while(isReg);
 		};
 		Brick.Loader.add(loadinfo);
 	};
@@ -840,7 +923,7 @@ Brick.env.lib = {
 	 * @method yui
 	 * @type String
 	 */
-	yui: '2.8.0r4'
+	yui: '2.8.1r1'
 };
 
 /**
@@ -1243,6 +1326,16 @@ Brick.namespace('util');
 		}
 	};
 	
+	YAHOO.util.YUILoader.prototype._url = function(path, type) {
+        var u = this.base || "", f=this.filter;
+        u = u + path;
+        
+        if (this.gzip && type == 'js'){
+        	u = this.gzipBase + u;
+        }
+        return this._filter(u);;
+    };
+	
 	/**
 	 * Загрузчик JS компонентов. <br>
 	 * Brick.Loader основан на загрузчкие YAHOO.util.YUILoader и позволяет
@@ -1431,14 +1524,12 @@ Brick.namespace('util');
 		}
 	};
 	
-	Brick.Loader = function(){
-		return {
-			mods: [],
-			add: function(o){
-				this.mods[this.mods.length] = o;
-			} 
-		};
-	}();
+	Brick.Loader = {
+		mods: [],
+		add: function(o){
+			this.mods[this.mods.length] = o;
+		} 
+	};
 	
 
 	var onReadyExecute = false;

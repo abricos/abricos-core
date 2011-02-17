@@ -169,3 +169,62 @@ th, td {
 	text-decoration: underline;
 } 
 
+.aw-page-content p {
+	padding-bottom: .3em;
+}
+.aw-page-content i, 
+.aw-page-content em {
+	font-style:italic;
+}
+.aw-page-content b, 
+.aw-page-content strong {
+	font-weight: bolder;
+}
+.aw-page-content ul, 
+.aw-page-content ol {
+	margin:1.5em 1em 1.5em 3em;
+	padding:0;
+}
+.aw-page-content ol li {
+	list-style-type: decimal;
+}
+.aw-page-content li {
+	list-style-type: disc;
+}
+.aw-page-content img {
+	margin: 5px;
+}
+
+.aw-page-content a, 
+.aw-page-content a:link {
+	color: #6a7398;
+}
+.aw-page-content a:hover {
+	color: #f00;
+}
+.aw-page-content a:active, 
+.aw-page-content a:visited {
+	color: #6a7398;
+}
+.aw-page-content h1, 
+.aw-page-content h2, 
+.aw-page-content h3, 
+.aw-page-content h4, 
+.aw-page-content h5 {
+	font-weight: bold;
+	color: #333;
+	padding-bottom: 0.5em;
+}
+.aw-page-content h1 {
+	font-size: 125%;
+}
+.aw-page-content h2 {
+	font-size: 120%;
+}
+.aw-page-content h3 {
+	font-size: 110%;
+}
+.aw-page-content h4, 
+.aw-page-content h5 {
+	font-size: 100%;
+}
