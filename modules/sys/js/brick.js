@@ -244,8 +244,10 @@ Brick.console = function(obj){
 				var files = mod.files || [];
 				for (var ii=0;ii<files.length;ii++){
 					var ccName = files[ii].replace(/\.js$/, '');
-					if (!Brick.componentRegistered(mod.name, ccName)){
-						// Brick.console('Нехватает: '+mod.name+':'+ ccName);
+					if (!Brick.componentExists(mod.name, ccName)){
+						// Brick.console('ops: '+this.mName+':'+this.cName+'=>'+mod.name+':'+ ccName);
+					}else if (!Brick.componentRegistered(mod.name, ccName)){
+						// Brick.console('Нехватает: '+this.mName+':'+this.cName+'=>'+mod.name+':'+ ccName);
 						return false;
 					}
 				}
@@ -1508,12 +1510,16 @@ Brick.namespace('util');
 								for (k=0;k<minfo.length;k++){
 									if (minfo[k]['f'] == mb){ mv = minfo[k]['k']; }
 								}
-								rq[rq.length]=mm+mb;
-								loader.addModule({
-									name: mm+mb, 
-									type: "js", 
-									fullpath: "/gzip.php?type=mod&module="+mm+"&version="+mv+"&tt="+Brick.env.ttname+"&file="+mb
-								});
+								if (mv == ""){
+									// Brick.console(mlib[ii]);
+								}else{
+									rq[rq.length]=mm+mb;
+									loader.addModule({
+										name: mm+mb, 
+										type: "js", 
+										fullpath: "/gzip.php?type=mod&module="+mm+"&version="+mv+"&tt="+Brick.env.ttname+"&file="+mb
+									});
+								}
 							}
 						}
 					}
