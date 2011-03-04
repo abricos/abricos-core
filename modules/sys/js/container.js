@@ -303,7 +303,7 @@ Component.entryPoint = function(){
 				cfg.setProperty("height", h+'px');
 				cfg.setProperty('draggable', false);
 				cfg.setProperty('resize', false);
-	            this.onResize();
+	            this._onResizePanel();
 			}else if (val == Panel.STATE_NORMAL){
 				this._savedShowState = val;
 				cfg.setProperty("x", this._savedX);
@@ -315,7 +315,7 @@ Component.entryPoint = function(){
 				if (cfg.getProperty('fixedcenter')){
 					this.center();
 				}
-	            this.onResize();
+	            this._onResizePanel();
 			}else if (val == Panel.STATE_MINIMIZED){
 				this._hidePanel();
 			}
@@ -381,7 +381,7 @@ Component.entryPoint = function(){
 				if (h > 0){
 					cfg.setProperty("height", args.height + "px");
 				}
-	            this.onResize();
+	            this._onResizePanel();
 	        }, this, true);
 			
 			this.resizeManager = resize;
@@ -462,6 +462,7 @@ Component.entryPoint = function(){
 		},
 		
 		_showPanel: function(){
+			if (this._isDestroyPanel){ return; }
 			Panel.superclass.show.call(this);
 			this.onShow();
 		},
@@ -469,6 +470,11 @@ Component.entryPoint = function(){
 		_hidePanel: function(){
 			Panel.superclass.hide.call(this);
 			this.onHide();
+		},
+		
+		_onResizePanel: function(){
+			var rg = Dom.getRegion(this.body);
+			this.onResize(rg);
 		},
 		
 		center: function(){
@@ -536,6 +542,7 @@ Component.entryPoint = function(){
 				this.resizeManager.destroy();
 			}
 			Panel.superclass.destroy.call(this);
+			this._isDestroyPanel = true;
 		},
 		
 		/**
@@ -669,4 +676,12 @@ Component.entryPoint = function(){
 		return panel;
 	};
 	
+	var Dialog = function(config){
+		config = config || {};
+		config.modal = true;
+		Dialog.superclass.constructor.call(this, config);
+	};
+	YAHOO.extend(Dialog, Panel, {});
+
+	Brick.widget.Dialog = Dialog;
 };
