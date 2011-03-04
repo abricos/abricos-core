@@ -13,7 +13,7 @@ var Component = new Brick.Component();
 Component.requires = {
     yahoo: ['element', 'paginator'],
     mod:[
-         {name: 'sys', files: ['data.js']},
+         {name: 'sys', files: ['data.js']}
     ]
 };
 Component.entryPoint = function(){
