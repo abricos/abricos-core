@@ -1,17 +1,21 @@
 <!--[*]
-[tt=mini][/tt]
-[script]userblock.php[/script]
-[bkvar=guest][/bkvar]
-[bkvar=user]
-	<script>
-		Brick.ff('user','api',function(){Brick.Page.reload();});
-	</script>
-[/bkvar]
-[bkvar=result][/bkvar]
+[tt=main][/tt]
+[script]login.php[/script]
 [mod=user]userblock[/mod]
+
+[bkvar=e1]Ошибка в имени пользователя[/bkvar]
+[bkvar=e2]Неверное имя пользователя или пароль[/bkvar]
+[bkvar=e3]Не заполнены обязательные поля[/bkvar]
+[bkvar=e4]Пользователь заблокирован[/bkvar]
+[bkvar=e5]Пользователь не прошел верификацию email[/bkvar]
+
+[bkvar=err]
+	<div class="userlogin-error">Ошибка авторизации: {v#err}</div>
+[/bkvar]
+
 [*]-->
-<h1>Авторизация на сайте</h1>
+<h3>Авторизация на сайте</h3>
+[bkvar]err[/bkvar]
 <div class="big">
 	[mod]user:userblock[/mod]
 </div>
-[bkvar]result[/bkvar]
