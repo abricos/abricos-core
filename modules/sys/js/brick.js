@@ -1771,7 +1771,7 @@ Brick.dateExt = function(){
 			var day = z(cd.getDate());
 			var mon = z(cd.getMonth()+1);// +1 т.к. нумерация идет с 0
 			var mons= mp[cd.getMonth()];
-			var min = z(cd.getMinutes()+1);
+			var min = z(cd.getMinutes());
 			var hour = z(cd.getHours());
 			
 			if (type == 1){
