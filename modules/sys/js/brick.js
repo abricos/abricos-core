@@ -1761,6 +1761,10 @@ Brick.dateExt = function(){
 	
 	return {
 		convert: function(udate, type, hideTime){
+			if (!udate || udate == null){ return ""; }
+			if (typeof udate['getTime'] == 'function'){
+				udate = udate.getTime()/1000;
+			}
 			if (udate*1 == 0){
 				return "";
 			}
@@ -1780,10 +1784,12 @@ Brick.dateExt = function(){
 					s += ', '+hour+':'+(min);
 				}
 				return s;
-			}
-			//Добавлена возможность отображения даты в виде дд.мм.гггг
-			else if (type == 2){
-					return day+'.'+mon+'.'+cd.getFullYear();
+			}else if (type == 2){// Добавлена возможность отображения даты в виде дд.мм.гггг
+				return day+'.'+mon+'.'+cd.getFullYear();
+			}else if (type == 3){
+				return day+' '+mp[cd.getMonth()]+' '+cd.getFullYear();
+			}else if (type == 4){
+				return hour+':'+(min);
 			}else{
 				var ld = new Date(), s;
 				ld = new Date(ld.getFullYear(), ld.getMonth(), ld.getDate());
@@ -1796,7 +1802,7 @@ Brick.dateExt = function(){
 				}else{
 					s = day+' '+mp[cd.getMonth()]+' '+cd.getFullYear();
 				}
-				var tm = hour +':'+(min);
+				var tm = hour+':'+(min);
 				if (!hideTime){
 					s += ', ' + tm; 
 				}

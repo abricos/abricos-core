@@ -152,6 +152,7 @@ th, td {
 	white-space:nowrap;
 	font-weight: bold;
 }
+
 .bk-table-def td {
 	background-color: #FFFFFF;
 	padding: 2px 6px;
@@ -159,6 +160,18 @@ th, td {
 .bk-table-def .sel td {
 	background-color: #DBE3F1;
 }
+.bk-table-def tr.row {
+	vertical-align: top;
+	border-bottom: 1px solid #CBCBCB;
+}
+.bk-table-def tr.row:hover {
+	background: none repeat scroll 0 0 #FFF0C6;
+}
+.bk-table-def tr.row:hover td {
+	background-color: inherit;
+}
+
+
 .bk-table-def a, 
 .bk-table-def a:link,
 .bk-table-def a:visited {
