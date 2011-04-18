@@ -124,8 +124,9 @@ abstract class CMSDatabase {
 	 * 
 	 * @param CMSRegistry $registry 
 	 */
-	public function CMSDatabase(CMSRegistry $registry){
+	public function CMSDatabase(CMSRegistry $registry, $tablePrefix){
 		$this->registry = $registry;
+		$this->prefix = empty($tablePrefix) ? 'cms_' : $tablePrefix;
 	}
 	
 	public function ClearError(){

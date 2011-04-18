@@ -20,6 +20,7 @@ $config['superadmin'] = '';
 
 $config['Database']['dbtype'] = 'mysql';
 $config['Database']['dbname'] = 'cms';
+$config['Database']['tableprefix'] = 'cms_';
 
 $config['Server']['servername'] = 'localhost';
 $config['Server']['port'] = 3306;

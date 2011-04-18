@@ -105,7 +105,7 @@ final class CMSRegistry {
 		
 		define('LNG', $this->config['Misc']['language']);
 		
-		$db = new CMSMySqlDB($this);
+		$db = new CMSMySqlDB($this, $this->config['Database']['tableprefix']);
 		$db->connect(
 			$this->config['Database']['dbname'],
 			$this->config['Server']['servername'],
