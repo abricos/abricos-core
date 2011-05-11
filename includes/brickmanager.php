@@ -521,7 +521,7 @@ class CMSSysBrickBuilder {
 			
 			// добавление css файлов
 			foreach ($this->_cssfile as $value){
-				$brick->param->var['css'] .= "<style type='text/css' media='screen, projection'>/*<![CDATA[*/	@import '".$value."'; /*]]>*/</style>";
+				$brick->param->var['css'] .= "<style type='text/css' media='screen, projection, print'>/*<![CDATA[*/	@import '".$value."'; /*]]>*/</style>";
 			}
 		}
 		
