@@ -33,6 +33,29 @@ if (CMSRegistry::$instance->modules->customTakelink){
 	$param->var['enmod'] = implode($arr, ',');
 }
 
+$iscache = !CMSRegistry::$instance->config['Misc']['develop_mode'];
+$cacheFile = CWD."/cache/jsvar";
+if ($iscache && file_exists($cacheFile)){
+	
+	$handle = fopen($cacheFile, 'r');
+	$fdata = '';
+	if ($handle){
+		$fdata = fread($handle, filesize($cacheFile));
+		fclose($handle);
+	} 
+	$farr = explode(",", $fdata);
+	$cVersion = $farr[0];
+	$cTime = TIMENOW - intval($farr[1]);
+	$cacheTime = 3*60;
+	$cKey = $farr[2];
+	if (count($farr) == 3 && $farr[0] == '0.1'){
+		if ($cTime < $cacheTime){
+			$param->var['jsv'] = $cKey;
+			return;
+		}
+	}
+}
+
 $key = 0;
 $dir = dir(CWD."/modules");
 while (false !== ($entry = $dir->read())) {
@@ -76,6 +99,18 @@ foreach ($files as $file){
 	$key += filemtime($file)+filesize($file)+1;
 }
 
-$param->var['jsv'] = md5($key);
+$cKey = $param->var['jsv'] = md5($key);
+
+if ($iscache){
+	
+	@unlink($cacheFile);
+	
+	$handle = fopen($cacheFile, 'w');
+	if ($handle){
+		fwrite($handle, "0.1,".TIMENOW.",".$cKey);
+		fclose($handle);
+	} 
+}
+
 
 ?>
