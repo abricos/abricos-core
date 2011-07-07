@@ -8,9 +8,6 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$mod = new SystemModule();
-CMSRegistry::$instance->modules->Register($mod);
-
 /**
  * Системный модуль платформы Abricos
  * @package Abricos
@@ -249,5 +246,8 @@ class SystemModule extends CMSModule {
 		return $arr;
 	}
 }
+
+$mod = new SystemModule();
+CMSRegistry::$instance->modules->Register($mod);
 
 ?>

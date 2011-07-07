@@ -8,9 +8,6 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$modUser = new User();
-CMSRegistry::$instance->modules->Register($modUser);
-
 /**
  * Модуль "Пользователи" 
  * @package Abricos
@@ -476,9 +473,10 @@ class UserQuery {
 		}
 		return $db->query_read($sql);
 	}
-	
-	
 }
+
+$modUser = new User();
+CMSRegistry::$instance->modules->Register($modUser);
 
 
 ?>
