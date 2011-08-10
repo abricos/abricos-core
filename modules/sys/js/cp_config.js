@@ -23,14 +23,12 @@ Component.entryPoint = function(){
 	var NS = this.namespace,
 		TMG = this.template;
 	
-	var tSetVar = Brick.util.Template.setProperty;
-	
 	var API = NS.API;
 
-	if (!Brick.objectExists('Brick.mod.sys.data')){
-		Brick.mod.sys.data = new Brick.util.data.byid.DataSet('sys');
+	if (!NS.data){
+		NS.data = new Brick.util.data.byid.DataSet('sys');
 	}
-	var DATA = Brick.mod.sys.data;
+	var DATA = NS.data;
 
 	var ConfigWidget = function(container){
 		this.init(container);
@@ -92,10 +90,22 @@ Component.entryPoint = function(){
 			
 			var __self = this;
 			var lst = "";
+			
+			var ast = [];
+			
 			this.tables['styles'].getRows().foreach(function(row){
-				var di = row.cell;
-				lst += TM.replace('option', {'id': di['nm'], 'tl': di['nm']});
+				ast[ast.length] = row.cell;
 			});
+			ast = ast.sort(function(a, b){
+				if (a['nm'] > b['nm']){ return 1; }
+				if (a['nm'] < b['nm']){ return -1; }
+				return 0;
+			});
+			for (var i=0;i<ast.length;i++){
+				var di = ast[i];
+				lst += TM.replace('option', {'id': di['nm'], 'tl': di['nm']});
+			}
+			
 			this.el('styles').innerHTML = TM.replace('select', {'list': lst});
 			this.rows['config'].foreach(function(row){
 				var di = row.cell;
