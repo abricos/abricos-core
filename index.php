@@ -2,10 +2,52 @@
 /**
 * @version $Id$
 * @package Abricos
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
+* @copyright Copyright (C) 2011 Abricos. All rights reserved.
 * @link http://abricos.org
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
+
+/*
+ * install check, and check on removal of the install directory.
+ */
+$scriptPath = "";
+if ($_SERVER['REQUEST_URI'] OR $_ENV['REQUEST_URI']) {
+	$scriptPath = $_SERVER['REQUEST_URI'] ? $_SERVER['REQUEST_URI'] : $_ENV['REQUEST_URI'];
+}else {
+	if ($_SERVER['PATH_INFO'] OR $_ENV['PATH_INFO']){
+		$scriptPath = $_SERVER['PATH_INFO'] ? $_SERVER['PATH_INFO'] : $_ENV['PATH_INFO'];
+	} else if ($_SERVER['REDIRECT_URL'] OR $_ENV['REDIRECT_URL']){
+		$scriptPath = $_SERVER['REDIRECT_URL'] ? $_SERVER['REDIRECT_URL'] : $_ENV['REDIRECT_URL'];
+	}else{
+		$scriptPath = $_SERVER['PHP_SELF'] ? $_SERVER['PHP_SELF'] : $_ENV['PHP_SELF'];
+	}
+	if ($_SERVER['QUERY_STRING'] OR $_ENV['QUERY_STRING']) {
+		$scriptPath .= '?' . ($_SERVER['QUERY_STRING'] ? $_SERVER['QUERY_STRING'] : $_ENV['QUERY_STRING']);
+	}
+}
+
+define('DS', DIRECTORY_SEPARATOR );
+define('PATH_ROOT',	dirname(__FILE__) ); 
+define('PATH_INSTALLATION', PATH_ROOT.DS.'install' );
+define('PATH_CONFIGURATION', PATH_ROOT.DS.'includes' );
+
+if ($scriptPath == "/__on_mod_rewrite/" && is_dir(PATH_INSTALLATION) ){
+	print('ok');
+	exit();
+}
+
+if (!file_exists( PATH_CONFIGURATION . DS . 'config.php' ) || filesize( PATH_CONFIGURATION . DS . 'config.php' ) < 10 ){
+	if(file_exists( PATH_INSTALLATION . DS . 'index.php' )) {
+		header( 'Location: /install' );
+		exit();
+	}else {
+		echo 'No configuration file found and no installation code available. Exiting...';
+		exit();
+	}
+}else if(file_exists( PATH_CONFIGURATION . DS . 'config.php' ) && is_dir(PATH_INSTALLATION)){
+	header( 'Location: /install/index.php?content=7' );
+}
+
 
 // error_reporting(E_ALL);
 error_reporting(E_ALL & ~E_NOTICE);
