@@ -548,7 +548,7 @@ Brick.console = function(obj){
 		fr.start();
 	};
 	
-	var fireElements = [];
+	var fireElements = {};
 	var fireElementsIdInc = 0;
 	var fireChecker = function(component){
 		var ids = [];
