@@ -41,7 +41,7 @@ class SystemModule extends CMSModule {
 	private $_manager = null;
 	
 	public function SystemModule(){
-		$this->version = "0.5.3";
+		$this->version = "0.5.4";
 		$this->name = "sys";
 	}
 	
