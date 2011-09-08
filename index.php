@@ -46,6 +46,9 @@ if (!file_exists( PATH_CONFIGURATION . DS . 'config.php' ) || filesize( PATH_CON
 	}
 }else if(file_exists( PATH_CONFIGURATION . DS . 'config.php' ) && is_dir(PATH_INSTALLATION)){
 	header( 'Location: /install/index.php?content=7' );
+}else if ($scriptPath == "/install/index.php?content=7"){
+	header( 'Location: /' );
+	exit;
 }
 
 
