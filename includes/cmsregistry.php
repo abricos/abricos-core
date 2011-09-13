@@ -151,19 +151,23 @@ final class CMSRegistry {
 	 *
 	 * @var CMSUserText
 	 */
-	private $_userTextManager = null;
+	// private $_userTextManager = null;
 	
 	/**
 	 * Получить менеджер обработки пользовательского текста
 	 *
 	 * @return CMSUserText
 	 */
-	public function GetUserTextManager(){
+	public function GetUserTextManager($fullerase = false){
+		require_once ('cmsusertext.php');
+		return new CMSUserText($fullerase);
+		/*
 		if (is_null($this->_userTextManager)){
 			require_once ('cmsusertext.php');
 			$this->_userTextManager = new CMSUserText();
 		}
 		return $this->_userTextManager;
+		/**/
 	} 
 	
 	/**

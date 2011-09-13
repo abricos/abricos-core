@@ -15,46 +15,62 @@ class CMSUserText {
 	 */
 	public $jevix = null;
 	
-	public function CMSUserText(){
+	public function CMSUserText($fullerase = false){
 		
 		require_once 'jevix/jevix.class.php';
 		require_once 'geshi/geshi.php';
 		
-		$this->JevixConfigure();
+		$this->JevixConfigure($fullerase);
 	}
 	
-	public function JevixConfigure(){
+	/**
+	 * 
+	 * Enter description here ...
+	 * @param unknown_type $mode
+	 */
+	public function JevixConfigure($fullerase = false){
 		$jevix = new Jevix();
 		
-		// 1. Устанавливаем разрешённые теги. (Все не разрешенные теги считаются запрещенными.)
-		$jevix->cfgAllowTags(array('cut', 'p', 'a', 'img', 'i', 'b', 'u', 's', 'video', 'em',  'strong', 'nobr', 'li', 'ol', 'ul', 'sup', 'abbr', 'sub', 'acronym', 'h4', 'h5', 'h6', 'br', 'hr', 'pre', 'code'));
-		// 2. Устанавливаем коротие теги. (не имеющие закрывающего тега)
-		$jevix->cfgSetTagShort(array('br','img', 'hr', 'cut'));
-		// 3. Устанавливаем преформатированные теги. (в них все будет заменятся на HTML сущности)
-		$jevix->cfgSetTagPreformatted(array('pre','code'));
 		// 4. Устанавливаем теги, которые необходимо вырезать из текста вместе с контентом.
 		$jevix->cfgSetTagCutWithContent(array('script', 'object', 'iframe', 'style'));
-		// 5. Устанавливаем разрешённые параметры тегов. Также можно устанавливать допустимые значения этих параметров.
-		$jevix->cfgAllowTagParams('a', array('title', 'href'));
-		$jevix->cfgAllowTagParams('img', array('src', 'alt' => '#text', 'title', 'align' => array('right', 'left', 'center'), 'width' => '#int', 'height' => '#int', 'hspace' => '#int', 'vspace' => '#int'));
-		// 6. Устанавливаем параметры тегов являющиеся обязяательными. Без них вырезает тег оставляя содержимое.
-		$jevix->cfgSetTagParamsRequired('img', 'src');
-		$jevix->cfgSetTagParamsRequired('a', 'href');
-		// 7. Устанавливаем теги которые может содержать тег контейнер
-		$jevix->cfgSetTagChilds('ul', array('li'), false, true);
-		$jevix->cfgSetTagChilds('ol', array('li'), false, true);
-		// 8. Устанавливаем атрибуты тегов, которые будут добавлятся автоматически
-		$jevix->cfgSetTagParamsAutoAdd('a', array('rel' => 'nofollow'));
-		// 9. Устанавливаем автозамену
-		$jevix->cfgSetAutoReplace(array('+/-', '(c)', '(r)'), array('±', '©', '®'));
 		// 10. Включаем или выключаем режим XHTML. (по умолчанию включен)
 		$jevix->cfgSetXHTMLMode(true);
 		// 11. Включаем или выключаем режим замены переноса строк на тег <br/>. (по умолчанию включен)
 		$jevix->cfgSetAutoBrMode(false);
-		// 12. Включаем или выключаем режим автоматического определения ссылок. (по умолчанию включен)
-		$jevix->cfgSetAutoLinkMode(true);
-		// 13. Отключаем типографирование в определенном теге
-		$jevix->cfgSetTagNoTypography('code');
+		
+		if (!$fullerase){
+			// 1. Устанавливаем разрешённые теги. (Все не разрешенные теги считаются запрещенными.)
+			$jevix->cfgAllowTags(array('cut', 'p', 'a', 'img', 'i', 'b', 'u', 's', 'video', 'em',  'strong', 'nobr', 'li', 'ol', 'ul', 'sup', 'abbr', 'sub', 'acronym', 'h4', 'h5', 'h6', 'br', 'hr', 'pre', 'code'));
+			// 2. Устанавливаем коротие теги. (не имеющие закрывающего тега)
+			$jevix->cfgSetTagShort(array('br','img', 'hr', 'cut'));
+			
+			// 3. Устанавливаем преформатированные теги. (в них все будет заменятся на HTML сущности)
+			$jevix->cfgSetTagPreformatted(array('pre','code'));
+			// 5. Устанавливаем разрешённые параметры тегов. Также можно устанавливать допустимые значения этих параметров.
+			$jevix->cfgAllowTagParams('a', array('title', 'href'));
+			$jevix->cfgAllowTagParams('img', array('src', 'alt' => '#text', 'title', 'align' => array('right', 'left', 'center'), 'width' => '#int', 'height' => '#int', 'hspace' => '#int', 'vspace' => '#int'));
+			// 6. Устанавливаем параметры тегов являющиеся обязяательными. Без них вырезает тег оставляя содержимое.
+			$jevix->cfgSetTagParamsRequired('img', 'src');
+			$jevix->cfgSetTagParamsRequired('a', 'href');
+			// 7. Устанавливаем теги которые может содержать тег контейнер
+			$jevix->cfgSetTagChilds('ul', array('li'), false, true);
+			$jevix->cfgSetTagChilds('ol', array('li'), false, true);
+			// 8. Устанавливаем атрибуты тегов, которые будут добавлятся автоматически
+			$jevix->cfgSetTagParamsAutoAdd('a', array('rel' => 'nofollow'));
+			// 9. Устанавливаем автозамену
+			$jevix->cfgSetAutoReplace(array('+/-', '(c)', '(r)'), array('±', '©', '®'));
+			// 12. Включаем или выключаем режим автоматического определения ссылок. (по умолчанию включен)
+			$jevix->cfgSetAutoLinkMode(true);
+			// 13. Отключаем типографирование в определенном теге
+			$jevix->cfgSetTagNoTypography('code');
+		}else{
+			// 1. Устанавливаем разрешённые теги. (Все не разрешенные теги считаются запрещенными.)
+			$jevix->cfgAllowTags(array());
+			// 2. Устанавливаем коротие теги. (не имеющие закрывающего тега)
+			$jevix->cfgSetTagShort(array());
+				
+			$jevix->cfgSetAutoLinkMode(false);
+		}
 		
 		$this->jevix = $jevix;
 	}
