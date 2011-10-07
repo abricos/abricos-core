@@ -212,12 +212,9 @@ Component.entryPoint = function(){
 	var Editor = function(d){
 		this.brickid = d['id'];
 		this.rows = d['rows'];
-		Editor.superclass.constructor.call(this, {
-			modal: true, 
-			fixedcenter: true
-		});
+		Editor.superclass.constructor.call(this);
 	};
-	YAHOO.extend(Editor, Brick.widget.Panel, {
+	YAHOO.extend(Editor, Brick.widget.Dialog, {
 		initTemplate: function(){
 			return T['editor'];
 		},
@@ -344,10 +341,7 @@ Component.entryPoint = function(){
 	var ParamEditor = function(row, callback){
 		this.row = row;
 		this.callback = callback;
-		Editor.superclass.constructor.call(this, {
-			modal: true,
-			fixedcenter: true
-		});
+		Editor.superclass.constructor.call(this);
 	};
 	YAHOO.extend(ParamEditor, Brick.widget.Panel, {
 		initTemplate: function(){

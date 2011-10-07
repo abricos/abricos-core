@@ -178,11 +178,10 @@ Component.entryPoint = function(){
 		this.userid = userid || 0;
 		this.callback = callback;
 		UserEditorPanel.superclass.constructor.call(this, {
-			modal: true,
 			fixedcenter: true
 		});
 	};
-	YAHOO.extend(UserEditorPanel, Brick.widget.Panel, {
+	YAHOO.extend(UserEditorPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(this._TId['editor'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
@@ -448,10 +447,10 @@ Component.entryPoint = function(){
 	var GroupEditorPanel = function(groupid){
 		this.groupid = groupid || 0;
 		GroupEditorPanel.superclass.constructor.call(this, {
-			modal: true, fixedcenter: true, width: '600px'
+			fixedcenter: true, width: '600px'
 		});
 	};
-	YAHOO.extend(GroupEditorPanel, Brick.widget.Panel, {
+	YAHOO.extend(GroupEditorPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(this._TId['geditor'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },

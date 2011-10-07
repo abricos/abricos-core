@@ -46,13 +46,13 @@ Component.entryPoint = function(){
 			'panelConfig': {}
 		}, param || {});
 		var config = L.merge({
-			modal: true, resize: false, fixedcenter: true
+			resize: false, fixedcenter: true
 			// ,width: '400px'
 		}, this.param.panelConfig || {});
 		LoginPanel.superclass.constructor.call(this, config);
 	};
 	
-	YAHOO.extend(LoginPanel, Brick.widget.Panel, {
+	YAHOO.extend(LoginPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(TId['loginpanel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
@@ -114,11 +114,11 @@ Component.entryPoint = function(){
 		}, param || {});
 
 		RegisterPanel.superclass.constructor.call(this, {
-			modal: true, resize: false,
+			resize: false,
 			fixedcenter: true
 		});
 	};
-	YAHOO.extend(RegisterPanel, Brick.widget.Panel, {
+	YAHOO.extend(RegisterPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(TId['register'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
@@ -226,11 +226,11 @@ Component.entryPoint = function(){
 		}, param || {});
 
 		RegisterSendEmailPanel.superclass.constructor.call(this, {
-			modal: true, resize: false,
+			resize: false,
 			fixedcenter: true
 		});
 	};
-	YAHOO.extend(RegisterSendEmailPanel, Brick.widget.Panel, {
+	YAHOO.extend(RegisterSendEmailPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(TId['regokpanel'][name]); },
 		initTemplate: function(){
 			return T['regokpanel'];
@@ -256,11 +256,11 @@ Component.entryPoint = function(){
 	 */
 	var PwdRestPanel = function (){
 		PwdRestPanel.superclass.constructor.call(this, {
-			modal: true, resize: false,
+			resize: false,
 			fixedcenter: true
 		});
 	};
-	YAHOO.extend(PwdRestPanel, Brick.widget.Panel, {
+	YAHOO.extend(PwdRestPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(TId['password'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		initTemplate: function(){
@@ -291,11 +291,11 @@ Component.entryPoint = function(){
 	var PwdRestSendEmailPanel = function (param){
 		this.param = param;
 		PwdRestSendEmailPanel.superclass.constructor.call(this, {
-			modal: true, resize: false,
+			resize: false,
 			fixedcenter: true
 		});
 	};
-	YAHOO.extend(PwdRestSendEmailPanel, Brick.widget.Panel, {
+	YAHOO.extend(PwdRestSendEmailPanel, Brick.widget.Dialog, {
 		initTemplate: function(){
 			return TM.replace('pwdokpanel', {
 				'email': this.param['email']

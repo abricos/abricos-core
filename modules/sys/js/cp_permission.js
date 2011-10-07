@@ -202,12 +202,9 @@ Component.entryPoint = function(){
 	
 	var PermissionEditor = function(){
 		
-		PermissionEditor.superclass.constructor.call(this, {
-			modal: true,
-			fixedcenter: true
-		});
+		PermissionEditor.superclass.constructor.call(this);
 	};
-	YAHOO.extend(PermissionEditor, Brick.widget.Panel, {
+	YAHOO.extend(PermissionEditor, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(this._TId['editor'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },

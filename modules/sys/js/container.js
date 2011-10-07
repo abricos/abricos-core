@@ -677,8 +677,11 @@ Component.entryPoint = function(){
 	};
 	
 	var Dialog = function(config){
-		config = config || {};
+		config = L.merge({
+			fixedcenter: true
+		}, config || {});
 		config.modal = true;
+		
 		Dialog.superclass.constructor.call(this, config);
 	};
 	YAHOO.extend(Dialog, Panel, {});
