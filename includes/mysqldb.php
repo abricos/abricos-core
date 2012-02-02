@@ -1,15 +1,19 @@
 <?php
 /**
-* @version $Id$
-* @package Abricos
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
-
-/**
- * База данных MySql
+ * Класс по работе с БД MySql
+ * 
+ * @todo Документирован не полностью
+ *
+ * @version $Id$
+ * @package Abricos
+ * @subpackage Core
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @copyright Copyright (C) 2008-2011 Abricos All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ *
+ * @abstract
  */
-class CMSMySqlDB extends CMSDatabase {
+class Ab_DatabaseMySql extends Ab_Database {
 
 	/**
 	 * Массив констант используемых в fetch_array
@@ -17,16 +21,16 @@ class CMSMySqlDB extends CMSDatabase {
 	 * @var	array
 	 */
 	public $fetchtypes = array(
-		CMSDatabase::DBARRAY_NUM   => MYSQL_NUM,
-		CMSDatabase::DBARRAY_ASSOC => MYSQL_ASSOC,
-		CMSDatabase::DBARRAY_BOTH  => MYSQL_BOTH
+		Ab_Database::DBARRAY_NUM   => MYSQL_NUM,
+		Ab_Database::DBARRAY_ASSOC => MYSQL_ASSOC,
+		Ab_Database::DBARRAY_BOTH  => MYSQL_BOTH
 	);
 	
 	/**
-	* SQL Query String
-	*
-	* @var	integer	The maximum size of query string permitted by the master server
-	*/
+	 * SQL Query String
+	 *
+	 * @var	integer	The maximum size of query string permitted by the master server
+	 */
 	private $maxpacket = 0;
 
 	protected function SetError($error){
@@ -49,7 +53,7 @@ class CMSMySqlDB extends CMSDatabase {
 		return mysql_query($this->sql);
 	}
 	
-	public function fetch_array_pt($queryresult, $type = CMSDatabase::DBARRAY_ASSOC) {
+	public function fetch_array_pt($queryresult, $type = Ab_Database::DBARRAY_ASSOC) {
 		return @mysql_fetch_array($queryresult, $this->fetchtypes["$type"]);
 	}
 	
@@ -97,6 +101,17 @@ class CMSMySqlDB extends CMSDatabase {
 			$this->query_write($sqls[$i]);
 		}
 	}
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ *
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_DatabaseMySql}
+ * @ignore
+ */
+class CMSMySqlDB extends Ab_DatabaseMySql {
 }
 
 ?>

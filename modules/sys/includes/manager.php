@@ -1,56 +1,50 @@
 <?php
 /**
+ * Менеджер системного модуля
+ * 
  * @version $Id$
  * @package Abricos
- * @subpackage Sys
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @subpackage Core
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
+ * @author Alexander Kuzmin <roosit@abricos.org>
  */
-
-/**
- * Менеджер 
- * @package Abricos
- * @subpackage Sys
- */
-class SystemManager {
+class Ab_CoreSystemManager extends Ab_ModuleManager {
 	
 	/**
 	 * Ядро
 	 *
 	 * @var CMSRegistry
 	 */
-	public $registry = null;
-	
-	/**
-	 * База данных
-	 *
-	 * @var CMSDatabase
-	 */
-	public $db = null;
+	public $registry;
 	
 	/**
 	 * Модуль
 	 * 
-	 * @var SystemModule
+	 * @var Ab_CoreSystemModule
 	 */
-	public $module = null;
+	public $module;
 	
-	public $user = null;
+	/**
+	 * @var Ab_CoreSystemManager
+	 */
+	public static $instance;
 	
-	public function SystemManager(SystemModule $module){
+	public function __construct(Ab_CoreSystemModule $module){
+		parent::__construct($module);
 		$this->module = $module;
 		$this->registry = $module->registry;
-		$this->db = $module->registry->db;
-		$this->user = $this->registry->user->info;
+		
+		Ab_CoreSystemManager::$instance = $this;
 	}
 	
 	public function IsRegister(){
-		return $this->registry->user->IsRegistred();
+		return Abricos::$user->id > 0;
 	}
 	
 	public function IsAdminRole(){
-		return $this->registry->user->IsAdminMode();
+		return $this->IsRoleEnable(Ab_CoreSystemAction::ADMIN);
 	}
 
 	/**

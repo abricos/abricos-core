@@ -2,7 +2,7 @@
 /**
  * @version $Id$
  * @package Abricos
- * @subpackage User
+ * @subpackage 
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
@@ -17,7 +17,7 @@ class UserQueryExt extends UserQuery {
 	//                      Запросы по пользователям                  //
 	////////////////////////////////////////////////////////////////////
 	
-	public static function UserConfigList(CMSDatabase $db, $userid, $module){
+	public static function UserConfigList(Ab_Database $db, $userid, $module){
 		$sql = "
 			SELECT
 				userconfigid as id,
@@ -29,7 +29,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function UserConfigInfo(CMSDatabase $db, $id){
+	public static function UserConfigInfo(Ab_Database $db, $id){
 		$sql = "
 			SELECT
 				userid as uid,
@@ -41,7 +41,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_first($sql);
 	}
 	
-	public static function UserConfigAppend(CMSDatabase $db, $userid, $module, $name, $value){
+	public static function UserConfigAppend(Ab_Database $db, $userid, $module, $name, $value){
 		$sql = "
 			INSERT INTO ".$db->prefix."userconfig (module, userid, optname, optvalue) VALUES (
 				'".bkstr($module)."',
@@ -53,7 +53,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserConfigUpdate(CMSDatabase $db, $userid, $cfgid, $cfgval){
+	public static function UserConfigUpdate(Ab_Database $db, $userid, $cfgid, $cfgval){
 		$sql = "
 			UPDATE ".$db->prefix."userconfig
 			SET optvalue='".bkstr($cfgval)."'
@@ -62,7 +62,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserPrivateInfo(CMSDatabase $db, $userid, $retarray = false){
+	public static function UserPrivateInfo(Ab_Database $db, $userid, $retarray = false){
 		$sql = "
 			SELECT 
 				userid as id, 
@@ -82,7 +82,7 @@ class UserQueryExt extends UserQuery {
 			return $db->query_first($sql);
 	}
 
-	public static function UserPublicInfo(CMSDatabase $db, $userid, $retarray = false){
+	public static function UserPublicInfo(Ab_Database $db, $userid, $retarray = false){
 		$sql = "
 			SELECT 
 				userid as id, 
@@ -100,7 +100,7 @@ class UserQueryExt extends UserQuery {
 	}
 	
 	
-	public static function UserByEmail(CMSDatabase $db, $email){
+	public static function UserByEmail(Ab_Database $db, $email){
 		$email = strtolower(trim($email));
 		$sql = "
 			SELECT * 
@@ -118,12 +118,12 @@ class UserQueryExt extends UserQuery {
 	 * 1 - пользователь с таким логином уже зарегистрирован, 
 	 * 2 - пользователь с таким email уже зарегистрирован
 	 * 
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 * @param String $username
 	 * @param String $email
 	 * @return Integer
 	 */
-	public static function UserExists(CMSDatabase $db, $username, $email){
+	public static function UserExists(Ab_Database $db, $username, $email){
 		$email = strtolower($email);
 		$username = htmlspecialchars_uni($username);
 		
@@ -145,10 +145,10 @@ class UserQueryExt extends UserQuery {
 	/**
 	 * Добавить пользователя в базу
 	 *
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 * @param Array $user данные пользователя
 	 */
-	public static function UserAppend(CMSDatabase $db, &$user, $groupid = User::UG_GUEST){
+	public static function UserAppend(Ab_Database $db, &$user, $groupid = User::UG_GUEST){
 		
 		$db->query_write("
 			INSERT INTO `".$db->prefix."user` 
@@ -183,7 +183,7 @@ class UserQueryExt extends UserQuery {
 	/**
 	 * Активация пользователя
 	 *
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 * @param Integer $userid
 	 * @param Integer $activateId
 	 * @return Integer ошибка: 
@@ -192,7 +192,7 @@ class UserQueryExt extends UserQuery {
 	 * 		2 - пользователь уже активирован;
 	 * 		3 - прочая ошибка
 	 */
-	public static function RegistrationActivate(CMSDatabase $db, $userid, $activateId){
+	public static function RegistrationActivate(Ab_Database $db, $userid, $activateId){
 
 		$actData = $db->query_first("
 			SELECT * 
@@ -221,7 +221,7 @@ class UserQueryExt extends UserQuery {
 		return 0;
 	}
 
-	public static function UserUpdate(CMSDatabase $db, $userid, $data){
+	public static function UserUpdate(Ab_Database $db, $userid, $data){
 		$arr = array();
 		foreach ($data as $key => $value){
 			array_push($arr, $key."='".$value."'");
@@ -237,13 +237,13 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserGroupRemoveByKey(CMSDatabase $db, $userid, $key){
+	public static function UserGroupRemoveByKey(Ab_Database $db, $userid, $key){
 		$group = UserQueryExt::GroupByKey($db, $key, true);
 		if (empty($group)){ return; }
 		UserQueryExt::UserGroupRemove($db, $userid, $group['id']);
 	}
 	
-	public static function UserGroupRemove(CMSDatabase $db, $userid, $groupid){
+	public static function UserGroupRemove(Ab_Database $db, $userid, $groupid){
 		$sql = "
 			DELETE FROM `".$db->prefix."usergroup`
 			WHERE userid=".bkint($userid)." AND groupid=".bkint($groupid)."
@@ -251,13 +251,13 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserGroupAppendByKey(CMSDatabase $db, $userid, $key){
+	public static function UserGroupAppendByKey(Ab_Database $db, $userid, $key){
 		$group = UserQueryExt::GroupByKey($db, $key, true);
 		if (empty($group)){ return; }
 		UserQueryExt::UserGroupAppend($db, $userid, $group['id']);
 	}
 	
-	public static function UserGroupAppend(CMSDatabase $db, $userid, $groupid){
+	public static function UserGroupAppend(Ab_Database $db, $userid, $groupid){
 		$sql = "
 			INSERT IGNORE INTO `".$db->prefix."usergroup` (`userid`, `groupid`) VALUES 
 			(".bkint($userid).",".bkint($groupid).")
@@ -265,7 +265,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserGroupUpdate(CMSDatabase $db, $userid, $groups){
+	public static function UserGroupUpdate(Ab_Database $db, $userid, $groups){
 		$sql = "
 			DELETE FROM `".$db->prefix."usergroup`
 			WHERE userid=".bkint($userid)."
@@ -285,7 +285,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserGroupList(CMSDatabase $db, $page, $limit){
+	public static function UserGroupList(Ab_Database $db, $page, $limit){
 		$from = (($page-1)*$limit);
 		$sql = "
 			SELECT
@@ -295,7 +295,7 @@ class UserQueryExt extends UserQuery {
 				SELECT 
 					userid
 				FROM ".$db->prefix."user
-				ORDER BY userid DESC
+				ORDER BY CASE WHEN lastvisit>joindate THEN lastvisit ELSE joindate END DESC
 				LIMIT ".$from.",".bkint($limit)."
 			) u
 			LEFT JOIN ".$db->prefix."usergroup ug ON u.userid = ug.userid
@@ -303,7 +303,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql);
 	}
 
-	public static function UserList(CMSDatabase $db, $page, $limit){
+	public static function UserList(Ab_Database $db, $page, $limit){
 		$from = (($page-1)*$limit);
 		$sql = "
 			SELECT 
@@ -313,13 +313,13 @@ class UserQueryExt extends UserQuery {
 				joindate as dl,
 				lastvisit as vst
 			FROM ".$db->prefix."user
-			ORDER BY userid DESC
+			ORDER BY CASE WHEN lastvisit>joindate THEN lastvisit ELSE joindate END DESC
 			LIMIT ".$from.",".bkint($limit)."
 		";
 		return $db->query_read($sql);
 	}
 	
-	public static function UserListAll(CMSDatabase $db){
+	public static function UserListAll(Ab_Database $db){
 		$sql = "
 			SELECT 
 				userid as id, 
@@ -332,7 +332,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql); 		
 	}
 	
-	public static function UserCount(CMSDatabase $db){
+	public static function UserCount(Ab_Database $db){
 		$sql = "
 			SELECT COUNT(userid) as cnt 
 			FROM ".$db->prefix."user
@@ -341,7 +341,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql); 
 	}
 	
-	public static function UserOnline(CMSDatabase $db){
+	public static function UserOnline(Ab_Database $db){
 		$sql = "
 			SELECT count( * ) AS cnt
 			FROM (
@@ -357,7 +357,7 @@ class UserQueryExt extends UserQuery {
 	/**
 	 * Кол-во отправленых писем по восстановлению пароля юзеру
 	 */
-	public static function PasswordSendCount(CMSDatabase $db, $userid){
+	public static function PasswordSendCount(Ab_Database $db, $userid){
 		$row = $db->query_first("
 			SELECT counteml 
 			FROM ".$db->prefix."userpwdreq
@@ -370,7 +370,7 @@ class UserQueryExt extends UserQuery {
 		return $row['counteml'];
 	}
 	
-	public static function PasswordRequestCreate(CMSDatabase $db, $userid, $hash){
+	public static function PasswordRequestCreate(Ab_Database $db, $userid, $hash){
 		$sql = "
 			INSERT ".$db->prefix."userpwdreq (userid, hash, dateline, counteml) VALUES
 			(
@@ -383,7 +383,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function PasswordRequestCheck(CMSDatabase $db, $hash){
+	public static function PasswordRequestCheck(Ab_Database $db, $hash){
 		$sql = "
 			SELECT * 
 			FROM ".$db->prefix."userpwdreq
@@ -393,7 +393,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_first($sql);
 	}
 	
-	public static function PasswordChange(CMSDatabase $db, $userid, $newpass){
+	public static function PasswordChange(Ab_Database $db, $userid, $newpass){
 		$db->query_write("
 			UPDATE ".$db->prefix."user
 			SET password = '".$newpass."'
@@ -415,9 +415,9 @@ class UserQueryExt extends UserQuery {
 	/**
 	 * Получить список действий модуля
 	 * 
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 */
-	public static function ModuleActionList(CMSDatabase $db, $modname = ''){
+	public static function ModuleActionList(Ab_Database $db, $modname = ''){
 		$where = "";
 		if (!empty($modname)){
 			$where = "WHERE module='".bkstr($modname)."'";
@@ -441,11 +441,11 @@ class UserQueryExt extends UserQuery {
 	/**
 	 * Список ролей (ID роли, ID действия, статус)
 	 * 
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 * @param integer $groupid если $usertype=0, то роль группы, иначе роль пользователя 
 	 * @param integer $usertype 
 	 */
-	public static function RoleList(CMSDatabase $db, $groupid, $usertype = 0){
+	public static function RoleList(Ab_Database $db, $groupid, $usertype = 0){
 		$sql = "
 			SELECT 
 				roleid as id,
@@ -457,7 +457,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function RoleAppend(CMSDatabase $db, $groupid, $d){
+	public static function RoleAppend(Ab_Database $db, $groupid, $d){
 		$sql = "
 			INSERT IGNORE INTO ".$db->prefix."userrole 
 			(`modactionid`, `usertype`, `userid`, `status`) VALUES (
@@ -469,7 +469,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function RoleRemove(CMSDatabase $db, $roleid){
+	public static function RoleRemove(Ab_Database $db, $roleid){
 		$sql = "
 			DELETE FROM ".$db->prefix."userrole
 			WHERE roleid=".bkint($roleid)."
@@ -477,7 +477,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function PermissionInstall(CMSDatabase $db, AbricosPermission $permission){
+	public static function PermissionInstall(Ab_Database $db, Ab_UserPermission $permission){
 		$modname = $permission->module->name;
 		$actions = array();
 		$rows = UserQueryExt::ModuleActionList($db, $modname);
@@ -544,7 +544,7 @@ class UserQueryExt extends UserQuery {
 		}
 	}
 	
-	public static function PermissionRemove(CMSDatabase $db, AbricosPermission $permission){
+	public static function PermissionRemove(Ab_Database $db, Ab_UserPermission $permission){
 		$rows = $db->query_read("
 			SELECT 
 				modactionid as id,
@@ -566,7 +566,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ModuleActionRemove(CMSDatabase $db, $modactionid){
+	public static function ModuleActionRemove(Ab_Database $db, $modactionid){
 		$sql = "
 			DELETE FROM ".$db->prefix."userrole
 			WHERE modactionid=".bkint($modactionid)."
@@ -580,7 +580,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function GroupByKey(CMSDatabase $db, $key, $retarray = false){
+	public static function GroupByKey(Ab_Database $db, $key, $retarray = false){
 		$sql = "
 			SELECT 
 				groupid as id, 
@@ -593,7 +593,7 @@ class UserQueryExt extends UserQuery {
 		return $retarray ? $db->query_first($sql) : $db->query_read($sql);
 	}
 	
-	public static function GroupList(CMSDatabase $db){
+	public static function GroupList(Ab_Database $db){
 		$sql = "
 			SELECT 
 				groupid as id, 
@@ -604,7 +604,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql);
 	}
 
-	public static function GroupCount(CMSDatabase $db){
+	public static function GroupCount(Ab_Database $db){
 		$sql = "
 			SELECT COUNT(groupid) as cnt 
 			FROM ".$db->prefix."group
@@ -613,7 +613,7 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql); 
 	}
 	
-	public static function GroupAppend(CMSDatabase $db, $name, $key = ''){
+	public static function GroupAppend(Ab_Database $db, $name, $key = ''){
 		$sql = "
 			INSERT INTO ".$db->prefix."group (`groupname`, `groupkey`) VALUES (
 				'".bkstr($name)."',
@@ -624,7 +624,7 @@ class UserQueryExt extends UserQuery {
 		return $db->insert_id();
 	}
 	
-	public static function GroupUpdate(CMSDatabase $db, $d){
+	public static function GroupUpdate(Ab_Database $db, $d){
 		$sql = "
 			UPDATE ".$db->prefix."group 
 			SET groupname = '".bkstr($d->nm)."'
@@ -633,7 +633,7 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql); 
 	}
 	
-	public static function UserFieldList (CMSDatabase $db){
+	public static function UserFieldList (Ab_Database $db){
 		$sql = "SHOW COLUMNS FROM ".$db->prefix."user";
 		return $db->query_read($sql);
 	}

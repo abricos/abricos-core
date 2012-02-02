@@ -1,19 +1,16 @@
 <?php
 /**
+ * Загрузчик кирпича
+ * 
  * @version $Id$
  * @package Abricos
- * @subpackage Sys
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @subpackage Core
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
- */
-
-/**
- * Загрузчик кирпича 
- * @package Abricos
- * @subpackage Sys
- */
-class CMSSysBrickReader {
+ * @author Alexander Kuzmin <roosit@abricos.org>
+*/
+class Ab_CoreBrickReader {
 	
 	/**
 	 * CMS Engine
@@ -52,7 +49,7 @@ class CMSSysBrickReader {
 		
 		$brickdb = array();
 
-		$rows = CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_BRICK);
+		$rows = Ab_CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_BRICK);
 		while (($row = $this->registry->db->fetch_array($rows))){
 			$brickdb[$row['own'].".".$row['nm']] = $row;
 		}
@@ -77,16 +74,16 @@ class CMSSysBrickReader {
 				$bname = basename($file, ".html");
 				$key = $module->name.".".$bname;
 				if (empty($brickdb[$key])){
-					$brick = CMSSysBrickReader::ReadBrickFromFile($file);
-					$brickid = CoreQuery::BrickAppendFromParser($this->db, $module->name, $bname, $brick->body, Brick::BRICKTYPE_BRICK, $brick->hash);
-					CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
+					$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
+					$brickid = Ab_CoreQuery::BrickAppendFromParser($this->db, $module->name, $bname, $brick->body, Brick::BRICKTYPE_BRICK, $brick->hash);
+					Ab_CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
 				}else { 
 					$bk = $brickdb[$key];
 					if (empty($bk['ud'])){
-						$brick = CMSSysBrickReader::ReadBrickFromFile($file);
+						$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
 						if ($bk['hh'] != $brick->hash){
-							CoreQuery::BrickSaveFromParser($this->db, $bk['id'], $brick->body, $brick->hash);
-							CoreQuery::BrickParamAppendFromParser($this->db, $bk['id'], $brick->param);
+							Ab_CoreQuery::BrickSaveFromParser($this->db, $bk['id'], $brick->body, $brick->hash);
+							Ab_CoreQuery::BrickParamAppendFromParser($this->db, $bk['id'], $brick->param);
 						}
 					}
 				}
@@ -100,7 +97,7 @@ class CMSSysBrickReader {
 		
 		$brickdb = array();
 
-		$rows = CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_CONTENT);
+		$rows = Ab_CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_CONTENT);
 		while (($row = $this->registry->db->fetch_array($rows))){
 			$brickdb[$row['own'].".".$row['nm']] = $row;
 		}
@@ -112,17 +109,17 @@ class CMSSysBrickReader {
 				$bname = basename($file, ".html");
 				$key = $module->name.".".$bname;
 				if (empty($brickdb[$key])){
-					$brick = CMSSysBrickReader::ReadBrickFromFile($file);
-					$brickid = CoreQuery::BrickAppendFromParser($this->db, $module->name, $bname, $brick->body, 
+					$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
+					$brickid = Ab_CoreQuery::BrickAppendFromParser($this->db, $module->name, $bname, $brick->body, 
 						Brick::BRICKTYPE_CONTENT, $brick->hash);
-					CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
+					Ab_CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
 				}else { 
 					$bk = $brickdb[$key];
 					if (empty($bk['ud'])){
-						$brick = CMSSysBrickReader::ReadBrickFromFile($file);
+						$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
 						if ($bk['hh'] != $brick->hash){
-							CoreQuery::BrickSaveFromParser($this->db, $bk['id'], $brick->body, $brick->hash);
-							CoreQuery::BrickParamAppendFromParser($this->db, $bk['id'], $brick->param);
+							Ab_CoreQuery::BrickSaveFromParser($this->db, $bk['id'], $brick->body, $brick->hash);
+							Ab_CoreQuery::BrickParamAppendFromParser($this->db, $bk['id'], $brick->param);
 						}
 					}
 				}
@@ -135,7 +132,7 @@ class CMSSysBrickReader {
 		
 		$template = array();
 		
-		$rows = CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_TEMPLATE);
+		$rows = Ab_CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_TEMPLATE);
 		while (($row = $this->registry->db->fetch_array($rows))){
 			$template[$row['own'].".".$row['nm']] = $row;
 		}
@@ -151,16 +148,16 @@ class CMSSysBrickReader {
 				$key = $dirname.".".$bname;
 				
 				if (empty($template[$key])){
-					$brick = CMSSysBrickReader::ReadBrickFromFile($file);
-					$brickid = CoreQuery::BrickAppendFromParser($this->db, $dirname, $bname, $brick->body, Brick::BRICKTYPE_TEMPLATE, $brick->hash);
-					CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
+					$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
+					$brickid = Ab_CoreQuery::BrickAppendFromParser($this->db, $dirname, $bname, $brick->body, Brick::BRICKTYPE_TEMPLATE, $brick->hash);
+					Ab_CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
 				}else{
 					$bk = $template[$key];
 					if (empty($bk['ud'])){
-						$brick = CMSSysBrickReader::ReadBrickFromFile($file);
+						$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
 						if ($bk['hh'] != $brick->hash){
-							CoreQuery::BrickSaveFromParser($this->db, $bk['id'], $brick->body, $brick->hash);
-							CoreQuery::BrickParamAppendFromParser($this->db, $bk['id'], $brick->param);
+							Ab_CoreQuery::BrickSaveFromParser($this->db, $bk['id'], $brick->body, $brick->hash);
+							Ab_CoreQuery::BrickParamAppendFromParser($this->db, $bk['id'], $brick->param);
 						}
 					}
 				}
@@ -168,30 +165,30 @@ class CMSSysBrickReader {
 		}
 	}
 	
-	public static function SyncParamFromDB(CMSSysBrickParam $param, $customParam){
+	public static function SyncParamFromDB(Ab_CoreBrickParam $param, $customParam){
 		foreach ($customParam as $p){
 			switch ($p['tp']){
 				case Brick::BRICKPRM_CSS:
-					CMSSysBrickReader::SyncParamVar($param->css, $p['v']);
+					Ab_CoreBrickReader::SyncParamVar($param->css, $p['v']);
 					break;
 				case Brick::BRICKPRM_GLOBALVAR:
 					$param->gvar[$p['nm']] = $p['v'];
 					break;
 				case Brick::BRICKPRM_JSFILE:
-					CMSSysBrickReader::SyncParamVar($param->jsfile, $p['v']);
+					Ab_CoreBrickReader::SyncParamVar($param->jsfile, $p['v']);
 					break;
 				case Brick::BRICKPRM_JSMOD:
 					if (!is_array($param->jsmod[$p['nm']])){
 						$param->jsmod[$p['nm']] = array();
 					}
-					CMSSysBrickReader::SyncParamVar($param->jsmod[$p['nm']], $p['v']);
+					Ab_CoreBrickReader::SyncParamVar($param->jsmod[$p['nm']], $p['v']);
 					break;
 					
 				case Brick::BRICKPRM_CSSMOD:
 					if (!is_array($param->cssmod[$p['nm']])){
 						$param->cssmod[$p['nm']] = array();
 					}
-					CMSSysBrickReader::SyncParamVar($param->cssmod[$p['nm']], $p['v']);
+					Ab_CoreBrickReader::SyncParamVar($param->cssmod[$p['nm']], $p['v']);
 					break;
 
 				case Brick::BRICKPRM_MODULE:
@@ -218,12 +215,12 @@ class CMSSysBrickReader {
 					if (!is_array($param->param[$p['nm']])){
 						$param->param[$p['nm']] = array();
 					}
-					CMSSysBrickReader::SyncParamVar($param->param[$p['nm']], $p['v']);
+					Ab_CoreBrickReader::SyncParamVar($param->param[$p['nm']], $p['v']);
 				case Brick::BRICKPRM_PHRASE:
 					$param->phrase[$p['nm']] = $p['v'];
 					break;
 				case Brick::BRICKPRM_SCRIPT:
-					CMSSysBrickReader::SyncParamVar($param->script, $p['v']);
+					Ab_CoreBrickReader::SyncParamVar($param->script, $p['v']);
 					break;
 				case Brick::BRICKPRM_TEMPLATE:
 					$param->template['name'] = $p['nm'];
@@ -274,8 +271,13 @@ class CMSSysBrickReader {
 			if (file_exists($override)){
 				$path = $override;
 			}
+			
+			if ($type == Brick::BRICKTYPE_CONTENT && !file_exists($path)){
+				Abricos::$instance->pageStatus = PAGESTATUS_500;
+			}
+			
 		}
-		return CMSSysBrickReader::ReadBrickFromFile($path);
+		return Ab_CoreBrickReader::ReadBrickFromFile($path);
 	}
 	
 	public static function ReadBrickFromFile($file){
@@ -313,7 +315,7 @@ class CMSSysBrickReader {
 		if (!empty($langa)){
 			foreach ($langa as $modname => $value){
 				foreach ($value as $name){
-					$mod = CMSRegistry::$instance->modules->GetModule($modname);
+					$mod = Abricos::GetModule($modname);
 					if (!empty($mod)){
 						$filebody = str_replace("{#".$modname.".".$name."}", $mod->lang[$name], $filebody);
 					}
@@ -332,22 +334,22 @@ class CMSSysBrickReader {
 		}
 		
 		$ret->body = preg_replace($pattern, '', $filebody);
-		$p = new CMSSysBrickParam();
+		$p = new Ab_CoreBrickParam();
 		
 		// локальные переменные кирпича
-		$p->var = CMSSysBrickReader::BrickParseVar($param, "bkvar");
-		$var = CMSSysBrickReader::BrickParseVar($param, "v");
+		$p->var = Ab_CoreBrickReader::BrickParseVar($param, "bkvar");
+		$var = Ab_CoreBrickReader::BrickParseVar($param, "v");
 		foreach ($var as $key => $value){
 			$p->var[$key] = $value;
 		}
 		
 		// глобальные переменные
-		$p->gvar = CMSSysBrickReader::BrickParseVar($param, "var");
+		$p->gvar = Ab_CoreBrickReader::BrickParseVar($param, "var");
 		
 		// подключаемые модули
 		// объявление может быть из нескольких кирпичей с параметрами
 		// например: [mod=mymod]mybrick1|p1=mystr|p2=10,mybrick2[/mod]
-		$arr = CMSSysBrickReader::BrickParseVar($param, "mod");
+		$arr = Ab_CoreBrickReader::BrickParseVar($param, "mod");
 		foreach($arr as $key => $value){
 			if (!is_array($p->module[$key])){
 				$p->module[$key] = array();
@@ -374,7 +376,7 @@ class CMSSysBrickReader {
 		}
 		
 		// шаблон
-		$arr = CMSSysBrickReader::BrickParseVar($param, "tt");
+		$arr = Ab_CoreBrickReader::BrickParseVar($param, "tt");
 		foreach ($arr as $key => $value){
 			$p->template['name'] = $key;
 			$p->template['owner'] = $value;
@@ -382,25 +384,25 @@ class CMSSysBrickReader {
 		}
 
 		// Фразы
-		$p->phrase = CMSSysBrickReader::BrickParseVar($param, "ph");
-		$p->param = CMSSysBrickReader::BrickParseVar($param, "p");
-		$p->script = CMSSysBrickReader::BrickParseValue($param, "script");
+		$p->phrase = Ab_CoreBrickReader::BrickParseVar($param, "ph");
+		$p->param = Ab_CoreBrickReader::BrickParseVar($param, "p");
+		$p->script = Ab_CoreBrickReader::BrickParseValue($param, "script");
 
 		// JavaScript модули
-		$arr = CMSSysBrickReader::BrickParseVar($param, "mjs");
+		$arr = Ab_CoreBrickReader::BrickParseVar($param, "mjs");
 		foreach($arr as $key => $value){
 			$p->jsmod[$key] = explode(',', $value); 
 		}
 		
 		// CSS файлы модуля
-		$arr = CMSSysBrickReader::BrickParseVar($param, "mcss");
+		$arr = Ab_CoreBrickReader::BrickParseVar($param, "mcss");
 		foreach($arr as $key => $value){
 			$p->cssmod[$key] = explode(',', $value); 
 		}
 		
 		// JavaScript файлы
-		$p->jsfile = CMSSysBrickReader::BrickParseValue($param, "js");
-		$p->css = CMSSysBrickReader::BrickParseValue($param, "css");
+		$p->jsfile = Ab_CoreBrickReader::BrickParseValue($param, "js");
+		$p->css = Ab_CoreBrickReader::BrickParseValue($param, "css");
 		
 		$ret->param = $p; 
 		
@@ -443,6 +445,17 @@ class CMSSysBrickReader {
 		return $array;
 	}
 	
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreBrickReader}
+ * @ignore
+ */
+final class CMSSysBrickReader extends Ab_CoreBrickReader {
 }
 
 ?>

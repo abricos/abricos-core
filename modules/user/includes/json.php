@@ -8,13 +8,12 @@
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 $brick = Brick::$builder->brick;
 
-$in = Brick::$input;
-
-$p_jsonPassword = $in->clean_gpc('p', 'jsonpass', TYPE_STR);
+$p_jsonPassword = Abricos::CleanGPC('p', 'jsonpass', TYPE_STR);
 $cfg = CMSRegistry::$instance->config['JsonDB'];
 if (!$cfg['use']){ return; }
 $jsonPassword = $cfg['password'];
@@ -23,18 +22,18 @@ if ($p_jsonPassword != $jsonPassword){
 	return;
 }
 
-$userManager = CMSRegistry::$instance->modules->GetModule('user')->GetManager(); 
-$p_do = $in->clean_gpc('p', 'do', TYPE_STR);
+$userManager = Abricos::GetModule('user')->GetManager(); 
+$p_do = Abricos::CleanGPC('p', 'do', TYPE_STR);
 
 $result = "";
 if ($p_do == "user"){
-	$p_username	= trim($in->clean_gpc('p', 'username', TYPE_STR));
-	$userinfo = UserQuery::UserByName(Brick::$db, $p_username);
+	$p_username	= trim(Abricos::CleanGPC('p', 'username', TYPE_STR));
+	$userinfo = UserQuery::UserByName(Abricos::$db, $p_username);
 	if (empty($userinfo)){ return; }
 	$result = json_encode($userinfo);
 }else if  ($p_do == "login"){
-	$p_username	= trim($in->clean_gpc('p', 'username', TYPE_STR));
-	$p_password	= trim($in->clean_gpc('p', 'password', TYPE_STR));
+	$p_username	= trim(Abricos::CleanGPC('p', 'username', TYPE_STR));
+	$p_password	= trim(Abricos::CleanGPC('p', 'password', TYPE_STR));
 	
 	$error = $userManager->Login($p_username, $p_password);
 	if ($error > 0){
@@ -44,9 +43,9 @@ if ($p_do == "user"){
 	// $info = array("error" => $error, "pass"=>$p_password, "user"=>$p_username);
 	$result = json_encode($info);
 }else if ($p_do == "userlist"){
-	$rows = UserQueryExt::UserListAll(Brick::$db);
+	$rows = UserQueryExt::UserListAll(Abricos::$db);
 	$list = array();
-	while (($row = Brick::$db->fetch_array($rows))){
+	while (($row = Abricos::$db->fetch_array($rows))){
 		$r = array();
 		$r['unm'] = $row['unm'];
 		$r['eml'] = $row['eml'];

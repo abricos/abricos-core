@@ -1,15 +1,17 @@
 <?php
 /**
-* @version $Id$
-* @package Abricos
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
-
-
-class CoreQuery {
+ * Системные SQL запросы 
+ * 
+ * @version $Id$
+ * @package Abricos
+ * @subpackage Core
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ */
+class Ab_CoreQuery {
 	
-	public static function ContentInfo(CMSDatabase $db, $contentid){
+	public static function ContentInfo(Ab_Database $db, $contentid){
 		$sql = "
 			SELECT *
 			FROM ".$db->prefix."content
@@ -19,7 +21,7 @@ class CoreQuery {
 		return $db->query_first($sql);
 	}
 
-	public static function ContentUpdate(CMSDatabase $db, $contentid, $body){
+	public static function ContentUpdate(Ab_Database $db, $contentid, $body){
 		$sql = "
 			UPDATE ".$db->prefix."content
 			SET
@@ -30,7 +32,7 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ContentRemove(CMSDatabase $db, $contentid){
+	public static function ContentRemove(Ab_Database $db, $contentid){
 		$sql = "
 			UPDATE ".$db->prefix."content
 			SET deldate='".TIMENOW."'
@@ -39,7 +41,7 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ContentRestore(CMSDatabase $db, $contentid){
+	public static function ContentRestore(Ab_Database $db, $contentid){
 		$sql = "
 			UPDATE ".$db->prefix."content
 			SET deldate=0
@@ -48,7 +50,7 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ContentAppend(CMSDatabase $db, $body, $modname){
+	public static function ContentAppend(Ab_Database $db, $body, $modname){
 		$db->query_write("
 			INSERT INTO ".$db->prefix."content (body, dateline, modman) 
 			VALUES ('".bkstr($body)."','".TIMENOW."', '".bkstr($modname)."')
@@ -56,17 +58,17 @@ class CoreQuery {
 		return $db->insert_id();
 	}
 	
-	public static function CreateContent(CMSDatabase $db, $body, $modname){
-		return CoreQuery::ContentAppend($db, $body, $modname);
+	public static function CreateContent(Ab_Database $db, $body, $modname){
+		return Ab_CoreQuery::ContentAppend($db, $body, $modname);
 	}
 	
 	/**
 	 * Информация о модулях
 	 *
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 * @return integer указатель на результат запроса
 	 */
-	public static function ModuleList(CMSDatabase $db){
+	public static function ModuleList(Ab_Database $db){
 		$sql = "
 			SELECT * 
 			FROM ".$db->prefix."module 
@@ -75,7 +77,7 @@ class CoreQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function ModuleByName(CMSDatabase $db, $name){
+	public static function ModuleByName(Ab_Database $db, $name){
 		$sql = "
 			SELECT *
 			FROM ".$db->prefix."module 
@@ -86,7 +88,7 @@ class CoreQuery {
 	} 
 	
 	
-	public static function ModuleCreateTable(CMSDatabase $db){
+	public static function ModuleCreateTable(Ab_Database $db){
 		$db->query_write("
 			CREATE TABLE IF NOT EXISTS `".$db->prefix."module` (
 			  `moduleid` int(5) unsigned NOT NULL auto_increment,
@@ -102,8 +104,8 @@ class CoreQuery {
 		);
 	}
 	
-	public static function ModuleAppend(CMSDatabase $db, CMSModule $module){
-		$row = CoreQuery::ModuleByName($db, $module->name);
+	public static function ModuleAppend(Ab_Database $db, Ab_Module $module){
+		$row = Ab_CoreQuery::ModuleByName($db, $module->name);
 		if (empty($row)){
 			$sql = "
 				INSERT INTO ".$db->prefix."module (name, version, takelink, installdate) VALUES(
@@ -115,11 +117,11 @@ class CoreQuery {
 			";
 			$db->query_write($sql);
 		}else{
-			CoreQuery::ModuleUpdateVersion($db, $module);
+			Ab_CoreQuery::ModuleUpdateVersion($db, $module);
 		}
 	}
 	
-	public static function ModuleUpdateVersion(CMSDatabase $db, CMSModule $module){
+	public static function ModuleUpdateVersion(Ab_Database $db, Ab_Module $module){
 		$db->query_write("
 			UPDATE ".$db->prefix."module 
 				SET 
@@ -132,10 +134,10 @@ class CoreQuery {
 	/**
 	 * Список кирпичей измененные администратором
 	 *
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 * @return result
 	 */
-	public static function BrickListCustom(CMSDatabase $db){
+	public static function BrickListCustom(Ab_Database $db){
 		$sql = "
 			SELECT 
 				brickid as id,
@@ -152,9 +154,9 @@ class CoreQuery {
 		/**
 	 * Получить параметры всех модифицированных кирпичей и просто модифицированных параметов
 	 *
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 */
-	public static function BrickParamListCustom(CMSDatabase $db){
+	public static function BrickParamListCustom(Ab_Database $db){
 		$sql = "
 			SELECT 
 				a.brickparamid as id,
@@ -172,8 +174,8 @@ class CoreQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function BrickParamRemove(CMSDatabase $db, $id){
-		CoreQuery::CacheClear($db);
+	public static function BrickParamRemove(Ab_Database $db, $id){
+		Ab_CoreQuery::CacheClear($db);
 		$sql = "
 			DELETE FROM ".$db->prefix."sys_brickparam
 			WHERE brickparamid=".bkint($id)."
@@ -181,8 +183,8 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickParamSave(CMSDatabase $db, $data){
-		CoreQuery::CacheClear($db);
+	public static function BrickParamSave(Ab_Database $db, $data){
+		Ab_CoreQuery::CacheClear($db);
 		$sql = "
 			UPDATE ".$db->prefix."sys_brickparam
 			SET
@@ -194,8 +196,8 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickParamAppend(CMSDatabase $db, $data){
-		CoreQuery::CacheClear($db);
+	public static function BrickParamAppend(Ab_Database $db, $data){
+		Ab_CoreQuery::CacheClear($db);
 		$sql = "
 			INSERT INTO ".$db->prefix."sys_brickparam
 			(paramtype, name, paramvalue, brickid, upddate) VALUES
@@ -210,7 +212,7 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickParamClearList(CMSDatabase $db, $brickid){
+	public static function BrickParamClearList(Ab_Database $db, $brickid){
 		$brickid = bkint($brickid);
 		$sql = "
 			DELETE FROM  ".$db->prefix."sys_brickparam
@@ -219,10 +221,10 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickParamAppendFromParser(CMSDatabase $db, $brickid, $param){
-		CoreQuery::CacheClear($db);
+	public static function BrickParamAppendFromParser(Ab_Database $db, $brickid, $param){
+		Ab_CoreQuery::CacheClear($db);
 		$brickid = bkint($brickid);
-		CoreQuery::BrickParamClearList($db, $brickid);
+		Ab_CoreQuery::BrickParamClearList($db, $brickid);
 		
 		$insert = array();
 		foreach($param->var as $key => $value){
@@ -272,7 +274,7 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickParamList(CMSDatabase $db, $brickid){
+	public static function BrickParamList(Ab_Database $db, $brickid){
 		$sql = "
 			SELECT
 				brickparamid as id, 
@@ -285,7 +287,7 @@ class CoreQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function BrickRecycleClear(CMSDatabase $db){
+	public static function BrickRecycleClear(Ab_Database $db){
 		$sql = "
 			SELECT brickid as id 
 			FROM ".$db->prefix."sys_brick
@@ -293,7 +295,7 @@ class CoreQuery {
 		";
 		$rows = $db->query_read($sql);
 		while (($row = $db->fetch_array($rows))){
-			CoreQuery::BrickParamClearList($db, $row['id']);
+			Ab_CoreQuery::BrickParamClearList($db, $row['id']);
 		}
 		$sql = "
 			DELETE FROM ".$db->prefix."sys_brick
@@ -302,8 +304,8 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickRestore(CMSDatabase $db, $brickid){
-		CoreQuery::CacheClear($db);
+	public static function BrickRestore(Ab_Database $db, $brickid){
+		Ab_CoreQuery::CacheClear($db);
 		$sql = "
 			UPDATE ".$db->prefix."sys_brick
 			SET deldate=0
@@ -312,8 +314,8 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickRemove(CMSDatabase $db, $brickid){
-		CoreQuery::CacheClear($db);
+	public static function BrickRemove(Ab_Database $db, $brickid){
+		Ab_CoreQuery::CacheClear($db);
 		$sql = "
 			UPDATE ".$db->prefix."sys_brick
 			SET deldate=".TIMENOW."
@@ -322,8 +324,8 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickSave(CMSDatabase $db, $data){
-		CoreQuery::CacheClear($db);
+	public static function BrickSave(Ab_Database $db, $data){
+		Ab_CoreQuery::CacheClear($db);
 		$sql = "
 			UPDATE ".$db->prefix."sys_brick
 			SET 
@@ -335,7 +337,7 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function BrickById(CMSDatabase $db, $brickid, $comment = false){
+	public static function BrickById(Ab_Database $db, $brickid, $comment = false){
 		$cmt = ",IFNULL(comments,'') as cmt";
 		if (!$comment){
 			$cmt = "";
@@ -355,7 +357,7 @@ class CoreQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function BrickList(CMSDatabase $db, $type, $withrc = 'no'){
+	public static function BrickList(Ab_Database $db, $type, $withrc = 'no'){
 		$sql = "
 			SELECT 
 				brickid as id,
@@ -372,8 +374,8 @@ class CoreQuery {
 		return $db->query_read($sql);
 	}
 
-	public static function BrickAppendFromParser(CMSDatabase $db, $owner, $name, $body, $type, $hash){
-		CoreQuery::CacheClear($db);
+	public static function BrickAppendFromParser(Ab_Database $db, $owner, $name, $body, $type, $hash){
+		Ab_CoreQuery::CacheClear($db);
 		$sql = "
 			INSERT INTO ".$db->prefix."sys_brick
 			(owner, name, body, bricktype, dateline, hash) VALUES
@@ -390,8 +392,8 @@ class CoreQuery {
 		return $db->insert_id();
 	}
 	
-	public static function BrickSaveFromParser(CMSDatabase $db, $brickid, $body, $paramhash){
-		CoreQuery::CacheClear($db);
+	public static function BrickSaveFromParser(Ab_Database $db, $brickid, $body, $paramhash){
+		Ab_CoreQuery::CacheClear($db);
 		$sql = "
 			UPDATE  ".$db->prefix."sys_brick
 			SET 
@@ -402,7 +404,7 @@ class CoreQuery {
 		$db->query_read($sql);
 	}
 	
-	public static function BrickListFromParser(CMSDatabase $db, $type){
+	public static function BrickListFromParser(Ab_Database $db, $type){
 		$sql = "
 			SELECT 
 				brickid as id,
@@ -417,12 +419,12 @@ class CoreQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function CacheClear(CMSDatabase $db){
+	public static function CacheClear(Ab_Database $db){
 		$sql = "TRUNCATE TABLE ".$db->prefix."sys_cache";
 		$db->query_write($sql);
 	}
 	
-	public static function CacheUpdate(CMSDatabase $db, $cacheid, $body){
+	public static function CacheUpdate(Ab_Database $db, $cacheid, $body){
 		$sql = "
 			UPDATE ".$db->prefix."sys_cache
 			SET
@@ -434,7 +436,7 @@ class CoreQuery {
 		$db->query_write($sql, true);
 	}
 	
-	public static function CacheAppend(CMSDatabase $db, $modname, $brickname, $body){
+	public static function CacheAppend(Ab_Database $db, $modname, $brickname, $body){
 		$sql = "
 			INSERT INTO ".$db->prefix."sys_cache
 			(module, name, body, upddate) VALUES (
@@ -447,7 +449,7 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function Cache(CMSDatabase $db, $modname, $brickname){
+	public static function Cache(Ab_Database $db, $modname, $brickname){
 		$sql = "
 			SELECT 
 				cacheid as id,
@@ -467,10 +469,10 @@ class CoreQuery {
 		phrase as ph
 	";
 
-	public static function Phrase(CMSDatabase $db, $modname, $name){
+	public static function Phrase(Ab_Database $db, $modname, $name){
 		$sql = "
 			SELECT
-				".CoreQuery::FIELDS_PHRASE." 
+				".Ab_CoreQuery::FIELDS_PHRASE." 
 			FROM ".$db->prefix."sys_phrase
 			WHERE module='".bkstr($modname)."' AND name='".bkstr($name)."' AND language='".LNG."'
 			LIMIT 1
@@ -478,7 +480,7 @@ class CoreQuery {
 		return $db->query_first($sql);
 	}
 	
-	public static function PhraseListUpdate(CMSDatabase $db, $phrases){
+	public static function PhraseListUpdate(Ab_Database $db, $phrases){
 		foreach ($phrases as $phrase){
 			$sql = "
 				UPDATE ".$db->prefix."sys_phrase 
@@ -492,7 +494,7 @@ class CoreQuery {
 		}
 	}
 	
-	public static function PhraseListAppend(CMSDatabase $db, $phrases){
+	public static function PhraseListAppend(Ab_Database $db, $phrases){
 		$ins = array();
 		foreach ($phrases as $phrase){
 			array_push($ins, "(
@@ -512,17 +514,17 @@ class CoreQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function PhraseListByModule(CMSDatabase $db, $module='sys'){
+	public static function PhraseListByModule(Ab_Database $db, $module='sys'){
 		$sql = "
 			SELECT
-				".CoreQuery::FIELDS_PHRASE."
+				".Ab_CoreQuery::FIELDS_PHRASE."
 			FROM ".$db->prefix."sys_phrase
 			WHERE module='".bkstr($module)."' AND language='".LNG."'
 		";
 		return $db->query_read($sql);
 	}
 	
-	public static function PhraseList(CMSDatabase $db, $list){
+	public static function PhraseList(Ab_Database $db, $list){
 		$where = array();
 		foreach ($list as $key => $value){
 			$sa = explode(":", $key);
@@ -543,7 +545,7 @@ class CoreQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function UpdateToAbricosPackage(CMSDatabase $db){
+	public static function UpdateToAbricosPackage(Ab_Database $db){
 		$db->query_write("
 			ALTER TABLE `".$db->prefix."module` 
 				ADD `installdate` int(10) unsigned NOT NULL default 0 AFTER `takelink`,
@@ -557,4 +559,16 @@ class CoreQuery {
 		");
 	}
 }
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreQuery}
+ * @ignore
+ */
+final class CoreQuery extends Ab_CoreQuery {
+}
+
 ?>

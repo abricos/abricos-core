@@ -50,7 +50,6 @@ Component.entryPoint = function(){
 				permData[di['nm']] = di['roles'];
 			});
 			
-			
 			if (L.isFunction(callback)){
 				callback();
 			}

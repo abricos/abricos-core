@@ -1,18 +1,28 @@
 <?php
 /**
-* @version $Id$
-* @package Abricos
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
-
-/**
- * Модуль
+ * Абстрактный класс модуля в платформе Абрикос
+ * 
+ * Структура модуля 
+ * 
+ * Модуль в платформе Абрикос — это самостоятельная сущность, со своим шаблоном, 
+ * стилями css, картинками, серверными скриптами и прочими необходимыми для его 
+ * работы компонентами. Все модули в платформе Абрикос располагаются в папке modules.
+ * 
+ * Главным файлом любого модуля в платформе является скрипт module.php, 
+ * который должен находиться в корневой папке модуля. Когда ядро платформы просматривает 
+ * доступные модули, то она смотрит именно этот файл.
+ * 
+ * @version $Id$
+ * @package Abricos
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @example modules/example/module.php
  */
-abstract class CMSModule {
+abstract class Ab_Module {
 	
 	/**
-	 * Политика безопасности
+	 * Политика безопасности модуля
 	 * 
 	 * @var AbricosPermission
 	 */
@@ -33,7 +43,10 @@ abstract class CMSModule {
 	public $revision = "";
 	
 	/**
-	 * Наименование - идентификатор модуля
+	 * Наименование модуля латинскими буквами и цифрами
+	 * 
+	 * Используется в качестве уникального идентификатора модуля 
+	 * в платформе Абрикос
 	 *
 	 * @var string
 	 */
@@ -50,7 +63,7 @@ abstract class CMSModule {
 	
 	/**
 	 * Ядро
-	 * @var CMSRegistry
+	 * @var Abricos
 	 */
 	public $registry = null;
 	
@@ -67,7 +80,30 @@ abstract class CMSModule {
 	public $defaultCSS = "";
 	
 	/**
-	 * Получить имя стартового кирпича для сборки страницы
+	 * Список зависимых модулей и их версии
+	 * Например: 
+	 * <code>
+	 * array(
+	 *   'sys' => '0.5.5', 
+	 *   'uprofile' => '0.1.2'
+	 * );
+	 * </code>
+	 * Примечание: модуль 'core' является синонимом 'sys'
+	 * @var array
+	 */
+	public $depends = array();
+
+	/**
+	 * Когда управление по формированию ответа сервера переходит модулю,
+	 * происходит вызов этого метода, который должен вернуть имя
+	 * контент файла (стартового кирпича).
+	 *
+	 * Стартовые кирпичи находяться в папке модуля content и содержат в себе
+	 * всю необходимую информацию для формирования ответа.
+	 *
+	 * Если метод возвращает пустую строку, платформа выдает 404 ошибку.
+	 *
+	 * Если файл контент не найден, то платформа выдает 500 ошибку.
 	 *
 	 * @return string
 	 */
@@ -93,144 +129,126 @@ abstract class CMSModule {
 	/**
 	 * Получить менеджер модуля
 	 * 
-	 * @return ModuleManager
+	 * Пример из модуля Example:
+	 * <code>
+	 * class ExampleModule extends Ab_Module {
+	 * 	// экземпляр менеджера модуля
+	 * 	private $_manager = null;
+	 * 	...
+	 * 	public function GetManager(){
+	 * 		if (is_null($this->_manager)){
+	 * 			require_once 'includes/manager.php';
+	 * 			$this->_manager = new ExampleManager($this);
+	 * 		}
+	 * 		return $this->_manager;
+	 * 	}
+	 * 	...
+	 * }
+	 * </code>
+	 * 
+	 * @return Ab_ModuleManager
 	 */
 	public function GetManager(){
 		return null;
 	}
 }
 
-abstract class ModuleManager {
+/**
+ * Абстрактный класс менеджера модуля в платформе Абрикос
+ * 
+ * Все AJAX запросы и прочие функции внешнего взаимодействия 
+ * с этим модулей поступают именно в этот класс.
+ * 
+ * Вызов и инициализацию менеджера необходимо осуществлять в
+ * методе {@link Ab_Module::GetManager()}
+ * 
+ * @package Abricos
+ * @example modules/example/includes/manager.php
+ */
+abstract class Ab_ModuleManager {
 	
 	/**
 	 * Ядро
 	 *
-	 * @var CMSRegistry
+	 * @var Abricos
 	 */
-	public $core = null;
+	public $core;
 	
 	/**
 	 * База данных
 	 *
-	 * @var CMSDatabase
+	 * @var AbricosDatabase
 	 */
-	public $db = null;
+	public $db;
+	
+	
+	/**
+	 * Пользователь
+	 * 
+	 * @var User
+	 */
+	public $user;
+	
+	/**
+	 * Идентификатор пользователя
+	 * 
+	 * @var integer
+	 */
+	public $userid = 0;
 	
 	/**
 	 * Модуль
-	 * @var CMSModule
+	 * 
+	 * @var Ab_Module
 	 */
 	public $module = null;
 	
-	public function ModuleManager(CMSModule $module){
+	public function __construct(Ab_Module $module){
 		$this->module = $module;
 		$this->core = $module->registry;
-		$this->db = $module->registry->db;
-		 
+		$this->db = Abricos::$db;
+		
+		$this->user = Abricos::$user;
+		$this->userid = Abricos::$user->id;
 	}
 	
 	public function AJAX($data){
 		return "";
 	}
-}
+	
+	/**
+	 * Получить значение роли текущего пользователя в политики безопасиности модуля
+	 * 
+	 * Вызывает метод $this->module->permission->CheckAction($action)
+	 * 
+	 * @var integer идентификатор роли
+	 * 
+	 * @return integer -1 - запрещено, 0 - отсутсвует, 1 - разрешено 
+	 */
+	public function GetRoleValue($action){
+		return $this->module->permission->CheckAction($action);
+	}
 
-/**
- * Менеджер обновления модуля
- */
-class CMSUpdateManager {
-	
 	/**
-	 * Текущий модуль
-	 *
-	 * @var CMSModule
-	 */
-	public $module;
-	
-	/**
-	 * Версия сервера
+	 * Разрешено ли действие @action текущего пользователя в политики безопасности модуля
 	 * 
-	 * @var string
-	 */
-	public $serverVersion;
-	
-	public $modinfo;
-	
-	private $_isInstall = null;
-	
-	public function CMSUpdateManager($module, $info){
-		$this->module = $module;
-		$this->modinfo = $info;
-		$this->serverVersion = $info['version'];
-	}
-	
-	/**
-	 * Является ли модуль новым в данной системе
+	 * @param integer $action идентификатор роли
 	 * 
-	 * @return Boolean
+	 * @return boolean true действие разрешено
 	 */
-	public function isInstall(){
-		if (!is_null($this->_isInstall)){ return $this->_isInstall; }
-		$aSV = $this->ParseVersion($this->serverVersion);
-		$cnt = count($aSV);
-		for ($i=0;$i<$cnt;$i++){
-			if ($aSV[$i]>0){
-				$this->_isInstall = false;
-				return false;
-			}
-		}
-		$this->_isInstall = true;
-		return true;
-	}
-	
-	/**
-	 * Является ли запрашиваемая версия больше версии модуля на сервере. 
-	 *  
-	 * @param string $version
-	 * @return Boolean
-	 */
-	public function isUpdate($newVersion){
-		$aSV = $this->ParseVersion($this->serverVersion);
-		$aNV = $this->ParseVersion($newVersion);
-		$cnt = count($aSV);
-		for ($i=0;$i<$cnt;$i++){
-			if ($aNV[$i] > $aSV[$i]){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private function ParseVersion($version){
-		$arr = explode(".", $version);
-		$retarr = array();
-		foreach ($arr as $s){
-			array_push($retarr, $this->str2int($s));
-		}
-		$count = count($retarr);
-		for ($i=$count;$i<7;$i++){
-			array_push($retarr, 0);
-		}
-		return $retarr;
-	}
-	
-	private function str2int($string, $concat = true) {
-		$length = strlen($string);   
-		for ($i = 0, $int = '', $concat_flag = true; $i < $length; $i++) {
-			if (is_numeric($string[$i]) && $concat_flag) {
-				$int .= $string[$i];
-			} elseif(!$concat && $concat_flag && strlen($int) > 0) {
-				$concat_flag = false;
-			}       
-		}
-		return (int) $int;
+	public function IsRoleEnable($action){
+		return $this->GetRoleValue($action) > 0;
 	}
 }
 
+
 /**
- * Менеджер модулей
- *
+ * Менеджер модулей в платформе Абрикос
+ * 
+ * @package Abricos
+ * @subpackage Core
  */
-class CMSModuleManager {
+class Ab_CoreModuleManager {
 	
 	/**
 	 * Массив зарегистрированных модулей
@@ -256,14 +274,14 @@ class CMSModuleManager {
 	/**
 	 * Ядро движка
 	 *
-	 * @var CMSRegistry
+	 * @var Abricos
 	 */
 	public $registry = null;
 	
 	/**
 	 * Менеджер БД
 	 *
-	 * @var CMSDatabase
+	 * @var AbricosDatabase
 	 */
 	public $db = null;
 	
@@ -272,7 +290,7 @@ class CMSModuleManager {
 	/**
 	 * Текущий модуль управления
 	 *
-	 * @var CMSModule
+	 * @var Ab_Module
 	 */
 	public $managesModule = null;
 	
@@ -280,8 +298,12 @@ class CMSModuleManager {
 	
 	/**
 	 * Модуль в котором в данный момент идет обновление схемы БД
+	 * 
+	 * Оставлен для совместимости, необходимо использовать Ab_UpdateManager::$current
 	 *
-	 * @var CMSUpdateManager
+	 * @var Ab_UpdateManager
+	 * @deprecated
+	 * @ignore
 	 */
 	public $updateManager = null;
 	
@@ -289,28 +311,27 @@ class CMSModuleManager {
 	
 	/**
 	 * Конструктор
-	 *
-	 * @param CMSRegistry $cms
-	 * @return CMSModuleManager
+	 * 
+	 * @ignore
+	 * @param Abricos $registry ядро
 	 */
-	public function CMSModuleManager($registry){
+	public function __construct($registry){
 		$this->registry = $registry;
 		$this->db = $registry->db;
 	}
 	
 	/**
-	 * Чтение информации из БД по зарегистрированным модулям
-	 *
+	 * Прочитать информации из БД по зарегистрированным модулям
 	 */
 	public function FetchModulesInfo(){
 		$db = $this->db;
 		$this->modulesInfo = array();
-		$rows = CoreQuery::ModuleList($db);
+		$rows = Ab_CoreQuery::ModuleList($db);
 		if ($db->IsError() && !$this->_firstError){ // возникла ошибка, вероятнее всего идет первый запуск движка
 			$db->ClearError();
-			CoreQuery::ModuleCreateTable($db);
+			Ab_CoreQuery::ModuleCreateTable($db);
 			if (!$db->IsError()){ // таблица была создана успешно, значит можно регистрировать все модули
-				$rows = CoreQuery::ModuleList($db);
+				$rows = Ab_CoreQuery::ModuleList($db);
 			}else{ 
 				// проблемы в настройках сайта или коннекта с БД
 				die('<strong>Configuration</strong>: DataBase error<br />'.$db->errorText);
@@ -369,6 +390,9 @@ class CMSModuleManager {
 		}
 	}
 	
+	/**
+	 * Зарегистрировать в ядре все модули
+	 */
 	public function RegisterAllModule(){
 		// первым регистрируется системный модуль
 		$this->RegisterByName('sys');
@@ -395,7 +419,7 @@ class CMSModuleManager {
 	 * Регистрация модуля по имени
 	 *
 	 * @param string $moduleName
-	 * @return CMSModule
+	 * @return Ab_Module
 	 */
 	public function RegisterByName($name){
 		$mod = $this->table[$name];
@@ -421,7 +445,7 @@ class CMSModuleManager {
 		return $mod;
 	}
 	
-	private function LoadLanguage(CMSModule $module, $languageid){
+	private function LoadLanguage(Ab_Module $module, $languageid){
 		// загрузка языка
 		$langfile = CWD."/modules/".$module->name."/language/".$languageid.".php";
 		if (file_exists($langfile)){
@@ -437,9 +461,9 @@ class CMSModuleManager {
 	/**
 	 * Регистрация модуля.
 	 *
-	 * @param CMSModule $module
+	 * @param Ab_Module $module
 	 */
-	public function Register(CMSModule $module){
+	public function Register(Ab_Module $module){
 		$modName = $module->name; 
 		if (empty($module)){ return; }
 
@@ -456,7 +480,7 @@ class CMSModuleManager {
 		$info = $this->modulesInfo[$modName];
 
 		if (empty($info)){
-			CoreQuery::ModuleAppend($this->db, $module);
+			Ab_CoreQuery::ModuleAppend($this->db, $module);
 			$this->FetchModulesInfo();
 		}
 		
@@ -467,15 +491,19 @@ class CMSModuleManager {
 		
 		if ($serverVersion == $newVersion){ return; }
 		
-		$this->updateManager = new CMSUpdateManager($module, $info);
+		Ab_UpdateManager::$current = new Ab_UpdateManager($module, $info);
+		
+		// TODO: удалить, оставлен для совместимости
+		$this->updateManager = Ab_UpdateManager::$current;
 		
 		$shema = CWD."/modules/".$modName."/includes/shema.php";
 		if (file_exists($shema)){
 			require_once($shema);
 		}
-		CoreQuery::ModuleUpdateVersion($this->db, $module);
+		Ab_CoreQuery::ModuleUpdateVersion($this->db, $module);
 		$this->FetchModulesInfo();
 		
+		Ab_UpdateManager::$current = null;
 		$this->updateManager = null;
 		// Удалить временные файлы
 		$chFiles = globa(CWD."/temp/*.gz");
@@ -488,7 +516,7 @@ class CMSModuleManager {
 	 * Получить модуль 
 	 *
 	 * @param string $name - имя модуля
-	 * @return CMSModule
+	 * @return Ab_Module
 	 */
 	public function GetModule($name){
 		if (empty($name)){
@@ -512,166 +540,42 @@ class CMSModuleManager {
 	}
 }
 
-abstract class AbricosPermission {
-	
-	private static $permission = null;
-	
-	/**
-	 * Модуль
-	 * 
-	 * @var CMSModule
-	 */
-	public $module = null;
-	public $defRoles = null;
-	
-	public function __construct(CMSModule $module, $defRoles = array()){
-		$this->module = $module;
-		$this->defRoles = $defRoles;
-	}
 
-	/**
-	 * @return UserManager
-	 */
-	public function GetUserManager(){
-		return CMSRegistry::$instance->modules->GetModule('user')->GetManager();
-	}
-	
-	public function Install(){
-		$this->GetUserManager();
-		UserQueryExt::PermissionInstall(CMSRegistry::$instance->db, $this);
-	}
-	
-	public function Reinstall(){
-		$this->GetUserManager();
-		UserQueryExt::PermissionRemove(CMSRegistry::$instance->db, $this);
-		UserQueryExt::PermissionInstall(CMSRegistry::$instance->db, $this);
-	}
-	
-	/**
-	 * Абстрактный метод. Запрос ролей по умолчанию
-	 */
-	public function GetRoles(){
-		return null;
-	}
+/* * * * * * * * * * * Устаревшии версии классов * * * * * * * * * * * */
 
-	/**
-	 * Проверить роль текущего пользователя
-	 * 
-	 * @param integer $action идентификатор действия в текущем модуле
-	 */
-	public function CheckAction($action){
-		if (is_null(AbricosPermission::$permission)){
-			$this->LoadRoles();
-		}
-		$mname = $this->module->name;
-		if (isset(AbricosPermission::$permission[$mname][$action])){
-			return AbricosPermission::$permission[$mname][$action];
-		}
-		return -1;
-	}
-	
-	private function LoadRoles(){
-		$modUser = CMSRegistry::$instance->modules->GetModule('user');
-		$db = CMSRegistry::$instance->db;
-		
-		$rows = UserQuery::UserRole($db, $modUser->info);
-		$perm = array();
-		while (($row = $db->fetch_array($rows))){
-			$mod = $row['md'];
-			if (!$perm[$mod]){
-				$perm[$mod] = array();
-			}
-			$perm[$mod][$row['act']] = $row['st'];
-		}
-		AbricosPermission::$permission = $perm;
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link AbricosAdress}
+ * @ignore
+ */
+abstract class CMSModule extends Ab_Module {
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link AbricosAdress}
+ * @ignore
+ */
+class CMSModuleManager extends Ab_CoreModuleManager {
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_ModuleManager}
+ * @ignore
+ */
+abstract class ModuleManager extends Ab_ModuleManager {
+	public function ModuleManager(Ab_Module $module){
+		parent::__construct($module);
 	}
 }
 
-	
-abstract class CMSPermission extends AbricosPermission {
-	
-	// потдержка предыдущих версий ядра
-	public function CMSPermission(CMSModule $module, $defRoles = array()){
-		
-		$old = $defRoles;
-		$defRoles = array();
-		
-		foreach ($old as $role){
-			$groupkey = '';
-			switch ($role->userid){
-			case User::UG_GUEST: $groupkey = UserGroup::GUEST; break;
-			case User::UG_REGISTERED: $groupkey = UserGroup::REGISTERED; break;
-			case User::UG_ADMIN: $groupkey = UserGroup::ADMIN; break;
-			}
-			if (empty($groupkey)){ continue; }
-			
-			array_push($defRoles, new AbricosRole($role->action, $groupkey, $role->status));
-		}
-		
-		parent::__construct($module, $defRoles);
-	}
-}
-
-class AbricosRole {
-	
-	/**
-	 * Действие
-	 * @var integer
-	 */
-	public $action = 0;
-	
-	/**
-	 * Статус: 0-запретить, 1-разрешить.
-	 * 
-	 * @var Integer
-	 */
-	public $status = 0;
-	
-	/**
-	 * Идентификатор группы модуля в ядре
-	 * @var string
-	 */
-	public $groupkey = "";
-	
-	public function __construct($action, $groupkey, $status = 1){
-		$this->action = $action;
-		$this->groupkey = $groupkey;
-		$this->status = $status;
-	}
-}
-
-class CMSRole {
-	
-	/**
-	 * Действие
-	 * @var integer
-	 */
-	public $action = 0;
-	
-	/**
-	 * Статус: 0-запретить, 1-разрешить.
-	 * 
-	 * @var Integer
-	 */
-	public $status = 0;
-
-	/**
-	 * Идентификатор группы/пользователя
-	 * 
-	 * @var integer
-	 */
-	public $userid = 0;
-	
-	/**
-	 * Статус идентификатор $userid: 0-группа, 1-пользователь
-	 * @var integer
-	 */
-	public $usertype = 0;
-	
-	public function CMSRole($action, $status = 0, $groupid = 0){
-		$this->action = $action;
-		$this->status = $status;
-		$this->userid = $groupid;
-	}
-}
-?>

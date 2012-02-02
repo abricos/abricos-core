@@ -1,12 +1,17 @@
 <?php
 /**
-* @version $Id$
-* @package Abricos
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * Парсер пользовательского текста
+ * 
+ * Вырезает лишние теги
+ * 
+ * @version $Id$
+ * @package Abricos
+ * @subpackage Core
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin <roosit@abricos.org>
 */
-
-class CMSUserText {
+class Ab_UserText {
 	
 	/**
 	 * Типограф
@@ -15,7 +20,7 @@ class CMSUserText {
 	 */
 	public $jevix = null;
 	
-	public function CMSUserText($fullerase = false){
+	public function __construct($fullerase = false){
 		
 		require_once 'jevix/jevix.class.php';
 		require_once 'geshi/geshi.php';
@@ -157,5 +162,17 @@ class CMSUserText {
 	}
 	
 }
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_UserText}
+ * @ignore
+ */
+final class CMSUserText extends Ab_UserText {
+}
+
 
 ?>

@@ -8,11 +8,12 @@
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$updateManager = CMSRegistry::$instance->modules->updateManager; 
-$db = CMSRegistry::$instance->db;
+$updateManager = Ab_UpdateManager::$current; 
+$db = Abricos::$db;
 $pfx = $db->prefix;
 
 if ($updateManager->isInstall()){
@@ -154,7 +155,7 @@ if ($updateManager->isUpdate('0.2.1')){
 		  UNIQUE KEY `userrole` (`modactionid`,`userid`,`usertype`)
 		)".$charset
 	);
-	CMSRegistry::$instance->modules->GetModule('user')->permission->Install();
+	Abricos::GetModule('user')->permission->Install();
 	
 	$db->query_write("ALTER TABLE `".$pfx."user` DROP INDEX `username`, ADD UNIQUE `username` ( `username` )");  
 }

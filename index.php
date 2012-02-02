@@ -1,11 +1,13 @@
 <?php
 /**
-* @version $Id$
-* @package Abricos
-* @copyright Copyright (C) 2011 Abricos. All rights reserved.
-* @link http://abricos.org
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @version $Id$
+ * @package Abricos
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
+ */
 
 /*
  * install check, and check on removal of the install directory.
@@ -83,14 +85,17 @@ if (!defined('CWD')){
 	define('CWD', (($getcwd = getcwd()) ? $getcwd : '.'));
 }
 
+require_once('includes/deprecated.php');
 require_once('includes/global_define.php');
 require_once('includes/functions.php');
-require_once('includes/cmsregistry.php');
-require_once('includes/cmsinputcleaner.php');
-require_once('includes/cmsadress.php');
-require_once('includes/cmsdatabase.php');
-require_once('includes/cmsmysqldb.php');
-require_once('includes/module.php');
+require_once('includes/core.php');
+require_once('includes/inputcleaner.php');
+require_once('includes/adress.php');
+require_once('includes/database.php');
+require_once('includes/mysqldb.php');
+require_once('includes/updatemanager.php');
+require_once('includes/modulemanager.php');
+require_once('includes/permission.php');
 require_once('includes/corequery.php');
 require_once('includes/brickmanager.php');
 require_once('includes/brickreader.php');
@@ -100,11 +105,8 @@ $core = new CMSRegistry();
 
 // Основное управление сайтом ложится на системный модуль
 $modSys = $core->modules->GetModule('sys');
-$modUser = $core->modules->GetModule('user');
-$modUser->SessionUpdate();
 
 $core->system = $modSys;
-$core->user = $modUser;
 
 $modSys->BuildOutput();
 

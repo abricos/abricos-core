@@ -8,17 +8,18 @@
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 $brick = Brick::$builder->brick;
 $userManager = Brick::$user->GetManager(); 
 
-$p_do = Brick::$input->clean_gpc('p', 'do', TYPE_STR);
-$p_login = Brick::$input->clean_gpc('p', 'login', TYPE_STR);
-$p_pass = Brick::$input->clean_gpc('p', 'password', TYPE_STR);
-$p_passconf = Brick::$input->clean_gpc('p', 'passconf', TYPE_STR);
-$p_email = Brick::$input->clean_gpc('p', 'email', TYPE_STR);
-$p_emailconf = Brick::$input->clean_gpc('p', 'emailconf', TYPE_STR);
+$p_do = Abricos::CleanGPC('p', 'do', TYPE_STR);
+$p_login = Abricos::CleanGPC('p', 'login', TYPE_STR);
+$p_pass = Abricos::CleanGPC('p', 'password', TYPE_STR);
+$p_passconf = Abricos::CleanGPC('p', 'passconf', TYPE_STR);
+$p_email = Abricos::CleanGPC('p', 'email', TYPE_STR);
+$p_emailconf = Abricos::CleanGPC('p', 'emailconf', TYPE_STR);
 
 $form = $brick->param->var['regform'];
 

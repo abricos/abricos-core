@@ -2,8 +2,7 @@
 /**
  * @version $Id$
  * @package Abricos
- * @subpackage User
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
@@ -13,9 +12,8 @@ require_once 'dbquery.php';
 /**
  * Менеджер управления пользователями
  * @package Abricos
- * @subpackage User
  */
-class UserManager extends ModuleManager {
+class UserManager extends Ab_ModuleManager {
 	
 	/**
 	 * Модуль
@@ -24,17 +22,10 @@ class UserManager extends ModuleManager {
 	 */
 	public $module = null;
 	
-	public $user = null;
-	public $userid = 0;
-	
 	private $_disableRoles = false;
 	
-	public function UserManager(User $module){
-		parent::ModuleManager($module);
-		
-		
-		$this->user = $module->info;
-		$this->userid = $this->user['userid'];
+	public function __construct(User $module){
+		parent::__construct($module);
 	}
 	
 	/**
@@ -58,7 +49,7 @@ class UserManager extends ModuleManager {
 	 */
 	public function IsAdminRole(){
 		if ($this->_disableRoles){ return true; }
-		return $this->module->permission->CheckAction(UserAction::USER_ADMIN) > 0;
+		return $this->IsRoleEnable(UserAction::USER_ADMIN);
 	}
 	
 	/**
@@ -265,16 +256,19 @@ class UserManager extends ModuleManager {
 		// данные для внесения в бд
 		$data = array();
 
-		// смена пароля
-		if (empty($newpassword) || strlen($newpassword) < 4){
-			return 2; // короткий пароль
-		}
-		if ($newpassword == $user['username']){
-			return 3; // пароль совпадает с логином
-		}
-		if ($this->IsAdminRole() && false){ // отключено
+		if ($this->IsAdminRole()){
+			// отключено
 			$data['password'] = $this->UserPasswordCrypt($newpassword, $user['salt']);
 		}else{
+			
+			// смена пароля
+			if (empty($newpassword) || strlen($newpassword) < 4){
+				return 2; // короткий пароль
+			}
+			if ($newpassword == $user['username']){
+				return 3; // пароль совпадает с логином
+			}
+			
 			$passcrypt = $this->UserPasswordCrypt($oldpassword, $user["salt"]);
 			if ($passcrypt == $user["password"]){ 
 				$data['password'] = $this->UserPasswordCrypt($newpassword, $user['salt']);
@@ -282,6 +276,7 @@ class UserManager extends ModuleManager {
 				return 4; // старый пароль ошибочный
 			}
 		}
+			
 		UserQueryExt::UserUpdate($this->db, $userid, $data);
 		
 		return 0;
@@ -337,7 +332,7 @@ class UserManager extends ModuleManager {
 	
 	public function Logout(){
 		$session = $this->module->session;
-		$sessionKey = CMSRegistry::$instance->input->clean_gpc('c', $session->cookieName, TYPE_STR);
+		$sessionKey = Abricos::CleanGPC('c', $session->cookieName, TYPE_STR);
 		setcookie($session->cookieName, '', TIMENOW, $session->sessionPath);
 		UserQuery::SessionRemove($this->db, $sessionKey);
 		$this->module->session->Drop('userid');

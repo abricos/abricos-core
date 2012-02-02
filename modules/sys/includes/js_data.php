@@ -4,16 +4,17 @@
  * 
  * @version $Id$
  * @package Abricos
- * @subpackage Sys
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 
 $brick = Brick::$builder->brick;
 
-$mod = Brick::$modules->GetModule('sys');
+$mod = Abricos::GetModule('sys');
 $ds = $mod->getDataSet();
 
 $manager = $mod->GetManager();
@@ -31,7 +32,7 @@ if (Brick::$session->IsAdminMode()){
 		}
 		switch ($ts->nm){
 			case 'bricks':
-				if ($rcclear){ CoreQuery::BrickRecycleClear(Brick::$db); }
+				if ($rcclear){ Ab_CoreQuery::BrickRecycleClear(Abricos::$db); }
 				break;
 		}
 		foreach ($ts->rs as $tsrs){
@@ -50,24 +51,24 @@ if (Brick::$session->IsAdminMode()){
 					break;
 				case 'brick':
 					foreach ($tsrs->r as $r){
-						if ($r->f == 'u'){ CoreQuery::BrickSave(Brick::$db, $r->d); }
+						if ($r->f == 'u'){ Ab_CoreQuery::BrickSave(Abricos::$db, $r->d); }
 					}
 					break;
 				case 'brickparam':
 					foreach ($tsrs->r as $r){
 						if ($r->f == 'a'){
-							CoreQuery::BrickParamAppend(Brick::$db, $r->d);
+							Ab_CoreQuery::BrickParamAppend(Abricos::$db, $r->d);
 						}else if ($r->f == 'u'){
-							CoreQuery::BrickParamSave(Brick::$db, $r->d);
+							Ab_CoreQuery::BrickParamSave(Abricos::$db, $r->d);
 						}else if ($r->f == 'd'){
-							CoreQuery::BrickParamRemove(Brick::$db, $r->d->id);
+							Ab_CoreQuery::BrickParamRemove(Abricos::$db, $r->d->id);
 						}
 					}
 					break;
 				case 'bricks':
 					foreach ($tsrs->r as $r){
-						if ($r->f == 'd'){ CoreQuery::BrickRemove(Brick::$db, $r->d->id); }
-						if ($r->f == 'r'){ CoreQuery::BrickRestore(Brick::$db, $r->d->id); }
+						if ($r->f == 'd'){ Ab_CoreQuery::BrickRemove(Abricos::$db, $r->d->id); }
+						if ($r->f == 'r'){ Ab_CoreQuery::BrickRestore(Abricos::$db, $r->d->id); }
 					}
 					break;
 			}
@@ -105,13 +106,13 @@ if (Brick::$session->IsAdminMode()){
 					$rows = Brick::$builder->phrase->GetArray($tsrs->p->mod);
 					break;
 				case 'bricks':
-					$rows = CoreQuery::BrickList(Brick::$db, $tsrs->p->tp, 'yes');
+					$rows = Ab_CoreQuery::BrickList(Abricos::$db, $tsrs->p->tp, 'yes');
 					break;
 				case 'brick':
-					$rows = CoreQuery::BrickById(Brick::$db, $tsrs->p->bkid, true);
+					$rows = Ab_CoreQuery::BrickById(Abricos::$db, $tsrs->p->bkid, true);
 					break;
 				case 'brickparam':
-					$rows = CoreQuery::BrickParamList(Brick::$db, $tsrs->p->bkid);
+					$rows = Ab_CoreQuery::BrickParamList(Abricos::$db, $tsrs->p->bkid);
 					break;
 				case 'permission_mods':
 					$rows = array();
@@ -127,7 +128,7 @@ if (Brick::$session->IsAdminMode()){
 					}
 					break;
 				case 'permission_mod':
-					$rows = CoreQuery::PermissionsByModule($tsrs->p->module);
+					$rows = Ab_CoreQuery::PermissionsByModule($tsrs->p->module);
 					break;
 				case 'modules':
 					$rows = $manager->ModuleList();

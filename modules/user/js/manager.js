@@ -12,15 +12,6 @@ Component.requires = {
 		{name: 'user', files: ['guest.js']}
 	]
 };
-(function(){
-	var rm = Component.requires.mod;
-	// загрузить api.js каждого модуля для редактора групп. 
-	for (var m in Brick.Modules){
-		if (Brick.componentExists(m, 'api') && !Brick.componentLoaded(m, 'api')){
-			rm[rm.length] = {name: m, files: ['api.js']}; 
-		}
-	}
-})();
 
 var profileExist = false;
 if (Brick.componentExists('uprofile', 'profile')){
@@ -29,18 +20,15 @@ if (Brick.componentExists('uprofile', 'profile')){
 	rm[rm.length] = {name: 'uprofile', files: ['profile.js']}; 
 }
 
-Component.entryPoint = function(){
+Component.entryPoint = function(NS){
 	
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
 		L = YAHOO.lang,
 		LNG = Brick.util.Language;
 	
-	var NS = this.namespace,
-		TMG = this.template;
+	var TMG = this.template;
 	
-	var API = NS.API;
-
 	if (!NS.data){
 		NS.data = new Brick.util.data.byid.DataSet('user');
 	}
@@ -164,7 +152,7 @@ Component.entryPoint = function(){
     	},
     	showUserEditor: function(userid){
     		var __self = this;
-			API.showUserEditorPanel(userid || 0, function(){
+			NS.API.showUserEditorPanel(userid || 0, function(){
 				__self.refresh();
 			});
     	},
@@ -475,7 +463,7 @@ Component.entryPoint = function(){
 			if (DATA.isFill(tables)){
 				this.renderElements();
 			}
-			API.dsRequest();
+			NS.data.request(true);
 		},
 		
 		dsComplete: function(type, args){
@@ -520,7 +508,7 @@ Component.entryPoint = function(){
 			this.roles.save();
 			
 			this.close();
-			API.dsRequest();
+			NS.data.request();
 		}
 	});
 	
@@ -641,6 +629,11 @@ Component.entryPoint = function(){
 		onClick: function(el){ return false; }
 	
 	};
-	NS.RolesWidget = RolesWidget; 
-
+	NS.RolesWidget = RolesWidget;
+	
+	NS.API.showManagerWidget = function(container){
+		new NS.ManagerWidget(container);
+		NS.data.request(true);
+	};
 };
+

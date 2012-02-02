@@ -4,25 +4,25 @@
  * 
  * @version $Id$
  * @package Abricos
- * @subpackage Sys
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 $param = Brick::$builder->brick->param;
 
-$modSys = Brick::$modules->GetModule('sys');
-$modUser = CMSRegistry::$instance->user; 
-$user = $modUser->info;
-$param->var['g'] = json_encode($user['group']);
-$param->var['uid'] = $user['userid'];
-$param->var['unm'] = $user['username'];
-$param->var['s'] = $modUser->session->key;
+$modSys = Abricos::GetModule('sys');
+
+$param->var['g'] = json_encode(Abricos::$user->info['group']);
+$param->var['uid'] = intval(Abricos::$user->id);
+$param->var['unm'] = Abricos::$user->login;
+$param->var['s'] = Abricos::$user->session->key;
 
 $template = Brick::$builder->phrase->Get('sys', 'style', 'default');
 $param->var['ttname'] = $template;
-$param->var['jsyui'] = SystemModule::$YUIVersion;
+$param->var['jsyui'] = Ab_CoreSystemModule::$YUIVersion;
 
 if (CMSRegistry::$instance->modules->customTakelink){
 	$modsinfo = CMSRegistry::$instance->modules->modulesInfo;

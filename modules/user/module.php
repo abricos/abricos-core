@@ -2,44 +2,66 @@
 /**
  * @version $Id$
  * @package Abricos
- * @subpackage User
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
 /**
- * Модуль "Пользователи" 
+ * Модуль управления пользователями
+ *  
  * @package Abricos
- * @subpackage User
  */
-class User extends CMSModule {
+class User extends Ab_Module {
 
 	/**
-	 * Группа пользователей "Гость"
+	 * Идентификатор текущего пользователя
+	 * 
 	 * @var integer
+	 */
+	public $id = 0;
+	
+	/**
+	 * Имя учетной записи текущего пользователя
+	 * 
+	 * @var string
+	 */
+	public $login = 'Guest';
+	
+	/**
+	 * Группа пользователей "Гость"
+	 * 
+	 * @var integer
+	 * @deprecated
 	 */
 	const UG_GUEST = 1;
 	
 	/**
 	 * Группа пользователей "Зарегистрированный"
+	 * 
 	 * @var integer
+	 * @deprecated
 	 */
 	const UG_REGISTERED = 2;
 	
 	/**
 	 * Группа пользователей "Администратор"
+	 * 
 	 * @var integer
+	 * @deprecated
 	 */
 	const UG_ADMIN = 3;
 	
-	public static $UG_REGISTERED_TO = array(1,2);
-	public static $UG_ADMIN_TO = array(1,2,3);
+	// TODO: На удаление
+	private static $UG_REGISTERED_TO = array(1,2);
+	// TODO: На удаление
+	private static $UG_ADMIN_TO = array(1,2,3);
 	
 	private $_manager = null;
 	
 	/**
-	 * Информация пользователя
+	 * Информация текущего пользователя из БД
+	 * 
 	 * @var array
 	 */
 	public $info = array(
@@ -50,13 +72,14 @@ class User extends CMSModule {
 	private $userinfo = null;
 	
 	/**
-	 * Идентификатор сессии клиента
+	 * Идентификатор сессии пользователя
+	 * 
 	 * @var string
 	 */
 	public $sessionHash = '';
 
-	function User(){
-		$this->version = "0.2.3";
+	public function __construct(){
+		$this->version = "0.2.4";
 		$this->name = "user";
 		$this->takelink = "user"; 
 		$this->permission = new UserPermission($this);
@@ -93,7 +116,7 @@ class User extends CMSModule {
 	/**
 	 * Менеджер сессии
 	 * 
-	 * @var Session
+	 * @var UserSession
 	 */
 	public $session;
 	
@@ -106,13 +129,13 @@ class User extends CMSModule {
 		$core = $this->registry;
 		$db = $core->db;
 
-		$this->session = $session = new Session();
+		$this->session = $session = new UserSession();
 		$userid = $session->Get('userid');
 		$flag = $session->Get('flag');
 		
 		if (empty($userid) && empty($flag)){ 
 			// сессия на пользователя не установлена, проверка на автологин
-			$sessionKey = $core->input->clean_gpc('c', $session->cookieName, TYPE_STR);
+			$sessionKey = Abricos::CleanGPC('c', $session->cookieName, TYPE_STR);
 			if (!empty($sessionKey)){
 				$privateKey = $this->GetSessionPrivateKey();
 				$sessionDB = UserQuery::Session($db, $session->sessionTimeOut, $sessionKey, $privateKey);
@@ -145,8 +168,15 @@ class User extends CMSModule {
 		// установка флага который сообщит нам что сессия установлена
 		$session->Set('userid', $userid);
 		$session->Set('flag', 1);
+		
+		$this->id = $userid;
+		$this->login = $info['username'];
 	}
 	
+	/**
+	 * Текущий пользователь СУПЕРАДМИНИСТРАТОР
+	 * @return boolean
+	 */
 	public function IsSuperAdmin (){
 		return $this->info["superadmin"];
 	}
@@ -154,6 +184,9 @@ class User extends CMSModule {
 	/**
 	 * Вернуть TRUE если пользователь является администратором
 	 * TODO: необходимо удалить (временое решение для совместимости)
+	 * 
+	 * @ignore
+	 * @deprecated
 	 * @return bool
 	 */
 	public function IsAdminMode (){
@@ -168,6 +201,8 @@ class User extends CMSModule {
 	/**
 	 * Вернуть TRUE если пользователь является зарегистрированным
 	 * TODO: необходимо удалить (временое решение для совместимости)
+	 * @deprecated
+	 * @ignore
 	 * @return bool
 	 */
 	public function IsRegistred(){
@@ -180,27 +215,11 @@ class User extends CMSModule {
 	}
 }
 
-class UserGroup {
-
-	/**
-	 * Группа пользователей "Гость"
-	 * @var string
-	 */
-	const GUEST = 'guest';
-	
-	/**
-	 * Группа пользователей "Зарегистрированный"
-	 * @var string
-	 */
-	const REGISTERED = 'register';
-	
-	/**
-	 * Группа пользователей "Администратор"
-	 * @var string
-	 */
-	const ADMIN = 'admin';	
-}
-
+/**
+ * Идентнификаторы действий ролей пользователя
+ * 
+ * @package Abricos
+ */
 class UserAction {
 	// регистрация пользователя
 	const REGISTRATION = 10;
@@ -209,16 +228,20 @@ class UserAction {
 	const USER_ADMIN = 50;
 }
 
-class UserPermission extends CMSPermission {
+/**
+ * Роли пользователей для модуля пользователей
+ * 
+ * @package Abricos
+ */
+class UserPermission extends Ab_UserPermission {
 	
-	public function UserPermission(User $module){
+	public function __construct(User $module){
 		
 		$defRoles = array(
-			new CMSRole(UserAction::REGISTRATION, 1, User::UG_GUEST),
-			new CMSRole(UserAction::USER_ADMIN, 1, User::UG_ADMIN)
+			new Ab_UserRole(UserAction::REGISTRATION, Ab_UserGroup::GUEST),
+			new Ab_UserRole(UserAction::USER_ADMIN, Ab_UserGroup::ADMIN)
 		);
-		
-		parent::CMSPermission($module, $defRoles);
+		parent::__construct($module, $defRoles);
 	}
 	
 	public function GetRoles(){
@@ -232,8 +255,9 @@ class UserPermission extends CMSPermission {
 /**
  * Класс работы с сессиями
  *
+ * @package Abricos
  */
-class Session {
+class UserSession {
 
 	/**
 	 * Время хранения сесси
@@ -255,7 +279,7 @@ class Session {
 	 */
 	public $key;
 	
-	public function Session(){
+	public function __construct(){
 		
 		$cfg = &CMSRegistry::$instance->config['session'];
 		
@@ -295,7 +319,7 @@ class Session {
 	 * Старт сессии
 	 */
 	public function Start(){
-		$sessionIDG = CMSRegistry::$instance->input->clean_gpc('g', 'session', TYPE_STR);
+		$sessionIDG = Abricos::CleanGPC('g', 'session', TYPE_STR);
 		if (!empty($sessionIDG)){
 			session_id($sessionIDG); 
 		}
@@ -327,19 +351,22 @@ class Session {
 	}
 }
 
+
 /**
  * Часто запрашиваемые запросы (для внутреннего использования)
+ * 
+ * @package Abricos
  */
 class UserQuery {
 	
 	/**
 	 * Вернуть полные данные пользователя для внутренних функций.
 	 * 
-	 * @param CMSDatabase $db
+	 * @param Ab_Database $db
 	 * @param integer $userid
 	 * @return array
 	 */
-	public static function User(CMSDatabase $db, $userid){
+	public static function User(Ab_Database $db, $userid){
 		$userid = bkint($userid);
 		if ($userid < 1){ return; }
 		$sql = "
@@ -354,7 +381,7 @@ class UserQuery {
 		return $user;
 	}
 	
-	public static function UserByName(CMSDatabase $db, $username){
+	public static function UserByName(Ab_Database $db, $username){
 		$sql = "
 			SELECT *
 			FROM ".$db->prefix."user
@@ -367,7 +394,7 @@ class UserQuery {
 		return $user;
 	}
 	
-	public static function GroupByUserId(CMSDatabase $db, $userid){
+	public static function GroupByUserId(Ab_Database $db, $userid){
 		$rows = $db->query_read("
 			SELECT 
 				groupid as id
@@ -381,7 +408,7 @@ class UserQuery {
 		return $ret;
 	}
 
-	public static function Session(CMSDatabase $db, $cookieTimeOut, $hash, $idHash){
+	public static function Session(Ab_Database $db, $cookieTimeOut, $hash, $idHash){
 		$sql = "
 			DELETE FROM ".$db->prefix."session 
 			WHERE lastactivity < ".(TIMENOW - $cookieTimeOut)." and userid > 0
@@ -400,7 +427,7 @@ class UserQuery {
 		return $db->query_first($sql);
 	}
 	
-	public static function SessionAppend(CMSDatabase $db, $userid, $hash, $idHash){
+	public static function SessionAppend(Ab_Database $db, $userid, $hash, $idHash){
 		$sql = "
 			INSERT INTO ".$db->prefix."session (userid, sessionhash, idhash, lastactivity)
 			VALUES (
@@ -413,7 +440,7 @@ class UserQuery {
 		$db->query_write($sql, true);
 	}
 
-	public static function SessionRemove(CMSDatabase $db, $sessionHash){
+	public static function SessionRemove(Ab_Database $db, $sessionHash){
 		$sql = "
 			DELETE FROM ".$db->prefix."session
 			WHERE sessionhash='".bkstr($sessionHash)."' 
@@ -421,7 +448,7 @@ class UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserUpdateLastActive(CMSDatabase $db, $userid){
+	public static function UserUpdateLastActive(Ab_Database $db, $userid){
 		$sql = "
 			UPDATE ".$db->prefix."user
 			SET lastvisit='".TIMENOW."'
@@ -431,7 +458,7 @@ class UserQuery {
 		$db->query_write($sql, true);
 	}
 	
-	public static function UserRole(CMSDatabase $db, $user){
+	public static function UserRole(Ab_Database $db, $user){
 		if ($user['userid'] == 0){
 			$sql = "
 				SELECT
@@ -475,8 +502,6 @@ class UserQuery {
 	}
 }
 
-$modUser = new User();
-CMSRegistry::$instance->modules->Register($modUser);
-
+Abricos::ModuleRegister(new User());
 
 ?>

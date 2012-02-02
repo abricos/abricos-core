@@ -55,7 +55,11 @@ Component.entryPoint = function(){
 	});
 	NS.BoardPanel = BoardPanel;
 	
+	var activePanel = null;
 	API.showBoardPanel = function(){
-		new BoardPanel();
+		if (L.isNull(activePanel) || activePanel.isDestroy()){
+			activePanel = new BoardPanel();
+		}
+		return activePanel;
 	};
 };

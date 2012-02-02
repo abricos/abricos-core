@@ -182,12 +182,16 @@ th, td {
 	text-decoration: underline;
 } 
 
+.aw-page-content {
+	line-height: 1.4em;
+}
+
 .aw-page-content p {
-	padding-bottom: .3em;
+	padding-bottom: .6em;
 }
 .aw-page-content i, 
 .aw-page-content em {
-	font-style:italic;
+	font-style: italic;
 }
 .aw-page-content b, 
 .aw-page-content strong {

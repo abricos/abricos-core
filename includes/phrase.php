@@ -1,19 +1,15 @@
 <?php
 /**
+ * Фраза
+ * 
  * @version $Id$
  * @package Abricos
- * @subpackage Sys
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @subpackage Core
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
+ * @author Alexander Kuzmin <roosit@abricos.org>
  */
-
-/**
- * Элементы фразы
- * @package Abricos
- * @subpackage Sys
- */
-class CMSSysPhraseItem {
+class Ab_CorePhraseItem {
 	public $module = "";
 	public $name = "";
 	public $value = "";
@@ -36,7 +32,7 @@ class CMSSysPhraseItem {
 	 */
 	public $isupdate = false;
 	
-	public function CMSSysPhraseItem($moduleName, $name, $value){
+	public function Ab_CorePhraseItem($moduleName, $name, $value){
 		$this->module = $moduleName;
 		$this->name = $name;
 		$this->value = $value;
@@ -55,12 +51,13 @@ class CMSSysPhraseItem {
 /**
  * Менеджер управления фразами
  * 
- * Задача класса загружать запрашиваемые фразы. Если фразы в базе 
- * не найдены, то создание их и сохранение со значениями по умолчанию 
+ * Загружает запрашиваемые фразы из базы. Если фраза в базе не найден, создает ее
+ * из значения по умолчанию.
+ *  
  * @package Abricos
- * @subpackage Sys
+ * @subpackage Core
  */
-class CMSSysPhrase {
+class Ab_CorePhrase {
 	
 	/**
 	 * Ядро
@@ -104,7 +101,7 @@ class CMSSysPhrase {
 	 */
 	public function PreloadByModule($module){
 		$db = $this->registry->db;
-		$rows = CoreQuery::PhraseListByModule($db, $module);
+		$rows = Ab_CoreQuery::PhraseListByModule($db, $module);
 		$this->_preload($rows);
 		$this->Save();
 	}
@@ -117,7 +114,7 @@ class CMSSysPhrase {
 	 */
 	public function Preload($list){
 		$db = $this->registry->db;
-		$rows = CoreQuery::PhraseList($db, $list);
+		$rows = Ab_CoreQuery::PhraseList($db, $list);
 		$this->_preload($rows);
 		foreach ($list as $key=>$value){
 			$sa = explode(":", $key);
@@ -131,7 +128,7 @@ class CMSSysPhrase {
 		$db = $this->registry->db;
 		while (($row = $db->fetch_array($rows))){
 			$key = $row['mnm'].":".$row['nm'];
-			$phrase = new CMSSysPhraseItem($row['mnm'], $row['nm'], $row['ph']);
+			$phrase = new Ab_CorePhraseItem($row['mnm'], $row['nm'], $row['ph']);
 			$phrase->id = $row['id'];
 			$this->arr[$key] = $phrase;
 		}
@@ -164,13 +161,13 @@ class CMSSysPhrase {
 			$phrase = null;
 			// возможно эта фраза не была выбрана из БД, проверочный запрос
 			if ($checkindb)
-				$phrase = CoreQuery::Phrase($this->registry->db, $modname, $name);
+				$phrase = Ab_CoreQuery::Phrase($this->registry->db, $modname, $name);
 			if (empty($phrase)){
-				$item = new CMSSysPhraseItem($modname, $name, $value);
+				$item = new Ab_CorePhraseItem($modname, $name, $value);
 				$item->isnew = true;
 				$this->arr[$key] = $item;
 			}else{
-				$item = new CMSSysPhraseItem($modname, $name, $phrase['ph']);
+				$item = new Ab_CorePhraseItem($modname, $name, $phrase['ph']);
 				$item->id = $phrase['id'];
 				$this->arr[$key] = $item;
 			}
@@ -203,12 +200,34 @@ class CMSSysPhrase {
 			$phrase->isupdate = false;
 		}
 		if (!empty($arrnew)){
-			CoreQuery::PhraseListAppend($this->registry->db, $arrnew);
+			Ab_CoreQuery::PhraseListAppend($this->registry->db, $arrnew);
 		}
 		if (!empty($arrupdate)){
-			CoreQuery::PhraseListUpdate($this->registry->db, $arrupdate);
+			Ab_CoreQuery::PhraseListUpdate($this->registry->db, $arrupdate);
 		}
 	}
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CorePhraseItem}
+ * @ignore
+ */
+final class CMSSysPhraseItem extends Ab_CorePhraseItem {
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CorePhrase}
+ * @ignore
+ */
+final class CMSSysPhrase extends Ab_CorePhrase {
 }
 
 ?>

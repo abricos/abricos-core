@@ -11,14 +11,15 @@
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 $brick = Brick::$builder->brick;
 
-$adress = Brick::$cms->adress;
+$adress = Abricos::$adress;
 $p_hash = bkstr($adress->dir[2]);
 
-$userManager = CMSRegistry::$instance->user->GetManager(); 
+$userManager = Abricos::$user->GetManager(); 
 
 $ret = $userManager->PasswordRequestCheck($p_hash);
 if ($ret->error > 0){

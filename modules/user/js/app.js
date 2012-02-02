@@ -10,7 +10,7 @@ Component.requires = {
 };
 Component.entryPoint = function(){
 	
-	if (!Brick.env.user.isRegister()){ return; }
+	if (Brick.Permission.check('user', '50') != 1){ return; }
 	
 	var os = Brick.mod.webos;
 	

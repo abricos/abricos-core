@@ -12,14 +12,15 @@
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 $brick = Brick::$builder->brick;
-$adress = Brick::$cms->adress;
+$adress = Abricos::$adress;
 $p_userid = bkint($adress->dir[2]);
 $p_actid =  bkint($adress->dir[3]);
 
-$userManager = CMSRegistry::$instance->user->GetManager(); 
+$userManager = Abricos::$user->GetManager(); 
 
 $result = $userManager->RegistrationActivate($p_userid, $p_actid);
 

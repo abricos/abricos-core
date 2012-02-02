@@ -1,33 +1,16 @@
 <?php
 /**
+ * Системный модуль
+ * 
  * @version $Id$
  * @package Abricos
- * @subpackage Sys
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @subpackage Core
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
+ * @author Alexander Kuzmin <roosit@abricos.org>
  */
-
-/**
- * Системный модуль платформы Abricos
- * @package Abricos
- * @subpackage Sys
- */
-class SystemModule extends CMSModule {
-	
-	/**
-	 * Идентификатор страницы в БД
-	 *
-	 * @var Integer
-	 */
-	private $pageId = 0;
-	
-	/**
-	 * Идентификатор раздела к которому принадлежит страница
-	 *
-	 * @var Integer
-	 */
-	private $menuId = 0;
+class Ab_CoreSystemModule extends Ab_Module {
 	
 	/**
 	 * Адрес, на основе которого собрано меню.
@@ -40,20 +23,22 @@ class SystemModule extends CMSModule {
 	
 	private $_manager = null;
 	
-	public function SystemModule(){
-		$this->version = "0.5.4";
+	public function __construct(){
+		$this->version = "0.5.5";
 		$this->name = "sys";
+		
+		$this->permission = new Ab_CoreSystemPermission($this);
 	}
 	
 	/**
 	 * Получить менеджер 
 	 *
-	 * @return SystemManager
+	 * @return Ab_CoreSystemManager
 	 */
 	public function GetManager(){
 		if (is_null($this->_manager)){
 			require_once 'includes/manager.php';
-			$this->_manager = new SystemManager($this);
+			$this->_manager = new Ab_CoreSystemManager($this);
 		}
 		return $this->_manager;
 	}
@@ -125,13 +110,13 @@ class SystemModule extends CMSModule {
 			header("HTTP/1.1 404 Not Found");
 		}
 		
-		$bm = new CMSSysBrickManager($this->registry);
+		$bm = new Ab_CoreBrickManager($this->registry);
 		
 		Brick::$db = $this->registry->db;
 		Brick::$input = $this->registry->input;
 		Brick::$modules = $this->registry->modules;
 		Brick::$cms = $this->registry;
-		Brick::$builder = new CMSSysBrickBuilder($this->registry);
+		Brick::$builder = new Ab_CoreBrickBuilder($this->registry);
 		Brick::$user = $this->registry->user;
 		// TODO: необходимо удалить
 		Brick::$session = $this->registry->user; 
@@ -159,6 +144,11 @@ class SystemModule extends CMSModule {
 		}
 
 		$brick = $bm->BuildOutput($modman->name, $contentName, Brick::BRICKTYPE_CONTENT);
+		if ($this->registry->pageStatus == PAGESTATUS_500){
+			header("HTTP/1.1 500 Internal Server Error");
+			exit;
+		}
+		
 		// Любая сборка страницы начинается с кирпича BRICKTYPE_CONTENT
 		// и обязательно содержит в себе шаблон, в который он будет входить.
 		// Необходимо для дальнейшей компиляции страницы подчинить кирпич-контент 
@@ -172,6 +162,13 @@ class SystemModule extends CMSModule {
 				array_push($newChildren, $childbrick);
 			}
 		}
+		
+		if (is_null($template)){
+			header("HTTP/1.1 500 Internal Server Error");
+			print("Template not found. Add the started brick: [tt=main][/tt]");
+			exit;
+		}
+		
 		
 		Brick::$builder->template = $template;
 		$brick->child = $newChildren;
@@ -213,7 +210,7 @@ class SystemModule extends CMSModule {
 	public $ds = null;
 	public function getDataSet(){
 		if (is_null($this->ds)){
-			$json = $this->registry->input->clean_gpc('p', 'json', TYPE_STR);
+			$json = Abricos::CleanGPC('p', 'json', TYPE_STR);
 			if (empty($json)){ return; }
 			$obj = json_decode($json);
 			if (empty($obj->_ds)){ return; }
@@ -247,7 +244,45 @@ class SystemModule extends CMSModule {
 	}
 }
 
-$mod = new SystemModule();
-CMSRegistry::$instance->modules->Register($mod);
+/**
+ * Права (идентификаторы действий) пользователя системного модуля
+ * 
+ * @package Abricos
+ * @subpackage Core
+ */
+class Ab_CoreSystemAction {
+	/**
+	 * Администратор
+	 * 
+	 * @var integer
+	 */
+	const ADMIN	= 50;
+}
+
+/**
+ * Права пользователей системного модуля
+ * 
+ * @package Abricos
+ * @subpackage Core
+ */
+class Ab_CoreSystemPermission extends Ab_UserPermission {
+
+	public function __construct(Ab_CoreSystemModule $module){
+		$defRoles = array(
+			new Ab_UserRole(Ab_CoreSystemAction::ADMIN, Ab_UserGroup::ADMIN)
+		);
+		parent::__construct($module, $defRoles);
+	}
+
+	/**
+	 * Получить роли
+	 */
+	public function GetRoles(){
+		return array(
+			Ab_CoreSystemAction::ADMIN => $this->CheckAction(Ab_CoreSystemAction::ADMIN)
+		);
+	}
+}
+Abricos::ModuleRegister(new Ab_CoreSystemModule())
 
 ?>

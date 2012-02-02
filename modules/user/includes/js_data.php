@@ -8,12 +8,13 @@
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 $brick = Brick::$builder->brick;
 
-$mod = Brick::$modules->GetModule('sys');
-$modUser = Brick::$modules->GetModule('user');
+$mod = Abricos::GetModule('sys');
+$modUser = Abricos::GetModule('user');
 $manager = $modUser->GetManager();
 $ds = $mod->getDataSet();
 

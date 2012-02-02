@@ -4,18 +4,19 @@
  * 
  * @version $Id$
  * @package Abricos
- * @subpackage Ajax
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
-$adress = CMSRegistry::$instance->adress;
+$adress = Abricos::$adress;
 
 $p_module = $adress->dir[1];
 $p_brick = $adress->dir[2];
 
-$mod = Brick::$modules->GetModule($p_module);
+$mod = Abricos::GetModule($p_module);
+
 if (empty($mod)){
 	return;
 }

@@ -7,22 +7,23 @@
  * @version $Id$
  * @package Abricos
  * @subpackage User
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 
 $brick = Brick::$builder->brick;
 $param = $brick->param;
 
-if (!Brick::$session->IsRegistred()){
+if (Abricos::$user->id == 0){
 	$param->var['body'] = $param->var['accden'];
 	Brick::$builder->AddJSModule('user', "guest.js");  	
  	return;
 }
-
-if (Brick::$session->IsAdminMode()){
+Abricos::GetModule('sys')->GetManager();
+if (Ab_CoreSystemManager::$instance->IsAdminRole()){
 	Brick::$modules->RegisterAllModule();
 }
 

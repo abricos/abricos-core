@@ -1,13 +1,18 @@
 <?php
 /**
-* @version $Id$
-* @package Abricos
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @version $Id$
+ * @package Abricos
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
+ */
 
 // Set the error reporting to minimal.
 @error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
+require_once 'includes/jscomponent.php';
 
 // example
 // http://www.abricos.org/gzip.php?file=js/yui/[версия yui]/yuiloader/yuiloader-min.js
@@ -47,6 +52,7 @@ switch($mime){
 
 if ($libType == 'sys'){
 	$files = array('/modules/sys/js/brick.js');
+	$module = "sys";
 }else if ($libType == 'mod'){
 	$newFiles = array();
 	foreach($files as $file){
@@ -110,8 +116,8 @@ if ($cacheFileExists){
 	$if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? stripslashes($_SERVER['HTTP_IF_MODIFIED_SINCE']) : FALSE;
 	$if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : FALSE;
 
-	$last_modified = gmdate('D, d M Y H:i:s', filemtime($cacheFile)) .' GMT'; 
-	
+	$last_modified = gmdate('D, d M Y H:i:s', filemtime($cacheFile)) .' GMT';
+
 	if ($if_modified_since && $if_none_match
       && $if_none_match == $etag // etag must match
       && $if_modified_since == $last_modified) {  // if-modified-since must match
@@ -144,60 +150,18 @@ if ($cacheFileExists) {
 
 $content = "";
 
+if ($libType == 'sys'){
+	$module = 'sys';
+}
+
 if ($libType == 'mod' || $libType == 'sys'){
 	
 	// Append main file
 	foreach ($files as $file){
-		$content .= getFileContents($realPath."/".$basedir."/". $file);
+		$cname = basename($file, ".js");
 		
-		// 	Append language file
-		$langFile = createLangFile("/".$basedir."/".$file, $lang);
-		if (file_exists($realPath.$langFile)){
-			$content .= "(function(){";
-			$content .= getFileContents($realPath.$langFile);
-			$content .= "})();";
-		}
-		
-		// Append template file
-		$tempFile = createTemplateFile($realPath."/".$basedir."/".$file);
-		if (file_exists($tempFile)){
-			
-			// если шаблон перегружен, значит чтение перегруженого шаблона
-			$bname = basename($file, ".htm");
-			$override = createTemplateFile($realPath."/tt/".$templateName."/override/".$module."/js/".$bname);
-			$content .= "(function(){var mt=Brick.util.Template; if(typeof mt['".$module."']=='undefined'){mt['".$module."']={}};var t=mt['".$module."'];";
-			if (file_exists($override)){
-				$content .= convertTemplateToJS($override);
-			}else{
-				$content .= convertTemplateToJS($tempFile);
-			}
-			$content .= "})();";
-		}
-
-		// Append css file
-		$cssFile = createCssFile($realPath."/".$basedir."/".$file);
-		if (file_exists($cssFile)){
-			$content .= "
-(function(){
-	var mcss=Brick.util.CSS; 
-	if(typeof mcss['".$module."']=='undefined'){
-		mcss['".$module."']={};
-	};
-	var css=mcss['".$module."'];
-";
-			$content .= convertCssToJS($cssFile);
-			$content .= "
-})();
-";
-		}
-		
-		// Append initialize code
-		$content .= "
-if (typeof Component != 'undefined'){
-	Brick.add('".$module."', '".basename($file, ".js")."', Component);
-	Component = undefined;
-}	
-";
+		$jsCompFile = new Ab_CoreJSCFile($module, $cname, $templateName, $lang);
+		$content .= $jsCompFile->build();
 	}
 	
 }else{
@@ -236,31 +200,12 @@ if ($libType == 'sys'){
 		
 		// чтение всех js модулей в модуле
 		foreach ($jsfiles as $jsfile){
+			$cname = basename($jsfile, ".js");
 			$bname = basename($jsfile);
-			$key = filemtime($jsfile)+filesize($jsfile);
-			// language file
-			$langFile = createLangFile($jsfile, $lang);
-			if (file_exists($langFile))
-				$key += filemtime($langFile)+filesize($langFile);
-
-			// шаблон js модуля
-			$tmpFile = createTemplateFile($jsfile);
-			if (file_exists($tmpFile)){
-				// если шаблон перегружен, значит чтение версии перегруженого шаблона
-				$override = createTemplateFile($realPath."/tt/".$templateName."/override/".$entry."/js/".basename($tmpFile));
-				if (file_exists($override)){
-					$key += filemtime($override)+filesize($override);
-				}else{
-					$key += filemtime($tmpFile)+filesize($tmpFile);
-				}
-			}
-
-			// css file
-			$tmpFile = createCssFile($jsfile);
-			if (file_exists($tmpFile))
-				$key += filemtime($tmpFile)+filesize($tmpFile);
-				
-			$content .= "v[v.length]={f:'".$bname."', k:'".md5($key)."'};\n";
+			$jsCompFile = new Ab_CoreJSCFile($entry, $cname, $templateName, $lang);
+		
+			$key = $jsCompFile->buildKey();
+			$content .= "v[v.length]={f:'".$bname."', k:'".$key."'};\n";
 		}
 		$content .= "m['".$entry."']=v;\n";
 	}
@@ -273,8 +218,9 @@ Brick.Modules = m;
 if ($compress) {
 	header("Content-Encoding: " . $enc);
 	$cacheData = gzencode($content, 9, FORCE_GZIP);
-} else
+} else {
 	$cacheData = $content;
+}
 
 // Write gz file
 if ($diskCache && $cacheKey != ""){
@@ -305,61 +251,12 @@ function globa($pattern, $flag = 0){
 	return $res ? $res : array();
 }
 
-function createCssFile($file){
-	return str_replace('.js', '.css', $file);
-}
-
-function convertCssToJS($file){
-	$str = getFileContents($file);
-	$str = preg_replace("/[\n\r\t]+/", "", $str);
-	$str = addslashes($str);
-	
-	$bname = basename($file, ".css");
-	$js = "css['".$bname."']='".$str."';";
-	return $js;
-}
-
-function createTemplateFile($file){return str_replace('.js', '.htm', $file);}
-
-function convertTemplateToJS($file){
-	$str = getFileContents($file);
-	$str = preg_replace("/[\n\r\t]+/", "", $str);
-	$str = preg_replace("/>[\s]+</", "><", $str);
-	
-	$pattern = '/<!--{([a-zA-Z0-9_ ]+)}-->/siU';
-	$mathes = array();
-	preg_match_all($pattern, $str, $mathes, PREG_SET_ORDER);
-	$ret = $str;
-
-	$bname = basename($file, ".htm");
-	$js = "t['".$bname."']={};";
-	
-	for ($i=count($mathes)-1;$i>=0;$i--){
-		$varr = $mathes[$i][0];
-		$var = trim($mathes[$i][1]);
-
-		$pos = strpos($ret, $varr);
-		$s = substr($ret, $pos);
-		$ret = substr($ret, 0, strlen($ret)-strlen($s));
-		
-		$s = substr($s, strlen($varr));
-		
-		$js .= "t['".$bname."']['".$var."']='".addslashes($s)."';";
-	}
-	
-	return $js;
-}
-
-function createLangFile($file, $lang){
-	$pi = pathinfo($file);
-	return $pi['dirname']."/langs/".str_replace('.js', '_'.$lang.'.js', $pi['basename']);
-}
-
 function getParam($name, $def = false) {
 	if (!isset($_GET[$name]))
 		return $def;
 		
 	$ret = str_replace("\\", "/", $_GET[$name]); 
+	$ret = str_replace("..", "", $ret);
 	return preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $ret); 
 }
 

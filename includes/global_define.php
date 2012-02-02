@@ -1,10 +1,12 @@
 <?php
 /**
-* @version $Id$
-* @package Abricos
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @version $Id$
+ * @package Abricos
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@abricos.org)
+ */
 
 define('MENUID_ADMIN', 9999999);
 
@@ -17,34 +19,4 @@ define('USERGROUPID_GUEST',				2);
 define('USERGROUPID_BANNED',			1);
 define('USERGROUPID_ALL',				0);
 
-
-define('TYPE_BOOL',     1); // force boolean
-define('TYPE_INT',      2); // force integer
-define('TYPE_UINT',     3); // force unsigned integer
-define('TYPE_NUM',      4); // force number
-define('TYPE_UNUM',     5); // force unsigned number
-define('TYPE_UNIXTIME', 6); // force unix datestamp (unsigned integer)
-define('TYPE_STR',      7); // force trimmed string
-define('TYPE_NOTRIM',   8); // force string - no trim
-define('TYPE_NOHTML',   9); // force trimmed string with HTML made safe
-define('TYPE_ARRAY',   10); // force array
-define('TYPE_FILE',    11); // force file
-define('TYPE_STRUTF',    12); 
-
-define('TYPE_ARRAY_BOOL',     101);
-define('TYPE_ARRAY_INT',      102);
-define('TYPE_ARRAY_UINT',     103);
-define('TYPE_ARRAY_NUM',      104);
-define('TYPE_ARRAY_UNUM',     105);
-define('TYPE_ARRAY_UNIXTIME', 106);
-define('TYPE_ARRAY_STR',      107);
-define('TYPE_ARRAY_NOTRIM',   108);
-define('TYPE_ARRAY_NOHTML',   109);
-define('TYPE_ARRAY_ARRAY',    110);
-define('TYPE_ARRAY_FILE',     11);  // An array of "Files" behaves differently than other <input> arrays. TYPE_FILE handles both types.
-
-define('TYPE_ARRAY_KEYS_INT', 202);
-
-define('TYPE_CONVERT_SINGLE', 100); // value to subtract from array types to convert to single types
-define('TYPE_CONVERT_KEYS',   200); // value to subtract from array => keys types to convert to single types
 ?>

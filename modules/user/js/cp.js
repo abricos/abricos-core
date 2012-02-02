@@ -10,13 +10,13 @@ Component.requires = {
 };
 Component.entryPoint = function(){
 	
-	if (!Brick.env.user.isAdmin()){ return; }
+	if (Brick.Permission.check('user', '50') != 1){ return; }
 	var cp = Brick.mod.user.cp;
 
-	var menuItem = new cp.MenuItem(this.moduleName, 'manager');
+	var menuItem = new cp.MenuItem('{C#MODNAME}', 'manager');
 	menuItem.icon = '/modules/user/css/images/cp_icon.gif';
 	menuItem.titleId = 'mod.user.cp.title';
-	menuItem.entryComponent = 'api';
+	menuItem.entryComponent = 'manager';
 	menuItem.entryPoint = 'Brick.mod.user.API.showManagerWidget';
 	cp.MenuManager.add(menuItem);
 };

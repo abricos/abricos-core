@@ -545,6 +545,10 @@ Component.entryPoint = function(){
 			this._isDestroyPanel = true;
 		},
 		
+		isDestroy: function(){
+			return this._isDestroyPanel;
+		},
+		
 		/**
 		 * Абстрактный метод, который возвращает HTML код панели.
 		 * 

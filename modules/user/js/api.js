@@ -93,14 +93,6 @@ Component.entryPoint = function(){
 		});
 	};
 	
-	API.showManagerWidget = function(container){
-		API.fn('manager', function(){
-			var widget = new NS.ManagerWidget(container);
-			API.addWidget('manager', widget);
-			API.dsRequest();
-		});
-	};
-
 	API.showUserEditorPanel = function(userid, callback){
 		API.fn('manager', function(){
 			var widget = new NS.UserEditorPanel(userid, callback);

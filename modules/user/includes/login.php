@@ -8,14 +8,15 @@
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
+ * @ignore
  */
 
 $brick = Brick::$builder->brick;
 $userMod = Brick::$user;
 $userManager = $userMod->GetManager(); 
 
-$p_login = Brick::$input->clean_gpc('p', 'login', TYPE_STR);
-$p_pass = Brick::$input->clean_gpc('p', 'password', TYPE_STR);
+$p_login = Abricos::CleanGPC('p', 'login', TYPE_STR);
+$p_pass = Abricos::CleanGPC('p', 'password', TYPE_STR);
 
 $err = 0;
 if (!empty($p_login) || !empty($p_pass)){

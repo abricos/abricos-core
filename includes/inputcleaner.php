@@ -1,15 +1,31 @@
 <?php
 /**
-* @version $Id$
-* @package Abricos
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * Обработчик глобальных переменных для безопасного использования
+ * 
+ * Рекомендуется обращаться к переменным $_POST, $_GET, $_REQUEST и т.п. не 
+ * на прямую, а через этот обработчик {@link Ab_CoreInputCleaner::clean_gpc()}. 
+ * Это позволит обезопасить их от возможных атак.
+ * 
+ * @version $Id$
+ * @package Abricos
+ * @subpackage Core
+ * @link http://abricos.org
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ */
+class Ab_CoreInputCleaner {
+	
+	/**
+	 * Get,Post,Cookie
+	 *
+	 * @var array
+	 */
+	public $GPC = array();
+	
+	private $shortvars = array();
 
-class CMSInputCleaner {
-	public $shortvars = array();
-
-	public $superglobal_lookup = array(
+	private $superglobal_lookup = array(
 		'g' => '_GET',
 		'p' => '_POST',
 		'r' => '_REQUEST',
@@ -19,24 +35,13 @@ class CMSInputCleaner {
 		'f' => '_FILES'
 	);
 
-	public $scriptpath = '';
-
 	/**
-	 * Enter description here...
-	 *
-	 * @var CMSRegistry
+	 * Конструктор
+	 * 
+	 * @param Abricos $registry
+	 * @ignore
 	 */
-	public $registry = null;
-
-	/**
-	 * Enter description here...
-	 *
-	 * @param CMSRegistry $registry
-	 * @return CMSInputCleaner
-	 */
-	public function CMSInputCleaner(CMSRegistry $registry) {
-		$this->registry = $registry;
-
+	public function __construct() {
 		if (!is_array($GLOBALS)) {
 			die('<strong>Fatal Error:</strong> Invalid URL.');
 		}
@@ -89,6 +94,10 @@ class CMSInputCleaner {
 		}
 	}
 
+	/**
+	 * 
+	 * @ignore
+	 */
 	function &clean_array(&$source, $variables) {
 		$return = array();
 
@@ -99,19 +108,20 @@ class CMSInputCleaner {
 	}
 
 	/**
-	* Makes GPC variables safe to use
-	*
-	* @param	string	Either, g, p, c, r or f (corresponding to get, post, cookie, request and files)
-	* @param	array	Array of variable names and types we want to extract from the source array
-	*
-	* @return	array
-	*/
+	 * Makes GPC variables safe to use
+	 *
+	 * @param	string	Either, g, p, c, r or f (corresponding to get, post, cookie, request and files)
+	 * @param	array	Array of variable names and types we want to extract from the source array
+	 *
+	 * @return	array
+	 * @ignore
+	 */
 	function clean_array_gpc($source, $variables) {
 		$sg =& $GLOBALS[$this->superglobal_lookup["$source"]];
 
 		foreach ($variables AS $varname => $vartype) {
-			if (!isset($this->registry->GPC["$varname"])){
-				$this->registry->GPC["$varname"] =& $this->clean(
+			if (!isset($this->GPC["$varname"])){
+				$this->GPC["$varname"] =& $this->clean(
 				$sg["$varname"],
 				$vartype,
 				isset($sg["$varname"])
@@ -120,15 +130,31 @@ class CMSInputCleaner {
 		}
 	}
 
+	/**
+	 * Обработать глобальную переменную для безопасного использования
+	 *   
+	 * Например:
+	 * <code>
+	 * $p_act = Abricos::CleanGPC('p', 'act', TYPE_STR);
+	 * </code>
+	 * 
+	 * @param string $source Тип глобальной переменной g, p, c, r or f (соответственно GET, POST, COOKIE, REQUEST и FILES)
+	 * @param string $varname Имя переменной
+	 * @param integer $vartype Тип переменной
+	 */
 	function &clean_gpc($source, $varname, $vartype = TYPE_NOCLEAN) 	{
-		if (!isset($this->registry->GPC["$varname"])) {
+		if (!isset($this->GPC["$varname"])) {
 			$sg =& $GLOBALS[$this->superglobal_lookup["$source"]];
-			$this->registry->GPC["$varname"] =& $this->clean($sg["$varname"],	$vartype,isset($sg["$varname"]));
+			$this->GPC["$varname"] =& $this->clean($sg["$varname"], $vartype, isset($sg["$varname"]));
 		}
 
-		return $this->registry->GPC["$varname"];
+		return $this->GPC["$varname"];
 	}
 
+	/**
+	 * 
+	 * @ignore
+	 */
 	function &clean(&$var, $vartype = TYPE_NOCLEAN, $exists = true)	{
 		if ($exists) {
 			if ($vartype < TYPE_CONVERT_SINGLE){
@@ -171,6 +197,10 @@ class CMSInputCleaner {
 		}
 	}
 
+	/**
+	 * 
+	 * @ignore
+	 */
 	function &do_clean(&$data, $type) {
 		static $booltypes = array('1', 'yes', 'y', 'true');
 		switch ($type) {
@@ -184,52 +214,45 @@ class CMSInputCleaner {
 			case TYPE_NOHTML: $data = htmlspecialchars_uni(trim(strval($data)));       break;
 			case TYPE_BOOL:   $data = in_array(strtolower($data), $booltypes) ? 1 : 0; break;
 			case TYPE_ARRAY:  $data = (is_array($data)) ? $data : array();             break;
-			//case TYPE_STRUTF:	$data = iconv("UTF-8", "Windows-1251", trim(strval($data))); break;
 			case TYPE_STRUTF:	$data = trim(strval($data));                             break;
 			
-			case TYPE_FILE:
-				{
-					// perhaps redundant :p
-					if (is_array($data))
-					{
-						if (is_array($data['name']))
-						{
-							$files = count($data['name']);
-							for ($index = 0; $index < $files; $index++)
-							{
-								$data['name']["$index"] = trim(strval($data['name']["$index"]));
-								$data['type']["$index"] = trim(strval($data['type']["$index"]));
-								$data['tmp_name']["$index"] = trim(strval($data['tmp_name']["$index"]));
-								$data['error']["$index"] = intval($data['error']["$index"]);
-								$data['size']["$index"] = intval($data['size']["$index"]);
-							}
+			case TYPE_FILE: {
+				if (is_array($data)) {
+					if (is_array($data['name'])) {
+						$files = count($data['name']);
+						for ($index = 0; $index < $files; $index++) {
+							$data['name']["$index"] = trim(strval($data['name']["$index"]));
+							$data['type']["$index"] = trim(strval($data['type']["$index"]));
+							$data['tmp_name']["$index"] = trim(strval($data['tmp_name']["$index"]));
+							$data['error']["$index"] = intval($data['error']["$index"]);
+							$data['size']["$index"] = intval($data['size']["$index"]);
 						}
-						else
-						{
-							$data['name'] = trim(strval($data['name']));
-							$data['type'] = trim(strval($data['type']));
-							$data['tmp_name'] = trim(strval($data['tmp_name']));
-							$data['error'] = intval($data['error']);
-							$data['size'] = intval($data['size']);
-						}
+					} else {
+						$data['name'] = trim(strval($data['name']));
+						$data['type'] = trim(strval($data['type']));
+						$data['tmp_name'] = trim(strval($data['tmp_name']));
+						$data['error'] = intval($data['error']);
+						$data['size'] = intval($data['size']);
 					}
-					else
-					{
-						$data = array(
+				} else {
+					$data = array (
 						'name'     => '',
 						'type'     => '',
 						'tmp_name' => '',
 						'error'    => 0,
-						'size'     => 4, // UPLOAD_ERR_NO_FILE
-						);
-					}
-					break;
+						'size'     => 4
+					);
 				}
+				break;
+			}
 		}
-
 		return $data;
 	}
 
+	/**
+	 * 
+	 * @ignore
+	 */
 	function stripslashes_deep(&$value) {
 	    static $recursive_counter = 0;
 	    if (++$recursive_counter > 1000) {
@@ -247,6 +270,10 @@ class CMSInputCleaner {
     	$recursive_counter--;
 	}
 
+	/**
+	 * 
+	 * @ignore
+	 */
 	function convert_shortvars(&$array) {
 		// extract long variable names from short variable names
 		foreach ($this->shortvars AS $shortname => $longname) {
@@ -257,11 +284,56 @@ class CMSInputCleaner {
 		}
 	}
 
+	/**
+	 * 
+	 * @ignore
+	 */
 	function strip_sessionhash(&$string) {
 		$string = preg_replace('/(s|sessionhash)=[a-z0-9]{32}?&?/', '', $string);
 		return $string;
 	}
 
 }
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreInputCleaner}
+ * @ignore
+ */
+class CMSInputCleaner extends Ab_CoreInputCleaner {
+}
+
+define('TYPE_BOOL',     1);
+define('TYPE_INT',      2);
+define('TYPE_UINT',     3);
+define('TYPE_NUM',      4);
+define('TYPE_UNUM',     5);
+define('TYPE_UNIXTIME', 6);
+define('TYPE_STR',      7);
+define('TYPE_NOTRIM',   8);
+define('TYPE_NOHTML',   9);
+define('TYPE_ARRAY',   10);
+define('TYPE_FILE',    11);
+define('TYPE_STRUTF',	12);
+
+define('TYPE_ARRAY_BOOL',     101);
+define('TYPE_ARRAY_INT',      102);
+define('TYPE_ARRAY_UINT',     103);
+define('TYPE_ARRAY_NUM',      104);
+define('TYPE_ARRAY_UNUM',     105);
+define('TYPE_ARRAY_UNIXTIME', 106);
+define('TYPE_ARRAY_STR',      107);
+define('TYPE_ARRAY_NOTRIM',   108);
+define('TYPE_ARRAY_NOHTML',   109);
+define('TYPE_ARRAY_ARRAY',    110);
+define('TYPE_ARRAY_FILE',     11);  
+
+define('TYPE_ARRAY_KEYS_INT', 202);
+
+define('TYPE_CONVERT_SINGLE', 100); 
+define('TYPE_CONVERT_KEYS',   200); 
 
 ?>

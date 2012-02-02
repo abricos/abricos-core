@@ -1,5 +1,5 @@
 /*
-@copyright Copyright (C) 2008 Abricos. All rights reserved.
+@copyright Copyright (C) 2011 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 @version $Id$
 */
@@ -89,7 +89,7 @@ Brick.namespace = function() {
 };
 
 /**
- * Найти в Dom элементе элементы типа SCRIPT, удалить их, при этом 
+ * Найти в Dom элементы типа SCRIPT, удалить их, при этом 
  * собрав весь JavaScript текст 
  * @method cleanScript
  * @static
@@ -158,6 +158,7 @@ Brick.readScript = function(text){
 };
 
 Brick.console = function(obj){
+	var console = window.console;
 	if (!console){ return; }
 	if (typeof console['log'] != 'function'){ return; }
 	console.log(obj);
@@ -262,22 +263,19 @@ Brick.console = function(obj){
 				componentName = this.cName,
 				component = this.component;
 				
-			var namespace = 'mod.'+moduleName;
-			var NS = component.namespace = Brick.namespace(namespace);
-			if (!Brick.objectExists(namespace+'.API')){
-				NS.API = new Brick.Component.API(moduleName);
+			var namespace = 'mod';
+			
+			var NS = Brick.namespace(namespace);
+			NS[moduleName] = NS[moduleName] || {};
+			NS = NS[moduleName];
+			component.namespace = NS;
+			
+			if (!NS['API']){
+				NS['API'] = new Brick.Component.API(moduleName);
 			}
 
 			component.entryPoint(NS);
 
-			/*
-			try{
-				component.entryPoint(NS);
-			}catch(e){
-				Brick.console(components);
-				Brick.console(e);
-				asdf;
-			}/**/
 			delete component.entryPoint;
 			component.isRegistered = true;
 			component.onLoad();
@@ -299,13 +297,14 @@ Brick.console = function(obj){
 	 */
 	Brick.add = function(moduleName, componentName, component){
 		components[moduleName] = components[moduleName] || {};
-		
+
 		if (components[moduleName][componentName]){
 			// что за безобразие?!
 			alert('Error: The component is already registered!\nModuleName='+moduleName+'\nComponentName='+componentName);
 			return;
 		}
-		
+		Brick._ldCk[moduleName][componentName+'.js']['ok'] = true;
+
 		component.isRegistered = false;
 		
 		components[moduleName][componentName] = component;
@@ -314,6 +313,23 @@ Brick.console = function(obj){
 
 		component.template = new Brick.Template(component);
 		component._counter = counter++;
+		
+		component.language = Brick.util.Language.geta(['mod', moduleName]);
+		
+		var initCSS = false;
+		
+		component.buildTemplate = function(w, ts){
+			if (!initCSS){
+				var CSS = Brick.util.CSS;
+				if (CSS[moduleName] && CSS[moduleName][componentName]){
+					CSS.update(CSS[moduleName][componentName]);
+					delete CSS[moduleName][componentName];
+				}
+				initCSS = true;
+			}
+			w._TM = component.template.build(ts); w._T = w._TM.data; w._TId = w._TM.idManager;
+			return w._TM;
+		};
 		
 		component.requires = component.requires || {};
 		var loadinfo = component.requires;
@@ -1274,6 +1290,18 @@ Brick.namespace('util');
 		return l;
 	};
 	
+	Language.geta = function(arr){
+		var l = _dict[Brick.env.language];
+		
+		for (var i=0;i<arr.length;i++){
+			l = l[arr[i]];
+			if (typeof l == 'undefined'){
+				return null;
+			}
+		}
+		return l;
+	}
+	
 	/**
 	 * Получить объект фраз текущего языка
 	 * 
@@ -1431,6 +1459,26 @@ Brick.namespace('util');
 				return;
 			}
 			
+			/*
+			// есть ли битые файлы?
+			var ldCk = Brick._ldCk;
+			for (var n in ldCk){
+				for (var nn in ldCk[n]){
+					if (!ldCk[n][nn]['ok']){
+						ldCk[n][nn]['n']++;
+						if (ldCk[n][nn]['n'] < 10){ // на всякий случай, хотя врядли он будет
+							this.add({mod:[{name: n, files: [nn]}]});
+						}
+					}
+				}
+			}
+			
+			if (this._modules.length != this._countModule){
+				this._start();
+				return;
+			}
+			/**/
+			
 			// Установить флаг загрузки. Необходим для предотвращения запуска загрузки 
 			// добавляемых модулей в процессе выполнения событий загруженных модулей
 			this._isProccess = true;
@@ -1444,6 +1492,7 @@ Brick.namespace('util');
 				}
 				m.event.executed = true;
 				var f = error ? m.event.onFailure : m.event.onSuccess;
+
 				//try{
 					if (typeof f == 'function'){
 						f();
@@ -1511,14 +1560,54 @@ Brick.namespace('util');
 									if (minfo[k]['f'] == mb){ mv = minfo[k]['k']; }
 								}
 								if (mv == ""){
-									// Brick.console(mlib[ii]);
+									
 								}else{
-									rq[rq.length]=mm+mb;
-									loader.addModule({
-										name: mm+mb, 
-										type: "js", 
-										fullpath: "/gzip.php?type=mod&module="+mm+"&version="+mv+"&tt="+Brick.env.ttname+"&file="+mb
-									});
+									var ldCk = Brick._ldCk[mm] = Brick._ldCk[mm] || {};
+									ldCk = ldCk[mb] = ldCk[mb] || {'ok': false, 'n': 0};
+									
+									var samm = mm.split("/"),
+										src = "";
+									if (samm.length == 2){
+										
+										var nHost = samm[0],
+											nPort = 80,
+											nModName = samm[1];
+										
+										aHost = nHost.split(':');
+										if (aHost.length == 2){
+											nHost = aHost[0];
+											if (aHost[1]*1 != 0){
+												nPort = aHost[1]*1 ;
+											}
+										}
+										
+										src = "/app/gzip/"+nHost
+											+"/"+nPort
+											+"/"+nModName
+											+"/"+mv
+											+"/"+mb;
+									}else{
+										src = "/gzip.php?type=mod&module="+mm
+											+"&version="+mv
+											+"&tt="+Brick.env.ttname
+											+"&n="+ldCk['n']
+											+"&file="+mb;
+									}
+
+									var reqid='n'+ldCk['n']+mm+mb;
+									
+									if (!Brick._ldReqId[reqid]){
+										Brick._ldReqId[reqid] = true;
+										
+										rq[rq.length]=reqid;
+										
+										loader.addModule({
+											name: reqid, 
+											type: "js", 
+											fullpath: src
+										});
+									
+									}
 								}
 							}
 						}
@@ -1529,6 +1618,10 @@ Brick.namespace('util');
 			loader.insert();
 		}
 	};
+	// связь прервалась, а браузер закешировал битый файл. 
+	// осталось только запросить с новым урлом этот js
+	Brick._ldCk = {};
+	Brick._ldReqId = {};
 	
 	Brick.Loader = {
 		mods: [],

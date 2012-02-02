@@ -1,18 +1,41 @@
 <?php
 /**
+ * Кирпич - строительный материал для страниц в платформе Абрикос
+ * 
+ * Идеология платформы Абрикос построена на том, что любой блок в собираемой 
+ * страницы должен иметь в себе все необходимое и быть в своем роде независимым 
+ * блоком.
+ * 
+ * Кирпич (Brick) - и есть тот самый строительный материал, который содержит в себе шаблон
+ * и при необходимости скрипт подготовки данных.
+ * 
+ * Кирпич может иметь вложенные кирпичи в неограниченном кол-ве.
+ * 
+ * Есть три типа кирпича: Brick, Template, Content.
+ * 
+ * Brick - свободный кирпич, который может быть использован в любом другом кирпиче;<br />
+ * Template - шаблон (каркас, своего рода фасад здания). Содержит в себе любые кирпичи, кроме кирпичей 
+ * шаблонов и стартовых кирпичей;<br />
+ * Content - стартовый кирпич, с него начинается сборка страницы. Обязательное условие - наличие 
+ * кирпича шаблона.
+ * 
+ * Пример свободного кирпича helloworld из модуля Example (/modules/example/brick/helloworld.html)
+ * {@example modules/example/brick/helloworld.html}
+ * 
+ * Пример стартового кирпича helloworld из модуля Example (/modules/example/content/helloworld.html)
+ * {@example modules/example/content/helloworld.html}
+ * 
+ * Пример скрипта подготовки данных helloworld.php из модуля Example (/modules/example/includes/helloworld.php)
+ * {@example modules/example/includes/helloworld.php}
+ * 
+ * Результат можно посмотреть по адресу: {@link http://demo.abricos.org/example/helloworld.html}
+ * 
  * @version $Id$
  * @package Abricos
- * @subpackage Sys
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @subpackage 
+ * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
- */
-
-/**
- * Класс статичных функций и свойств. 
- * 
- * @package Abricos
- * @subpackage Sys
+ * @author Alexander Kuzmin <roosit@abricos.org>
  */
 class Brick {
 	
@@ -32,7 +55,6 @@ class Brick {
 	const BRICKPRM_PARAM = 9;
 	const BRICKPRM_CSSMOD = 6;
 	
-	
 	/**
 	 * Текущий стиль, содержащий шаблоны, для сборок страниц
 	 * @var string
@@ -49,28 +71,28 @@ class Brick {
 	/**
 	 * Компилятор кирпичей
 	 *
-	 * @var CMSSysBrickBuilder
+	 * @var Ab_CoreBrickBuilder
 	 */
 	public static $builder = null;
 	
 	/**
 	 * Менеджер базы данных
 	 *
-	 * @var CMSDatabase
+	 * @var Ab_Database
 	 */
 	public static $db = null;
 	
 	/**
 	 * Модуль, который получил управления на вывод страницы
 	 *
-	 * @var CMSModule
+	 * @var Ab_Module
 	 */
 	public static $modman = null;
 	
 	/**
 	 * Менеджер модулей
 	 *
-	 * @var CMSModuleManager
+	 * @var AbricosCoreModuleManager
 	 */
 	public static $modules = null;
 	
@@ -82,8 +104,7 @@ class Brick {
 	public static $cms = null;
 	
 	/**
-	 * GPC
-	 *
+	 * 
 	 * @var CMSInputCleaner
 	 */
 	public static $input = null;
@@ -150,9 +171,9 @@ class Brick {
  * Конструктор страницы из кирпичей 
  * 
  * @package Abricos
- * @subpackage Sys
+ * @subpackage Core
  */
-class CMSSysBrickBuilder {
+class Ab_CoreBrickBuilder {
 	
 	/**
 	 * Ядро
@@ -166,14 +187,14 @@ class CMSSysBrickBuilder {
 	 * 
 	 * Используется в скриптах управления кирпичем
 	 *
-	 * @var CMSSysBrick
+	 * @var Ab_CoreBrick
 	 */
 	public $brick = null;
 
 	/**
 	 * Шаблон
 	 *
-	 * @var CMSSysBrick
+	 * @var Ab_CoreBrick
 	 */
 	public $template = null;
 	
@@ -231,7 +252,7 @@ class CMSSysBrickBuilder {
 	 * 
 	 * @param CMSRegistry $registry
 	 */
-	public function CMSSysBrickBuilder(CMSRegistry $registry){
+	public function __construct(CMSRegistry $registry){
 		$this->registry = $registry;
 		$this->phrase = new CMSSysPhrase($this->registry );
 	}
@@ -249,7 +270,7 @@ class CMSSysBrickBuilder {
 	 * Сборка страницы. 
 	 * параметр $brick - имеет тип шаблон.
 	 */
-	public function Compile(CMSSysBrick $brick){
+	public function Compile(Ab_CoreBrick $brick){
 		// загрузить все глобальные параметры кирпичей 
 		$this->TakeGlobalParam($brick);
 		
@@ -270,7 +291,7 @@ class CMSSysBrickBuilder {
 			}
 		}
 		if (isset($this->_globalVar['jsyui'])){
-			$this->_globalVar['jsyui'] = SystemModule::$YUIVersion;
+			$this->_globalVar['jsyui'] = Ab_CoreSystemModule::$YUIVersion;
 		}
 		
 		// установка версии
@@ -300,9 +321,9 @@ class CMSSysBrickBuilder {
 	 * @param CMSModule $module
 	 * @param string $name
 	 */
-	public function LoadBrick(CMSModule $module, $name, CMSSysBrick $parent = null, $overparam = null){
+	public function LoadBrick(Ab_Module $module, $name, Ab_CoreBrick $parent = null, $overparam = null){
 		
-		$bm = new CMSSysBrickManager($this->registry, false);
+		$bm = new Ab_CoreBrickManager($this->registry, false);
 		$brick = $bm->BuildOutput($module->name, $name, Brick::BRICKTYPE_BRICK, $parent);
 		
 		$this->SetUseModule($module->name);
@@ -336,7 +357,7 @@ class CMSSysBrickBuilder {
 		return $brick;
 	}
 	
-	public function LoadBrickS($moduleName, $name, CMSSysBrick $parent = null, $overparam = null){
+	public function LoadBrickS($moduleName, $name, Ab_CoreBrick $parent = null, $overparam = null){
 		$mod = $this->registry->modules->GetModule($moduleName);
 		return $this->LoadBrick($mod, $name, $parent, $overparam);
 	}
@@ -376,11 +397,11 @@ class CMSSysBrickBuilder {
 		$this->_cssfile[$file] = $file;
 	}
 	
-	private function SetVar(CMSSysBrick $brick, $search, $replace){
+	private function SetVar(Ab_CoreBrick $brick, $search, $replace){
 		$brick->content = str_replace($search, $replace, $brick->content);
 	}
 	
-	private function PagePrint(CMSSysBrick $tplBrick){
+	private function PagePrint(Ab_CoreBrick $tplBrick){
 		header("Content-Type: text/html; charset=utf-8");
 		header("Expires: Mon, 26 Jul 2005 15:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -403,7 +424,7 @@ class CMSSysBrickBuilder {
 		$this->PrintBrick($tplBrick, $sa[1]);
 	}
 	
-	public function PrintBrick(CMSSysBrick $brick, $content){
+	public function PrintBrick(Ab_CoreBrick $brick, $content){
 		// Поиск в $content запросы на вставку данных из дочерних кирпичей $brick, 
 		// результат будет занесен в $mathes, для последующей обработки. 
 		$mathes = array();
@@ -471,7 +492,7 @@ class CMSSysBrickBuilder {
 		print substr($content, $position, strlen($content)-$posiiton);
 	}
 	
-	private function FetchVars(CMSSysBrick $brick){
+	private function FetchVars(Ab_CoreBrick $brick){
 
 		if ($brick->type == Brick::BRICKTYPE_TEMPLATE){
 			$list = array();
@@ -507,7 +528,7 @@ class CMSSysBrickBuilder {
 			
 			// проверка css модулей по умолчания
 			foreach ($this->_usemod as $modname => $value){
-				$mod = Brick::$modules->GetModule($modname);
+				$mod = Abricos::GetModule($modname);
 				if (empty($mod->defaultCSS)){ continue; }
 				$webcssfile = "/modules/".$modname."/css/".$mod->defaultCSS;
 				$cssfile = CWD.$webcssfile;
@@ -553,9 +574,9 @@ class CMSSysBrickBuilder {
 	/**
 	 * Взять глобальные параметры у каждого кирпича
 	 *
-	 * @param CMSSysBrick $brick
+	 * @param Ab_CoreBrick $brick
 	 */
-	private function TakeGlobalParam(CMSSysBrick $brick){
+	private function TakeGlobalParam(Ab_CoreBrick $brick){
 		if ($brick->type != Brick::BRICKTYPE_TEMPLATE){
 			$this->SetUseModule($brick->owner);
 		}
@@ -590,9 +611,9 @@ class CMSSysBrickBuilder {
 	/**
 	 * Выполнение скриптов кирпича
 	 *
-	 * @param CMSSysBrick $brick
+	 * @param Ab_CoreBrick $brick
 	 */
-	private function ExecuteBrick(CMSSysBrick $brick){
+	private function ExecuteBrick(Ab_CoreBrick $brick){
 		
 		$p = $brick->param;
 		foreach ($brick->child as $childbrick){
@@ -609,7 +630,7 @@ class CMSSysBrickBuilder {
 			if (!file_exists($file)){
 				$brick->content .= "File not found: ".$file."\n";
 			}else{
-				$mod = Brick::$modules->GetModule($brick->owner);
+				$mod = Abricos::GetModule($brick->owner);
 				if (empty($mod)){
 					$brick->content .= "Module ".$brick->owner." not found!\n";
 				}else{
@@ -629,9 +650,9 @@ class CMSSysBrickBuilder {
  * администратором сайта, либо с файловой системы
  * 
  * @package Abricos
- * @subpackage Sys
+ * @subpackage Core
  */
-class CMSSysBrickManager {
+class Ab_CoreBrickManager {
 	
 	/**
 	 * Ядро
@@ -643,15 +664,15 @@ class CMSSysBrickManager {
 	/**
 	 * Пользовательские версии кирпичей и параметров
 	 *
-	 * @var CMSSysBrickCustomManager
+	 * @var Ab_CoreCustomBrickManager
 	 */
 	public $custom = null;
 	
-	public function CMSSysBrickManager(CMSRegistry $registry, $useCustom = true){
+	public function __construct(CMSRegistry $registry, $useCustom = true){
 		$this->registry = $registry;
 		// пользовательские кирпичи и параметры
 		if ($useCustom){
-			$this->custom = new CMSSysBrickCustomManager($this->registry);
+			$this->custom = new Ab_CoreCustomBrickManager($this->registry);
 		}
 	}
 	
@@ -677,7 +698,7 @@ class CMSSysBrickManager {
 		if ($brickType == Brick::BRICKTYPE_TEMPLATE){
 			if (CMSRegistry::$instance->config['Misc']['brick_cache']){
 				$time = TIMENOW-5*360;
-				$cache = CMSQSys::Cache($db, $owner, $brickName);
+				$cache = Ab_CoreQuery::Cache($db, $owner, $brickName);
 				if (empty($cache) || $cache['ud'] < $time){
 					$recache = true;
 				}
@@ -695,13 +716,13 @@ class CMSSysBrickManager {
 		$brick = null;
 		if (empty($customBrick)){
 			// кирпич не найден в БД, читаем из файла
-			$brickFF = CMSSysBrickReader::ReadBrick($owner, $brickName, $brickType);
-			$brick = new CMSSysBrick($owner, $brickName, $brickType, $brickFF->body, $brickFF->param, $parent);
+			$brickFF = Ab_CoreBrickReader::ReadBrick($owner, $brickName, $brickType);
+			$brick = new Ab_CoreBrick($owner, $brickName, $brickType, $brickFF->body, $brickFF->param, $parent);
 			$this->SyncParam($owner, $brickName, $brickType, $brick->param);
 		}else{
-			$param = new CMSSysBrickParam();
+			$param = new Ab_CoreBrickParam();
 			$this->SyncParam($owner, $brickName, $brickType, $param);
-			$brick = new CMSSysBrick($owner, $brickName, $brickType, $customBrick['bd'], $param, $parent);
+			$brick = new Ab_CoreBrick($owner, $brickName, $brickType, $customBrick['bd'], $param, $parent);
 		}
 		
 		$p = $brick->param;
@@ -771,9 +792,9 @@ class CMSSysBrickManager {
 		}
 		if ($brickType == Brick::BRICKTYPE_TEMPLATE && $recache){
 			if (empty($cache)){
-				CMSQSys::CacheAppend($db, $owner, $brickName, serialize($brick));
+				Ab_CoreQuery::CacheAppend($db, $owner, $brickName, serialize($brick));
 			}else{
-				CMSQSys::CacheUpdate($db, $cache['id'], serialize($brick));
+				Ab_CoreQuery::CacheUpdate($db, $cache['id'], serialize($brick));
 			}
 		}
 		return $brick;
@@ -784,15 +805,15 @@ class CMSSysBrickManager {
 	 * @param string $owner
 	 * @param string $brickName
 	 * @param integer $brickType
-	 * @param CMSSysBrickParam $param
+	 * @param Ab_CoreBrickParam $param
 	 */
-	private function SyncParam($owner, $brickName, $brickType, CMSSysBrickParam $param){
+	private function SyncParam($owner, $brickName, $brickType, Ab_CoreBrickParam $param){
 		if (is_null($this->custom)){ return; }
 		$customParam = $this->custom->GetParams($brickType, $owner, $brickName);
 		if (empty($customParam)){
 			return;
 		}
-		CMSSysBrickReader::SyncParamFromDB($param, $customParam);
+		Ab_CoreBrickReader::SyncParamFromDB($param, $customParam);
 	}
 }
 
@@ -800,9 +821,9 @@ class CMSSysBrickManager {
  * Параметры кирпича
  * 
  * @package Abricos
- * @subpackage Sys
+ * @subpackage Core
  */
-class CMSSysBrickParam {
+class Ab_CoreBrickParam {
 	
 	/**
 	 * Параметры кирпича (могут определяться в процессе подключения)
@@ -879,14 +900,14 @@ class CMSSysBrickParam {
  * Кирпич
  * 
  * @package Abricos
- * @subpackage Sys
+ * @subpackage Core
  */
-class CMSSysBrick {
+class Ab_CoreBrick {
 	
 	/**
 	 * Родитель
 	 *
-	 * @var CMSSysBrick
+	 * @var Ab_CoreBrick
 	 */
 	public $parent = null;
 	
@@ -928,7 +949,7 @@ class CMSSysBrick {
 	/**
 	 * Параметры кирпича
 	 *
-	 * @var CMSSysBrickParam
+	 * @var Ab_CoreBrickParam
 	 */
 	public $param = null;
 	
@@ -946,9 +967,9 @@ class CMSSysBrick {
  * Класс управления кирпичами исправленых администратором сайта
  *
  * @package Abricos
- * @subpackage Sys
+ * @subpackage Core
  */
-class CMSSysBrickCustomManager {
+class Ab_CoreCustomBrickManager {
 	
 	public $bricks = array();
 	public $params = array();
@@ -958,13 +979,13 @@ class CMSSysBrickCustomManager {
 	 */
 	public function __construct(CMSRegistry $registry){
 		$db = $registry->db;
-		$rows = CoreQuery::BrickListCustom($db);
+		$rows = Ab_CoreQuery::BrickListCustom($db);
 		while (($row = $db->fetch_array($rows))){
 			$key = $row['own'].$row['nm'].$row['tp'];
 			$this->bricks[$key] = $row;
 		}
 
-		$rows = CoreQuery::BrickParamListCustom($db);
+		$rows = Ab_CoreQuery::BrickParamListCustom($db);
 		while (($row = $db->fetch_array($rows))){
 			$k1 = $row['bown'].$row['bnm'].$row['btp'];
 			if (!is_array($this->params[$k1])){
@@ -991,4 +1012,47 @@ class CMSSysBrickCustomManager {
 	}
 }
 
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreBrickBuilder}
+ * @ignore
+ */
+final class CMSSysBrickBuilder extends Ab_CoreBrickBuilder {
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreBrickManager}
+ * @ignore
+ */
+final class CMSSysBrickManager extends Ab_CoreBrickManager {
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreBrickParam}
+ * @ignore
+ */
+final class CMSSysBrickParam extends Ab_CoreBrickParam {
+}
+
+/**
+ * Устарел, оставлен для совместимости
+ * 
+ * @package Abricos
+ * @subpackage Deprecated
+ * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreCustomBrickManager}
+ * @ignore
+ */
+final class CMSSysBrickCustomManager extends Ab_CoreCustomBrickManager {
+}
 ?>
