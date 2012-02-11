@@ -45,8 +45,8 @@ class Ab_CoreInputCleaner {
 		if (!is_array($GLOBALS)) {
 			die('<strong>Fatal Error:</strong> Invalid URL.');
 		}
-
-		if (function_exists('get_magic_quotes_gpc') && -1 == version_compare(PHP_VERSION, '5.2.99')) {
+	
+		if (function_exists('get_magic_quotes_gpc')) {
 			if (get_magic_quotes_gpc()){
 				$this->stripslashes_deep($_REQUEST);
 				$this->stripslashes_deep($_GET);
@@ -60,8 +60,6 @@ class Ab_CoreInputCleaner {
 					$this->stripslashes_deep($_FILES);
 				}
 			}
-			set_magic_quotes_runtime(0);
-			@ini_set('magic_quotes_sybase', 0);
 		}
 
 		foreach (array('_GET', '_POST') AS $arrayname) {
