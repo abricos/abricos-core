@@ -144,9 +144,11 @@ Component.entryPoint = function(NS){
 			case (this._TId['urow']['edit']+'-'):
 				this.showUserEditor(numid);
 				return true;
+				/*
 			case (this._TId['urow']['profile']+'-'):
 				this.showUserProfile(numid);
 				return true;
+				/**/
 			}
 			return false;
     	},
