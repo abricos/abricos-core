@@ -456,15 +456,9 @@ class Ab_CoreBrickBuilder {
 			$printBrick = null;
 			foreach ($brick->child as $cbrick){
 				if ($cbrick->owner != $modName || $cbrick->name != $modBrickName || ($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)){
-						continue; 
+					continue; 
 				}
 				$printBrick = $cbrick;
-				/*
-				print substr($content, $position, $value[0][1]-$position);
-				$this->PrintBrick($cbrick, $cbrick->content);
-				$position = $value[0][1]+strlen($value[0][0]);
-				$isPrint = true;
-				/**/
 				break;
 			}
 			if (!is_null($printBrick)){
@@ -472,21 +466,12 @@ class Ab_CoreBrickBuilder {
 				$this->PrintBrick($printBrick, $printBrick->content);
 				$position = $value[0][1]+strlen($value[0][0]);
 			}else{
-				/*
 				// кирпич модуля заявлен в контенте кирпича родителя, но не вывиден
 				// возможно модуль просто не добавлен в систему, значит необходимо
 				// вывести пустое значение 
+				print substr($content, $position, $value[0][1]-$position);
+				$position = $value[0][1]+strlen($value[0][0]);
 				// TODO: необходимо добавить настройку, не выводить пустое значение, если нет кирпича модуля, но он заявлен в кирпиче родителя
-				$mods = $brick->param->module[$sa[0]];
-				foreach ($mods as $mod){
-					if ($mod->name == $modBrickName 
-							//|| ($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)
-						){
-						$position = $value[0][1]+strlen($value[0][0]);
-						break;
-					} 
-				}
-				/**/
 			}
 		}
 		print substr($content, $position, strlen($content)-$posiiton);
