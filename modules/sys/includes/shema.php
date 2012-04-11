@@ -17,6 +17,7 @@ $db = Abricos::$db;
 $pfx = $db->prefix;
 
 if ($updateManager->isInstall()){
+	Ab_UpdateManager::$isCoreInstall = true;
 
 	$db->query_write("
 		CREATE TABLE IF NOT EXISTS `".$pfx."content` (
@@ -97,8 +98,8 @@ if ($updateManager->isInstall()){
 	$db->query_write("
 		INSERT INTO `".$pfx."sys_phrase` (`module`, `name`, `phrase`, `language`) VALUES
 		('sys', 'style', 'default', 'ru'),
-		('sys', 'site_name', 'Abricos', 'ru'),
-		('sys', 'site_title', 'система управления web-контентом', 'ru'),
+		('sys', 'site_name', 'Название сайта', 'ru'),
+		('sys', 'site_title', 'Краткое описание Вашего сайта', 'ru'),
 		('sys', 'admin_mail', '', 'ru')
 	");
 }

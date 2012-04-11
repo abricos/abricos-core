@@ -34,11 +34,17 @@ abstract class Ab_UserPermission {
 		return Abricos::GetModule('user')->GetManager();
 	}
 	
+	/**
+	 * Установить роли
+	 */
 	public function Install(){
 		$this->GetUserManager();
 		UserQueryExt::PermissionInstall(Abricos::$db, $this);
 	}
 	
+	/**
+	 * Переустановить роли
+	 */
 	public function Reinstall(){
 		$this->GetUserManager();
 		UserQueryExt::PermissionRemove(Abricos::$db, $this);

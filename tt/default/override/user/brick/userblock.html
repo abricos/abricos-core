@@ -1,0 +1,43 @@
+<!--[*]
+[script]userblock.php[/script]
+
+[bkvar=guest]
+	<form action="/user/login/" method="post" name="loginform">
+		<div class="atd">
+			<label class="login" for="txt-login">
+				<span>Логин</span>
+				<input id="txt-login" type="text" name="login" size="20" maxlength="32" />
+			</label>
+			<label class="password" for="txt-password">
+				<span>Пароль</span>
+				<input id="txt-password" type="password" name="password" size="20" maxlength="32" />
+			</label>
+			<div class="clear regrec">
+				<a title="Регистрация нового пользователя" href="/user/register/" class="showregister">Регистрация</a>
+				<a title="Восстановить пароль" href="/user/password/" class="showrecpwd">Забыли пароль?</a>
+			</div>
+			<div class="bact">
+				<label class="autologin" for="chk-autologin">
+					<input id="chk-autologin" type="checkbox" name="autologin" />
+					<span>Запомнить меня</span>
+				</label>
+				<input class="btn-authorize" type="submit" value="Войти" />
+			</div>
+		</div>
+	</form>
+[/bkvar]
+
+[bkvar=user]
+	<a href="/user/" class="showcp" title="Перейти в панель управления">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="Выйти">Выйти</a>)
+	<br />
+	<a href="/user/" class="showcp" title="Перейти в панель управления">Панель управления</a>
+[/bkvar]
+
+[bkvar=result][/bkvar]
+
+[*]-->
+<div id="userblock">
+	[bkvar]result[/bkvar]
+</div>
+<script>Brick.ff('user','ui',function(){Brick.mod.user.ui.userblockInit('userblock');});</script>
+

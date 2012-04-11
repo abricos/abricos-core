@@ -1,8 +1,8 @@
 <!--[*]
 [var=meta_title][/var][var=meta_keys][/var][var=meta_desc][/var]
 [ph=sys:meta_title][/ph][ph=sys:meta_keys][/ph][ph=sys:meta_desc][/ph]
-[ph=sys:site_name]Abricos[/ph]
-[ph=sys:site_title]система управления web-контентом[/ph]
+[ph=sys:site_name]Название сайта[/ph]
+[ph=sys:site_title]Краткое описание вашего сайта[/ph]
 [bkvar=ttowner]default[/bkvar]
 [bkvar=js][/bkvar]
 [bkvar=css][/bkvar]
@@ -29,10 +29,17 @@
 	
 </head>
 <body class="yui-skin-sam">
-	<div id="doc3" class="yui-t3">
+	<div id="doc4" class="yui-t3">
 		<div id="hd">
-			<span class="tl">[ph]sys:site_name[/ph]</span>
-			<p class="dsc">[ph]sys:site_title[/ph]</p>
+			<div class="tllogo">
+				<a href="/" title="Главная">
+					<img src="/tt/[bkvar]ttowner[/bkvar]/images/logo.png" />
+				</a>
+			</div>
+			<div class="tlcont">
+				<span class="tl">[ph]sys:site_name[/ph]</span>
+				<p class="dsc">[ph]sys:site_title[/ph]</p>
+			</div>
 			[mod]sitemap:breadcrumb[/mod]
 		</div>
 		<div id="bd">
@@ -43,17 +50,17 @@
 					</div>
 				</div>
 			</div>
-			<div class="yui-b">
+			<div class="yui-b sidebar">
 				[mod]sitemap:vmenu[/mod]
 				[mod]news:newsblock[/mod]
 			</div>
 		</div>
 		<div id="ft">
-			<p>&#169; [ph]sys:site_name[/ph] - все права защищены. Работает на <a href="http://abricos.org">Abricos</a> [var]version[/var]</p>
+			<p>&#169; [ph]sys:site_name[/ph] - все права защищены. Работает на <a href="http://abricos.org" title="Abricos - система управления сайтом (CMS), платформа интернет-приложений (WebOS)">Абрикос</a> [var]version[/var]</p>
 		</div>
-	</div>
-	<div class="small">
-		[mod]user:userblock[/mod]
+		<div class="small smalluserblock">
+			[mod]user:userblock[/mod]
+		</div>
 	</div>
 </body>
 

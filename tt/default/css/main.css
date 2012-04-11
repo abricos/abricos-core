@@ -33,37 +33,76 @@ h1, h2, h3, h4, h5 {
 	color: #333;
 	padding-bottom: 0.5em;
 }
-h1 { 
-	font-size: 125%;
-}
-h2 {
-	font-size: 120%;
-}
-h3 {
-	font-size: 110%;
-}
-h4, h5 {
-	font-size: 100%;
+h1 { font-size: 125%; }
+h2 { font-size: 120%; }
+h3 { font-size: 110%; }
+h4, 
+h5 { font-size: 100%; }
+
+.hide { display: none; }
+.clear { clear: both; }
+
+#doc4 {
+	position: relative;
 }
 
+#yui-main {
+	font-family: Verdana, Tahoma, Arial;
+	font-weight: normal;
+	line-height: 1.6;
+}
+.yui-b .box {
+	padding: 4px 10px;
+	margin-bottom: 10px;
+}
+.yui-g {
+	padding: 7px 10px 15px 10px !important;
+	overflow: hidden;
+	min-height: 300px;
+	margin-bottom: 10px;
+}
+.box {
+	border: 1px solid #dee2e3; 
+	background: #fff url(../images/bg.gif) repeat-x;
+}
+
+/* * * * * Header * * * * */
 #hd {
-	color: #090;
-	margin: 30px 0 10px 10px; *
-	margin: 15px 0 5px 5px;
-	padding: 0 0 0 20px;
+	height: 132px;
+}
+#hd .tllogo {
+	position: absolute;
+	left: 4px;
+	top: 12px;
+	width: 96px; height: 96px;
+}
+#hd .tlcont {
+	position: absolute;
+	left: 112px;
+	top: 16px;
 }
 #hd .tl {
+	color: #090;
 	font-weight: bold;
 	font-size: 200%;
 }
 #hd .dsc {
+	margin-top: 8px;
 	font-size: 105%;
 	color: #999;
-	margin: 0;
-	padding: 0;
 }
+.breadcrumb {
+	position: absolute;
+	left: 318px;
+	top: 114px;
+}
+
+/* * * * * Footer * * * * */
 #ft {
 	background: #333 none repeat scroll 0 0;
+	color: #fff;
+}
+#ft a {
 	color: #fff;
 }
 #ft p {
@@ -72,30 +111,16 @@ h4, h5 {
 	padding: 0.6em;
 }
 
-#yui-main {
-	font-family: Verdana, Tahoma, Arial;
-	font-weight: normal;
-	line-height: 1.6;
+/* * * * * Sidebar * * * * */
+#bd .sidebar h1,
+#bd .sidebar h2,
+#bd .sidebar h3,
+#bd .sidebar h4 {
+	margin-top: 5px;
+	color: #6A7398;
 }
 
-.yui-g {
-	padding: 10px 10px 15px 10px;
-	overflow: hidden;
-	min-height: 10px;
-	margin-bottom: 10px;
-}
-.box {
-	border: 1px solid #dee2e3; 
-	background: #fff url(../images/bg.gif) repeat-x;
-}
-.yui-b .box {
-	padding:4px 10px;
-	margin-bottom: 10px;
-}
-.hide {
-	display: none;
-}
-
+/* * * * * Body * * * * */
 #bd .bd p {
 	padding-bottom: .9em;
 }
@@ -122,16 +147,11 @@ h4, h5 {
 	margin: 5px;
 }
 
-.breadcrumb {
-	margin-left: 26.09em;
-	*margin-left: 25.62em;
-}
-
 #userblock {
 	color:#666666;
 	text-align: left;
 }
-#userblock form{
+#userblock form {
 	clear: both;
 }
 
@@ -172,41 +192,63 @@ h4, h5 {
 	padding: 10px 10px 0 0;
 }
 
-.small #userblock {
-	position:absolute;
-	top:10px;
-	right:25px;
-	font-size:90%;
+.smalluserblock {
+	position: absolute;
+	top: 15px;
+	right: 5px;
+	font-family: Verdana,Tahoma;
+}
+
+.small #userblock .atd {
+	text-align: right;
 }
 
 .small #userblock .login,
-.small #userblock .password,
-.small #userblock .autologin {
-		margin: 0 15px 0 0;
+.small #userblock .password {
+	display: block;
+	margin-bottom: 7px;
 }
-.small #userblock .btn-authorize {
-	padding: 0 6px;
-}
-.small #userblock #txt-login,
-.small #userblock #txt-password {
-	color:#666666;
-	font-family:Tahoma;
-	margin-left: 8px;
-	padding:1px 2px;
-	width:112px;
-}
-.small #userblock #chk-autologin {
-	margin: 0 5px 0 0;
-}
-.small #userblock ul {
-	padding-left: 170px;
-}
-.small #userblock ul li {
-	float:left;
-	line-height:120%;
+.small #userblock .login input,
+.small #userblock .password input {
+	font-size: 1.1em;
 }
 
-.small #userblock .register ,
-.small #userblock .recpwd {
-	padding:3px 1px 0 10px;
+.small #userblock .login span,
+.small #userblock .password span {
+	margin-right: 5px;
+	float: left;
+	width: 80px;
+	margin-top: 2px;
 }
+
+.small #userblock #txt-login,
+.small #userblock #txt-password {
+	width: 170px;
+	color: #666666;
+	padding:1px 2px;
+}
+
+.small #userblock .regrec,
+.small #userblock .bact {
+	font-size: .87em;
+	margin-top: 5px;
+	text-align: right;
+}
+
+.small #userblock .showregister ,
+.small #userblock .showrecpwd {
+	margin-left: 3px;
+}
+.small #userblock .autologin {
+	margin-top: 15px;
+}
+.small #userblock .autologin input, 
+.small #userblock .autologin span {
+	vertical-align: middle;
+}
+
+.small #userblock .btn-authorize {
+	padding: 1px 7px;
+	margin-left: 5px;
+}
+

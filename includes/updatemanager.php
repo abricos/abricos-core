@@ -28,6 +28,8 @@ class Ab_UpdateManager {
 	 */
 	public static $current = null;
 	
+	public static $isCoreInstall = false; 
+	
 	/**
 	 * Текущий модуль
 	 *

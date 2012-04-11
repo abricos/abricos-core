@@ -24,7 +24,7 @@ abstract class Ab_Module {
 	/**
 	 * Политика безопасности модуля
 	 * 
-	 * @var AbricosPermission
+	 * @var Ab_UserPermission
 	 */
 	public $permission = null;
 	
