@@ -1,25 +1,57 @@
 <!--[*]
 [script]userblock.php[/script]
 
+[mcss=user]user.css[/mcss]
+
 [bkvar=guest]
 	<form action="/user/login/" method="post" name="loginform">
 		<div class="atd">
-			<label class="login" for="txt-login"><span>Логин</span><input id="txt-login" type="text" name="login" size="20" maxlength="32" /></label>
-			<label class="password" for="txt-password"><span>Пароль</span><input id="txt-password" type="password" name="password" size="20" maxlength="32" /></label>
-			<label class="autologin" for="chk-autologin"><input id="chk-autologin" type="checkbox" name="autologin" /><span>Запомнить меня</span></label>
-			<input class="btn-authorize" type="submit" value="Войти" />
+			<label class="login" for="txt-login">
+				<span>Логин</span>
+				<input id="txt-login" type="text" name="login" size="20" maxlength="32" />
+			</label>
+			<label class="password" for="txt-password">
+				<span>Пароль</span>
+				<input id="txt-password" type="password" name="password" size="20" maxlength="32" />
+			</label>
+			<div class="clear regrec">
+				<a title="Регистрация нового пользователя" href="/user/register/" class="showregister">Регистрация</a>
+				<a title="Восстановить пароль" href="/user/password/" class="showrecpwd">Забыли пароль?</a>
+			</div>
+			<div class="bact">
+				<label class="autologin" for="chk-autologin">
+					<input id="chk-autologin" type="checkbox" name="autologin" />
+					<span>Запомнить меня</span>
+				</label>
+				<input class="btn-authorize" type="submit" value="Войти" />
+			</div>
 		</div>
-		<ul>
-			<li class="register"><a title="Регистрация нового пользователя" href="/user/register/" class="showregister">Регистрация</a></li>
-			<li class="recpwd"><a title="Восстановить пароль" href="/user/password/" class="showrecpwd">Забыли пароль?</a></li>
-		</ul>
 	</form>
 [/bkvar]
 
 [bkvar=user]
-	<a href="/user/" class="showcp" title="Перейти в панель управления">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="Выйти">Выйти</a>)
-	<br />
-	<a href="/user/" class="showcp" title="Перейти в панель управления">Панель управления</a>
+	<div class="autuser">
+		<a href="/user/" class="showcp" title="Перейти в панель управления">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="Выйти">Выйти</a>)
+		<br />
+		<a href="/user/" class="showcp" title="Перейти в панель управления">Панель управления</a>
+	</div>
+[/bkvar]
+
+[bkvar=bosuser]
+	<div class="autuser">
+		<a href="/bos/#app=uprofile/ws/showws/" class="showprofile" title="Личный раздел">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="Выйти">Выйти</a>)
+		<br />
+		<div id="appbosuicont" class="appbosuicont">
+			<a id="bshowbosui" href="/bos/" class="showbos" title="Открыть менеджер приложений">Приложения</a>
+			<div id="appbosuilist" class="aw-bos">
+				<div class="loading">
+					<img src="/images/loading.gif" /> Пожалуйста, подождите
+					<br />
+					Построение списка приложений...
+				</div>
+			</div>
+		</div>
+	</div>
 [/bkvar]
 
 [bkvar=result][/bkvar]
@@ -29,4 +61,3 @@
 	[bkvar]result[/bkvar]
 </div>
 <script>Brick.ff('user','ui',function(){Brick.mod.user.ui.userblockInit('userblock');});</script>
-

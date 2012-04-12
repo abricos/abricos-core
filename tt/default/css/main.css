@@ -154,101 +154,10 @@ h5 { font-size: 100%; }
 #userblock form {
 	clear: both;
 }
-
-.big #userblock {
-	margin: 10px;
-	line-height: 1em;
-}
-.big #userblock .atd span {
-	display: block;
-}
-.big #userblock .autologin {
-	display: block;
-}
-.big #userblock .autologin span {
-	display: inline;
-}
-.big #userblock #chk-autologin {
-	margin: 0 5px 0 0;
-}
-.big #userblock #txt-login,
-.big #userblock #txt-password {
-	font-family:Tahoma;
-	font-size: 2em;
-	margin-bottom: 10px;
-	width:300px;
-}
-.big #userblock .btn-authorize {
-	font-size: 1.5em;
-	padding: 0 6px;
-	display: block;
-	margin-top: 5px;
-}
-.big #userblock ul li {
-	float:left;
-}
-.big #userblock .register ,
-.big #userblock .recpwd {
-	padding: 10px 10px 0 0;
-}
-
 .smalluserblock {
 	position: absolute;
 	top: 15px;
-	right: 5px;
+	right: 0px;
 	font-family: Verdana,Tahoma;
-}
-
-.small #userblock .atd {
-	text-align: right;
-}
-
-.small #userblock .login,
-.small #userblock .password {
-	display: block;
-	margin-bottom: 7px;
-}
-.small #userblock .login input,
-.small #userblock .password input {
-	font-size: 1.1em;
-}
-
-.small #userblock .login span,
-.small #userblock .password span {
-	margin-right: 5px;
-	float: left;
-	width: 80px;
-	margin-top: 2px;
-}
-
-.small #userblock #txt-login,
-.small #userblock #txt-password {
-	width: 170px;
-	color: #666666;
-	padding:1px 2px;
-}
-
-.small #userblock .regrec,
-.small #userblock .bact {
-	font-size: .87em;
-	margin-top: 5px;
-	text-align: right;
-}
-
-.small #userblock .showregister ,
-.small #userblock .showrecpwd {
-	margin-left: 3px;
-}
-.small #userblock .autologin {
-	margin-top: 15px;
-}
-.small #userblock .autologin input, 
-.small #userblock .autologin span {
-	vertical-align: middle;
-}
-
-.small #userblock .btn-authorize {
-	padding: 1px 7px;
-	margin-left: 5px;
 }
 

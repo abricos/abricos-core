@@ -8,25 +8,18 @@
 var Component = new Brick.Component();
 Component.requires = {
 	yahoo: ['dom'],
-	mod:[
-	     {name: 'sys', files: ['wait.js']}
-	]
+	mod:[{name: 'sys', files: ['wait.js']}]
 };
-Component.entryPoint = function(){
+Component.entryPoint = function(NS){
 	
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
 	
-	var NS = this.namespace, 
-		API = NS.API,
-		F = Brick.Component.API.fire,
-		FF = Brick.Component.API.fireFunction;
+	var API = NS.API, F = Brick.f, FF = Brick.ff;
 	
-	NS['ui'] = NS['ui'] || {}; 
+	NS['ui'] = NS['ui'] || {};
 	
-(function(){
-
 	var LW = Brick.widget.LayWait;
 	
 	var getval = function(id){
@@ -41,11 +34,11 @@ Component.entryPoint = function(){
 		el.value = val;
 	};
 	
-	var notDouble = {'userblockInit': {}};
+	var notDouble = {};
 	
 	NS.ui.userblockInit = function(elId){
-		if (notDouble['userblockInit'][elId]){ return; }
-		notDouble['userblockInit'][elId] = true;
+		if (notDouble[elId]){ return; }
+		notDouble[elId] = true;
 		
 		var container = Dom.get(elId);
 		if (L.isNull(container)){ return; }
@@ -77,7 +70,6 @@ Component.entryPoint = function(){
 							});
 						}else{
 							Brick.Page.reload();
-							// lw.hide();
 						}
 					});
 				});
@@ -91,6 +83,65 @@ Component.entryPoint = function(){
 			var el = E.getTarget(e);
 			if (onClick(el)){ E.preventDefault(e); }
 		});
+		
+		var findel = function(el, id){
+			el = Dom.get(el);
+			if (el.id == id){ return el; }
+			if (!el.childNodes || el.childNodes.length == 0){ return null; }
+			var chs = el.childNodes;
+			for (var i=0;i<chs.length;i++){
+				var cel = findel(chs[i], id);
+				if (!L.isNull(cel)){ return cel; }
+			}
+			return null;
+		};
+		
+		var elShowAppList = findel(elId, 'bshowbosui'),
+			elCont = findel(elId, 'appbosuicont'),
+			elAppList = findel(elId, 'appbosuilist');
+		
+		if (!L.isNull(elShowAppList) && !L.isNull(elShowAppList)){
+			var elAppBosList = null;
+			
+			E.on(elShowAppList, 'mousemove', function(){
+				if (L.isNull(elAppBosList)){
+					elAppBosList = new AppBosUIListWidget(elShowAppList, elCont, elAppList);
+				}else{
+					elAppBosList.show();
+				}
+			});
+		}
 	};
-})();
+	
+	var AppBosUIListWidget = function(elBtn, elCont, elList){
+		this.init(elBtn, elCont, elList);
+	};
+	AppBosUIListWidget.prototype = {
+		init: function(elBtn, elCont, elList){
+			this.elCont = elCont;
+			
+			var __self = this;
+			E.on(elBtn, 'mouseout', function(){
+				setTimeout(function(){ __self.hide(); }, 200);
+			});
+			
+			Brick.f('bos', 'label', function(){
+				Brick.Permission.load(function(){
+					__self.widget = new Brick.mod.bos.LabelListWidget(elList, {
+			    		'startupBeforeEventDisable': true,
+			    		'startupAfterEventDisable': true,
+			    		'uriPrefix': '/bos/'
+					});
+				});
+			});
+		},
+		show: function(){
+			Dom.addClass(this.elCont, 'visiblelist');
+		},
+		hide: function(){
+			Dom.removeClass(this.elCont, 'visiblelist');
+		}
+	};
+	NS.AppBosUIListWidget = AppBosUIListWidget;
+	
 };

@@ -14,7 +14,14 @@ $var = &$brick->param->var;
 if (Abricos::$user->id == 0){
 	$var['result'] = $var['guest'];
 }else{
-	$var['result'] = Brick::ReplaceVarByData($var['user'], array(
+	
+	$bkname = 'user';
+	$modBos = Abricos::GetModule('bos');
+	if (!empty($modBos)){
+		$bkname = 'bosuser';
+	}
+	
+	$var['result'] = Brick::ReplaceVarByData($var[$bkname], array(
 		"username" => Abricos::$user->login
 	));
 }
