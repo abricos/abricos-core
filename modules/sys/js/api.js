@@ -30,14 +30,6 @@ Component.entryPoint = function(){
 		});
 	};
 
-	API.showTemplateWidget = function(container){
-		API.fn('cp_template', function(){
-			var widget = new NS.TemplateWidget(container);
-			API.addWidget('TemplateWidget', widget);
-			API.dsRequest();
-		});
-	};
-	
 	API.showPermissionWidget = function(container){
 		API.fn('cp_permission', function(){
 			var widget = new NS.PermissionWidget(container);

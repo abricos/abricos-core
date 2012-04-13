@@ -6,7 +6,7 @@
  * @package Abricos
  * @subpackage Core
  * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
+ * @copyright Copyright (C) 2012 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin <roosit@abricos.org>
  */
@@ -46,6 +46,13 @@ class Ab_CoreSystemManager extends Ab_ModuleManager {
 	public function IsAdminRole(){
 		return $this->IsRoleEnable(Ab_CoreSystemAction::ADMIN);
 	}
+	
+	public function AJAX($d){
+		switch($d->do){
+		}
+		return null;
+	}
+	
 
 	/**
 	 * Получить список модулей
@@ -67,6 +74,8 @@ class Ab_CoreSystemManager extends Ab_ModuleManager {
 		}
 		return $ret;
 	}
+	
+	
 }
 
 ?>

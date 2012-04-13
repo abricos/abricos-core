@@ -26,15 +26,6 @@ if (Brick::$session->IsAdminMode()){
 	
 	// Первым шагом необходимо выполнить все комманды по добавлению/обновлению таблиц
 	foreach ($ds->ts as $ts){
-		$rcclear = false;
-		foreach($ts->cmd as $cmd){
-			if ($cmd == 'rc'){ $rcclear = true; }
-		}
-		switch ($ts->nm){
-			case 'bricks':
-				if ($rcclear){ Ab_CoreQuery::BrickRecycleClear(Abricos::$db); }
-				break;
-		}
 		foreach ($ts->rs as $tsrs){
 			if (empty($tsrs->r)){
 				continue;
@@ -48,28 +39,6 @@ if (Brick::$session->IsAdminMode()){
 						}
 					}
 					Brick::$builder->phrase->Save();
-					break;
-				case 'brick':
-					foreach ($tsrs->r as $r){
-						if ($r->f == 'u'){ Ab_CoreQuery::BrickSave(Abricos::$db, $r->d); }
-					}
-					break;
-				case 'brickparam':
-					foreach ($tsrs->r as $r){
-						if ($r->f == 'a'){
-							Ab_CoreQuery::BrickParamAppend(Abricos::$db, $r->d);
-						}else if ($r->f == 'u'){
-							Ab_CoreQuery::BrickParamSave(Abricos::$db, $r->d);
-						}else if ($r->f == 'd'){
-							Ab_CoreQuery::BrickParamRemove(Abricos::$db, $r->d->id);
-						}
-					}
-					break;
-				case 'bricks':
-					foreach ($tsrs->r as $r){
-						if ($r->f == 'd'){ Ab_CoreQuery::BrickRemove(Abricos::$db, $r->d->id); }
-						if ($r->f == 'r'){ Ab_CoreQuery::BrickRestore(Abricos::$db, $r->d->id); }
-					}
 					break;
 			}
 		}
@@ -104,15 +73,6 @@ if (Brick::$session->IsAdminMode()){
 				case 'config':
 					Brick::$builder->phrase->PreloadByModule($tsrs->p->mod);
 					$rows = Brick::$builder->phrase->GetArray($tsrs->p->mod);
-					break;
-				case 'bricks':
-					$rows = Ab_CoreQuery::BrickList(Abricos::$db, $tsrs->p->tp, 'yes');
-					break;
-				case 'brick':
-					$rows = Ab_CoreQuery::BrickById(Abricos::$db, $tsrs->p->bkid, true);
-					break;
-				case 'brickparam':
-					$rows = Ab_CoreQuery::BrickParamList(Abricos::$db, $tsrs->p->bkid);
 					break;
 				case 'permission_mods':
 					$rows = array();
