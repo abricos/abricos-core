@@ -59,10 +59,22 @@ class Ab_CorePhraseItem {
  */
 class Ab_CorePhrase {
 	
+	private static $_instance = null;
+	
+	/**
+	 * @return Ab_CorePhrase
+	 */
+	public static function GetInstance(){
+		if (is_null(Ab_CorePhrase::$_instance)){
+			Ab_CorePhrase::$_instance = new Ab_CorePhrase();
+		}
+		return Ab_CorePhrase::$_instance;
+	}
+	
 	/**
 	 * Ядро
 	 *
-	 * @var CMSRegistry
+	 * @var Abricos
 	 */
 	public $registry = null;
 	
@@ -70,12 +82,9 @@ class Ab_CorePhrase {
 	
 	/**
 	 * Конструктор
-	 *
-	 * @param CMSRegistry $registry ядро движка
-	 * @param mixed $list
 	 */
-	public function __construct(CMSRegistry $registry){
-		$this->registry = $registry;
+	public function __construct(){
+		$this->registry = Abricos::$instance;
 	}
 	
 	/**

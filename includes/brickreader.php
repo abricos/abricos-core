@@ -30,7 +30,8 @@ class Ab_CoreBrickReader {
 	public function __construct(CMSRegistry $registry){
 		$this->registry = $registry;
 		$this->db = $registry->db;
-		$this->isAdmin = $registry->user->IsAdminMode(); 
+		Abricos::GetModule('sys')->GetManager();
+		$this->isAdmin = Ab_CoreSystemManager::$instance->IsAdminRole(); 
 	}
 	
 	/**

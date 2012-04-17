@@ -243,7 +243,7 @@ class Ab_CoreBrickBuilder {
 	/**
 	 * Менеджер фраз
 	 *
-	 * @var CMSSysPhrase
+	 * @var Ab_CorePhrase
 	 */
 	public $phrase = null;
 
@@ -254,7 +254,7 @@ class Ab_CoreBrickBuilder {
 	 */
 	public function __construct(CMSRegistry $registry){
 		$this->registry = $registry;
-		$this->phrase = new CMSSysPhrase($this->registry );
+		$this->phrase = Ab_CorePhrase::GetInstance();
 	}
 
 	/**

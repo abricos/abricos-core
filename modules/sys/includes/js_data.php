@@ -22,7 +22,7 @@ $manager = $mod->GetManager();
 $ret = new stdClass();
 $ret->_ds = array();
 
-if (Brick::$session->IsAdminMode()){ 
+if (Ab_CoreSystemManager::$instance->IsAdminRole()){ 
 	
 	// Первым шагом необходимо выполнить все комманды по добавлению/обновлению таблиц
 	foreach ($ds->ts as $ts){
