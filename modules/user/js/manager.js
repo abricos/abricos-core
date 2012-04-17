@@ -34,7 +34,8 @@ Component.entryPoint = function(NS){
 	}
 	var DATA = NS.data;
 	
-	var UProfileExist = Brick.componentExists('uprofile', 'profile');
+	var UProfileExist = Brick.componentExists('uprofile', 'profile') 
+			&& Brick.componentExists('bos', 'lib');
 	
 	var ManagerWidget = function(container){
 		this.init(container);
@@ -114,6 +115,13 @@ Component.entryPoint = function(NS){
 				lst[lst.length] = rg.cell['nm']; 
 			});
 			
+			var upfl = UProfileExist;
+			if (upfl){
+				upfl = Brick.mod.bos 
+					&& Brick.mod.bos.Workspace 
+					&& !L.isNull(Brick.mod.bos.Workspace.instance);
+			}
+			
     		return this._TM.replace('urow', {
     			'unm': di['unm'],
     			'eml': di['eml'],
@@ -121,7 +129,7 @@ Component.entryPoint = function(NS){
     			'vst': Brick.dateExt.convert(di['vst']),
     			'ugp': lst.join(','),
     			'id': di['id'],
-    			'dis': UProfileExist ? '' : 'none'
+    			'dis': upfl ? '' : 'none'
 			});
     	},
     	renderTable: function(lst){
