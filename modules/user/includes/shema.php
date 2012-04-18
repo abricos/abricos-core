@@ -72,7 +72,7 @@ if ($updateManager->isInstall()){
 	// добавление в таблицу администратора
 	$db->query_write("
 		INSERT INTO `".$pfx."user` (`usergroupid`, `username`, `password`, `email`, `joindate`, `salt`) VALUES
-		(6, 'admin', '3f5726cdbe88eac915ffb9e981b72682', 'admin@example.com', ".TIMENOW.", '( R');
+		(6, 'admin', '3f5726cdbe88eac915ffb9e981b72682', '', ".TIMENOW.", '( R');
 	");
 	
 }
