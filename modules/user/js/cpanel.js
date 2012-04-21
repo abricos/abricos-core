@@ -17,31 +17,15 @@ Component.requires = {
          {name: 'user', files: ['permission.js']}
 	]
 };
-Component.entryPoint = function(){
+Component.entryPoint = function(NS){
 	
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
 	
-	var TMG = this.template,
-		NS = this.namespace,
-		API = NS.API;
-
 	Brick.namespace('Brick.mod.user.cp');
 	
-(function(){
-	
-	var T = TMG.get('css', 'css').data;
-	Brick.util.CSS.update(T['css']);
-	delete T['css'];
-	
-})();
-
-(function(){
-	
-	var TM = TMG.build('wrapwidget'),
-		T = TM.data,
-		TId = TM.idManager;
+	var buildTemplate = this.buildTemplate;
 	
 	var WrapWidget = function(container){
 		container = container || 'bk_user_cp';
@@ -52,51 +36,40 @@ Component.entryPoint = function(){
 	};
 	WrapWidget.prototype = {
 		init: function(container){
-			container.innerHTML = T['wrapwidget'];
-			this.widget = new NS.cp.Widget(TId['wrapwidget']['container']);
+			var TM = buildTemplate(this, 'wrapwidget');
+			container.innerHTML = TM.replace('wrapwidget');
+			this.widget = new NS.cp.Widget(TM.getEl('wrapwidget.container'));
 		}
 	};
-	
 	NS.cp.WrapWidget = WrapWidget;
-	
-})();
 
-(function(){
 	
 	var Widget = function(container){
 		container = L.isString(container) ? Dom.get(container) : container;
 		
 		this.init(container);
 	};
-	
 	Widget.prototype = {
-		/**
-		 * Текущий элемент меню
-		 * 
-		 * @property selectedMenuItem
-		 * @type Brick.mod.user.cp.MenuItem
-		 */
-		selectedMenuItem: null,
-		
-		/**
-		 * Ассоциативный массив страниц панели управления.
-		 * 
-		 * @property pages
-		 * @type {String, Object}
-		 */
-		pages: null,
-		
 		init: function(container){
 			
-			var TM = this._TM = TMG.build('widget,miicon,menuitem'),
-				T = this._T = TM.data,
-				TId = this._TId = TM.idManager;
-			
+			/**
+			 * Текущий элемент меню
+			 * 
+			 * @property selectedMenuItem
+			 * @type Brick.mod.user.cp.MenuItem
+			 */
 			this.selectedMenuItem = null;
+			
+			/**
+			 * Ассоциативный массив страниц панели управления.
+			 * 
+			 * @property pages
+			 * @type {String, Object}
+			 */
 			this.pages = {};
-		
+
 			var __self = this;
-			container.innerHTML = T['widget'];
+			container.innerHTML = buildTemplate(this, 'widget,miicon,menuitem').replace('widget');
 	
 			E.on(container, 'click', function(e){ 
 				if (__self.onClick(E.getTarget(e))){ 
@@ -230,10 +203,7 @@ Component.entryPoint = function(){
 
 		}
 	};
-	
 	NS.cp.Widget = Widget;
-	
-})();
 
 	/**
 	 * Элемент меню панели управления

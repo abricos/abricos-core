@@ -18,8 +18,6 @@ $brick = Brick::$builder->brick;
 $param = $brick->param;
 
 if (Abricos::$user->id == 0){
-	$param->var['body'] = $param->var['accden'];
-	Brick::$builder->AddJSModule('user', "guest.js");  	
  	return;
 }
 Abricos::GetModule('sys')->GetManager();
@@ -53,7 +51,7 @@ while (false !== ($entry = $dir->read())) {
 	$modcp[$entry] = $prm;
 }
 	
-$param->var['body'] = 	str_replace("#mlist#", json_encode($modcp), $param->var['cpbody']);
+$param->var['body'] = str_replace("#mlist#", json_encode($modcp), $param->var['cpbody']);
 	
 
 ?>
