@@ -70,6 +70,7 @@ class UserQueryExt extends UserQuery {
 				joindate as dl,
 				lastvisit as vst,
 				email as eml,
+				emailconfirm as emlcnf,
 				'' as oldpass,
 				'' as pass
 			FROM ".$db->prefix."user
@@ -180,6 +181,16 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
+	public static function RegistrationActivateInfo(Ab_Database $db, $userid){
+		$sql = "
+			SELECT *
+			FROM ".$db->prefix."useractivate
+			WHERE userid=".bkint($userid)."
+			LIMIT 1
+		";
+		return $db->query_first($sql);
+	}
+	
 	/**
 	 * Активация пользователя
 	 *
@@ -194,12 +205,7 @@ class UserQueryExt extends UserQuery {
 	 */
 	public static function RegistrationActivate(Ab_Database $db, $userid, $activateId){
 
-		$actData = $db->query_first("
-			SELECT * 
-			FROM ".$db->prefix."useractivate 
-			WHERE userid=".bkint($userid)." AND activateid=".bkint($activateId)."
-			LIMIT 1
-		");
+		$actData = UserQueryExt::RegistrationActivateInfo($db, $userid);
 		
 		if (empty($actData) || $actData['activateid'] != $activateId){
 			return 3;

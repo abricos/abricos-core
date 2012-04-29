@@ -74,6 +74,10 @@ class UserManager extends Ab_ModuleManager {
 				return $this->UserUpdate($d);
 			case "passwordchange":
 				return $this->UserPasswordChange($d->userid, $d->pass, $d->passold);
+			case "useremailconfirm":
+				return $this->RegistrationActivate($d->userid);
+			case "useremailcnfsend":
+				return $this->ConfirmEmailSendAgain($d->userid);
 		}
 		return -1;
 	}
@@ -134,8 +138,7 @@ class UserManager extends Ab_ModuleManager {
 			switch ($name){
 
 				/////// Постраничный список пользователей //////
-				case 'userlist':
-					return UserQueryExt::UserList($db, $p->page, $p->limit);
+				case 'userlist': return $this->UserList($p->page, $p->limit);
 				case 'usercount':
 					return UserQueryExt::UserCount($db);
 				case 'usergrouplist':
@@ -183,6 +186,14 @@ class UserManager extends Ab_ModuleManager {
 	////////////////////////////////////////////////////////////////////
 	//                      Административные функции                  //
 	////////////////////////////////////////////////////////////////////
+	
+	public function UserList($page = 1, $limit = 15){
+		if (!$this->IsAdminRole()){
+			return null;
+		}
+		
+		return UserQueryExt::UserList($this->db, $page, $limit);
+	}
 	
 	public function UserInfo($userid){
 		if (!$this->IsChangeUserRole($userid)){
@@ -436,7 +447,13 @@ class UserManager extends Ab_ModuleManager {
 		if (!$sendMail){ 
 			return 0; 
 		}
+		
+		$this->ConfirmEmailSend($user);
 			
+		return 0;
+	}
+	
+	private function ConfirmEmailSend($user){
 		$host = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];
 		$link = "http://".$host."/user/activate/".$user["userid"]."/".$user["activateid"];
 		
@@ -449,9 +466,17 @@ class UserManager extends Ab_ModuleManager {
 			"sitename" => Brick::$builder->phrase->Get('sys', 'site_name')
 		)));
 		
-		$this->core->GetNotification()->SendMail($email, $subject, $body);
-		
-		return 0;
+		$this->core->GetNotification()->SendMail($user["email"], $subject, $body);
+	}
+	
+	public function ConfirmEmailSendAgain($userid){
+		if (!$this->IsAdminRole()){
+			return;
+		}
+		$user = UserQueryExt::User($this->db, $userid);
+		$actinfo = UserQueryExt::RegistrationActivateInfo($this->db, $userid);
+		$user['activateid'] = $actinfo['activateid'];
+		$this->ConfirmEmailSend($user);
 	}
 	
 	/**
@@ -465,7 +490,8 @@ class UserManager extends Ab_ModuleManager {
 	 * @param integer $activeid код активации
 	 * @return stdClass
 	 */
-	public function RegistrationActivate($userid, $activeid){
+	public function RegistrationActivate($userid, $activeid = 0){
+		
 		$ret = new stdClass();
 		$ret->error = 0;
 		$user = UserQuery::User($this->db, $userid);
@@ -475,7 +501,19 @@ class UserManager extends Ab_ModuleManager {
 			$ret->error = 2;
 		}else{
 			$ret->username = $user['username'];
+			
+			if ($activeid == 0){
+				if (!$this->IsAdminRole()){
+					return null;
+				}
+				$row = UserQueryExt::RegistrationActivateInfo($this->db, $userid);
+				$activeid = $row['activateid'];
+			}
+					
 			$ret->error = UserQueryExt::RegistrationActivate($this->db, $userid, $activeid);
+			if ($this->IsAdminRole()){
+				$ret->user = $this->UserInfo($userid);
+			}
 		}
 		return $ret;
 	}

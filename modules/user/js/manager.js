@@ -27,12 +27,9 @@ Component.entryPoint = function(NS){
 		L = YAHOO.lang,
 		LNG = Brick.util.Language;
 	
-	var TMG = this.template;
+	var buildTemplate = this.buildTemplate;
 	
-	if (!NS.data){
-		NS.data = new Brick.util.data.byid.DataSet('user');
-	}
-	var DATA = NS.data;
+	var DATA = NS.data = NS.data || new Brick.util.data.byid.DataSet('user');
 	
 	var UProfileExist = Brick.componentExists('uprofile', 'profile') 
 			&& Brick.componentExists('bos', 'lib');
@@ -43,9 +40,9 @@ Component.entryPoint = function(NS){
 	ManagerWidget.prototype = {
 		pages: null,
 		init: function(container){
-			var TM = TMG.build('manager'), T = TM.data, TId = TM.idManager;
+			var TM = buildTemplate(this, 'manager');
 			
-			container.innerHTML = T['manager'];
+			container.innerHTML = TM.replace('manager');
 			
 			var tabView = new YAHOO.widget.TabView(TM.getElId('manager.id'));
 			
@@ -71,9 +68,7 @@ Component.entryPoint = function(NS){
 	
 	var UsersWidget = function(el){
 		
-		var TM = TMG.build('users,utable,urow,urowwait'),
-			T = TM.data, TId = TM.idManager;
-		this._TM = TM; this._T = T; this._TId = TId;
+		var TM = buildTemplate(this, 'users,utable,urow,urowwait');
 
 		var config = {
 			tm: TM, DATA: DATA, rowlimit: 10,
@@ -84,7 +79,7 @@ Component.entryPoint = function(NS){
 	};
     YAHOO.extend(UsersWidget, Brick.widget.TablePage, {
     	initTemplate: function(){
-    		return this._T['users'];
+    		return this._TM.replace('users');
     	},
     	
     	refresh: function(){
@@ -152,11 +147,6 @@ Component.entryPoint = function(NS){
 			case (this._TId['urow']['edit']+'-'):
 				this.showUserEditor(numid);
 				return true;
-				/*
-			case (this._TId['urow']['profile']+'-'):
-				this.showUserProfile(numid);
-				return true;
-				/**/
 			}
 			return false;
     	},
@@ -184,10 +174,7 @@ Component.entryPoint = function(NS){
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
 		initTemplate: function(){
-			var TM = TMG.build('editor'), T = TM.data, TId = TM.idManager;
-			this._TM = TM; this._T = T; this._TId = TId;
-			
-			return  T['editor'];
+			return buildTemplate(this, 'editor').replace('editor');
 		},
 		destroy: function(){
 			this.userGroupWidget.destroy();
@@ -211,17 +198,18 @@ Component.entryPoint = function(NS){
 		},
 		renderUser: function(d){
 			d = L.merge({
-				'unm': '', 'eml': '', 'gp': ''
+				'unm': '', 'eml': '', 'gp': '', 'emlcnf': '1'
 			}, d || {});
 	 		
 	 		this.setelv('unm', d['unm']);
 	 		this.setelv('eml', d['eml']);
+	 		
+ 			Dom.setStyle(this.el('actcont'), 'display', d['emlcnf']*1 == 0 ? '' : 'none');
 
 	 		this.userGroupWidget.setValue(d['gp']);
 	 		this.userGroupWidget.render();
 		},
 		onClick: function(el){
-			
 			if (this.userGroupWidget.onClick(el)){ return true; }
 			
 			var tp = this._TId['editor']; 
@@ -229,7 +217,39 @@ Component.entryPoint = function(NS){
 			case tp['bcancel']: this.close(); return true;
 			case tp['bsave']: this.save(); return true;
 			case tp['bpass']: this.showPassField(); return true;
+			case tp['bactconfirm']: this.emailConfirm(); return true;
+			case tp['bactemlsend']: this.emailConfirmSend(); return true;
 			}
+		},
+		emailConfirm: function(){
+			this._ajaxConf('useremailconfirm');
+		},
+		emailConfirmSend: function(){
+			this._ajaxConf('useremailcnfsend');
+		},
+		_ajaxConf: function(sdo){
+			var elLoad = this.el('actload'),
+				elBtns = this.el('actbtns');
+			
+			Dom.setStyle(elLoad, 'display', '');
+			Dom.setStyle(elBtns, 'display', 'none');
+			
+			var __self = this;
+			
+			Brick.ajax('user', {
+				'data': {
+					'do': sdo,
+					'userid': this.userid
+				},
+				'event': function(request){
+					Dom.setStyle(elLoad, 'display', 'none');
+					Dom.setStyle(elBtns, 'display', '');
+					
+					if (sdo == 'useremailconfirm' && !L.isNull(request.data)){
+						__self.renderUser(request.data['user']);
+					}
+				}
+			});
 		},
 		showPassField: function(){
 			this.el('bpass').style.display = 'none';
@@ -290,18 +310,16 @@ Component.entryPoint = function(NS){
 	UserGroupWidget.prototype = {
 		init: function(container, userid){
 			this.userid = userid;
-			var TM = TMG.build('ugwidget,ugstable,ugsrow,ugsrowwait,ugtable,ugrowwait,ugrow'), 
-				T = TM.data, TId = TM.idManager;
-			this._TM = TM; this._T = T; this._TId = TId;
+			var TM = buildTemplate(this, 'ugwidget,ugstable,ugsrow,ugsrowwait,ugtable,ugrowwait,ugrow');
 			
-			container.innerHTML = T['ugwidget'];
+			container.innerHTML = TM.replace('ugwidget');
 
 			TM.getEl('ugwidget.selgroups').innerHTML = TM.replace('ugstable', {
-				'rows': this._T['ugsrowwait']
+				'rows': TM.replace('ugsrowwait')
 			});
 
 			TM.getEl('ugwidget.table').innerHTML = TM.replace('ugtable', {
-				'rows': this._T['ugrowwait']
+				'rows': TM.replace('ugrowwait')
 			});
 		},
 		destroy: function(){},
@@ -389,9 +407,7 @@ Component.entryPoint = function(NS){
 	
 	var GroupsWidget = function(el){
 		
-		var TM = TMG.build('groups,gtable,grow,growwait'),
-			T = TM.data, TId = TM.idManager;
-		this._TM = TM; this._T = T; this._TId = TId;
+		var TM = buildTemplate(this, 'groups,gtable,grow,growwait');
 
 		var config = {
 			rowlimit: 10,
@@ -406,7 +422,7 @@ Component.entryPoint = function(NS){
 	
     YAHOO.extend(GroupsWidget, Brick.widget.TablePage, {
     	initTemplate: function(){
-    		return this._T['groups'];
+    		return this._TM.replace('groups');
     	},
     	renderTableAwait: function(){
     		this._TM.getEl("groups.table").innerHTML = this._TM.replace('gtable', {'rows': this._T['growwait']});
@@ -453,9 +469,7 @@ Component.entryPoint = function(NS){
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
 		initTemplate: function(){
-			var TM = TMG.build('geditor'), T = TM.data, TId = TM.idManager;
-			this._TM = TM; this._T = T; this._TId = TId;
-			return T['geditor'];
+			return buildTemplate(this, 'geditor').replace('geditor');
 		},
 		onLoad: function(){
 			
@@ -532,10 +546,9 @@ Component.entryPoint = function(NS){
 			groupid = groupid || 0;
 			this.groupid = groupid;
 		
-			var TM = TMG.build('roles,rltable,rlrowwait,rlrow,rlaction'), 
-				T = TM.data, TId = TM.idManager;
-			this._TM = TM; this._T = T; this._TId = TId;
-			container.innerHTML = T['roles'];
+			var TM = buildTemplate(this, 'roles,rltable,rlrowwait,rlrow,rlaction');
+			
+			container.innerHTML = TM.replace('roles');
 			
 			var tables = {
 				'grouplist': DATA.get('grouplist', true),

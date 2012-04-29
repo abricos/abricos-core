@@ -65,7 +65,7 @@
 
 <!--{editor}-->
 <div class='hd'>Редактор пользователя</div>
-<div class='bd'>
+<div class='bd aw-user'>
 
 	<div class="field linespace-1">
 		<p>
@@ -88,12 +88,23 @@
 				</tr>
 			</table>
 		</div>
+		<div id="{i#actcont}" style="display: none">
+			<h3>Активация</h3>
+
+			<div id="{i#actload}" class="center" style="display: none">
+				<img src="/images/loading.gif" />
+			</div>
+			<div id="{i#actbtns}" class="center">
+				<input id="{i#bactconfirm}" type="button" value="Активировать вручную" class="btn" />
+				<input id="{i#bactemlsend}" type="button" value="Отправить повторно" class="btn" />
+			</div>
+		</div>
 		<h3>Группа</h3>
 		<div id="{i#group}"></div>
 		 
 	 	<div class="buttons right top">
-			<input id="{i#bsave}" type="button" value="Сохранить" />
-			<input id="{i#bcancel}" type="button" value="Отмена" />
+			<input id="{i#bsave}" type="button" value="Сохранить" class="btn" />
+			<input id="{i#bcancel}" type="button" value="Отмена" class="btn" />
 		</div>
 		 
 	</div>
