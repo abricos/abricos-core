@@ -127,6 +127,22 @@ class User extends Ab_Module {
 	public function GetSessionPrivateKey(){
 		return md5($_SERVER['REMOTE_ADDR']);
 	}
+
+	/**
+	 * @return AntibotModule
+	 */
+	public function GetAntibotModule(){
+		$mod = Abricos::GetModule('antibot');
+		return $mod;
+	}
+	
+	public function AntibotUserDataUpdate(){
+		$mod = $this->GetAntibotModule();
+		if (empty($mod)){
+			return;
+		}
+		$mod->UserDataUpdate();
+	}
 	
 	public function SessionUpdate(){
 		
@@ -153,7 +169,9 @@ class User extends Ab_Module {
 			$info = UserQuery::User($db, $userid);
 			if (empty($info)){ // Гость
 				$session->Drop('userid');
+				$this->id = 0;
 			}else{
+				$this->id = $userid;
 				$info['superadmin'] = false;
 				if (!empty($core->config['superadmin'])){
 					$ids = explode(',', $core->config['superadmin']);
@@ -166,14 +184,14 @@ class User extends Ab_Module {
 					}
 				}
 				$this->info = &$info;
-				UserQuery::UserUpdateLastActive($db, $userid);			
+				UserQuery::UserUpdateLastActive($db, $userid, $_SERVER['REMOTE_ADDR']);
+				$this->AntibotUserDataUpdate();
 			}
 		}
 		// установка флага который сообщит нам что сессия установлена
 		$session->Set('userid', $userid);
 		$session->Set('flag', 1);
 		
-		$this->id = $userid;
 		$this->login = $info['username'];
 	}
 	
@@ -452,10 +470,11 @@ class UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserUpdateLastActive(Ab_Database $db, $userid){
+	public static function UserUpdateLastActive(Ab_Database $db, $userid, $ip){
 		$sql = "
 			UPDATE ".$db->prefix."user
-			SET lastvisit='".TIMENOW."'
+			SET lastvisit='".TIMENOW."',
+				ipadress='".bkstr($ip)."'
 			WHERE userid='".bkint($userid)."'
 			LIMIT 1
 		";
