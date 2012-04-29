@@ -83,6 +83,7 @@ class User extends Ab_Module {
 		$this->name = "user";
 		$this->takelink = "user"; 
 		$this->permission = new UserPermission($this);
+		Abricos::$user = $this;
 	}
 	
 	/**
