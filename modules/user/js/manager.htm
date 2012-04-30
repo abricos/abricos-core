@@ -1,29 +1,39 @@
 <!--{manager}-->
-<div id="{i#id}" class="yui-navset">
-	<ul class="yui-nav">
-		<li class="selected"><a href="#{i#users}"><em>Пользователи</em></a></li>
-		<li><a href="#{i#groups}"><em>Группы пользователей</em></a></li>
-	</ul>            
-	<div class="yui-content">
-		<div id="{i#users}"></div>
-		<div id="{i#groups}"></div>
+<div id="{i#id}" class="aw-user">
+	<div id="{i#tab}" class="mgr yui-navset">
+		<ul class="yui-nav">
+			<li class="selected"><a href="#{i#users}"><em>Пользователи</em></a></li>
+			<li><a href="#{i#groups}"><em>Группы пользователей</em></a></li>
+		</ul>            
+		<div class="yui-content">
+			<div id="{i#users}"></div>
+			<div id="{i#groups}"></div>
+		</div>
 	</div>
 </div>
 
 <!--{users}-->
-<div class="field buttons right">
-	<input id="{i#badd}" type="button" value="Добавить пользователя" class="btn" />
-	<input id="{i#refresh}" type="button" value="Обновить" class="btn" />
-</div>
-<div id='{i#pagtop}'></div>
-<div id='{i#table}'></div>
-<div id='{i#pagbot}'></div>
-<div class="field linespace-1" style="display: none;">
-	<p>
-		<b>Статистика</b><br />
-		Зарегистрированных всего: <span id="{i#count}">0</span><br /> 
-		Сейчас на сайте: <span id="{i#online}">0</span>
-	</p>
+<div class="users {v#notuprofile} {v#notantibot}">
+	<table class="ushd"><tbody><tr>
+	<td>
+		<div id='{i#pagtop}'></div>
+	</td>
+	<td>
+		<div class="right">
+			<input id="{i#badd}" type="button" value="Добавить пользователя" class="btn" />
+			<input id="{i#refresh}" type="button" value="Обновить" class="btn" />
+		</div>
+	</td>
+	</tr></tbody></table>
+	<div id='{i#table}'></div>
+	<div id='{i#pagbot}'></div>
+	<div class="" style="display: none;">
+		<p>
+			<b>Статистика</b><br />
+			Зарегистрированных всего: <span id="{i#count}">0</span><br /> 
+			Сейчас на сайте: <span id="{i#online}">0</span>
+		</p>
+	</div>
 </div>
 
 <!--{utable}-->
@@ -37,7 +47,8 @@
 			<th>Визит</th>
 			<th>Группа</th>
 			<th></th>
-			<th></th>
+			<th class="uprofile"></th>
+			<th class="antibot"></th>
 		</tr>
 	</thead>
 	<tbody>{v#rows}</tbody>
@@ -56,8 +67,15 @@
 	<td>{v#dl}</td>
 	<td>{v#vst}</td>
 	<td>{v#ugp}</td>
-	<td><a href="#" id="{i#edit}-{v#id}">Править</a></td>
-	<td><a href="#app=uprofile/ws/showws/{v#id}/" id="{i#profile}-{v#id}" class="show-user-profile-old user-{v#id}" style="display: {v#dis};">Профиль</a></td>
+	<td class="bact">
+		<img id="{i#edit}-{v#id}" alt="Править" title="Редактировать пользователя" src="/modules/user/images/edit.gif" />
+	</td>
+	<td class="uprofile">
+		<a href="#app=uprofile/ws/showws/{v#id}/" id="{i#profile}-{v#id}" class="show-user-profile-old user-{v#id}">Профиль</a>
+	</td>
+	<td class="antibot">
+		<a href="#" id="{i#antibot}-{v#id}">Бот</a>
+	</td>
 </tr>
 
 <!--{urowgrp}-->
@@ -199,7 +217,7 @@
 
 <!--{roles}-->
 <h3>Правила</h3>
-<div id="{i#table}"  style="height: 300px; overflow-y: auto; margin-top: 5px; border-bottom: 1px solid #CBCBCB;"></div>
+<div id="{i#table}" style="height: 300px; overflow-y: auto; margin-top: 5px; border-bottom: 1px solid #CBCBCB;"></div>
 
 
 <!--{rltable}-->

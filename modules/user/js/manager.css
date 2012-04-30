@@ -1,0 +1,19 @@
+.aw-user .notuprofile .uprofile {
+	display: none;
+}
+.aw-user .notantibot .antibot {
+	display: none;
+}
+.aw-user .mgr .users table.ushd {
+	width: 100%;
+}
+.aw-user .mgr .users table.ushd .yui-pg-container {
+	margin-top: 14px;
+}
+
+.aw-user .mgr .users .bact {
+	width: 16px;
+}
+.aw-user .mgr .users .bact img {
+	cursor: pointer;
+}

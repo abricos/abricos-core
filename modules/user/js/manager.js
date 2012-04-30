@@ -12,14 +12,10 @@ Component.requires = {
 		{name: 'user', files: ['guest.js']}
 	]
 };
-
-var profileExist = false;
-if (Brick.componentExists('uprofile', 'profile')){
-	profileExist = true;
+if (Brick.componentExists('antibot', 'bot')){
 	var rm = Component.requires.mod;
-	rm[rm.length] = {name: 'uprofile', files: ['profile.js']}; 
+	rm[rm.length] = {name: 'antibot', files: ['bot.js']}; 
 }
-
 Component.entryPoint = function(NS){
 	
 	var Dom = YAHOO.util.Dom,
@@ -44,7 +40,7 @@ Component.entryPoint = function(NS){
 			
 			container.innerHTML = TM.replace('manager');
 			
-			var tabView = new YAHOO.widget.TabView(TM.getElId('manager.id'));
+			var tabView = new YAHOO.widget.TabView(TM.getElId('manager.tab'));
 			
 			var pages = {};
 			pages['users'] = new NS.UsersWidget(TM.getEl('manager.users'));
@@ -67,7 +63,6 @@ Component.entryPoint = function(NS){
 	
 	
 	var UsersWidget = function(el){
-		
 		var TM = buildTemplate(this, 'users,utable,urow,urowwait');
 
 		var config = {
@@ -79,7 +74,19 @@ Component.entryPoint = function(NS){
 	};
     YAHOO.extend(UsersWidget, Brick.widget.TablePage, {
     	initTemplate: function(){
-    		return this._TM.replace('users');
+			var upfl = UProfileExist;
+			if (upfl){
+				upfl = Brick.mod.bos 
+					&& Brick.mod.bos.Workspace 
+					&& !L.isNull(Brick.mod.bos.Workspace.instance);
+			}
+			
+			var antibot = Brick.componentExists('antibot', 'bot');
+
+    		return this._TM.replace('users', {
+    			'notuprofile': upfl ? '' : 'notuprofile',
+    			'notantibot': antibot ? '' : 'notantibot'
+    		});
     	},
     	
     	refresh: function(){
@@ -110,21 +117,13 @@ Component.entryPoint = function(NS){
 				lst[lst.length] = rg.cell['nm']; 
 			});
 			
-			var upfl = UProfileExist;
-			if (upfl){
-				upfl = Brick.mod.bos 
-					&& Brick.mod.bos.Workspace 
-					&& !L.isNull(Brick.mod.bos.Workspace.instance);
-			}
-			
     		return this._TM.replace('urow', {
     			'unm': di['unm'],
     			'eml': di['eml'],
     			'dl': Brick.dateExt.convert(di['dl']),
     			'vst': Brick.dateExt.convert(di['vst']),
     			'ugp': lst.join(','),
-    			'id': di['id'],
-    			'dis': upfl ? '' : 'none'
+    			'id': di['id']
 			});
     	},
     	renderTable: function(lst){
@@ -147,6 +146,9 @@ Component.entryPoint = function(NS){
 			case (this._TId['urow']['edit']+'-'):
 				this.showUserEditor(numid);
 				return true;
+			case (this._TId['urow']['antibot']+'-'):
+				this.showAntibot(numid);
+				return true;
 			}
 			return false;
     	},
@@ -156,8 +158,10 @@ Component.entryPoint = function(NS){
 				__self.refresh();
 			});
     	},
-    	showUserProfile: function(userid){
-    		Brick.mod.uprofile.API.showProfilePanel(userid);
+    	showAntibot: function(userid){
+    		new Brick.mod.antibot.BotEditorPanel(userid, function(){
+    			
+    		});
     	}
     });
 	NS.UsersWidget = UsersWidget;	
