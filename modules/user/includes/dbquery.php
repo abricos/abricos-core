@@ -309,8 +309,13 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql);
 	}
 
-	public static function UserList(Ab_Database $db, $page, $limit){
+	public static function UserList(Ab_Database $db, $page, $limit, $notbot = false){
 		$from = (($page-1)*$limit);
+		
+		$where = "";
+		if ($notbot){
+			$where = "WHERE antibotdetect=0";
+		}
 		$sql = "
 			SELECT 
 				userid as id, 
@@ -319,8 +324,24 @@ class UserQueryExt extends UserQuery {
 				joindate as dl,
 				lastvisit as vst
 			FROM ".$db->prefix."user
+			".$where."
 			ORDER BY CASE WHEN lastvisit>joindate THEN lastvisit ELSE joindate END DESC
 			LIMIT ".$from.",".bkint($limit)."
+		";
+		return $db->query_read($sql);
+	}
+	
+	public static function UserCount(Ab_Database $db, $notbot = false){
+		$where = "";
+		if ($notbot){
+			$where = "WHERE antibotdetect=0";
+		}
+	
+		$sql = "
+			SELECT COUNT(userid) as cnt
+			FROM ".$db->prefix."user
+			".$where."
+			LIMIT 1
 		";
 		return $db->query_read($sql);
 	}
@@ -336,15 +357,6 @@ class UserQueryExt extends UserQuery {
 			FROM ".$db->prefix."user
 		";
 		return $db->query_read($sql); 		
-	}
-	
-	public static function UserCount(Ab_Database $db){
-		$sql = "
-			SELECT COUNT(userid) as cnt 
-			FROM ".$db->prefix."user
-			LIMIT 1
-		";
-		return $db->query_read($sql); 
 	}
 	
 	public static function UserOnline(Ab_Database $db){

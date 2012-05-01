@@ -91,6 +91,8 @@ Component.entryPoint = function(NS){
     	
     	refresh: function(){
     		var prm = this.getParam();
+    		DATA.get('userlist', true).clear();
+    		DATA.get('usercount', true).clear();
     		DATA.get('usergrouplist', true).getRows(prm).clear();
     		
     		UsersWidget.superclass.refresh.call(this);    
@@ -159,8 +161,9 @@ Component.entryPoint = function(NS){
 			});
     	},
     	showAntibot: function(userid){
+    		var __self = this;
     		new Brick.mod.antibot.BotEditorPanel(userid, function(){
-    			
+    			__self.refresh();
     		});
     	}
     });

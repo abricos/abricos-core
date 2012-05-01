@@ -82,14 +82,17 @@ abstract class Ab_UserPermission {
 		$modUser = Abricos::GetModule('user');
 		$db = Abricos::$db;
 		
-		$rows = UserQuery::UserRole($db, $modUser->info);
 		$perm = array();
-		while (($row = $db->fetch_array($rows))){
-			$mod = $row['md'];
-			if (!$perm[$mod]){
-				$perm[$mod] = array();
+		// Если не бот, то загрузка ролей
+		if (empty($modUser->info['antibotdetect'])){
+			$rows = UserQuery::UserRole($db, $modUser->info);
+			while (($row = $db->fetch_array($rows))){
+				$mod = $row['md'];
+				if (!$perm[$mod]){
+					$perm[$mod] = array();
+				}
+				$perm[$mod][$row['act']] = $row['st'];
 			}
-			$perm[$mod][$row['act']] = $row['st'];
 		}
 		Ab_UserPermission::$permission = $perm;
 	}

@@ -139,8 +139,7 @@ class UserManager extends Ab_ModuleManager {
 
 				/////// Постраничный список пользователей //////
 				case 'userlist': return $this->UserList($p->page, $p->limit);
-				case 'usercount':
-					return UserQueryExt::UserCount($db);
+				case 'usercount': return $this->UserCount();
 				case 'usergrouplist':
 					return UserQueryExt::UserGroupList($db, $p->page, $p->limit);
 					
@@ -192,7 +191,18 @@ class UserManager extends Ab_ModuleManager {
 			return null;
 		}
 		
-		return UserQueryExt::UserList($this->db, $page, $limit);
+		$modAntibot = Abricos::GetModule('antibot');
+		
+		return UserQueryExt::UserList($this->db, $page, $limit, !empty($modAntibot));
+	}
+	
+	public function UserCount(){
+		if (!$this->IsAdminRole()){
+			return null;
+		}
+		
+		$modAntibot = Abricos::GetModule('antibot');
+		return UserQueryExt::UserCount($this->db, !empty($modAntibot));
 	}
 	
 	public function UserInfo($userid){
