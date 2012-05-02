@@ -137,12 +137,12 @@ class User extends Ab_Module {
 		return $mod;
 	}
 	
-	public function AntibotUserDataUpdate(){
+	public function AntibotUserDataUpdate($userid=0){
 		$mod = $this->GetAntibotModule();
 		if (empty($mod)){
 			return;
 		}
-		$mod->UserDataUpdate();
+		$mod->UserDataUpdate($userid);
 	}
 	
 	public function SessionUpdate(){
@@ -186,7 +186,7 @@ class User extends Ab_Module {
 				}
 				$this->info = &$info;
 				UserQuery::UserUpdateLastActive($db, $userid, $_SERVER['REMOTE_ADDR']);
-				$this->AntibotUserDataUpdate();
+				$this->AntibotUserDataUpdate($userid);
 			}
 		}
 		// установка флага который сообщит нам что сессия установлена

@@ -149,18 +149,19 @@ class UserQueryExt extends UserQuery {
 	 * @param Ab_Database $db
 	 * @param Array $user данные пользователя
 	 */
-	public static function UserAppend(Ab_Database $db, &$user, $groupid = User::UG_GUEST){
+	public static function UserAppend(Ab_Database $db, &$user, $groupid = User::UG_GUEST, $ip=''){
 		
 		$db->query_write("
 			INSERT INTO `".$db->prefix."user` 
-				(username, password, email, emailconfirm, joindate, salt) VALUES (
+				(username, password, email, emailconfirm, joindate, salt, ipadress) VALUES (
 				'".bkstr($user['username'])."', 
 				'".bkstr($user['password'])."', 
 				'".bkstr($user['email'])."', 
 				".($groupid == User::UG_GUEST ? 0 : 1).", 
 				'".bkstr($user['joindate'])."', 
-				'".bkstr($user['salt'])."'".
-		")");
+				'".bkstr($user['salt'])."',
+				'".bkstr($ip)."'
+		)");
 		$userid = $db->insert_id();
 		
 		UserQueryExt::UserGroupUpdate($db, $userid, array($groupid));
@@ -179,6 +180,7 @@ class UserQueryExt extends UserQuery {
 				'".bkstr($user['joindate'])."'
 		)";
 		$db->query_write($sql);
+		return $userid;
 	}
 	
 	public static function RegistrationActivateInfo(Ab_Database $db, $userid){
@@ -291,8 +293,12 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserGroupList(Ab_Database $db, $page, $limit){
+	public static function UserGroupList(Ab_Database $db, $page, $limit, $notbot = false){
 		$from = (($page-1)*$limit);
+		$where = "";
+		if ($notbot){
+			$where = "WHERE antibotdetect=0";
+		}
 		$sql = "
 			SELECT
 				u.userid as uid, 
@@ -301,6 +307,7 @@ class UserQueryExt extends UserQuery {
 				SELECT 
 					userid
 				FROM ".$db->prefix."user
+				".$where."
 				ORDER BY CASE WHEN lastvisit>joindate THEN lastvisit ELSE joindate END DESC
 				LIMIT ".$from.",".bkint($limit)."
 			) u

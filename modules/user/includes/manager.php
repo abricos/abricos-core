@@ -140,8 +140,7 @@ class UserManager extends Ab_ModuleManager {
 				/////// Постраничный список пользователей //////
 				case 'userlist': return $this->UserList($p->page, $p->limit);
 				case 'usercount': return $this->UserCount();
-				case 'usergrouplist':
-					return UserQueryExt::UserGroupList($db, $p->page, $p->limit);
+				case 'usergrouplist': return $this->UserGroupList($p->page, $p->limit);
 					
 				/////// Постраничный список групп //////
 				case 'grouplist':
@@ -192,7 +191,6 @@ class UserManager extends Ab_ModuleManager {
 		}
 		
 		$modAntibot = Abricos::GetModule('antibot');
-		
 		return UserQueryExt::UserList($this->db, $page, $limit, !empty($modAntibot));
 	}
 	
@@ -203,6 +201,15 @@ class UserManager extends Ab_ModuleManager {
 		
 		$modAntibot = Abricos::GetModule('antibot');
 		return UserQueryExt::UserCount($this->db, !empty($modAntibot));
+	}
+	
+	public function UserGroupList($page = 1, $limit = 15){
+		if (!$this->IsAdminRole()){
+			return null;
+		}
+		
+		$modAntibot = Abricos::GetModule('antibot');
+		return UserQueryExt::UserGroupList($this->db, $page, $limit, !empty($modAntibot));
 	}
 	
 	public function UserInfo($userid){
@@ -451,7 +458,8 @@ class UserManager extends Ab_ModuleManager {
 		if ($this->IsAdminRole()){
 			UserQueryExt::UserAppend($this->db, $user, User::UG_REGISTERED);
 		}else{
-			UserQueryExt::UserAppend($this->db, $user);
+			$userid = UserQueryExt::UserAppend($this->db, $user, User::UG_GUEST, $_SERVER['REMOTE_ADDR']);
+			Abricos::$user->AntibotUserDataUpdate($userid);
 		}
 		
 		if (!$sendMail){ 
