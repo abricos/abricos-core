@@ -22,15 +22,7 @@ Component.entryPoint = function(){
 		API = NS.API,
 		R = NS.roles;
 
-	var initCSS = false,
-		buildTemplate = function(w, ts){
-		if (!initCSS){
-			Brick.util.CSS.update(Brick.util.CSS['user']['board']);
-			delete Brick.util.CSS['user']['board'];
-			initCSS = true;
-		}
-		w._TM = TMG.build(ts); w._T = w._TM.data; w._TId = w._TM.idManager;
-	};	
+	var buildTemplate = this.buildTemplate;	
 	
 	var BoardPanel = function(){
 		BoardPanel.superclass.constructor.call(this, {
