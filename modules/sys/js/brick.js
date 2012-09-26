@@ -1066,6 +1066,7 @@ Brick.namespace('util');
  */
 (function(){
 	var CSS = {};
+	CSS.disableCSSComponent = false;
 	
 	/**
 	 * Добавить CSS стиль на текущую страницу в браузере
@@ -1075,7 +1076,7 @@ Brick.namespace('util');
 	 * @param {String} t Текст CSS
 	 */
 	CSS.update = function(t){
-		if (typeof t == 'undefined'){
+		if (typeof t == 'undefined' || CSS.disableCSSComponent){
 			return;
 		}
 		var style = document.createElement('style');
@@ -1280,10 +1281,13 @@ Brick.namespace('util');
 	
 	Language.get = function(lang, key){
 		var l = _dict[lang], k = key.split('.'), i;
+		if (typeof l == 'undefined'){
+			return [];
+		}
 		for (i=0;i<k.length;i++){
 			l = l[k[i]];
 			if (typeof l == 'undefined'){
-				return null;
+				return [];
 			}
 		}
 		
@@ -1292,11 +1296,14 @@ Brick.namespace('util');
 	
 	Language.geta = function(arr){
 		var l = _dict[Brick.env.language];
+		if (typeof l == 'undefined'){
+			return [];
+		}
 		
 		for (var i=0;i<arr.length;i++){
 			l = l[arr[i]];
 			if (typeof l == 'undefined'){
-				return null;
+				return [];
 			}
 		}
 		return l;
@@ -1580,7 +1587,6 @@ Brick.namespace('util');
 												nPort = aHost[1]*1 ;
 											}
 										}
-										
 										src = "/app/gzip/"+nHost
 											+"/"+nPort
 											+"/"+nModName
@@ -1591,6 +1597,7 @@ Brick.namespace('util');
 											+"&version="+mv
 											+"&tt="+Brick.env.ttname
 											+"&n="+ldCk['n']
+											+"&lang="+Brick.env.language
 											+"&file="+mb;
 									}
 
@@ -1618,7 +1625,7 @@ Brick.namespace('util');
 			loader.insert();
 		}
 	};
-	// связь прервалась, а браузер закешировал битый файл. 
+	// TODO: связь прервалась, а браузер закешировал битый файл. 
 	// осталось только запросить с новым урлом этот js
 	Brick._ldCk = {};
 	Brick._ldReqId = {};
@@ -1841,10 +1848,6 @@ Brick.byteToString = function(byte){
 
 
 Brick.dateExt = function(){
-	var m = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-	var mp = ['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'];
-	var ds = ['Вчера', 'Сегодня', 'Завтра'];
-	
 	var z = function(num){
 		if (num < 10){
 			return '0'+num;
@@ -1854,6 +1857,12 @@ Brick.dateExt = function(){
 	
 	return {
 		convert: function(udate, type, hideTime){
+			var LNG = Brick.util.Language.getc('mod.sys.date')
+
+			var mp = LNG['monthp'], 
+				ds = LNG['dayst'];
+
+			
 			if (!udate || udate == null){ return ""; }
 			if (typeof udate['getTime'] == 'function'){
 				udate = udate.getTime()/1000;
@@ -1867,7 +1876,7 @@ Brick.dateExt = function(){
 			
 			var day = z(cd.getDate());
 			var mon = z(cd.getMonth()+1);// +1 т.к. нумерация идет с 0
-			var mons= mp[cd.getMonth()];
+			var mons= mp[cd.getMonth()+1];
 			var min = z(cd.getMinutes());
 			var hour = z(cd.getHours());
 			
@@ -1880,7 +1889,7 @@ Brick.dateExt = function(){
 			}else if (type == 2){// Добавлена возможность отображения даты в виде дд.мм.гггг
 				return day+'.'+mon+'.'+cd.getFullYear();
 			}else if (type == 3){
-				return day+' '+mp[cd.getMonth()]+' '+cd.getFullYear();
+				return day+' '+mp[cd.getMonth()+1]+' '+cd.getFullYear();
 			}else if (type == 4){
 				return hour+':'+(min);
 			}else{
@@ -1889,11 +1898,11 @@ Brick.dateExt = function(){
 	
 				var v = (Math.round(ld.getTime()/1000) - udate)/60/60/24;
 				if (v > 0 && v < 1){
-					s = ds[0];
-				}else if (v < 0 && v >-2){
 					s = ds[1];
+				}else if (v < 0 && v >-2){
+					s = ds[2];
 				}else{
-					s = day+' '+mp[cd.getMonth()]+' '+cd.getFullYear();
+					s = day+' '+mp[cd.getMonth()+1]+' '+cd.getFullYear();
 				}
 				var tm = hour+':'+(min);
 				if (!hideTime){

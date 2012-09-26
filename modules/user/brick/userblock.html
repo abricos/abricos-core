@@ -7,23 +7,23 @@
 	<form action="/user/login/" method="post" name="loginform">
 		<div class="atd">
 			<label class="login" for="txt-login">
-				<span>Логин</span>
+				<span>{#brick.userblock.1}</span>
 				<input id="txt-login" type="text" name="login" size="20" maxlength="32" />
 			</label>
 			<label class="password" for="txt-password">
-				<span>Пароль</span>
+				<span>{#brick.userblock.2}</span>
 				<input id="txt-password" type="password" name="password" size="20" maxlength="32" />
 			</label>
 			<div class="clear regrec">
-				<a title="Регистрация нового пользователя" href="/user/register/" class="showregister">Регистрация</a>
-				<a title="Восстановить пароль" href="/user/password/" class="showrecpwd">Забыли пароль?</a>
+				<a title="{#brick.userblock.3}" href="/user/register/" class="showregister">{#brick.userblock.4}</a>
+				<a title="{#brick.userblock.5}" href="/user/password/" class="showrecpwd">{#brick.userblock.6}</a>
 			</div>
 			<div class="bact">
 				<label class="autologin" for="chk-autologin">
 					<input id="chk-autologin" type="checkbox" name="autologin" />
-					<span>Запомнить меня</span>
+					<span>{#brick.userblock.7}</span>
 				</label>
-				<input class="btn-authorize" type="submit" value="Войти" />
+				<input class="btn-authorize" type="submit" value="{#brick.userblock.8}" />
 			</div>
 		</div>
 	</form>
@@ -31,23 +31,23 @@
 
 [bkvar=user]
 	<div class="autuser">
-		<a href="/user/" class="showcp" title="Перейти в панель управления">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="Выйти">Выйти</a>)
+		<a href="/user/" class="showcp" title="{#brick.userblock.9}">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="{#brick.userblock.10}">{#brick.userblock.10}</a>)
 		<br />
-		<a href="/user/" class="showcp" title="Перейти в панель управления">Панель управления</a>
+		<a href="/user/" class="showcp" title="{#brick.userblock.12}">{#brick.userblock.11}</a>
 	</div>
 [/bkvar]
 
 [bkvar=bosuser]
 	<div class="autuser">
-		<a href="/bos/#app=uprofile/ws/showws/" class="showprofile" title="Личный раздел">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="Выйти">Выйти</a>)
+		<a href="/bos/#app=uprofile/ws/showws/" class="showprofile" title="{#brick.userblock.13}">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="{#brick.userblock.14}">{#brick.userblock.14}</a>)
 		<br />
 		<div id="appbosuicont" class="appbosuicont">
-			<a id="bshowbosui" href="/bos/" class="showbos" title="Открыть менеджер приложений">Приложения</a>
+			<a id="bshowbosui" href="/bos/" class="showbos" title="{#brick.userblock.15}">{#brick.userblock.16}</a>
 			<div id="appbosuilist" class="aw-bos">
 				<div class="loading">
-					<img src="/images/loading.gif" /> Пожалуйста, подождите
+					<img src="/images/loading.gif" /> {#brick.userblock.17}
 					<br />
-					Построение списка приложений...
+					{#brick.userblock.18}
 				</div>
 			</div>
 		</div>

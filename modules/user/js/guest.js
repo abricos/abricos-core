@@ -51,7 +51,6 @@ Component.entryPoint = function(){
 		}, this.param.panelConfig || {});
 		LoginPanel.superclass.constructor.call(this, config);
 	};
-	
 	YAHOO.extend(LoginPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(TId['loginpanel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
@@ -67,7 +66,7 @@ Component.entryPoint = function(){
 			this.setelv('username', p['username']);
 			this.setelv('userpass', p['password']);
 			if (p['error'] > 0){
-				var lng = Brick.util.Language.getc('mod.user.loginpanel.error.srv');
+				var lng = Brick.util.Language.getc('mod.user.guest.loginpanel.error.srv');
 				var err = this.el('error');
 				err.style.display = "block";
 				err.innerHTML = lng[p['error']];

@@ -83,7 +83,7 @@ class Ab_UpdateManager {
 	 */
 	public function isInstall(){
 		if (!is_null($this->_isInstall)){ return $this->_isInstall; }
-		$aSV = $this->ParseVersion($this->serverVersion);
+		$aSV = Ab_UpdateManager::ParseVersion($this->serverVersion);
 		$cnt = count($aSV);
 		for ($i=0;$i<$cnt;$i++){
 			if ($aSV[$i]>0){
@@ -109,24 +109,37 @@ class Ab_UpdateManager {
 	 * @return Boolean
 	 */
 	public function isUpdate($version){
-		$aSV = $this->ParseVersion($this->serverVersion);
-		$aNV = $this->ParseVersion($version);
-		$cnt = count($aSV);
-		for ($i=0;$i<$cnt;$i++){
-			if ($aNV[$i] > $aSV[$i]){
-				return true;
-			}else if ($aNV[$i] < $aSV[$i]){
-				return false;
-			}
-		}
-		return false;
+		$cmp = Ab_UpdateManager::CompareVersion($this->serverVersion, $version);
+		return $cmp > 0;
 	}
 	
-	private function ParseVersion($version){
+	/**
+	 * Сравнить версии
+	 * 
+	 * @param string $version1
+	 * @param string $version2
+	 * 
+	 * @return integer Если $version1<$version2 вернет -1, $version1>$version2 вернет 1, $version1==$version2 вернет 0 
+	 */
+	public static function CompareVersion($version1, $version2){
+		$av1 = Ab_UpdateManager::ParseVersion($version1);
+		$av2 = Ab_UpdateManager::ParseVersion($version2);
+		$cnt = max(count($av1), count($av2));
+		for ($i=0;$i<$cnt;$i++){
+			if ($av2[$i] > $av1[$i]){
+				return 1;
+			}else if ($av2[$i] < $av1[$i]){
+				return -1;
+			}
+		}
+		return 0;
+	}
+	
+	public static function ParseVersion($version){
 		$arr = explode(".", $version);
 		$retarr = array();
 		foreach ($arr as $s){
-			array_push($retarr, $this->str2int($s));
+			array_push($retarr,  Ab_UpdateManager::str2int($s));
 		}
 		$count = count($retarr);
 		for ($i=$count;$i<7;$i++){
@@ -135,7 +148,7 @@ class Ab_UpdateManager {
 		return $retarr;
 	}
 	
-	private function str2int($string, $concat = true) {
+	private static function str2int($string, $concat = true) {
 		$length = strlen($string);   
 		for ($i = 0, $int = '', $concat_flag = true; $i < $length; $i++) {
 			if (is_numeric($string[$i]) && $concat_flag) {

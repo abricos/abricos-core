@@ -474,7 +474,7 @@ class Ab_CoreQuery {
 			SELECT
 				".Ab_CoreQuery::FIELDS_PHRASE." 
 			FROM ".$db->prefix."sys_phrase
-			WHERE module='".bkstr($modname)."' AND name='".bkstr($name)."' AND language='".LNG."'
+			WHERE module='".bkstr($modname)."' AND name='".bkstr($name)."' AND language='".bkstr(Abricos::$LNG)."'
 			LIMIT 1
 		";
 		return $db->query_first($sql);
@@ -501,7 +501,7 @@ class Ab_CoreQuery {
 				'".bkstr($phrase->module)."',
 				'".bkstr($phrase->name)."',
 				'".bkstr($phrase->value)."',
-					'".LNG."'
+				'".bkstr(Abricos::$LNG)."'
 				)"
 			);
 		}
@@ -519,7 +519,7 @@ class Ab_CoreQuery {
 			SELECT
 				".Ab_CoreQuery::FIELDS_PHRASE."
 			FROM ".$db->prefix."sys_phrase
-			WHERE module='".bkstr($module)."' AND language='".LNG."'
+			WHERE module='".bkstr($module)."' AND language='".bkstr(Abricos::$LNG)."'
 		";
 		return $db->query_read($sql);
 	}
@@ -540,7 +540,7 @@ class Ab_CoreQuery {
 				name as nm,
 				phrase as ph
 			FROM ".$db->prefix."sys_phrase
-			WHERE (".implode(" OR ", $where).") AND language='".LNG."' 
+			WHERE (".implode(" OR ", $where).") AND language='".bkstr(Abricos::$LNG)."' 
 		";
 		return $db->query_read($sql);
 	}

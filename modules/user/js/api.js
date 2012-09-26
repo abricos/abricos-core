@@ -10,7 +10,7 @@
  */
 var Component = new Brick.Component();
 Component.requires = {
-		yahoo: ['dom']
+	yahoo: ['dom']
 };
 Component.entryPoint = function(){
 	var Dom = YAHOO.util.Dom,

@@ -53,6 +53,9 @@ switch($mime){
 if ($libType == 'sys'){
 	$files = array('/modules/sys/js/brick.js');
 	$module = "sys";
+}else if ($libType == 'fullcssforie'){
+	$files = array('fullcssforie');
+	$module = "sys";
 }else if ($libType == 'mod'){
 	$newFiles = array();
 	foreach($files as $file){
@@ -154,7 +157,24 @@ if ($libType == 'sys'){
 	$module = 'sys';
 }
 
-if ($libType == 'mod' || $libType == 'sys'){
+if ($libType == 'fullcssforie'){
+	
+	$dir = dir($realPath."/modules");
+	while (false !== ($entry = $dir->read())) {
+		if ($entry == "." || $entry == ".." || empty($entry)){
+			continue;
+		}
+	
+		$jsdir = $realPath."/modules/".$entry."/js";
+	
+	
+		$cssfiles = globa($jsdir."/*.css");
+		foreach ($cssfiles as $file){
+			$content .= getFileContents($file);
+		}
+	}
+	
+}else if ($libType == 'mod' || $libType == 'sys'){
 	
 	// Append main file
 	foreach ($files as $file){

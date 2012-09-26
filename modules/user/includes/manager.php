@@ -138,9 +138,9 @@ class UserManager extends Ab_ModuleManager {
 			switch ($name){
 
 				/////// Постраничный список пользователей //////
-				case 'userlist': return $this->UserList($p->page, $p->limit);
-				case 'usercount': return $this->UserCount();
-				case 'usergrouplist': return $this->UserGroupList($p->page, $p->limit);
+				case 'userlist': return $this->UserList($p->page, $p->limit, $p->filter);
+				case 'usercount': return $this->UserCount($p->filter);
+				case 'usergrouplist': return $this->UserGroupList($p->page, $p->limit, $p->filter);
 					
 				/////// Постраничный список групп //////
 				case 'grouplist':
@@ -185,31 +185,31 @@ class UserManager extends Ab_ModuleManager {
 	//                      Административные функции                  //
 	////////////////////////////////////////////////////////////////////
 	
-	public function UserList($page = 1, $limit = 15){
+	public function UserList($page = 1, $limit = 15, $filter = ''){
 		if (!$this->IsAdminRole()){
 			return null;
 		}
 		
 		$modAntibot = Abricos::GetModule('antibot');
-		return UserQueryExt::UserList($this->db, $page, $limit, !empty($modAntibot));
+		return UserQueryExt::UserList($this->db, $page, $limit, $filter, !empty($modAntibot));
 	}
 	
-	public function UserCount(){
+	public function UserCount($filter = ''){
 		if (!$this->IsAdminRole()){
 			return null;
 		}
 		
 		$modAntibot = Abricos::GetModule('antibot');
-		return UserQueryExt::UserCount($this->db, !empty($modAntibot));
+		return UserQueryExt::UserCount($this->db, $filter, !empty($modAntibot));
 	}
 	
-	public function UserGroupList($page = 1, $limit = 15){
+	public function UserGroupList($page = 1, $limit = 15, $filter = ''){
 		if (!$this->IsAdminRole()){
 			return null;
 		}
 		
 		$modAntibot = Abricos::GetModule('antibot');
-		return UserQueryExt::UserGroupList($this->db, $page, $limit, !empty($modAntibot));
+		return UserQueryExt::UserGroupList($this->db, $page, $limit, $filter, !empty($modAntibot));
 	}
 	
 	public function UserInfo($userid){
@@ -354,6 +354,9 @@ class UserManager extends Ab_ModuleManager {
 			setcookie($session->cookieName, $sessionKey, TIMENOW + $session->sessionTimeOut, $session->sessionPath);
 			UserQuery::SessionAppend($this->db, $user['userid'], $sessionKey, $privateKey);
 		}
+		
+		// Удалить пользователей не прошедших верификацию email (редкая операция)
+		UserQueryExt::RegistrationActivateClear($this->db);
 		
 		return 0;
 	}

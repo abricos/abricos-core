@@ -1,9 +1,8 @@
-<!--{wrapwidget}-->
-<div class="mod-user-cp">
+<!--{wrapwidget}--><div class="mod-user-cp">
 	<table class="h100 w100"><tbody>
 		<tr>
 			<td>
-				<div class="header"><span>Панель управления</span></div>
+				<div class="header"><span>{#mod.user.cpanel.wrapwidget.1}</span></div>
 			</td>
 		</tr>
 		<tr>
@@ -13,7 +12,7 @@
 			<td>
 				<table class="w100">
 					<tbody><tr class="footer">
-						<td><p><a href="http://abricos.org/">Платформа Абрикос</a> 2012</p></td>
+						<td><p><a href="http://abricos.org/">{#mod.user.cpanel.wrapwidget.2}</a> 2012</p></td>
 						<td><p class="right"><a href="http://abricos.org/">abricos.org</a></p></td>
 					</tr>
 				</tbody></table>
@@ -21,13 +20,11 @@
 		</tr>
 	</tbody></table>
 </div>
-
-<!--{widget}-->
-<div class="mod-user-cp-wd">
+<!--{widget}--><div class="mod-user-cp-wd">
 	<table class="h100 w100"><tbody><tr>
 	<td class="w20" valign="top">
 		<div class="panel">
-			<div class="head"><a href="/">Главная</a> / Меню</div>
+			<div class="head"><a href="/">{#mod.user.cpanel.widget.1}</a> / {#mod.user.cpanel.widget.3}</div>
 			<ul class="menu" id="{i#mainmenu}"></ul>
 		</div>
 	</td>
@@ -36,24 +33,16 @@
 			<div class="head" id="{i#contname}"></div>
 			<div class="out" id="{i#modbody}" style="overflow:auto;">
 				<div id="{i#wait}">
-					<img src="/images/loading.gif" />&nbsp;<strong>Пожалуйста, подождите. Идет загрузка данных...</strong>
+					<img src="/images/loading.gif" />&nbsp;<strong>{#mod.user.cpanel.widget.2}</strong>
 				</div>
 			</div>
 		</div>
 	</td>							
 	</tr></tbody></table>
 </div>
-
-<!--{menuitem}-->
-<li class="{gi#micon}-{v#id} level-0"><a href="#" id="{i#id}-{v#id}">{v#tl}</a>{v#child}</li>
-
-<!--{menuchild}-->
-<ul class="hide" id="{i#id}-{v#id}">{v#items}</ul>
-
-<!--{menuchilditem}-->
-<li class="child"><a href="#" id="{gi#menuid}-{v#id}">{v#tl}</a>{v#child}</li>
-
-<!--{miicon}-->
-.{gi#micon}-{v#id} {
+<!--{menuitem}--><li class="{gi#micon}-{v#id} level-0"><a href="#" id="{i#id}-{v#id}">{v#tl}</a>{v#child}</li>
+<!--{menuchild}--><ul class="hide" id="{i#id}-{v#id}">{v#items}</ul>
+<!--{menuchilditem}--><li class="child"><a href="#" id="{gi#menuid}-{v#id}">{v#tl}</a>{v#child}</li>
+<!--{miicon}-->.{gi#micon}-{v#id} {
 	background-image:url({v#url});
 }

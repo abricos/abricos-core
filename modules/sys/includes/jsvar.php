@@ -11,10 +11,12 @@
  * @ignore
  */
 
-$param = Brick::$builder->brick->param;
+$brick = Brick::$builder->brick;
+$param = $brick->param;
 
 $modSys = Abricos::GetModule('sys');
 
+$param->var['lang'] = Abricos::$LNG;
 $param->var['g'] = json_encode(Abricos::$user->info['group']);
 $param->var['uid'] = intval(Abricos::$user->id);
 $param->var['unm'] = Abricos::$user->login;
@@ -31,6 +33,10 @@ if (CMSRegistry::$instance->modules->customTakelink){
 		array_push($arr, "'".$key."'");
 	}
 	$param->var['enmod'] = implode($arr, ',');
+}
+
+if ($param->param['fullcssforie'] == 'true' && is_browser('ie')){
+	$param->var['fullcssres'] = Brick::ReplaceVarByData($param->var['fullcsstpl'], $param->var);
 }
 
 $iscache = !CMSRegistry::$instance->config['Misc']['develop_mode'];
@@ -99,7 +105,7 @@ foreach ($files as $file){
 	$key += filemtime($file)+filesize($file)+1;
 }
 
-$cKey = $param->var['jsv'] = md5($key);
+$cKey = $param->var['jsv'] = md5($key.Abricos::$LNG);
 
 if ($iscache){
 	
@@ -111,6 +117,5 @@ if ($iscache){
 		fclose($handle);
 	} 
 }
-
 
 ?>

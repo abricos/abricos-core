@@ -17,3 +17,21 @@
 .aw-user .mgr .users .bact img {
 	cursor: pointer;
 }
+
+.aw-user .mgr .users .filter {
+	margin-left: 10px;
+	margin-top: 7px;
+} 
+.aw-user .mgr .users .filter span, 
+.aw-user .mgr .users .filter input {
+	margin-right: 10px;
+}
+.aw-user .mgr .users .filter span,
+.aw-user .mgr .users .filter input.ftxt {
+	font-size: 1.2em;
+}
+.aw-user .mgr .users .filter input.ftxt {
+	width: 300px;
+	vertical-align: middle;
+	margin-bottom: 2px;
+}

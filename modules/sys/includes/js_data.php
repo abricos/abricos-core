@@ -5,7 +5,6 @@
  * @version $Id$
  * @package Abricos
  * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin (roosit@abricos.org)
  * @ignore
@@ -34,7 +33,7 @@ if (Ab_CoreSystemManager::$instance->IsAdminRole()){
 				case 'config':
 					Brick::$builder->phrase->PreloadByModule($tsrs->p->mod);
 					foreach ($tsrs->r as $r){
-						if ($r->f == 'u'){
+						if ($r->f == 'u' || $r->f == 'a'){
 							Brick::$builder->phrase->Set($tsrs->p->mod, $r->d->nm, $r->d->ph);
 						}
 					}

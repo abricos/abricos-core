@@ -1,42 +1,39 @@
-<!--{loginpanel}-->
-<div class='hd'>Вход на сайт</div>
+<!--{loginpanel}--><div class='hd'>{#mod.user.guest.loginpanel.1}</div>
 <div class='bd'>
 	<form name="userloginform" id="{i#form}" method="post" action="#" onSubmit="return false;">
 		<div id="{i#error}" style="color: red; display: none;" ></div>
 		<div class="field">
 			<table cellpadding="2" cellspacing="2" border="0">
 			<tr>
-				<td><label>Имя</label>&nbsp;</td>
+				<td><label>{#mod.user.guest.loginpanel.2}</label>&nbsp;</td>
 				<td>
 					<input name="username" id="{i#username}" type="text" style="font-size: 160%" size="10"/>
 				</td>
 			</tr>
 			<tr>
-				<td><label>Пароль</label>&nbsp;</td>
+				<td><label>{#mod.user.guest.loginpanel.3}</label>&nbsp;</td>
 				<td><input name="userpassword" id="{i#userpass}" type="password" style="font-size: 160%" size="10" /></td>
 			</tr>
 			<tr>
 				<td colspan="2" align="center">
 					<div class="right">
-						<input id="{i#blogin}" type="button" value="Войти" class="btn"/>
-						<input id="{i#bcancel}" type="button" value="Отмена" class="btn"/>
+						<input id="{i#blogin}" type="button" value="{#mod.user.guest.loginpanel.4}" class="btn"/>
+						<input id="{i#bcancel}" type="button" value="{#mod.user.guest.loginpanel.5}" class="btn"/>
 					</div>
-					<input id="{i#bloginsub}" type="submit" value="Войти" style="display: none" />
+					<input id="{i#bloginsub}" type="submit" value="{#mod.user.guest.loginpanel.6}" style="display: none" />
 				</td>
 			</tr>
 			<tr><td colspan="2">
-			    <a href="#" id="{i#breg}" title="Регистрация нового пользователя">Зарегистрироваться</a>
+			    <a href="#" id="{i#breg}" title="{#mod.user.guest.loginpanel.7}">{#mod.user.guest.loginpanel.8}</a>
 			</td></tr>
 			<tr><td colspan="2">
-			    <a href="#" id="{i#bpwd}" title="Восстановление пароля">Забыли пароль?</a>
+			    <a href="#" id="{i#bpwd}" title="{#mod.user.guest.loginpanel.9}">{#mod.user.guest.loginpanel.10}</a>
 			</td></tr>
 			</table>
 		</div>
 	</form>
 </div>
-
-<!--{password}-->
-<div class='hd'>Восстановление пароля</div>
+<!--{password}--><div class='hd'>Восстановление пароля</div>
 <div class='bd'>
 	<form id='{i#form}'>
 		<p>Введите E-mail, указанный при регистрации.</p>
@@ -50,60 +47,56 @@
 		</div>
 	</form>
 </div>
-
-<!--{pwdokpanel}-->
-<div class='hd'>Восстановление пароля</div>
+<!--{pwdokpanel}--><div class='hd'>{#mod.user.guest.pwdokpanel.1}</div>
 <div class='bd'>
 	<div style="font-size: 120%">
-		Инструкция по восстановлению пароля была отправлена вам на email: "{v#email}".<br />
-		Проверьте вашу почту.
+		{#mod.user.guest.pwdokpanel.2}<br />
+		{#mod.user.guest.pwdokpanel.3}
 		<div style="margin-top:6px; text-align: right" >
-			<input id="{i#bclose}" type="button" value="Закрыть" />
+			<input id="{i#bclose}" type="button" value="{#mod.user.guest.pwdokpanel.4}" />
 		</div>
 	</div>
 </div>
-
-<!--{register}-->
-<div class='hd'>Регистрация</div>
+<!--{register}--><div class='hd'>{#mod.user.guest.register.1}</div>
 <div class='bd' style="width: 430px">
 	<div style="text-align: left">
 		<div id="{i#error}" style="color: red; display: none;" ></div>
-		<div style="margin-bottom:3px">Для регистрации необходимо заполнить поля</div>
+		<div style="margin-bottom:3px">{#mod.user.guest.register.2}</div>
 		<div style="margin-bottom:3px">
-	        <strong>Имя</strong>:<br />
+	        <strong>{#mod.user.guest.register.3}</strong>:<br />
 	        <input id="{i#username}" type="text" size="50" maxlength="25" />
     	</div>
 		<fieldset>
-			<legend>Пароль</legend>
+			<legend>{#mod.user.guest.register.4}</legend>
 			<table cellpadding="0" cellspacing="3" border="0" width="400">
 			<tr>
-				<td colspan="2">Введите свой пароль. Пароль чувствителен к регистру букв.</td>
+				<td colspan="2">{#mod.user.guest.register.5}</td>
 			</tr>
 			<tr>
 				<td>
-					Пароль:<br />
+					{#mod.user.guest.register.6}:<br />
 					<input id="{i#pass}" type="password" size="25" maxlength="15" />
 				</td>
 				<td>
-					Подтвердите пароль:<br />
+					{#mod.user.guest.register.7}:<br />
 					<input id="{i#passconf}" type="password" size="25" maxlength="15" />
 				</td>
 			</tr>
 			</table>
 		</fieldset>
 		<fieldset>
-			<legend>Email адрес</legend>
+			<legend>{#mod.user.guest.register.8}</legend>
 			<table cellpadding="0" cellspacing="3" border="0" width="400">
 			<tr>
-				<td colspan="2">Введите правильный email адрес.</td>
+				<td colspan="2">{#mod.user.guest.register.9}</td>
 			</tr>
 			<tr>
 				<td>
-					Email адрес:<br />
+					{#mod.user.guest.register.10}:<br />
 					<input id="{i#email}" type="text" size="25" maxlength="50" />
 				</td>
 				<td>
-					Подтвердите email адрес:<br />
+					{#mod.user.guest.register.11}<br />
 					<input id="{i#emailconf}" type="text" size="25" maxlength="50" />
 				</td>
 			</tr>
@@ -111,21 +104,19 @@
 		</fieldset>
     </div>
     <div style="margin-top:6px; text-align: right" >
-		<input id="{i#breg}" type="button" value="Зарегистрироваться" />
+		<input id="{i#breg}" type="button" value="{#mod.user.guest.register.12}" />
 		&nbsp;&nbsp;
-		<input id="{i#bcancel}" type="button" name="Reset" value="Отмена" />
+		<input id="{i#bcancel}" type="button" name="Reset" value="{#mod.user.guest.register.13}" />
 	</div>
 </div>
-
-<!--{regokpanel}-->
-<div class='hd'>Регистрация</div>
+<!--{regokpanel}--><div class='hd'>{#mod.user.guest.regokpanel.1}</div>
 <div class='bd'>
 	<div style="font-size: 120%"> 
-		Заявка на регистрацию принята успешно. <br />
-		На Ваш email: "<span id="{i#email}"></span>" выслано письмо с потверждением регистрации.<br />
-		Проверьте вашу почту.
+		{#mod.user.guest.regokpanel.2} <br />
+		{#mod.user.guest.regokpanel.3}<br />
+		{#mod.user.guest.regokpanel.4}
 		<div style="margin-top:6px; text-align: right" >
-			<input id="{i#bclose}" type="button" value="Закрыть" />
+			<input id="{i#bclose}" type="button" value="{#mod.user.guest.regokpanel.5}" />
 		</div>
 	</div>
 </div>

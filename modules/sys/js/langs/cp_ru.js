@@ -1,19 +1,15 @@
-Brick.util.Language.add('ru',{
-	'mod': {
-		'sys': {
-			'title': 'Ядро',
-			'roles':{
-				'50': 'Администрирование'
-			}
-		}
+Brick.util.Language.add('ru',{'mod': {'{C#MODNAME}':{
+	'title': 'Ядро',
+	'roles': {
+		'50': 'Администрирование'
 	},
-	'sys':{
+	'cp': {
 		'title': 'Настройка сайта',
 		'permission': {
 			'title': 'Безопасность'
 		},
-		'modules':{
+		'modules': {
 			'title': 'Модули'
 		}
 	}
-});
+}}});

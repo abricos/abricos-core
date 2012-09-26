@@ -75,13 +75,13 @@ class Ab_CoreBrickReader {
 				$bname = basename($file, ".html");
 				$key = $module->name.".".$bname;
 				if (empty($brickdb[$key])){
-					$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
+					$brick = Ab_CoreBrickReader::ReadBrickFromFile($file, $module->name);
 					$brickid = Ab_CoreQuery::BrickAppendFromParser($this->db, $module->name, $bname, $brick->body, Brick::BRICKTYPE_BRICK, $brick->hash);
 					Ab_CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
 				}else { 
 					$bk = $brickdb[$key];
 					if (empty($bk['ud'])){
-						$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
+						$brick = Ab_CoreBrickReader::ReadBrickFromFile($file, $module->name);
 						if ($bk['hh'] != $brick->hash){
 							Ab_CoreQuery::BrickSaveFromParser($this->db, $bk['id'], $brick->body, $brick->hash);
 							Ab_CoreQuery::BrickParamAppendFromParser($this->db, $bk['id'], $brick->param);
@@ -110,14 +110,14 @@ class Ab_CoreBrickReader {
 				$bname = basename($file, ".html");
 				$key = $module->name.".".$bname;
 				if (empty($brickdb[$key])){
-					$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
+					$brick = Ab_CoreBrickReader::ReadBrickFromFile($file, $module->name);
 					$brickid = Ab_CoreQuery::BrickAppendFromParser($this->db, $module->name, $bname, $brick->body, 
 						Brick::BRICKTYPE_CONTENT, $brick->hash);
 					Ab_CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
 				}else { 
 					$bk = $brickdb[$key];
 					if (empty($bk['ud'])){
-						$brick = Ab_CoreBrickReader::ReadBrickFromFile($file);
+						$brick = Ab_CoreBrickReader::ReadBrickFromFile($file, $module->name);
 						if ($bk['hh'] != $brick->hash){
 							Ab_CoreQuery::BrickSaveFromParser($this->db, $bk['id'], $brick->body, $brick->hash);
 							Ab_CoreQuery::BrickParamAppendFromParser($this->db, $bk['id'], $brick->param);
@@ -278,10 +278,10 @@ class Ab_CoreBrickReader {
 			}
 			
 		}
-		return Ab_CoreBrickReader::ReadBrickFromFile($path);
+		return Ab_CoreBrickReader::ReadBrickFromFile($path, $owner);
 	}
 	
-	public static function ReadBrickFromFile($file){
+	public static function ReadBrickFromFile($file, $modname = ''){
 		$ret = new stdClass();
 		if (!file_exists($file)){
 			$filebody = "File not found: ".$file;
@@ -290,35 +290,33 @@ class Ab_CoreBrickReader {
 		}
 		
 		$langa = array();
-		// чтение языковых идентификаторов
+		// чтение и обработка языковых фраз в контенте кирпича
 		$lngs = array();
-		preg_match_all("{#[a-zA-Z_.]+}", $filebody, $lngs);
-		if (!empty($lngs)){
-			foreach ($lngs[0] as $value){
-				$value = str_replace("#", "", $value);
-				$arr = explode(".", $value);
-				if (!is_array($langa[$arr[0]])){
-					$langa[$arr[0]] = array();
-				}
-				$find = false;
-				foreach ($langa[$arr[0]] as $vname){
-					if ($vname == $arr[1]){
-						$find = true;
-						break;
+		preg_match_all("/\{#[0-9a-zA-Z_.]+\}/", $filebody, $lngs);
+		
+		if (is_array($lngs) && is_array($lngs[0]) && count($lngs[0])>0){
+			$mod = Abricos::GetModule($modname);
+			if (!empty($mod)){
+
+				foreach ($lngs[0] as $value){
+					$key = str_replace("{#", "", $value);
+					$key = str_replace("}", "", $key);
+					
+					$arr = explode(".", $key);
+					
+					$lang = &$mod->lang;
+					$ph = null;
+					foreach($arr as $s){
+						
+						if (is_array($lang[$s])){
+							$lang = &$lang[$s];
+						}else if (is_string($lang[$s])){
+							$ph = $lang[$s];
+							break;
+						}
 					}
-				}
-				if (!$find){
-					array_push($langa[$arr[0]], $arr[1]);
-				}
-			}
-		}
-		// обработка языковых фраз в контенте кирпича
-		if (!empty($langa)){
-			foreach ($langa as $modname => $value){
-				foreach ($value as $name){
-					$mod = Abricos::GetModule($modname);
-					if (!empty($mod)){
-						$filebody = str_replace("{#".$modname.".".$name."}", $mod->lang[$name], $filebody);
+					if (!is_null($ph)){
+						$filebody = str_replace("{#".$key."}", $ph, $filebody);
 					}
 				}
 			}

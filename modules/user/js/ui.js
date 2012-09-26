@@ -65,7 +65,7 @@ Component.entryPoint = function(NS){
 								lw.hide();
 								setval('txt-login', '');
 								setval('txt-password', '');
-								var lng = Brick.util.Language.getc('mod.user.loginpanel.error.srv');
+								var lng = Brick.util.Language.getc('mod.user.guest.loginpanel.error.srv');
 								alert(lng[msg.data]);
 							});
 						}else{

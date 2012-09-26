@@ -58,6 +58,12 @@ final class Abricos {
 	 */
 	public static $config;
 	
+	/**
+	 * Идентификатор языка
+	 * @var string
+	 */
+	public static $LNG = 'ru';
+	
 	private static $_notification = null;
 	
 	/**
@@ -225,12 +231,12 @@ class CMSRegistry {
 		
 		$this->fetch_config();
 		
-		
 		if (empty($this->config['Misc']['language'])){
 			$this->config['Misc']['language'] = 'ru';
 		}
 		
 		define('LNG', $this->config['Misc']['language']);
+		Abricos::$LNG = $this->config['Misc']['language'];
 		
 		$db = new Ab_DatabaseMySql($this, $this->config['Database']['tableprefix']);
 		$db->connect(
@@ -340,6 +346,10 @@ class CMSRegistry {
 		if (!isset($config['JsonDB']['use']) || !$config['JsonDB']['use']){
 			$config['JsonDB']['password'] = TIMENOW;
 		}
+		if (empty($config['Misc']['language'])){
+			$config['Misc']['language'] = 'ru';
+		}
+		
 		$this->config =& $config;
 	}
 	

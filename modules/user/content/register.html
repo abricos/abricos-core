@@ -2,15 +2,15 @@
 [tt=main][/tt]
 [script]register.php[/script]
 
-[bkvar=e1]Пользователь с таким логином уже зарегистрирован на сайте[/bkvar]
-[bkvar=e2]Пользователь с таким email уже зарегистрирован[/bkvar]
-[bkvar=e3]Недопустимое имя пользователя[/bkvar]
-[bkvar=e4]Неверный формат email[/bkvar]
-[bkvar=e105]Пароли несовпадают[/bkvar]
-[bkvar=e106]Email не совпадают[/bkvar]
+[bkvar=e1]{#content.register.1}[/bkvar]
+[bkvar=e2]{#content.register.2}[/bkvar]
+[bkvar=e3]{#content.register.3}[/bkvar]
+[bkvar=e4]{#content.register.4}[/bkvar]
+[bkvar=e105]{#content.register.5}[/bkvar]
+[bkvar=e106]{#content.register.6}[/bkvar]
 
 [bkvar=err]
-	<div class="register-error">Ошибка регистрации: {v#err}</div>
+	<div class="register-error">{#content.register.7}</div>
 [/bkvar]
 
 [bkvar=regform]
@@ -18,61 +18,61 @@
 		<input name="do" type="hidden" value="register" />
 		{v#error}
 		<div style="margin-bottom:3px">
-			<strong>Имя</strong>:<br />
+			<strong>{#content.register.8}</strong>:<br />
 			<input name="login" type="text" size="50" maxlength="25" />
 		</div>
 		<fieldset>
-			<legend>Пароль</legend>
+			<legend>{#content.register.9}</legend>
 			<table cellpadding="0" cellspacing="3" border="0" width="400">
 			<tr>
-				<td colspan="2">Введите свой пароль. Пароль чувствителен к регистру букв.</td>
+				<td colspan="2">{#content.register.10}</td>
 			</tr>
 			<tr>
 				<td>
-					Пароль:<br />
+					{#content.register.11}:<br />
 					<input name="password" type="password" size="25" maxlength="15" />
 				</td>
 				<td>
-					Подтвердите пароль:<br />
+					{#content.register.12}:<br />
 					<input name="passconf" type="password" size="25" maxlength="15" />
 				</td>
 			</tr>
 			</table>
 		</fieldset>
 		<fieldset>
-			<legend>Email адрес</legend>
+			<legend>{#content.register.13}</legend>
 			<table cellpadding="0" cellspacing="3" border="0" width="400">
 			<tr>
-				<td colspan="2">Введите правильный email адрес.</td>
+				<td colspan="2">{#content.register.14}</td>
 			</tr>
 			<tr>
 				<td>
-					Email адрес:<br />
+					{#content.register.15}:<br />
 					<input name="email" type="text" size="25" maxlength="50" />
 				</td>
 				<td>
-					Подтвердите email адрес:<br />
+					{#content.register.16}:<br />
 					<input name="emailconf" type="text" size="25" maxlength="50" />
 				</td>
 			</tr>
 			</table>
 		</fieldset>
 		<div style="margin-top: 10px;">
-			<input type="submit" value="Зарегистрироваться" />
+			<input type="submit" value="{#content.register.17}" />
 		</div>
 	</form>
 [/bkvar]
 
 [bkvar=regok]
 	<p> 
-		Заявка на регистрацию принята успешно. <br />
-		На Ваш email: "{v#email}" выслано письмо с потверждением регистрации.<br />
-		Проверьте вашу почту.
+		{#content.register.18} <br />
+		{#content.register.19}<br />
+		{#content.register.20}
 	</p>
 [/bkvar]
 
 [*]-->
-<h3>Регистрация на сайте</h3>
+<h3>{#content.register.21}</h3>
 <div class="bd">
 	{v#result}
 </div>

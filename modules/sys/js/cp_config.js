@@ -107,7 +107,20 @@ Component.entryPoint = function(){
 			}
 			
 			this.el('styles').innerHTML = TM.replace('select', {'list': lst});
-			this.rows['config'].foreach(function(row){
+			
+			var table = this.tables['config'], rows = this.rows['config'];
+
+			var checkvar = function(n){
+				var row = rows.find({'nm': n});
+				if (!L.isNull(row)){ return; }
+				
+				row = table.newRow();
+				row.update({'mnm':'sys','nm': n, 'ph': ''});
+				rows.add(row);
+			};
+			checkvar('admin_mail');
+
+			rows.foreach(function(row){
 				var di = row.cell;
 				if (di['nm'] == 'style'){
 					Brick.util.Form.setValue(TM.getEl('select.id'), di['ph']);

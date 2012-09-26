@@ -4,21 +4,21 @@
 [bkvar=result][/bkvar]
 
 [bkvar=ok]
-	Активация пользователя прошла успешно.<br />
-	Имя пользователя: {v#unm}
+	{#content.activate.1}<br />
+	{#content.activate.2}: {v#unm}
 [/bkvar]
 
 [bkvar=err]
-	Ошибка активации пользователя:<br />
+	{#content.activate.3}:<br />
 	{v#err}
 [/bkvar]
 
-[bkvar=err1]Пользователь не найден[/bkvar]
-[bkvar=err2]Пользователь уже активирован[/bkvar]
-[bkvar=err3]Неизвестная ошибка[/bkvar]
+[bkvar=err1]{#content.activate.4}[/bkvar]
+[bkvar=err2]{#content.activate.5}[/bkvar]
+[bkvar=err3]{#content.activate.6}[/bkvar]
 
 [*]-->
-<h3>Активация пользователя</h3>
+<h3>{#content.activate.7}</h3>
 <div class='bd'>
 	[bkvar]result[/bkvar]
 </div>

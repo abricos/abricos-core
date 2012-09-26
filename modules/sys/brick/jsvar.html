@@ -8,12 +8,23 @@
 [bkvar=ttname][/bkvar]
 [bkvar=jsyui][/bkvar]
 [bkvar=enmod][/bkvar]
+[bkvar=lang]en[/bkvar]
+
+[p=fullcssforie][/p]
+[bkvar=fullcssres][/bkvar]
+[bkvar=fullcsstpl]
+	<link rel="stylesheet" href="/gzip.php?type=fullcssforie&version={v#jsv}&lang={v#lang}&tt={v#ttname}&mime=css" type="text/css" />
+[/bkvar]
+
 [*]-->
 <script src="/gzip.php?base=/js/yui/[bkvar]jsyui[/bkvar]&file=/yuiloader/yuiloader-min.js,/event/event-min.js" type="text/javascript" language="JavaScript" charset="utf-8"></script>
-<script src="/gzip.php?type=sys&version=[bkvar]jsv[/bkvar]&tt=[bkvar]ttname[/bkvar]" type="text/javascript" language="JavaScript" charset="utf-8"></script>
+<script src="/gzip.php?type=sys&version=[bkvar]jsv[/bkvar]&lang=[bkvar]lang[/bkvar]&tt=[bkvar]ttname[/bkvar]" type="text/javascript" language="JavaScript" charset="utf-8"></script>
 <script language="JavaScript" type="text/javascript" charset="utf-8">
 	var u=Brick.env.user;u.id=[bkvar]uid[/bkvar];u.group=[bkvar]g[/bkvar];u.session='[bkvar]s[/bkvar]';u.name='[bkvar]unm[/bkvar]';
 	Brick.env.ttname='[bkvar]ttname[/bkvar]';
 	Brick.env.lib.yui='[bkvar]jsyui[/bkvar]';
 	Brick.env.enmod=[[bkvar]enmod[/bkvar]];
+	Brick.env.language='[bkvar]lang[/bkvar]';
 </script>
+
+[bkvar]fullcssres[/bkvar]

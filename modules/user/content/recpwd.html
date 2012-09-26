@@ -2,32 +2,21 @@
 [tt=main][/tt]
 [script]recpwd.php[/script]
 [bkvar=result][/bkvar]
-[ph=user:pwdres_changemail_subj]Ваш новый пароль для доступа на %1$s[/ph]
-[ph=user:pwdres_changemail]Дорогой(ая) %1$s,
-
-Как Вы и просили, ваш пароль был переустановлен. Новая информация о пароле следующая:
-
-Имя пользователя: %1$s
-Пароль пользователя: %2$s
-
-Изменить ваш пароль вы можете на личной странице.
-
-С наилучшими пожеланиями,
- Администрация %3$s[/ph]
+[ph=user:pwdres_changemail_subj]{#content.recpwd.1}[/ph]
+[ph=user:pwdres_changemail]{#content.recpwd.2}[/ph]
  
 [bkvar=ok]
 	<p>
-		Ваш пароль был переустановлен и выслан вам на email: {v#email}. <br />
-		Проверьте вашу почту.
+		{#content.recpwd.3}. <br />
+		{#content.recpwd.4}.
 	</p>
 [/bkvar]
 
 [bkvar=err]
 	<p>
-		Системе не удалось распознать идентификатор восстановления пароля.<br />
-		Возможно это связанно с истечением срока отведенного под изменение пароля.<br />
-		Если вы все еще хотите запросить инструкцию по восстановлению пароля, <br />
-		то воcпользуйтесь процедурой <a href="#" onclick="Brick.f('user', 'api', 'showPwdRestPanel'); return false;">восстановления пароля</a> 
+		{#content.recpwd.5}.<br />
+		{#content.recpwd.6}<br />
+		{#content.recpwd.7}
 	</p>
 [/bkvar]
  

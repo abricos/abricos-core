@@ -228,6 +228,44 @@ class UserQueryExt extends UserQuery {
 		
 		return 0;
 	}
+	
+	/**
+	 * Удалить учетки не прошедшии верификацию email спустя 7 дней
+	 * 
+	 * @param Ab_Database $db
+	 */
+	public static function RegistrationActivateClear(Ab_Database $db){
+		$d = TIMENOW-60*60*24*7;
+		$aw = array();
+		$sql = "
+			SELECT userid 
+			FROM ".$db->prefix."user
+			WHERE emailconfirm=0 AND joindate<".$d."
+			LIMIT 250
+		";
+		$rows = $db->query_read($sql);
+		while (($row = $db->fetch_array($rows))){
+			array_push($aw, "userid=".$row['userid']);
+		}
+		
+		if (count($aw) == 0){ return; }
+		$sql = "
+			DELETE FROM ".$db->prefix."user
+			WHERE emailconfirm=0 AND joindate<".$d."
+		";
+		$db->query_write($sql);
+		
+		$sql = "
+			DELETE FROM ".$db->prefix."usergroup
+			WHERE ".implode(" OR ", $aw)."
+		";
+		$db->query_write($sql);
+		$sql = "
+			DELETE FROM ".$db->prefix."useractivate
+			WHERE ".implode(" OR ", $aw)."
+		";
+		$db->query_write($sql);
+	}
 
 	public static function UserUpdate(Ab_Database $db, $userid, $data){
 		$arr = array();
@@ -293,12 +331,24 @@ class UserQueryExt extends UserQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function UserGroupList(Ab_Database $db, $page, $limit, $notbot = false){
-		$from = (($page-1)*$limit);
-		$where = "";
+	private static function BuildListWhere ($filter = '', $notbot = false){
+		$aw = array();
 		if ($notbot){
-			$where = "WHERE antibotdetect=0";
+			array_push($aw, "antibotdetect=0");
 		}
+		if (!empty($filter)){
+			array_push($aw, "(username LIKE '%".bkstr($filter)."%' OR email LIKE '%".bkstr($filter)."%')");
+		}
+		$where = "";
+		if (count($aw)>0){
+			$where = "WHERE ".implode(" AND ", $aw);
+		}
+		return $where;
+	}
+	
+	public static function UserGroupList(Ab_Database $db, $page, $limit, $filter = '', $notbot = false){
+		$from = (($page-1)*$limit);
+
 		$sql = "
 			SELECT
 				u.userid as uid, 
@@ -307,7 +357,7 @@ class UserQueryExt extends UserQuery {
 				SELECT 
 					userid
 				FROM ".$db->prefix."user
-				".$where."
+				".UserQueryExt::BuildListWhere($filter, $notbot)."
 				ORDER BY CASE WHEN lastvisit>joindate THEN lastvisit ELSE joindate END DESC
 				LIMIT ".$from.",".bkint($limit)."
 			) u
@@ -316,13 +366,9 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql);
 	}
 
-	public static function UserList(Ab_Database $db, $page, $limit, $notbot = false){
+	public static function UserList(Ab_Database $db, $page, $limit, $filter = '', $notbot = false){
 		$from = (($page-1)*$limit);
 		
-		$where = "";
-		if ($notbot){
-			$where = "WHERE antibotdetect=0";
-		}
 		$sql = "
 			SELECT 
 				userid as id, 
@@ -331,23 +377,18 @@ class UserQueryExt extends UserQuery {
 				joindate as dl,
 				lastvisit as vst
 			FROM ".$db->prefix."user
-			".$where."
+			".UserQueryExt::BuildListWhere($filter, $notbot)."
 			ORDER BY CASE WHEN lastvisit>joindate THEN lastvisit ELSE joindate END DESC
 			LIMIT ".$from.",".bkint($limit)."
 		";
 		return $db->query_read($sql);
 	}
 	
-	public static function UserCount(Ab_Database $db, $notbot = false){
-		$where = "";
-		if ($notbot){
-			$where = "WHERE antibotdetect=0";
-		}
-	
+	public static function UserCount(Ab_Database $db, $filter = '', $notbot = false){
 		$sql = "
 			SELECT COUNT(userid) as cnt
 			FROM ".$db->prefix."user
-			".$where."
+			".UserQueryExt::BuildListWhere($filter, $notbot)."
 			LIMIT 1
 		";
 		return $db->query_read($sql);

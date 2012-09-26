@@ -1,23 +1,22 @@
-<!--{panel}-->
-<div class="field linespace-1">
-	<h3>Общие настройки</h3>
+<!--{panel}--><div class="field linespace-1">
+	<h3>{#mod.sys.cp_config.panel.1}</h3>
 	<p>
-		<label id="{i#site_name}-lbl">Название сайта:</label><br />
+		<label id="{i#site_name}-lbl">{#mod.sys.cp_config.panel.2}:</label><br />
 		<input type="text" id="{i#site_name}" value="" style="width: 400px" />
 	</p>
 	<p>
-		<label id="{i#admin_mail}-lbl">E-mail администратора:</label><br />
+		<label id="{i#admin_mail}-lbl">{#mod.sys.cp_config.panel.3}:</label><br />
 		<input type="text" id="{i#admin_mail}" value="" style="width: 400px" />
 	</p>
 	<p>
-		<label id="{i#site_title}-lbl">Краткое описание сайта:</label><br />
+		<label id="{i#site_title}-lbl">{#mod.sys.cp_config.panel.4}:</label><br />
 		<textarea id="{i#site_title}" style="width: 500px; height: 30px"></textarea>
 	</p>
-	<h3>Стиль сайта</h3>
+	<h3>{#mod.sys.cp_config.panel.5}</h3>
 	<p id="{i#styles}">
-		<select><option>Загружаю стили...</option></select>
+		<select><option>{#mod.sys.cp_config.panel.6}</option></select>
 	</p>
-	<h3>Мета теги по умолчанию</h3>
+	<h3>{#mod.sys.cp_config.panel.7}</h3>
 	<p>
 		<label id="{i#meta_title}-lbl">Title:</label><br />
 		<textarea id="{i#meta_title}" style="width: 500px; height: 30px"></textarea>
@@ -32,11 +31,7 @@
 	</p>
 </div>
 <div class="buttons-top right">
-	<input id='{i#bsave}' type="button" value="Сохранить" />
+	<input id='{i#bsave}' type="button" value="{#mod.sys.cp_config.panel.8}" />
 </div>
-
-<!--{select}-->
-<select id="{i#id}">{v#list}</select>
-
-<!--{option}-->
-<option value="{v#id}">{v#tl}</option>
+<!--{select}--><select id="{i#id}">{v#list}</select>
+<!--{option}--><option value="{v#id}">{v#tl}</option>

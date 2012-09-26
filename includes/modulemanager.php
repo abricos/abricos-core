@@ -22,6 +22,12 @@
 abstract class Ab_Module {
 	
 	/**
+	 * Ошибка модуля. Если true, модуль не инициализируется в ядре
+	 * @var boolean
+	 */
+	public $error = false;
+	
+	/**
 	 * Политика безопасности модуля
 	 * 
 	 * @var Ab_UserPermission
@@ -468,7 +474,6 @@ class Ab_CoreModuleManager {
 		if (empty($module)){ return; }
 
 		$module->registry = $this->registry;
-		$this->table[$modName] = &$module;
 		
 		if (!$this->LoadLanguage($module, LNG)){ // загрузка фраз языка
 			if (LNG != 'ru'){ // загрузка не удалась, попытка загрузить русский язык по умолчанию
@@ -489,7 +494,15 @@ class Ab_CoreModuleManager {
 		$serverVersion = $info['version'];
 		$newVersion = $module->version;
 		
-		if ($serverVersion == $newVersion){ return; }
+		require_once 'updatemanager.php';
+		$cmp = Ab_UpdateManager::CompareVersion($serverVersion, $newVersion);
+
+		
+		if ($cmp == -1){ return; } // downgrade модуля запрещен
+		
+		$this->table[$modName] = &$module;
+		
+		if ($cmp == 0){ return; }
 		
 		Ab_UpdateManager::$current = new Ab_UpdateManager($module, $info);
 		

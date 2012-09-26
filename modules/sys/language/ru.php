@@ -1,20 +1,12 @@
 <?php
-/**
- * Языковые фразы
- * 
- * @version $Id$
- * @package Abricos
- * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
- * @ignore
- */
-
 return array(
-	'title'=>'Новости',
-	'notpub'=>'Не опубликован',
-	'source'=>'Источник'
-);
+	'content' => array(
+		'404' => array(
+			"1" => "Страница не найдена (404-я ошибка)",
+			"2" => "К сожалению, такой страницы не существует. Вероятно, она была удалена автором с сервера, либо её здесь никогда не было.",
+			"3" => "Перейти на <a href=\"/\">главную страницу</a>"
+		)
 
+	)
+);
 ?>

@@ -68,7 +68,8 @@ Component.entryPoint = function(NS){
 		var config = {
 			tm: TM, DATA: DATA, rowlimit: 10,
 			tables: { 'list': 'userlist', 'count': 'usercount' },
-			paginators: ['users.pagtop', 'users.pagbot']
+			paginators: ['users.pagtop', 'users.pagbot'],
+			filter: {'filter': ''}
 		};
 		UsersWidget.superclass.constructor.call(this, el, config);    
 	};
@@ -87,6 +88,13 @@ Component.entryPoint = function(NS){
     			'notuprofile': upfl ? '' : 'notuprofile',
     			'notantibot': antibot ? '' : 'notantibot'
     		});
+    	},
+    	
+    	onLoad: function(){
+    		var __self = this;
+			E.on(this._TM.getEl('users.id'), 'keypress', function(e){
+				if (__self.onKeyPress(E.getTarget(e), e)){ E.stopEvent(e); }
+			});
     	},
     	
     	refresh: function(){
@@ -132,27 +140,53 @@ Component.entryPoint = function(NS){
     		var TM = this._TM;
     		TM.getEl("users.table").innerHTML = TM.replace('utable', {'rows': lst});
     	}, 
-    	onClick: function(el){
-    		var TM = this._TM;
-    		if (el.id == TM.getElId("users.refresh")){
-    			this.refresh();
-    			return true;
-    		}else if (el.id == TM.getElId("users.badd")){
-    			this.showUserEditor(); 
-    			return true;
+		onKeyPress: function(el, e){
+    		var TM = this._TM, TId = this._TId, tp = TId['users'];
+    		
+    		if (el.id == this._TId['users']['filter']){
+    			if (e.keyCode != 13){ return false; }
+    			this.setCustomFilter(); 
+    			return true;	
     		}
-			var prefix = el.id.replace(/([0-9]+$)/, '');
-			var numid = el.id.replace(prefix, "");
+    		return false;
+		},
+    	
+    	onClick: function(el){
+    		var TM = this._TM, TId = this._TId, tp = TId['users'];
+    		
+    		switch(el.id){
+    		case tp['refresh']: this.refresh(); return true;
+    		case tp['badd']: this.showUserEditor(); return true;
+    		case tp['bstopspam']: this.showStopSpam(); return true;
+    		case tp['bfilter']: this.setCustomFilter(); return true;
+    		case tp['bfilterclear']: this.clearCustomFilter(); return true;
+			}
+    		
+			var prefix = el.id.replace(/([0-9]+$)/, ''), 
+				numid = el.id.replace(prefix, ""),
+				tp = TId['urow'];
 
 			switch(prefix){
-			case (this._TId['urow']['edit']+'-'):
-				this.showUserEditor(numid);
-				return true;
-			case (this._TId['urow']['antibot']+'-'):
-				this.showAntibot(numid);
-				return true;
+			case (tp['edit']+'-'): this.showUserEditor(numid); return true;
+			case (tp['antibot']+'-'): this.showAntibot(numid); return true;
 			}
 			return false;
+    	},
+    	clearCustomFilter: function(){
+    		this._TM.getEl('users.filter').value = '';
+    		this.setCustomFilter();
+    	},
+    	setCustomFilter: function(){
+    		this.setFilter({
+    			'filter': this._TM.getEl('users.filter').value
+    		});
+    		this.refresh();
+    	},
+    	showStopSpam: function(){
+    		var __self = this;
+    		new Brick.mod.antibot.StopSpamPanel(function(){
+    			__self.refresh();
+    		});
     	},
     	showUserEditor: function(userid){
     		var __self = this;

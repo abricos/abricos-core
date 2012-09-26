@@ -60,7 +60,7 @@ class Ab_CoreJSCFile {
 			}
 		}
 		
-		$this->fileLANG = $modPath."/langs/".$component."_ru.js";
+		$this->fileLANG = $modPath."/langs/".$component."_".$lang.".js";
 	}
 	
 	public function error(){
@@ -145,8 +145,8 @@ class Ab_CoreJSCFile {
 		$key += $this->buildKeyByFile($this->fileCSS);
 		$key += $this->buildKeyByFile($this->fileHTML);
 		$key += $this->buildKeyByFile($this->fileLANG);
-		$key += 3;
-		return md5($this->module.$this->component.$key);
+		$key += 5;
+		return md5($this->module.$this->component.$this->language.$key);
 	}
 	
 	public function buildKeyByFile($file){
