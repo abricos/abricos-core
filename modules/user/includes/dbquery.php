@@ -2,10 +2,9 @@
 /**
  * @version $Id$
  * @package Abricos
- * @subpackage 
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
+ * @subpackage User 
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
+ * @author Alexander Kuzmin <roosit@abricos.org>
  */
 
 /**
@@ -153,7 +152,8 @@ class UserQueryExt extends UserQuery {
 		
 		$db->query_write("
 			INSERT INTO `".$db->prefix."user` 
-				(username, password, email, emailconfirm, joindate, salt, ipadress) VALUES (
+				(language, username, password, email, emailconfirm, joindate, salt, ipadress) VALUES (
+				'".Abricos::$LNG."',
 				'".bkstr($user['username'])."', 
 				'".bkstr($user['password'])."', 
 				'".bkstr($user['email'])."', 

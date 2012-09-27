@@ -5,9 +5,8 @@
  * @version $Id$
  * @package Abricos
  * @subpackage Sys
- * @copyright Copyright (C) 2008 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
+ * @author Alexander Kuzmin <roosit@abricos.org>
  * @ignore
  */
 
@@ -35,6 +34,7 @@ if ($updateManager->isInstall()){
 	$db->query_write("
 		CREATE TABLE IF NOT EXISTS `".$pfx."user` (
 		  `userid` int(10) unsigned NOT NULL auto_increment,
+		  `language` CHAR(2) NOT NULL DEFAULT 'en', 
 		  `usergroupid` int(4) unsigned NOT NULL default '0',
 		  `username` varchar(150) NOT NULL default '',
 		  `password` varchar(32) NOT NULL default '',
@@ -71,8 +71,8 @@ if ($updateManager->isInstall()){
 	
 	// добавление в таблицу администратора
 	$db->query_write("
-		INSERT INTO `".$pfx."user` (`usergroupid`, `username`, `password`, `email`, `joindate`, `salt`) VALUES
-		(6, 'admin', '3f5726cdbe88eac915ffb9e981b72682', '', ".TIMENOW.", '( R');
+		INSERT INTO `".$pfx."user` (`language`, `usergroupid`, `username`, `password`, `email`, `joindate`, `salt`) VALUES
+		('".Abricos::$LNG."', 6, 'admin', '3f5726cdbe88eac915ffb9e981b72682', '', ".TIMENOW.", '( R');
 	");
 	
 }
@@ -203,6 +203,12 @@ if ($updateManager->isUpdate('0.2.3') && !$updateManager->isInstall()){
 	$db->query_write("UPDATE `".$pfx."group` SET groupkey='register' WHERE groupid=2");
 	$db->query_write("UPDATE `".$pfx."group` SET groupkey='admin' WHERE groupid=3");
 	
+}
+
+if ($updateManager->isUpdate('0.2.5') && !$updateManager->isInstall()){
+	$db->query_write("
+		ALTER TABLE `".$pfx."user` ADD `language` CHAR(2) NOT NULL DEFAULT 'ru' AFTER `userid`
+	");
 }
 
 ?>
