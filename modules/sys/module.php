@@ -130,6 +130,36 @@ class Ab_CoreSystemModule extends Ab_Module {
 		Brick::$session = $this->registry->user; 
 		Brick::$style = Brick::$builder->phrase->Get('sys', 'style', 'default');
 		
+		// возможно стиль предопределен в конфике для этого урла
+		
+		if (!empty($this->registry->config["Template"])){
+			$uri = $this->registry->adress->requestURI;
+			$cfg = &$this->registry->config["Template"];
+			$find = false;
+		
+			if (!empty($cfg["ignore"])){
+				foreach($cfg["ignore"] as &$exp){
+					$find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
+					if ($find){
+						break;
+					}
+				}
+			}
+			if (!$find && !empty($cfg["exp"])){
+				foreach($cfg["exp"] as &$exp){
+					$find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
+					if ($find){
+						Brick::$style = $exp["owner"];
+						break;
+					}
+				}
+			}
+			if (!$find && !empty($cfg["default"])){
+				Brick::$style = $cfg["default"]['owner'];
+			}
+		}
+		
+		
 		if (is_array($contentName)){
 			// поиск для перегруженных кирпичей
 			$find = false;

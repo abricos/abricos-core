@@ -747,6 +747,7 @@ class Ab_CoreBrickManager {
 					$p->template = $cfg["default"];
 				}
 			}
+				
 			// шаблон определенный администратором
 			$mod = $this->registry->modules->GetModule($owner);
 			$ttpl = $mod->GetTemplate();
