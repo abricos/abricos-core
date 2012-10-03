@@ -79,6 +79,14 @@ class Ab_CoreSystemModule extends Ab_Module {
 				}
 				break;
 			}
+
+			// сначало проверить в настройках
+			if (is_null($modman)){
+				$superModule = Abricos::$config['Takelink']['__super']['module'];
+				if (!empty($superModule)){
+					$modman = $modules->RegisterByName($superModule);
+				}
+			}					
 			if (is_null($modman)){
 				foreach ($modules->modulesInfo as $key => $info){
 					if ($info['takelink'] == '__super'){
