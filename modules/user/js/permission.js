@@ -22,13 +22,15 @@ Component.entryPoint = function(){
 	}
 	var DATA = NS.data;
 	
+	Brick.Permission = Brick.Permission || {};
 (function(){
 	
 	var permData = null;
 	
-	var P = {};
+	var P = Brick.Permission;
 	
 	P.load = function(callback){
+		var fd = P.FD;
 		
 		if (!L.isNull(permData)){
 			if (L.isFunction(callback)){
@@ -37,26 +39,40 @@ Component.entryPoint = function(){
 			}
 		};
 		
-		var permTable = DATA.get('permission', true);
-		var dsComplete = function(type, args){
-			if (!args[0].check(['permission'])){
-				return;
-			}
-			DATA.onComplete.unsubscribe(dsComplete);
-
+		if (fd){
+			
 			permData = {};
-			permTable.getRows().foreach(function(row){
-				var di = row.cell;
+			
+			for (var i=0;i<fd.length;i++){
+				var di = fd[i];
 				permData[di['nm']] = di['roles'];
-			});
+			}
 			
 			if (L.isFunction(callback)){
 				callback();
 			}
-		};
-		
-		DATA.onComplete.subscribe(dsComplete);
-		DATA.request(true);
+		}else{
+			var permTable = DATA.get('permission', true);
+			var dsComplete = function(type, args){
+				if (!args[0].check(['permission'])){
+					return;
+				}
+				DATA.onComplete.unsubscribe(dsComplete);
+
+				permData = {};
+				permTable.getRows().foreach(function(row){
+					var di = row.cell;
+					permData[di['nm']] = di['roles'];
+				});
+				
+				if (L.isFunction(callback)){
+					callback();
+				}
+			};
+			
+			DATA.onComplete.subscribe(dsComplete);
+			DATA.request(true);
+		}
 	};
 	
 	P.check = function(module, action){
@@ -75,8 +91,7 @@ Component.entryPoint = function(){
 		
 		return roles[action] * 1;
 	};
-	
-	Brick.Permission = P;
+
 })();	
 
 };
