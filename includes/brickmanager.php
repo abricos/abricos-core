@@ -277,16 +277,23 @@ class Ab_CoreBrickBuilder {
 		$this->phrase->Preload($this->_phrase);
 		
 		$this->ExecuteBrick($brick);
+		$pbprm = &$brick->parent->param->param;
 		
 		// Установка метатегов страницы по умолчанию, если они не установлены в процессе компиляции кирпичей
 		if (isset($this->_phrase['sys:meta_title'])){
-			if (isset($this->_globalVar['meta_title']) && empty($this->_globalVar['meta_title'])){
+			if (isset($pbprm['meta_title']) && !empty($pbprm['meta_title'])){
+				$this->_globalVar['meta_title'] = $pbprm['meta_title'];
+			}else if (isset($this->_globalVar['meta_title']) && empty($this->_globalVar['meta_title'])){
 				$this->_globalVar['meta_title'] = $this->phrase->Get('sys', 'meta_title');
 			}
-			if (isset($this->_globalVar['meta_keys']) && empty($this->_globalVar['meta_keys'])){
+			if (isset($pbprm['meta_keys']) && !empty($pbprm['meta_keys'])){
+				$this->_globalVar['meta_keys'] = $pbprm['meta_keys'];
+			}else if (isset($this->_globalVar['meta_keys']) && empty($this->_globalVar['meta_keys'])){
 				$this->_globalVar['meta_keys'] = $this->phrase->Get('sys', 'meta_keys');
 			}
-			if (isset($this->_globalVar['meta_desc']) && empty($this->_globalVar['meta_desc'])){
+			if (isset($pbprm['meta_desc']) && !empty($pbprm['meta_desc'])){
+				$this->_globalVar['meta_desc'] = $pbprm['meta_desc'];
+			}else if (isset($this->_globalVar['meta_desc']) && empty($this->_globalVar['meta_desc'])){
 				$this->_globalVar['meta_desc'] = $this->phrase->Get('sys', 'meta_desc');
 			}
 		}
