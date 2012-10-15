@@ -89,6 +89,7 @@ if ($updateManager->isInstall() || $updateManager->serverVersion === '1.0.1'){
 		  `optname` varchar(25) NOT NULL DEFAULT '' COMMENT 'Имя параметра',
 		  `optvalue` TEXT NOT NULL COMMENT 'Значение параметра',
 		  PRIMARY KEY  (`userconfigid`),
+		  UNIQUE KEY `configvar` (`userid`,`module`,`optname`),
 		  KEY `module` (`module`),
 		  KEY `userid` (`userid`)
 	  )".$charset
@@ -202,12 +203,17 @@ if ($updateManager->isUpdate('0.2.3') && !$updateManager->isInstall()){
 	$db->query_write("UPDATE `".$pfx."group` SET groupkey='guest' WHERE groupid=1");
 	$db->query_write("UPDATE `".$pfx."group` SET groupkey='register' WHERE groupid=2");
 	$db->query_write("UPDATE `".$pfx."group` SET groupkey='admin' WHERE groupid=3");
-	
 }
 
 if ($updateManager->isUpdate('0.2.5') && !$updateManager->isInstall()){
 	$db->query_write("
 		ALTER TABLE `".$pfx."user` ADD `language` CHAR(2) NOT NULL DEFAULT 'ru' AFTER `userid`
+	");
+}
+
+if ($updateManager->isUpdate('0.2.5.1') && !$updateManager->isInstall()){
+	$db->query_write("
+		ALTER TABLE `".$pfx."userconfig` ADD UNIQUE `configvar` (`userid`, `module`, `optname`)
 	");
 }
 

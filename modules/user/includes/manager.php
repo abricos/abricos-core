@@ -617,12 +617,23 @@ class UserManager extends Ab_ModuleManager {
 		return UserQueryExt::UserConfigList($this->db, $userid, $modname);
 	}
 	
+	public function UserConfigValueSave($userid, $modname, $varname, $value){
+		if (!$this->IsChangeUserRole($userid)){ return null; }
+		UserQueryExt::UserConfigSave($this->db, $userid, $modname, $varname, $value);
+	}
+
+	/**
+	 * @deprecated
+	 */
 	public function UserConfigAppend($userid, $modname, $cfgname, $cfgval){
 		if (!$this->IsChangeUserRole($userid)){ return null; }
 		
 		UserQueryExt::UserConfigAppend($this->db, $userid, $modname, $cfgname, $cfgval);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function UserConfigUpdate($userid, $cfgid, $cfgval){
 		if (!$this->IsChangeUserRole($userid)){ return null; }
 		

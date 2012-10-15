@@ -79,7 +79,7 @@ class User extends Ab_Module {
 	public $sessionHash = '';
 
 	public function __construct(){
-		$this->version = "0.2.5";
+		$this->version = "0.2.5.1";
 		$this->name = "user";
 		$this->takelink = "user"; 
 		$this->permission = new UserPermission($this);

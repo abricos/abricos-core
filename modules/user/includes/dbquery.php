@@ -28,6 +28,19 @@ class UserQueryExt extends UserQuery {
 		return $db->query_read($sql);
 	}
 	
+	public static function UserConfigSave(Ab_Database $db, $userid, $module, $name, $value){
+		$sql = "
+			INSERT INTO ".$db->prefix."userconfig (module, userid, optname, optvalue) VALUES (
+				'".bkstr($module)."',
+				".bkint($userid).",
+				'".bkstr($name)."',
+				'".bkstr($value)."'
+			) 
+			ON DUPLICATE KEY UPDATE optvalue='".bkstr($value)."'
+		";
+		$db->query_write($sql);
+	}
+	
 	public static function UserConfigInfo(Ab_Database $db, $id){
 		$sql = "
 			SELECT
