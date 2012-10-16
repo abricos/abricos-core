@@ -128,9 +128,6 @@ class UserManager extends Ab_ModuleManager {
 			
 			case 'permission':
 				return $this->Permission();
-			
-			case 'modactionlist':
-				return UserQueryExt::ModuleActionList($this->db);
 		}
 		
 		// Запросы уровня администратора
@@ -151,7 +148,8 @@ class UserManager extends Ab_ModuleManager {
 				/////// Роли //////
 				case 'rolelist':
 					return UserQueryExt::RoleList($db, $p->groupid); 
-					
+				case 'modactionlist':
+					return UserQueryExt::ModuleActionList($this->db);
 			}
 		}
 		

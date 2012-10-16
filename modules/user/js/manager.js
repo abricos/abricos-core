@@ -630,13 +630,13 @@ Component.entryPoint = function(NS){
 		
 		
 		render: function(){
-			
 			var modules = {};
 			DATA.get('modactionlist').getRows().foreach(function(row){modules[row.cell['md']]=true;});
 
 			var lst = "", TM = this._TM;
 			
 			for (var nn in modules){
+				if (!Brick.componentExists(nn, 'cp')){ continue; }
 				lst += TM.replace('rlrow', {
 	    			'nm': LNG.getc('mod.'+nn+'.title') || nn,
 	    			'lst': this.buildModRoles(nn)
@@ -645,7 +645,6 @@ Component.entryPoint = function(NS){
     		TM.getEl("roles.table").innerHTML = TM.replace('rltable', {'rows': lst});
     		
 			this.setRolesValue();
-
 		},
 		
 		setRolesValue: function(){
