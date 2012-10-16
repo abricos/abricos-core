@@ -660,7 +660,9 @@ Component.entryPoint = function(NS){
 					role = role.cell;
 				}
 				var el = Dom.get(TId['rlaction']['id']+'-'+di['id']);
-				el.checked = role['st']*1 > 0;
+				if (!L.isNull(el)){
+					el.checked = role['st']*1 > 0;
+				}
 			});
 		},
 		
