@@ -70,6 +70,21 @@ Component.entryPoint = function(NS){
 							});
 						}else{
 							Brick.Page.reload();
+							/*
+							var u = Brick.env.user;
+							if (u.id>0 && u.agr==1){
+								Brick.ff('user', 'guest', function(){
+									Brick.console('asdf');
+									new NS.TermsOfUsePanel(function(st){
+										if (st=='ok'){
+											Brick.Page.reload();
+										}else{
+											NS.API.userLogout();
+										}
+									});
+								});
+							}
+							/**/
 						}
 					});
 				});

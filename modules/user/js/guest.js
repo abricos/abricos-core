@@ -358,11 +358,9 @@ Component.entryPoint = function(){
 	});
 	NS.PwdRestSendEmailPanel = PwdRestSendEmailPanel;
 	
-	var TermsOfUsePanel = function(){
-		TermsOfUsePanel.superclass.constructor.call(this, {
-			width: '640px',
-			height: '480px'
-		});
+	var TermsOfUsePanel = function(callback){
+		this.callback = callback;
+		TermsOfUsePanel.superclass.constructor.call(this, {});
 	};
 	YAHOO.extend(TermsOfUsePanel, Brick.widget.Dialog, {
 		initTemplate: function(){
@@ -371,14 +369,30 @@ Component.entryPoint = function(){
 		onLoad: function(el){
 			var TM = this._TM; 
 			Brick.ajax('user', {
-				'data': {
-					'do': 'termsofuse'
-				},
+				'data': {'do':'termsofuse'},
 				'event': function(r){
 					var text = L.isNull(r) ? "" : r.data.text;
 					TM.getEl('termsofuse.text').innerHTML = text;
 				}
 			});
+			var u = Brick.env.user;
+			if (u.id > 0 && u.agr == 0){
+				Dom.setStyle(TM.getEl('termsofuse.btns'), 'display', '');
+			}
+		},
+		onClick: function(el){
+			var tp = this._TId['termsofuse'];
+			switch(el.id){
+			case tp['bok']: this._callback('ok'); return true;
+			case tp['bcancel']: this._callback('cancel'); return true;
+			}
+			return false;
+		},
+		_callback: function(st){
+			if (L.isFunction(this.callback)){
+				this.callback(st);
+			}
+			this.close();
 		}
 	});
 	NS.TermsOfUsePanel = TermsOfUsePanel;
