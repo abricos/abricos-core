@@ -94,7 +94,7 @@
 			<div class="agreement">
 				<input id="{i#agreement}" type="checkbox" />
 				<label for="{i#agreement}">
-					Я согласен с <a href="/user/termsofuse/">пользовательским соглашением</a>
+					Я согласен с <a id="{i#termsofuse}" href="/user/termsofuse/">пользовательским соглашением</a>
 				</label>
 			</div>
 			
@@ -144,4 +144,15 @@
 <div class='hd'>{#mod.user.guest.register.1}</div>
 <div class='bd'>
 	<div id="{i#widget}"></div>
+</div>
+
+
+<!--{termsofuse}-->
+<div class='hd'>Пользовательское соглашение</div>
+<div class='bd aw-user'>
+	<div id="{i#text}" class="termsofuse">
+		<div class="loadingform">
+			<img src="/images/loading_line.gif" />
+		</div>	
+	</div>
 </div>

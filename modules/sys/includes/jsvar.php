@@ -20,6 +20,9 @@ $param->var['lang'] = Abricos::$LNG;
 $param->var['g'] = json_encode(Abricos::$user->info['group']);
 $param->var['uid'] = intval(Abricos::$user->id);
 $param->var['unm'] = Abricos::$user->login;
+if (Abricos::$user->id > 0){
+	$param->var['agr'] = intval(Abricos::$user->info['agreement']);
+}
 $param->var['s'] = Abricos::$user->session->key;
 
 $template = Brick::$builder->phrase->Get('sys', 'style', 'default');

@@ -1,4 +1,4 @@
-/* * * * * Регистрация */
+/* * * * * Регистрация * * * * * */
 .aw-user .uregform {
 	min-width: 600px;
 }
@@ -38,4 +38,23 @@
 .aw-user .uregform .uregerr {
 	color: red;
 	margin-right: 10px;
+}
+
+/* * * * * * TermsOfUse * * * * * */
+.aw-user .termsofuse {
+	overflow-y: auto;
+}
+.aw-user .termsofuse .loadingform {
+	padding: 200px 0;
+	text-align: center;
+}
+.aw-user .termsofuse h3 {
+    font-size: 1.7em;
+}
+.aw-user .termsofuse  p {
+    font-size: 1.1em;
+    line-height: 1.7em;
+    margin-top: 0.5em;
+    padding-bottom: 0.5em;
+    text-align: justify;
 }

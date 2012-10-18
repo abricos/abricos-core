@@ -126,10 +126,14 @@ Component.entryPoint = function(){
 			this.clearError();
 			var TId = this._TId, tp = TId['regwidget'];
 			switch(el.id){
-			case (tp['breg']): this.register(); return true;
-			case (tp['bact']): this.activate(); return true;
+			case tp['breg']: this.register(); return true;
+			case tp['bact']: this.activate(); return true;
+			case tp['termsofuse']: this.showTermsOfUsePanel(); return true;
 			}
 			return false;
+		},
+		showTermsOfUsePanel: function(){
+			new NS.TermsOfUsePanel();
 		},
 		clearError: function(){
 			Dom.setStyle(this._TM.getEl('regwidget.error'), 'display', 'none');
@@ -353,5 +357,30 @@ Component.entryPoint = function(){
 		}
 	});
 	NS.PwdRestSendEmailPanel = PwdRestSendEmailPanel;
+	
+	var TermsOfUsePanel = function(){
+		TermsOfUsePanel.superclass.constructor.call(this, {
+			width: '640px',
+			height: '480px'
+		});
+	};
+	YAHOO.extend(TermsOfUsePanel, Brick.widget.Dialog, {
+		initTemplate: function(){
+			return buildTemplate(this, 'termsofuse').replace('termsofuse'); 
+		},
+		onLoad: function(el){
+			var TM = this._TM; 
+			Brick.ajax('user', {
+				'data': {
+					'do': 'termsofuse'
+				},
+				'event': function(r){
+					var text = L.isNull(r) ? "" : r.data.text;
+					TM.getEl('termsofuse.text').innerHTML = text;
+				}
+			});
+		}
+	});
+	NS.TermsOfUsePanel = TermsOfUsePanel;
 	
 };

@@ -41,6 +41,7 @@ if ($updateManager->isInstall()){
 		  `email` varchar(100) NOT NULL default '',
 		  `joindate` int(10) unsigned NOT NULL default '0',
 		  `lastvisit` int(10) unsigned NOT NULL default '0',
+		  `agreement` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
 		  `ipadress` varchar(15) NOT NULL default '',
 		  `salt` char(3) NOT NULL default '',
 		  `deldate` int(10) NOT NULL default '0',
@@ -216,5 +217,12 @@ if ($updateManager->isUpdate('0.2.5.1') && !$updateManager->isInstall()){
 		ALTER TABLE `".$pfx."userconfig` ADD UNIQUE `configvar` (`userid`, `module`, `optname`)
 	");
 }
+
+if ($updateManager->isUpdate('0.2.5.2') && !$updateManager->isInstall()){
+	$db->query_write("
+		ALTER TABLE `".$pfx."user` ADD `agreement` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0
+	");
+}
+
 
 ?>

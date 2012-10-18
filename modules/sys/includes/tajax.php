@@ -15,6 +15,8 @@ $adress = Abricos::$adress;
 $p_module = $adress->dir[1];
 $mod = Abricos::GetModule($p_module);
 $sdata = Abricos::CleanGPC('p', 'data', TYPE_STR);
+
+$brick = Brick::$builder->brick;
 if (empty($sdata)){
 	$data = new stdClass(); 
 }else{
@@ -27,5 +29,5 @@ if (empty($mod)){
 }else{
 	$result->data = $mod->GetManager()->AJAX($data);
 }
-Brick::$builder->brick->content = json_encode($result);
+$brick->content = json_encode($result);
 ?>

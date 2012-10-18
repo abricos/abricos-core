@@ -67,6 +67,7 @@ class User extends Ab_Module {
 	public $info = array(
 		"userid"	=> 0,
 		"group"		=> array(1),
+		"agreement"	=> 1,
 		"username"	=> "Guest"
 	);
 	private $userinfo = null;
@@ -79,7 +80,7 @@ class User extends Ab_Module {
 	public $sessionHash = '';
 
 	public function __construct(){
-		$this->version = "0.2.5.1";
+		$this->version = "0.2.5.2";
 		$this->name = "user";
 		$this->takelink = "user"; 
 		$this->permission = new UserPermission($this);

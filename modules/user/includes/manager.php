@@ -66,6 +66,8 @@ class UserManager extends Ab_ModuleManager {
 		switch($d->do){
 			case "login":
 				return $this->Login($d->username, $d->password, $d->autologin);
+			case "termsofuse": 
+				return $this->TermsOfUse();
 			case "register":
 				return $this->Register($d->username, $d->password, $d->email, true);
 			case "user":
@@ -459,7 +461,7 @@ class UserManager extends Ab_ModuleManager {
 		if ($this->IsAdminRole()){
 			UserQueryExt::UserAppend($this->db, $user, User::UG_REGISTERED);
 		}else{
-			$userid = UserQueryExt::UserAppend($this->db, $user, User::UG_GUEST, $_SERVER['REMOTE_ADDR']);
+			$userid = UserQueryExt::UserAppend($this->db, $user, User::UG_GUEST, $_SERVER['REMOTE_ADDR'], true);
 			Abricos::$user->AntibotUserDataUpdate($userid);
 		}
 		
@@ -586,6 +588,14 @@ class UserManager extends Ab_ModuleManager {
 		$this->core->GetNotification()->SendMail($email, $subject, $body);
 		
 		return 0;
+	}
+	
+	public function TermsOfUse(){
+		$brick = Brick::$builder->LoadBrickS('user', 'termsofuse', null, null);
+		
+	 	$ret = new stdClass();
+	 	$ret->text = $brick->content;
+		return $ret;
 	}
 	
 	public function PasswordRequestCheck($hash){
