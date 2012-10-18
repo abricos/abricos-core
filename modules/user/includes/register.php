@@ -10,7 +10,7 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  * @ignore
  */
-
+/*
 $brick = Brick::$builder->brick;
 $userManager = Brick::$user->GetManager(); 
 
@@ -47,5 +47,7 @@ $form = Brick::ReplaceVarByData($form, array(
 $brick->content = Brick::ReplaceVarByData($brick->content, array(
 	"result" => $form
 ));
+
+/**/
 
 ?>

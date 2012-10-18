@@ -206,6 +206,16 @@ class UserQueryExt extends UserQuery {
 		return $db->query_first($sql);
 	}
 	
+	public static function RegistrationActivateInfoByCode(Ab_Database $db, $code){
+		$sql = "
+			SELECT *
+			FROM ".$db->prefix."useractivate
+			WHERE activateid=".bkint($code)."
+			LIMIT 1
+		";
+		return $db->query_first($sql);
+	}
+	
 	/**
 	 * Активация пользователя
 	 *

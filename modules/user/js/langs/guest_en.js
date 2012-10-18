@@ -1,21 +1,16 @@
 Brick.util.Language.add('en',{'mod': {'{C#MODNAME}':{
 	'register': {
 		'error': {
-			'client': {
-				'username': 'Username',
-				'pass': 'Password',
-				'passc': 'Confirm Password',
-				'email': 'Email Address',
-				'emailc': 'Confirm Email Address',
-				'emailconf': 'Emails does not match',
-				'passconf': 'Passwords does not match'
-			},
-			'srv': {
-				'1': 'This user name is already registered',
-				'2': 'User with this email is already registered',
-				'3': 'The error in the user name',
-				'4': 'Error in Email'
-			}
+			'username': 'Username',
+			'empty': 'Не заполнены обязательные поля',
+			'passlen': 'Пароль должен быть больше 3-х символов',
+			'passconf': 'Passwords does not match',
+			'agreement': 'Для регистрации необходимо согласиться с пользовательским соглашением',
+			's1': 'This user name is already registered',
+			's2': 'User with this email is already registered',
+			's3': 'The error in the user name',
+			's4': 'Error in Email',
+			's100': 'Ошибка на стороне сервера'
 		}
 	},
 	'password': {
@@ -68,11 +63,9 @@ Brick.util.Language.add('en',{'mod': {'{C#MODNAME}':{
 			'13': 'Cancel'
 		},
 		'regokpanel': {
-			'1': 'Registration',
-			'2': 'An application for registration is successfully accepted.',
-			'3': 'In your email \"<span id=\"{i#email}\"></span>\" sent the confirmation letter of registration.',
-			'4': 'Check your mail.',
-			'5': 'Close'
+			'2': 'Поздравляем! Заявка на регистрацию принята успешно.',
+			'3': 'На ваш почтовый ящик <span id=\"{i#actemail}\"></span> выслано письмо с кодом активации.',
+			'4': 'Для завершения регистрации впишите (скопируйте) код активации и нажмите кнопку Активировать'
 		}
 	}
 }}});

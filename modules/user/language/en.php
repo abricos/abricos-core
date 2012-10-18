@@ -3,18 +3,19 @@ return array(
 	'brick' => array(
 		'templates' => array(
 			"1" => "Register - Activate your account",
-			"2" => "Dear {v#username},
+			"2" => "Уважаемый(ая) {v#username},
 
-You have successfully logged on. 
+Сообщаем Вам, что вы успешно зарегистрированы в системе. 
 
-To activate your account, you need to pass the last point of registration!
+Для активизации вашего аккаунта, необходимо пройти последний пункт регистрации!
 
-To become a registered user, you need to follow once the link below and your account will be included in the user base.
+Чтобы стать зарегистрированным пользователем, вам необходимо ввести код активации <b>{v#actcode}</b> в форму регистрации или однократно проследовать по указанной ниже ссылке:
+				
+Ссылка активации: <a href=\"{v#link}\">{v#link}</a>
+Код активации: <b>{v#actcode}</b>
 
-To complete registration, follow this link: <a href=\"{v#link}\">{v#link}</a>
-
-All the best,
-{v#sitename}",
+С наилучшими пожеланиями,
+Администрация {v#sitename}",
 			"3" => "Information about your account to access the {v#sitename}",
 			"4" => "Dear,
 

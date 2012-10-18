@@ -3,7 +3,7 @@
 	<form name="userloginform" id="{i#form}" method="post" action="#" onSubmit="return false;">
 		<div id="{i#error}" style="color: red; display: none;" ></div>
 		<div class="field">
-			<table cellpadding="2" cellspacing="2" border="0">
+			<table>
 			<tr>
 				<td><label>{#mod.user.guest.loginpanel.2}</label>&nbsp;</td>
 				<td>
@@ -57,66 +57,91 @@
 		</div>
 	</div>
 </div>
-<!--{register}--><div class='hd'>{#mod.user.guest.register.1}</div>
-<div class='bd' style="width: 430px">
-	<div style="text-align: left">
-		<div id="{i#error}" style="color: red; display: none;" ></div>
-		<div style="margin-bottom:3px">{#mod.user.guest.register.2}</div>
-		<div style="margin-bottom:3px">
-	        <strong>{#mod.user.guest.register.3}</strong>:<br />
-	        <input id="{i#username}" type="text" size="50" maxlength="25" />
-    	</div>
-		<fieldset>
-			<legend>{#mod.user.guest.register.4}</legend>
-			<table cellpadding="0" cellspacing="3" border="0" width="400">
-			<tr>
-				<td colspan="2">{#mod.user.guest.register.5}</td>
-			</tr>
-			<tr>
-				<td>
-					{#mod.user.guest.register.6}:<br />
-					<input id="{i#pass}" type="password" size="25" maxlength="15" />
-				</td>
-				<td>
-					{#mod.user.guest.register.7}:<br />
-					<input id="{i#passconf}" type="password" size="25" maxlength="15" />
-				</td>
-			</tr>
-			</table>
-		</fieldset>
-		<fieldset>
-			<legend>{#mod.user.guest.register.8}</legend>
-			<table cellpadding="0" cellspacing="3" border="0" width="400">
-			<tr>
-				<td colspan="2">{#mod.user.guest.register.9}</td>
-			</tr>
-			<tr>
-				<td>
-					{#mod.user.guest.register.10}:<br />
-					<input id="{i#email}" type="text" size="25" maxlength="50" />
-				</td>
-				<td>
-					{#mod.user.guest.register.11}<br />
-					<input id="{i#emailconf}" type="text" size="25" maxlength="50" />
-				</td>
-			</tr>
-			</table>
-		</fieldset>
-    </div>
-    <div style="margin-top:6px; text-align: right" >
-		<input id="{i#breg}" type="button" value="{#mod.user.guest.register.12}" />
-		&nbsp;&nbsp;
-		<input id="{i#bcancel}" type="button" name="Reset" value="{#mod.user.guest.register.13}" />
+
+<!--{regwidget}-->
+<div class="aw-user" id="{i#id}">
+	<div class="uregform">
+		<div class="ufields" id="{i#regform}" >
+		
+			<dl class="username">
+				<dt>{#mod.user.guest.register.3}</dt>
+				<dd>
+					<input id="{i#username}" type="text" class="inp" placeholder="Псевдоним" />
+				</dd>
+			</dl>
+
+			<dl class="email">
+				<dt>{#mod.user.guest.register.8}</dt>
+				<dd>
+					<input id="{i#email}" type="text" class="inp" placeholder="Email нужен для подтверждения регистрации" />
+				</dd>
+			</dl>
+
+			<dl class="password">
+				<dt>{#mod.user.guest.register.6}</dt>
+				<dd>
+					<input id="{i#password}" type="password" class="inp" placeholder="Длина не менее 4-х символов" />
+				</dd>
+			</dl>
+	
+			<dl class="passwordconf">
+				<dt>{#mod.user.guest.register.7}</dt>
+				<dd>
+					<input id="{i#passwordconf}" type="password" class="inp" placeholder="" />
+				</dd>
+			</dl>
+			
+			<div class="agreement">
+				<input id="{i#agreement}" type="checkbox" />
+				<label for="{i#agreement}">
+					Я согласен с <a href="/user/termsofuse/">пользовательским соглашением</a>
+				</label>
+			</div>
+			
+			<div class="buttons right">
+				<span id="{i#error}" class="uregerr"></span>
+				<input id="{i#breg}" class="btn" type="button" value="{#mod.user.guest.register.12}" />
+				<span id="{i#saved}" class="saved" style="display: none">
+					<img src="/images/loading.gif" />Регистрация...
+				</span>
+			</div>
+			
+		</div>
+
+		<div id="{i#actform}" class="ufields" style="display: none">
+			<p>
+				{#mod.user.guest.regokpanel.2} <br />
+				{#mod.user.guest.regokpanel.3} <br />
+				{#mod.user.guest.regokpanel.4}
+			</p>
+			<p>&nbsp;</p>
+			<dl class="actcode">
+				<dt>Код активации</dt>
+				<dd>
+					<input id="{i#actcode}" type="text" class="inp" placeholder="Код активации отправлен на ваш почтовый ящик" />
+				</dd>
+			</dl>
+			
+			<div class="buttons right">
+				<span id="{i#erroract}" class="uregerr"></span>
+				<input id="{i#bact}" class="btn" type="button" value="Активировать" />
+				<span id="{i#savedact}" class="saved" style="display: none">
+					<img src="/images/loading.gif" />Активация...
+				</span>
+			</div>
+		</div>
+		
+		<div id="{i#regok}" class="ufields" style="display: none">
+			<p>
+				Активация пользователя прошла успешно!
+			</p>
+		</div>
+		
 	</div>
 </div>
-<!--{regokpanel}--><div class='hd'>{#mod.user.guest.regokpanel.1}</div>
+
+<!--{regpanel}-->
+<div class='hd'>{#mod.user.guest.register.1}</div>
 <div class='bd'>
-	<div style="font-size: 120%"> 
-		{#mod.user.guest.regokpanel.2} <br />
-		{#mod.user.guest.regokpanel.3}<br />
-		{#mod.user.guest.regokpanel.4}
-		<div style="margin-top:6px; text-align: right" >
-			<input id="{i#bclose}" type="button" value="{#mod.user.guest.regokpanel.5}" />
-		</div>
-	</div>
+	<div id="{i#widget}"></div>
 </div>

@@ -24,6 +24,8 @@ Component.entryPoint = function(){
 	
 	var NS = this.namespace,
 		API = this.namespace.API;
+	
+	var buildTemplate = this.buildTemplate;
  
 	var TMG = this.template,
 		TM = TMG.build(),
@@ -99,6 +101,158 @@ Component.entryPoint = function(){
 	
 	NS.LoginPanel = LoginPanel;
 	
+	
+	var RegisterWidget = function(container, config){
+		config = L.merge({ }, config || {});
+		this.init(container, config);
+	};
+	RegisterWidget.prototype = {
+		init: function(container, config){
+			this.cfg = config;
+			
+			var TM = buildTemplate(this, 'regwidget'), __self = this;
+			container.innerHTML = TM.replace('regwidget');
+			
+			E.on(container, 'click', function(e){
+                var el = E.getTarget(e);
+                if (__self.onClick(el)){ E.preventDefault(e); }
+            });
+		},
+		destroy: function(){
+			var el = this._TM.getEl('list.id');
+			el.parentNode.removeChild(el);
+		},
+		onClick: function(el){
+			this.clearError();
+			var TId = this._TId, tp = TId['regwidget'];
+			switch(el.id){
+			case (tp['breg']): this.register(); return true;
+			case (tp['bact']): this.activate(); return true;
+			}
+			return false;
+		},
+		clearError: function(){
+			Dom.setStyle(this._TM.getEl('regwidget.error'), 'display', 'none');
+			Dom.setStyle(this._TM.getEl('regwidget.erroract'), 'display', 'none');
+		},
+		showError: function(err){
+			var TM = this._TM, gel = function(n){ return TM.getEl('regwidget.'+n);};
+			Dom.setStyle(gel('error'), 'display', '');
+			gel('error').innerHTML =  
+				gel('erroract').innerHTML = Brick.util.Language.getc('mod.user.register.error.'+err)
+		},
+		getRegData: function(){
+			var TM = this._TM, gel = function(n){ return TM.getEl('regwidget.'+n);},
+				fill = function(v){ return L.isString(v) && v.length>0; };
+				
+			var sd = {
+				'username': L.trim(gel('username').value),
+				'email': L.trim(gel('email').value),
+				'password': L.trim(gel('password').value),
+				'agr': gel('agreement').checked
+			};
+
+			if (!fill(sd['username']) ||
+				!fill(sd['password']) ||
+				!fill(sd['email'])
+				){
+				this.showError('empty'); return null;
+			}
+			
+			if (sd['password'] != L.trim(gel('passwordconf').value)){ this.showError('passconf'); return null; }
+			if (!sd['agr']){ this.showError('agreement'); return null; }
+			
+			gel('actemail').innerHTML = sd['email'];
+			
+			return sd;
+		},
+		register: function(){
+			var sd = this.getRegData();
+			if (L.isNull(sd)){ return null; }
+			
+			var TM = this._TM, gel = function(n){ return TM.getEl('regwidget.'+n);};
+			var __self = this;
+			
+			Dom.setStyle(gel('breg'), 'display', 'none');
+			Dom.setStyle(gel('saved'), 'display', '');
+
+			sd['do'] = 'register';
+			this._savedata = sd;
+			Brick.ajax('user', {
+				'data': sd,
+				'event': function(r){
+					Dom.setStyle(gel('breg'), 'display', '');
+					Dom.setStyle(gel('saved'), 'display', 'none');
+					
+					var err = !L.isNull(r) ? r.data*1 : 100;
+					
+					if (err > 0){
+						__self.showError('s'+err);
+					}else{
+						__self.showActivate();
+					}
+				}
+			});
+		},
+		showActivate: function(){
+			var TM = this._TM, gel = function(n){ return TM.getEl('regwidget.'+n);};
+			
+			Dom.setStyle(gel('regform'), 'display', 'none');
+			Dom.setStyle(gel('actform'), 'display', '');
+		},
+		getActData: function(){
+			var TM = this._TM, gel = function(n){ return TM.getEl('regwidget.'+n);},
+				fill = function(v){ return L.isString(v) && v.length>0; };
+				
+			var sd = {
+				'userid': 0,
+				'actcode': L.trim(gel('actcode').value)
+			};
+			if (!fill(sd['actcode'])){
+				this.showError('empty'); return null;
+			}
+			return sd;
+		},
+		activate: function(){
+			var sd = this.getActData();
+			if (L.isNull(sd)){ return null; }
+			
+			var TM = this._TM, gel = function(n){ return TM.getEl('regwidget.'+n);};
+			var __self = this;
+			
+			Dom.setStyle(gel('bact'), 'display', 'none');
+			Dom.setStyle(gel('savedact'), 'display', '');
+
+			sd['do'] = 'useremailconfirm';
+			Brick.ajax('user', {
+				'data': sd,
+				'event': function(r){
+					Dom.setStyle(gel('bact'), 'display', '');
+					Dom.setStyle(gel('savedact'), 'display', 'none');
+					
+					var err = !L.isNull(r) ? r.data.error*1 : 100;
+					if (err > 0){
+						__self.showError('a1');
+					}else{
+						__self.showRegOK();
+					}
+				}
+			});
+		},
+		showRegOK: function(){
+			var TM = this._TM, gel = function(n){ return TM.getEl('regwidget.'+n);};
+			
+			Dom.setStyle(gel('actform'), 'display', 'none');
+			Dom.setStyle(gel('regok'), 'display', '');
+			
+			var sd = this._savedata;
+			API.userLogin(sd['username'], sd['password'], 0, function(msg){
+				Brick.Page.reload();
+			});
+		}
+	};
+	NS.RegisterWidget = RegisterWidget;	
+	
 	/**
 	 * Панель регистрации пользователя
 	 * 
@@ -118,84 +272,11 @@ Component.entryPoint = function(){
 		});
 	};
 	YAHOO.extend(RegisterPanel, Brick.widget.Dialog, {
-		el: function(name){ return Dom.get(TId['register'][name]); },
-		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
-		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
 		initTemplate: function(){
-			return T['register'];
+			return buildTemplate(this, 'regpanel').replace('regpanel');
 		},
 		onLoad: function(){
-			var p = this.param;
-			this.setelv('username', p['username']);
-			this.setelv('email', p['email']);
-			if (p['error'] > 0){
-				var lng = Brick.util.Language.getc('mod.user.register.error.srv');
-				var err = this.el('error');
-				err.style.display = "block";
-				err.innerHTML = lng[p['error']];
-			}
-		},
-		onClick: function(el){
-			var tp = TId['register']; 
-			switch(el.id){
-			case tp['bcancel']: this.close(); return true;
-			case tp['breg']: this.send(); return true;
-			}
-			return false;
-		},
-		send: function(){
-			var unm = this.el('username');
-			var pass = this.el('pass');
-			var passconf = this.el('passconf');
-			var email = this.el('email');
-			var emailconf = this.el('emailconf');
-
-			var lng = Brick.util.Language.getc("mod.user.register.error.client"); 
-			
-			var validobj = {
-				elements: {
-					'username':{ obj: unm, rules: ["empty","username"], args:{"field": lng['username']}},
-					'pass':{ obj: pass, rules: ["empty"], args:{"field": lng['pass']}},
-					'passconf':{ obj: passconf, rules: ["empty"], args:{"field": lng['passc']}},
-					'email':{ obj: email, rules: ["empty","email"], args:{"field": lng['email']}},
-					'emailconf':{ obj: emailconf, rules: ["empty","email"], args:{"field": lng['emailc']}}
-				}
-			};
-			
-			var validator = new Brick.util.Form.Validator(validobj);
-			var errors = validator.check();
-			if (errors.length > 0){ return; }
-			
-			if (pass.value != passconf.value){ alert(lng['passconf']); return; }
-			if (email.value != emailconf.value){ alert(lng['emailconf']); return; }
-			
-			var __self = this;
-			var lw = new Brick.widget.LayWait(TM.getEl('register.breg').parentNode, true);
-			Brick.ajax('user', {
-				'data': {
-					'do': 'register',
-					'username': unm.value,
-					'password': pass.value,
-					'email': email.value
-				},
-				'event': function(r){
-					lw.hide();
-					__self._setResult(r.data);
-
-				}
-			});
-		},
-		_setResult: function(error){
-			if (error > 0){
-				var lng = Brick.util.Language.getc('mod.user.register.error.srv');
-				alert(lng[error]);
-				return;
-			}
-			var email = this.el('email').value;
-			setTimeout(function(){
-				new RegisterSendEmailPanel({'email': email});
-    		}, 300);
-			this.close();
+			this.regWidget = new NS.RegisterWidget(this._TM.getEl('regpanel.widget'), this.param);
 		}
 	});
 	NS.RegisterPanel = RegisterPanel;
@@ -207,45 +288,9 @@ Component.entryPoint = function(){
 	 * @method showRegisterPanel
 	 * @static
 	 */
-	API.showRegisterPanel = function(param){
-		return new NS.RegisterPanel(param);
+	API.showRegisterPanel = function(cfg){
+		return new NS.RegisterPanel(cfg);
 	};
-	
-	/**
-	 * Панель "Регистрация - отправлен email для подверждения"
-	 * 
-	 * @class RegisterSendEmailPanel
-	 * @extends Brick.widget.Panel
-	 * @constructor
-	 * @param {Object} param 
-	 */
-	var RegisterSendEmailPanel = function(param){
-		this.param = L.merge({
-			'username': '', 'email': ''
-		}, param || {});
-
-		RegisterSendEmailPanel.superclass.constructor.call(this, {
-			resize: false,
-			fixedcenter: true
-		});
-	};
-	YAHOO.extend(RegisterSendEmailPanel, Brick.widget.Dialog, {
-		el: function(name){ return Dom.get(TId['regokpanel'][name]); },
-		initTemplate: function(){
-			return T['regokpanel'];
-		},
-		onLoad: function(){
-			this.el('email').innerHTML = this.param['email'];
-		},
-		onClick: function(el){
-			if (el.id == TId['regokpanel']['bclose']){
-				this.close(); return true;
-			}
-			return false;
-		}
-	});
-	
-	NS.RegisterSendEmailPanel = RegisterSendEmailPanel;
 
 	/**
 	 * Панель "Восстановление пароля"

@@ -1,0 +1,41 @@
+/* * * * * Регистрация */
+.aw-user .uregform {
+	min-width: 600px;
+}
+.aw-user .ufields input.inp {
+    border: 1px solid #ACAEB4;
+    border-radius: 3px 3px 3px 3px;
+    height: 20px;
+    line-height: 20px;
+    padding: 3px;
+    width: 400px;
+}
+.aw-user .ufields dl {
+    clear: left;
+    margin: 0 0 10px;
+}
+.aw-user .ufields dt {
+	padding-top: 3px;
+    color: #333333;
+    float: left;
+    font-weight: normal;
+    padding-right: 15px;
+    text-align: right;
+    width: 160px;
+}
+.aw-user .ufields .agreement {
+	text-align: center;
+}
+.aw-user .ufields .agreement label {
+	margin-left: 5px;
+}
+.aw-user .uregform img {
+	vertical-align: middle;
+}
+.aw-user .uregform .buttons {
+	margin: 10px 0;
+}
+.aw-user .uregform .uregerr {
+	color: red;
+	margin-right: 10px;
+}

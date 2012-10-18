@@ -75,7 +75,7 @@ class UserManager extends Ab_ModuleManager {
 			case "passwordchange":
 				return $this->UserPasswordChange($d->userid, $d->pass, $d->passold);
 			case "useremailconfirm":
-				return $this->RegistrationActivate($d->userid);
+				return $this->RegistrationActivate($d->userid, $d->actcode);
 			case "useremailcnfsend":
 				return $this->ConfirmEmailSendAgain($d->userid);
 		}
@@ -480,6 +480,7 @@ class UserManager extends Ab_ModuleManager {
 		
 		$subject = $brick->param->var['reg_mailconf_subj'];
 		$body = nl2br(Brick::ReplaceVarByData($brick->param->var['reg_mailconf'], array(
+			"actcode" => $user["activateid"],
 			"username" => $user['username'],
 			"link" => $link,
 			"sitename" => Brick::$builder->phrase->Get('sys', 'site_name')
@@ -510,6 +511,15 @@ class UserManager extends Ab_ModuleManager {
 	 * @return stdClass
 	 */
 	public function RegistrationActivate($userid, $activeid = 0){
+		
+		if (empty($userid)){
+			$row = UserQueryExt::RegistrationActivateInfoByCode($this->db, $activeid);
+			if (empty($row)){
+				sleep(1);
+			}else{
+				$userid = $row['userid'];
+			}
+		}
 		
 		$ret = new stdClass();
 		$ret->error = 0;
