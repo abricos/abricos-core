@@ -66,8 +66,12 @@ class UserManager extends Ab_ModuleManager {
 		switch($d->do){
 			case "login":
 				return $this->Login($d->username, $d->password, $d->autologin);
-			case "termsofuse": 
-				return $this->TermsOfUse();
+			case "loginext":
+				return $this->LoginExt($d->username, $d->password, $d->autologin);
+
+			case "termsofuse": return $this->TermsOfUse();
+			case "termsofuseagreement": return $this->TermsOfUseAgreement();
+				
 			case "register":
 				return $this->Register($d->username, $d->password, $d->email, true);
 			case "user":
@@ -312,8 +316,10 @@ class UserManager extends Ab_ModuleManager {
 	
 	
 	////////////////////////////////////////////////////////////////////
-	//      Функции: регистрации/авторизации пользователя     //
+	//      	Функции: регистрации/авторизации пользователя     	  //
 	////////////////////////////////////////////////////////////////////
+	
+	private $_usercache = null;
 	
 	/**
 	 * Проверить данные авторизации и вернуть номер ошибки: 
@@ -338,6 +344,7 @@ class UserManager extends Ab_ModuleManager {
 		
 		$user = UserQuery::UserByName($this->db, $username);
 		if (empty($user)){ return 2; }
+		$this->_usercache = $user;
 
 		if ($user['emailconfirm'] < 1) { return 5; }
 		
@@ -359,6 +366,23 @@ class UserManager extends Ab_ModuleManager {
 		UserQueryExt::RegistrationActivateClear($this->db);
 		
 		return 0;
+	}
+	
+	public function LoginExt($username, $password, $autologin = false){
+		$ret = new stdClass();
+		$ret->error = $this->Login($username, $password, $autologin);
+		
+		$user = $this->_usercache;
+		if (is_null($user) || empty($user)){
+			return $ret;
+		}
+		
+		$ret->user = array(
+			"id" => $user['userid'],
+			"agr" => $user['agreement']
+		);
+		
+		return $ret;
 	}
 	
 	public function Logout(){
@@ -596,6 +620,13 @@ class UserManager extends Ab_ModuleManager {
 	 	$ret = new stdClass();
 	 	$ret->text = $brick->content;
 		return $ret;
+	}
+	
+	public function TermsOfUseAgreement(){
+		if ($this->userid == 0){ return false; }
+		
+		UserQueryExt::TermsOfUseAgreement($this->db, $this->userid);
+		return true;
 	}
 	
 	public function PasswordRequestCheck($hash){

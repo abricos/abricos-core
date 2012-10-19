@@ -197,6 +197,16 @@ class UserQueryExt extends UserQuery {
 		return $userid;
 	}
 	
+	public static function TermsOfUseAgreement(Ab_Database $db, $userid){
+		$sql = "
+			UPDATE ".$db->prefix."user
+			SET agreement=1
+			WHERE userid=".bkint($userid)."
+			LIMIT 1
+		";
+		$db->query_write($sql);
+	}
+	
 	public static function RegistrationActivateInfo(Ab_Database $db, $userid){
 		$sql = "
 			SELECT *

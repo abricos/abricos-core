@@ -59,32 +59,19 @@ Component.entryPoint = function(NS){
 			}else if (Dom.hasClass(el, 'btn-authorize')){
 				var lw = new LW(container);
 				FF('user', 'api', function(){
-					API.userLogin(getval('txt-login'), getval('txt-password'), getval('chk-autologin'), function(msg){
-						if (msg.data > 0){
+					API.userLogin(getval('txt-login'), getval('txt-password'), getval('chk-autologin'), function(error, stopReload){
+						lw.hide();
+						if (error > 0){
 							FF('user', 'guest', function(){
-								lw.hide();
 								setval('txt-login', '');
 								setval('txt-password', '');
 								var lng = Brick.util.Language.getc('mod.user.guest.loginpanel.error.srv');
-								alert(lng[msg.data]);
+								alert(lng[error]);
 							});
 						}else{
-							Brick.Page.reload();
-							/*
-							var u = Brick.env.user;
-							if (u.id>0 && u.agr==1){
-								Brick.ff('user', 'guest', function(){
-									Brick.console('asdf');
-									new NS.TermsOfUsePanel(function(st){
-										if (st=='ok'){
-											Brick.Page.reload();
-										}else{
-											NS.API.userLogout();
-										}
-									});
-								});
+							if (!stopReload){
+								Brick.Page.reload();
 							}
-							/**/
 						}
 					});
 				});

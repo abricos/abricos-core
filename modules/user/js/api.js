@@ -225,15 +225,38 @@ Component.entryPoint = function(){
 	 * @param {String} password Пароль
 	 * @param {Function} (optional) fmsg Обработчик события
 	 */
-	API.userLogin = function(username, password, autologin, fmsg){
+	API.userLogin = function(username, password, autologin, callback){
 		Brick.ajax('user', {
 			'data': {
-				'do': REQUEST_TYPE.LOGIN,
+				'do': 'loginext',
 				'username': username,
 				'password': password,
 				'autologin': autologin || 0
 			},
-			'event': fmsg
+			'event': function(r){
+				var d = L.isNull(r) ? {} : r.data;
+
+				if (d['error']==0 && !!d['user'] && d['user']['id']>0 &&  d['user']['agr']==0){
+					if (L.isFunction(callback)){
+						callback(0, true);
+					}
+					var u = d['user'];
+					Brick.env.user.id = u['id']; // hack
+					Brick.ff('user', 'guest', function(){
+						new NS.TermsOfUsePanel(function(st){
+							if (st=='ok'){
+								Brick.Page.reload();
+							}else{
+								NS.API.userLogout();
+							}
+						}, u['id']);
+					});
+				}else{
+					if (L.isFunction(callback)){
+						callback(d['error']);
+					}
+				}
+			}
 		});
 	};
 	

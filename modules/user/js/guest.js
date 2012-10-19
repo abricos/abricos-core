@@ -250,7 +250,7 @@ Component.entryPoint = function(){
 			Dom.setStyle(gel('regok'), 'display', '');
 			
 			var sd = this._savedata;
-			API.userLogin(sd['username'], sd['password'], 0, function(msg){
+			API.userLogin(sd['username'], sd['password'], 0, function(error){
 				Brick.Page.reload();
 			});
 		}
@@ -358,8 +358,9 @@ Component.entryPoint = function(){
 	});
 	NS.PwdRestSendEmailPanel = PwdRestSendEmailPanel;
 	
-	var TermsOfUsePanel = function(callback){
+	var TermsOfUsePanel = function(callback, userid){
 		this.callback = callback;
+		this.userid = userid;
 		TermsOfUsePanel.superclass.constructor.call(this, {});
 	};
 	YAHOO.extend(TermsOfUsePanel, Brick.widget.Dialog, {
@@ -367,6 +368,7 @@ Component.entryPoint = function(){
 			return buildTemplate(this, 'termsofuse').replace('termsofuse'); 
 		},
 		onLoad: function(el){
+			
 			var TM = this._TM; 
 			Brick.ajax('user', {
 				'data': {'do':'termsofuse'},
@@ -375,16 +377,19 @@ Component.entryPoint = function(){
 					TM.getEl('termsofuse.text').innerHTML = text;
 				}
 			});
-			var u = Brick.env.user;
-			if (u.id > 0 && u.agr == 0){
+			if (this.userid > 0){
 				Dom.setStyle(TM.getEl('termsofuse.btns'), 'display', '');
 			}
 		},
 		onClick: function(el){
 			var tp = this._TId['termsofuse'];
 			switch(el.id){
-			case tp['bok']: this._callback('ok'); return true;
-			case tp['bcancel']: this._callback('cancel'); return true;
+			case tp['bok']:
+				this.agreement();
+				return true;
+			case tp['bcancel']:
+				this.close();
+				return true;
 			}
 			return false;
 		},
@@ -392,7 +397,31 @@ Component.entryPoint = function(){
 			if (L.isFunction(this.callback)){
 				this.callback(st);
 			}
-			this.close();
+		},
+		onClose: function(){
+			if (!this.isOk){
+				this._callback('cancel');
+			}
+		},
+		agreement: function(){
+			var TM = this._TM, gel = function(n){ return TM.getEl('termsofuse.'+n);};
+			
+			Dom.setStyle(gel('bok'), 'display', 'none');
+			Dom.setStyle(gel('bcancel'), 'display', 'none');
+			Dom.setStyle(gel('saved'), 'display', '');
+			this.isOk = true;
+
+			var __self = this;
+			Brick.ajax('user', {
+				'data': {
+					'do':'termsofuseagreement',
+					'userid': this.userid
+				},
+				'event': function(r){
+					__self._callback('ok');
+					__self.close();
+				}
+			});
 		}
 	});
 	NS.TermsOfUsePanel = TermsOfUsePanel;
