@@ -247,7 +247,8 @@ Component.entryPoint = function(){
 							if (st=='ok'){
 								Brick.Page.reload();
 							}else{
-								NS.API.userLogout();
+								// NS.API.userLogout();
+								Brick.Page.reload();
 							}
 						}, u['id']);
 					});
