@@ -310,7 +310,7 @@ class Ab_CoreBrickBuilder {
 		if (isset($this->_globalVar['host'])){
 			$this->_globalVar['host'] = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];;  
 		}
-		
+
 		$this->FetchVars($brick);
 
 		$this->PagePrint($brick);
@@ -497,6 +497,7 @@ class Ab_CoreBrickBuilder {
 			}
 			$brick->param->var['js'] = "<script language='JavaScript' type='text/javascript' charset='utf-8'>Brick.Loader.add({mod:[".implode(',', $list)."]})</script>";
 			$brick->param->var['ttowner'] = $brick->owner;
+			$this->_globalVar['ttowner'] = $brick->owner;
 
 			// добавление дополнительных JS файлов
 			foreach ($this->_jsfile as $value){
