@@ -49,32 +49,35 @@ Component.entryPoint = function(){
 		}, param || {});
 		var config = L.merge({
 			resize: false, fixedcenter: true
-			// ,width: '400px'
 		}, this.param.panelConfig || {});
 		LoginPanel.superclass.constructor.call(this, config);
 	};
 	YAHOO.extend(LoginPanel, Brick.widget.Dialog, {
-		el: function(name){ return Dom.get(TId['loginpanel'][name]); },
+		el: function(name){ return Dom.get(this._TId['loginpanel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
 		initTemplate: function(){
-			return T['loginpanel'];
+			return buildTemplate('loginpanel').replace('loginpanel');
 		},
 		onLoad: function(){
 			var __self = this;
-			E.on(TId['loginpanel']['form'], 'submit', function(){ __self.send();});
+			var TM = this._TM,
+				gel = function(n){ return  TM.getEl('loginpanel.'+n); };
+
+			E.on(gel('form'), 'submit', function(){ __self.send();});
 			
 			var p = this.param;
-			this.setelv('username', p['username']);
-			this.setelv('userpass', p['password']);
+			gel('username').value = p['username'];
+			gel('userpass').value = p['password'];
+			
 			if (p['error'] > 0){
 				var lng = Brick.util.Language.getc('mod.user.guest.loginpanel.error.srv');
-				var err = this.el('error');
-				err.style.display = "block";
+				var err = gel('error');
+				Dom.setStyle(err, 'display', '');
 				err.innerHTML = lng[p['error']];
 			}
 			if (p.hideClose){
-				this.el('bcancel').style.display = 'none';
+				Dom.setStyle(gel('bcancel'), 'display', 'none');
 			}
 		},
 		send: function(){
@@ -82,7 +85,7 @@ Component.entryPoint = function(){
 			this.close();
 		},
 		onClick: function(el){
-			var tp = TId['loginpanel']; 
+			var tp = this._TId['loginpanel']; 
 			switch(el.id){
 			case tp['blogin']:
 				this.send();
@@ -101,6 +104,102 @@ Component.entryPoint = function(){
 	
 	NS.LoginPanel = LoginPanel;
 	
+	var AuthWidget = function(container, config){
+		config = L.merge({
+			'onAuthCallback': null,
+			'onClickRegCallback': null,
+			'onClickPwdCallback': null
+		}, config || {});
+		this.init(container, config);
+	};
+	AuthWidget.prototype = {
+		init: function(container, config){
+			this.cfg = config;
+			
+			var TM = buildTemplate(this, 'authwidget'), __self = this;
+			container.innerHTML = TM.replace('authwidget');
+			
+			E.on(container, 'click', function(e){
+                var el = E.getTarget(e);
+                if (__self.onClick(el)){ E.preventDefault(e); }
+            });
+		},
+		destroy: function(){
+			var el = this._TM.getEl('authwidget.id');
+			el.parentNode.removeChild(el);
+		},
+		onClick: function(el){
+			this.clearError();
+			var tp = this._TId['authwidget'];
+			switch(el.id){
+			case tp['bauth']: this.auth(); return true;
+			}
+			return false;
+		},
+		clearError: function(){
+			Dom.setStyle(this._TM.getEl('authwidget.error'), 'display', 'none');
+			Dom.setStyle(this._TM.getEl('authwidget.erroract'), 'display', 'none');
+		},
+		showError: function(err){
+			/*
+			var TM = this._TM, gel = function(n){ return TM.getEl('authwidget.'+n);};
+			Dom.setStyle(gel('error'), 'display', '');
+			gel('error').innerHTML =  
+				gel('erroract').innerHTML = Brick.util.Language.getc('mod.user.register.error.'+err)
+			/**/
+		},
+		getAuthData: function(){
+			var TM = this._TM, gel = function(n){ return TM.getEl('authwidget.'+n);},
+				fill = function(v){ return L.isString(v) && v.length>0; };
+				
+			var sd = {
+				'username': L.trim(gel('username').value),
+				'password': L.trim(gel('password').value)
+			};
+
+			if (!fill(sd['username']) || !fill(sd['password'])){
+				this.showError('empty'); return null;
+			}
+			
+			return sd;
+		},
+		auth: function(){
+			var sd = this.getAuthData();
+			if (L.isNull(sd)){ return null; }
+			
+			var TM = this._TM, gel = function(n){ return TM.getEl('authwidget.'+n);};
+			var __self = this;
+			
+			Dom.setStyle(gel('bauth'), 'display', 'none');
+			Dom.setStyle(gel('saved'), 'display', '');
+
+			sd['do'] = 'auth';
+			this._savedata = sd;
+			
+			API.userLogin(sd['username'], sd['password'], 0, function(error){
+				Brick.Page.reload();
+			});
+			
+			/*
+			Brick.ajax('user', {
+				'data': sd,
+				'event': function(r){
+					Dom.setStyle(gel('bauth'), 'display', '');
+					Dom.setStyle(gel('saved'), 'display', 'none');
+					
+					var err = !L.isNull(r) ? r.data*1 : 100;
+					
+					if (err > 0){
+						__self.showError('s'+err);
+					}else{
+						// __self.showActivate();
+					}
+				}
+			});
+			/**/
+		}
+	};
+	NS.AuthWidget = AuthWidget;
 	
 	var RegisterWidget = function(container, config){
 		config = L.merge({ }, config || {});
@@ -119,7 +218,7 @@ Component.entryPoint = function(){
             });
 		},
 		destroy: function(){
-			var el = this._TM.getEl('list.id');
+			var el = this._TM.getEl('regwidget.id');
 			el.parentNode.removeChild(el);
 		},
 		onClick: function(el){

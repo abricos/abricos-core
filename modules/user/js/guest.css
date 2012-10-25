@@ -1,6 +1,13 @@
 /* * * * * Регистрация * * * * * */
+.aw-user .uauthform {
+	min-width: 400px;
+}
 .aw-user .uregform {
 	min-width: 600px;
+}
+.aw-user .uauthform a.bpwd {
+	margin-left: 10px;
+	
 }
 .aw-user .ufields input.inp {
     border: 1px solid #ACAEB4;
@@ -9,6 +16,9 @@
     line-height: 20px;
     padding: 3px;
     width: 400px;
+}
+.aw-user .uauthform .ufields input.inp {
+    width: 200px;
 }
 .aw-user .ufields dl {
     clear: left;

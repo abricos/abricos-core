@@ -58,6 +58,41 @@
 	</div>
 </div>
 
+<!--{authwidget}-->
+<div class="aw-user" id="{i#id}">
+	<div class="uauthform">
+		<div class="ufields" id="{i#regform}" >
+		
+			<dl class="username">
+				<dt>{#mod.user.guest.loginpanel.2}</dt>
+				<dd>
+					<input id="{i#username}" type="text" class="inp" />
+				</dd>
+			</dl>
+
+			<dl class="password">
+				<dt>{#mod.user.guest.loginpanel.3}</dt>
+				<dd>
+					<input id="{i#password}" type="password" class="inp" />
+				</dd>
+			</dl>
+			
+			<div class="center">
+				<a href="#" id="{i#breg}" class="breg" title="{#mod.user.guest.loginpanel.7}">{#mod.user.guest.loginpanel.8}</a>
+			    <a href="#" id="{i#bpwd}" class="bpwd" title="{#mod.user.guest.loginpanel.9}">{#mod.user.guest.loginpanel.10}</a>
+			</div>
+			
+			<div class="buttons right">
+				<span id="{i#error}" class="uregerr"></span>
+				<input id="{i#breg}" class="btn" type="button" value="{#mod.user.guest.loginpanel.4}" />
+				<span id="{i#saved}" class="saved" style="display: none">
+					<img src="/images/loading.gif" />Авторизация...
+				</span>
+			</div>
+		</div>
+	</div>
+</div>
+
 <!--{regwidget}-->
 <div class="aw-user" id="{i#id}">
 	<div class="uregform">
