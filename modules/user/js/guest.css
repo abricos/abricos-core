@@ -1,3 +1,8 @@
+.aw-user .uauthreg h4 {
+	margin-bottom: 10px;
+	font-size: 1.3em;
+}
+
 /* * * * * Регистрация * * * * * */
 .aw-user .uauthform {
 	min-width: 400px;
@@ -7,7 +12,6 @@
 }
 .aw-user .uauthform a.bpwd {
 	margin-left: 10px;
-	
 }
 .aw-user .ufields input.inp {
     border: 1px solid #ACAEB4;

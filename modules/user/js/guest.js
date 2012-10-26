@@ -87,22 +87,81 @@ Component.entryPoint = function(){
 		onClick: function(el){
 			var tp = this._TId['loginpanel']; 
 			switch(el.id){
-			case tp['blogin']:
-				this.send();
-				return true;
+			case tp['blogin']: this.send(); return true;
 			case tp['bcancel']: this.close(); return true;
-			case tp['breg']:
-				API.showRegisterPanel();
-				return true;
-			case tp['bpwd']:
-				API.showPwdRestPanel();
-				return true;
+			case tp['breg']: API.showRegisterPanel(); return true;
+			case tp['bpwd']: API.showPwdRestPanel(); return true;
 			}
 			return false;
 		}
 	});
 	
 	NS.LoginPanel = LoginPanel;
+	
+	var EasyAuthRegWidget = function(container, config){
+		config = L.merge({
+			'onAuthCallback': null
+		}, config || {});
+		this.init(container, config);
+	};
+	EasyAuthRegWidget .prototype = {
+		init: function(container, cfg){
+			this.cfg = cfg;
+			
+			var TM = buildTemplate(this, 'authregwidget'), __self = this;
+			container.innerHTML = TM.replace('authregwidget');
+			
+			this.authWidget = new NS.AuthWidget(TM.getEl('authregwidget.authwidget'), {
+				'onClickRegCallback': function(){
+					__self.showRegister();
+				},
+				'onAuthCallback': function(userid){
+					__self.onAuth(userid);
+				}
+			});
+			
+			this.regWidget = null;
+			
+			E.on(container, 'click', function(e){
+                var el = E.getTarget(e);
+                if (__self.onClick(el)){ E.preventDefault(e); }
+            });
+		},
+		onClick: function(el){
+			return false;
+		},
+		onAuth: function(userid){
+			var cfg = this.cfg;
+			if (L.isFunction(cfg['onAuthCallback'])){
+				cfg['onAuthCallback'](userid);
+			}
+		},
+		showAuth: function(){
+			var TM = this._TM, gel = function(n){ return TM.getEl('authregwidget.'+n);};
+			Dom.setStyle(gel('auth'), 'display', '');
+			Dom.setStyle(gel('reg'), 'display', 'none');
+		},
+		showRegister: function(){
+			var __self = this;
+			var TM = this._TM, gel = function(n){ return TM.getEl('authregwidget.'+n);};
+			Dom.setStyle(gel('auth'), 'display', 'none');
+			Dom.setStyle(gel('reg'), 'display', '');
+			
+			this.regWidget = new RegisterWidget(gel('regwidget'), {
+				'onRegOkCallback': function(d){
+					__self.auth(d['username'], d['password']);
+				},
+				'onRegCancelCallback': function(){
+					__self.showAuth();
+				}
+			});
+		},
+		auth: function(uname, upass){
+			__self.showAuth();
+			__self.authWidget.setValue(uname, upass);
+		}
+	};
+	NS.EasyAuthRegWidget = EasyAuthRegWidget;
 	
 	var AuthWidget = function(container, config){
 		config = L.merge({
@@ -132,15 +191,26 @@ Component.entryPoint = function(){
 			this.clearError();
 			var tp = this._TId['authwidget'];
 			switch(el.id){
+			case tp['breg']: this.showRegister(); return true;
 			case tp['bauth']: this.auth(); return true;
 			}
 			return false;
+		},
+		showRegister: function(){
+			var cfg = this.cfg;
+			
+			if (L.isFunction(cfg['onClickRegCallback'])){
+				cfg['onClickRegCallback']();
+			}else{
+				return new RegisterPanel();
+			}
 		},
 		clearError: function(){
 			Dom.setStyle(this._TM.getEl('authwidget.error'), 'display', 'none');
 			Dom.setStyle(this._TM.getEl('authwidget.erroract'), 'display', 'none');
 		},
 		showError: function(err){
+			// TODO: включить ошибки
 			/*
 			var TM = this._TM, gel = function(n){ return TM.getEl('authwidget.'+n);};
 			Dom.setStyle(gel('error'), 'display', '');
@@ -163,12 +233,18 @@ Component.entryPoint = function(){
 			
 			return sd;
 		},
+		setValue: function(uname, upass, autologin){
+			var TM = this._TM, gel = function(n){ return TM.getEl('authwidget.'+n);};
+			
+			gel('username').value = L.trim(uname);
+			gel('password').value = L.trim(upass);
+		},
 		auth: function(){
 			var sd = this.getAuthData();
 			if (L.isNull(sd)){ return null; }
 			
 			var TM = this._TM, gel = function(n){ return TM.getEl('authwidget.'+n);};
-			var __self = this;
+			var __self = this, cfg = this.cfg;
 			
 			Dom.setStyle(gel('bauth'), 'display', 'none');
 			Dom.setStyle(gel('saved'), 'display', '');
@@ -176,41 +252,42 @@ Component.entryPoint = function(){
 			sd['do'] = 'auth';
 			this._savedata = sd;
 			
-			API.userLogin(sd['username'], sd['password'], 0, function(error){
-				Brick.Page.reload();
-			});
-			
-			/*
-			Brick.ajax('user', {
-				'data': sd,
-				'event': function(r){
-					Dom.setStyle(gel('bauth'), 'display', '');
-					Dom.setStyle(gel('saved'), 'display', 'none');
-					
-					var err = !L.isNull(r) ? r.data*1 : 100;
-					
-					if (err > 0){
-						__self.showError('s'+err);
+			API.userLogin(sd['username'], sd['password'], 0, function(err, userid){
+				
+				Dom.setStyle(gel('bauth'), 'display', '');
+				Dom.setStyle(gel('saved'), 'display', 'none');
+				
+				if (err > 0){
+					__self.showError('s'+err);
+				}else{
+					if (L.isFunction(cfg['onAuthCallback'])){
+						cfg['onAuthCallback'](userid);
 					}else{
-						// __self.showActivate();
+						Brick.Page.reload();
 					}
 				}
 			});
-			/**/
 		}
 	};
 	NS.AuthWidget = AuthWidget;
 	
 	var RegisterWidget = function(container, config){
-		config = L.merge({ }, config || {});
+		config = L.merge({ 
+			'onRegOkCallback': null,
+			'onRegCancelCallback': null
+		}, config || {});
 		this.init(container, config);
 	};
 	RegisterWidget.prototype = {
-		init: function(container, config){
-			this.cfg = config;
+		init: function(container, cfg){
+			this.cfg = cfg;
 			
 			var TM = buildTemplate(this, 'regwidget'), __self = this;
 			container.innerHTML = TM.replace('regwidget');
+			
+			if (L.isFunction(cfg['onRegCancelCallback'])){
+				Dom.setStyle(TM.getEl('regwidget.bregcancel'), 'display', '');
+			}
 			
 			E.on(container, 'click', function(e){
                 var el = E.getTarget(e);
@@ -228,8 +305,15 @@ Component.entryPoint = function(){
 			case tp['breg']: this.register(); return true;
 			case tp['bact']: this.activate(); return true;
 			case tp['termsofuse']: this.showTermsOfUsePanel(); return true;
+			case tp['bregcancel']: this.regCancel(); return true;
 			}
 			return false;
+		},
+		regCancel: function(){
+			var cfg = this.cfg;
+			if (L.isFunction(cfg['onRegCancelCallback'])){
+				cfg['onRegCancelCallback']();
+			}
 		},
 		showTermsOfUsePanel: function(){
 			new NS.TermsOfUsePanel();
@@ -343,12 +427,19 @@ Component.entryPoint = function(){
 			});
 		},
 		showRegOK: function(){
+			var cfg = this.cfg;
+			var sd = this._savedata;
+			
+			if (L.isFunction(cfg['onRegOkCallback'])){
+				cfg['onRegOkCallback'](sd);
+				return;
+			}
+			
 			var TM = this._TM, gel = function(n){ return TM.getEl('regwidget.'+n);};
 			
 			Dom.setStyle(gel('actform'), 'display', 'none');
 			Dom.setStyle(gel('regok'), 'display', '');
 			
-			var sd = this._savedata;
 			API.userLogin(sd['username'], sd['password'], 0, function(error){
 				Brick.Page.reload();
 			});

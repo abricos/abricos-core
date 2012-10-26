@@ -58,6 +58,22 @@
 	</div>
 </div>
 
+<!--{authregwidget}-->
+<div class="aw-user" id="{i#id}">
+	<div class="uauthreg">
+	
+		<div id="{i#auth}" class="auth">
+			<h4>Авторизация</h4>
+			<div id="{i#authwidget}"></div>
+		</div>
+		<div id="{i#reg}" style="display: none" class="reg">
+			<h4>Регистрация</h4>
+			<div id="{i#regwidget}"></div>
+		</div>
+	
+	</div>
+</div>
+
 <!--{authwidget}-->
 <div class="aw-user" id="{i#id}">
 	<div class="uauthform">
@@ -84,7 +100,7 @@
 			
 			<div class="buttons right">
 				<span id="{i#error}" class="uregerr"></span>
-				<input id="{i#breg}" class="btn" type="button" value="{#mod.user.guest.loginpanel.4}" />
+				<input id="{i#bauth}" class="btn" type="button" value="{#mod.user.guest.loginpanel.4}" />
 				<span id="{i#saved}" class="saved" style="display: none">
 					<img src="/images/loading.gif" />Авторизация...
 				</span>
@@ -136,6 +152,7 @@
 			<div class="buttons right">
 				<span id="{i#error}" class="uregerr"></span>
 				<input id="{i#breg}" class="btn" type="button" value="{#mod.user.guest.register.12}" />
+				<input id="{i#bregcancel}" class="btn" type="button" value="Отмена" style="display: none" />
 				<span id="{i#saved}" class="saved" style="display: none">
 					<img src="/images/loading.gif" />Регистрация...
 				</span>

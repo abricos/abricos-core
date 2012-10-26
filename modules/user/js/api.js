@@ -234,14 +234,15 @@ Component.entryPoint = function(){
 				'autologin': autologin || 0
 			},
 			'event': function(r){
-				var d = L.isNull(r) ? {} : r.data;
+				var d = L.isNull(r) ? {'user': {}} : r.data;
+				var u = d['user'] || {'id': 0};
+				Brick.env.user.id = u['id']; // hack
 
 				if (d['error']==0 && !!d['user'] && d['user']['id']>0 &&  d['user']['agr']==0){
-					if (L.isFunction(callback)){
-						callback(0, true);
-					}
-					var u = d['user'];
 					Brick.env.user.id = u['id']; // hack
+					if (L.isFunction(callback)){
+						callback(0, u['id']);
+					}
 					Brick.ff('user', 'guest', function(){
 						new NS.TermsOfUsePanel(function(st){
 							if (st=='ok'){
@@ -254,7 +255,7 @@ Component.entryPoint = function(){
 					});
 				}else{
 					if (L.isFunction(callback)){
-						callback(d['error']);
+						callback(d['error'],  u['id']);
 					}
 				}
 			}
