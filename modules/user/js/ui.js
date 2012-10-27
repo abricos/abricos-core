@@ -59,7 +59,7 @@ Component.entryPoint = function(NS){
 			}else if (Dom.hasClass(el, 'btn-authorize')){
 				var lw = new LW(container);
 				FF('user', 'api', function(){
-					API.userLogin(getval('txt-login'), getval('txt-password'), getval('chk-autologin'), function(error, stopReload){
+					API.userLogin(getval('txt-login'), getval('txt-password'), getval('chk-autologin'), function(error, userid, stopReload){
 						lw.hide();
 						if (error > 0){
 							FF('user', 'guest', function(){

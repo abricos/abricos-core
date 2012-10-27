@@ -241,7 +241,7 @@ Component.entryPoint = function(){
 				if (d['error']==0 && !!d['user'] && d['user']['id']>0 &&  d['user']['agr']==0){
 					Brick.env.user.id = u['id']; // hack
 					if (L.isFunction(callback)){
-						callback(0, u['id']);
+						callback(0, u['id'], true);
 					}
 					Brick.ff('user', 'guest', function(){
 						new NS.TermsOfUsePanel(function(st){
