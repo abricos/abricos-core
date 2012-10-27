@@ -26,6 +26,7 @@ Component.entryPoint = function(){
 		API = this.namespace.API;
 	
 	var buildTemplate = this.buildTemplate;
+	var LNG = this.language;
  
 	var TMG = this.template,
 		TM = TMG.build(),
@@ -157,8 +158,9 @@ Component.entryPoint = function(){
 			});
 		},
 		auth: function(uname, upass){
-			__self.showAuth();
-			__self.authWidget.setValue(uname, upass);
+			this.showAuth();
+			this.authWidget.setValue(uname, upass);
+			this.authWidget.auth();
 		}
 	};
 	NS.EasyAuthRegWidget = EasyAuthRegWidget;
@@ -216,13 +218,10 @@ Component.entryPoint = function(){
 			Dom.setStyle(this._TM.getEl('authwidget.erroract'), 'display', 'none');
 		},
 		showError: function(err){
-			// TODO: включить ошибки
-			/*
 			var TM = this._TM, gel = function(n){ return TM.getEl('authwidget.'+n);};
 			Dom.setStyle(gel('error'), 'display', '');
 			gel('error').innerHTML =  
-				gel('erroract').innerHTML = Brick.util.Language.getc('mod.user.register.error.'+err)
-			/**/
+				Brick.util.Language.getc('mod.user.guest.loginpanel.error.srv.'+err);
 		},
 		getAuthData: function(){
 			var TM = this._TM, gel = function(n){ return TM.getEl('authwidget.'+n);},
@@ -264,7 +263,7 @@ Component.entryPoint = function(){
 				Dom.setStyle(gel('saved'), 'display', 'none');
 				
 				if (err > 0){
-					__self.showError('s'+err);
+					__self.showError(err);
 				}else{
 					if (L.isFunction(cfg['onAuthCallback'])){
 						cfg['onAuthCallback'](userid);

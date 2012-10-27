@@ -49,7 +49,7 @@
 .aw-user .uregform .buttons {
 	margin: 10px 0;
 }
-.aw-user .uregform .uregerr {
+.aw-user .ufields .uregerr {
 	color: red;
 	margin-right: 10px;
 }
