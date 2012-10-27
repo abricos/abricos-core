@@ -193,6 +193,8 @@ Component.entryPoint = function(){
 			switch(el.id){
 			case tp['breg']: this.showRegister(); return true;
 			case tp['bauth']: this.auth(); return true;
+			case tp['bpwd']: this.showRestPass(); return true;
+
 			}
 			return false;
 		},
@@ -204,6 +206,10 @@ Component.entryPoint = function(){
 			}else{
 				return new RegisterPanel();
 			}
+		},
+		
+		showRestPass: function(){
+			API.showPwdRestPanel();
 		},
 		clearError: function(){
 			Dom.setStyle(this._TM.getEl('authwidget.error'), 'display', 'none');
