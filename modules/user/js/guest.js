@@ -186,6 +186,11 @@ Component.entryPoint = function(){
                 var el = E.getTarget(e);
                 if (__self.onClick(el)){ E.preventDefault(e); }
             });
+			E.on(container, 'keypress', function(e){
+				if (e.keyCode == 13){
+					__self.auth();
+				}
+			});			
 		},
 		destroy: function(){
 			var el = this._TM.getEl('authwidget.id');
