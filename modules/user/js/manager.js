@@ -676,6 +676,7 @@ Component.entryPoint = function(NS){
 				var el = Dom.get(TId['rlaction']['id']+'-'+di['id']);
 				var role = roleRows.find({'maid': di['id']});
 
+				if (L.isNull(el)){ return; }
 				if (el.checked){
 					if (L.isNull(role)){
 						role = roleTable.newRow();
