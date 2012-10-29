@@ -135,6 +135,8 @@ Component.entryPoint = function(){
 			var cfg = this.cfg;
 			if (L.isFunction(cfg['onAuthCallback'])){
 				cfg['onAuthCallback'](userid);
+			}else{
+				Brick.Page.reload();
 			}
 		},
 		showAuth: function(){
