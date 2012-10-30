@@ -5,10 +5,10 @@
 
 /* * * * * Регистрация * * * * * */
 .aw-user .uauthform {
-	min-width: 400px;
+	width: 400px;
 }
 .aw-user .uregform {
-	min-width: 600px;
+	width: 600px;
 }
 .aw-user .uauthform a.bpwd {
 	margin-left: 10px;
