@@ -399,19 +399,20 @@ class UserManager extends Ab_ModuleManager {
 	}
 	
 	
-	public function UserVerifyName(&$username) {
-		$username = trim($username);
+	public function UserVerifyName($username) {
+		$username = strtolower(trim($username));
+		
 		$length = strlen($username);
 		if ($length == 0) {
 			return false;
 		} else if ($length < 3) {
 			return false;
-		} else if ($length > 100) {
+		} else if ($length > 50) {
 			return false;
-		} else if (preg_match('/(?<!&#[0-9]{3}|&#[0-9]{4}|&#[0-9]{5});/', $username)) {
+		}else if ( preg_match("/^[^a-z]{1}|[^a-z0-9_.-]+/i", $username) ){
 			return false;
 		} 
-		$username = htmlspecialchars_uni($username);
+		// $username = htmlspecialchars_uni($username);
 		return true;
 	}
 
