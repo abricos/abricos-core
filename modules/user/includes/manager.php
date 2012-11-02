@@ -340,7 +340,7 @@ class UserManager extends Ab_ModuleManager {
 		
 		if (empty($username) || empty($password)){ return 3; }
 	
-		if (!$this->UserVerifyName($username)){ return 1; }
+		// if (!$this->UserVerifyName($username)){ return 1; }
 		
 		$user = UserQuery::UserByName($this->db, $username);
 		if (empty($user)){ return 2; }
