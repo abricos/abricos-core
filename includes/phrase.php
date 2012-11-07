@@ -152,6 +152,12 @@ class Ab_CorePhrase {
 	 * @param string $value 
 	 */
 	public function Get($modname, $name, $value = "", $checkindb = true){
+		
+		$cfg = Abricos::$config['phrase'];
+		if (!empty($cfg) && !empty($cfg[$modname]) && isset($cfg[$modname][$name])){
+			return $cfg[$modname][$name];
+		}
+		
 		$phrase = $this->GetPhraseItem($modname, $name, $value, $checkindb);
 		return $phrase->value;
 	}
