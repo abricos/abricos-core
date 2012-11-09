@@ -225,4 +225,31 @@ if ($updateManager->isUpdate('0.2.5.2') && !$updateManager->isInstall()){
 }
 
 
+if ($updateManager->isUpdate('0.2.5.3')){
+	
+	// логи входа дубликатов
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS ".$pfx."userdoublelog (
+			`doublelogid` int(10) unsigned NOT NULL auto_increment,
+			`userid` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '',
+			`doubleuserid` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '',
+			`ipadress` varchar(15) NOT NULL default '',
+			`dateline` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '',
+			PRIMARY KEY  (`doublelogid`)
+		)".$charset
+	);
+
+	// дубликаты
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS ".$pfx."userdouble (
+			`userid` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '',
+			`doubleuserid` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '',
+			`dateline` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '',
+		  	UNIQUE KEY `userdouble` (`userid`,`doubleuserid`)
+		)".$charset
+	);
+	
+}
+
+
 ?>

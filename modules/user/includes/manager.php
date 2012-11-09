@@ -354,6 +354,15 @@ class UserManager extends Ab_ModuleManager {
 		$session = $this->module->session; 
 		$session->Set('userid', $user['userid']);
 		
+		$guserid = $session->Get('guserid');
+		$session->Set('guserid', $user['userid']);
+		
+		// зашел тот же человек, но под другой учеткой
+		if ($guserid > 0 && $guserid != $user['userid']){
+			UserQueryExt::UserDoubleLogAppend($this->db, $guserid, $user['userid'], $_SERVER['REMOTE_ADDR']);
+		}
+		
+		
 		if ($autologin){
 			// установить куки для автологина
 			$privateKey = $this->module->GetSessionPrivateKey();
