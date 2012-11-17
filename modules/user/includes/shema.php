@@ -44,6 +44,7 @@ if ($updateManager->isInstall()){
 		  `agreement` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
 		  `ipadress` varchar(15) NOT NULL default '',
 		  `salt` char(3) NOT NULL default '',
+		  `upddate` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'Дата обновления',
 		  `deldate` int(10) NOT NULL default '0',
 		  PRIMARY KEY  (`userid`),
 		  KEY `username` (`username`)
@@ -249,6 +250,12 @@ if ($updateManager->isUpdate('0.2.5.3')){
 		)".$charset
 	);
 	
+}
+
+if ($updateManager->isUpdate('0.2.5.4') && !$updateManager->isInstall()){
+	$db->query_write("
+		ALTER TABLE `".$pfx."user` ADD `upddate` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'Дата обновления'
+	");
 }
 
 
