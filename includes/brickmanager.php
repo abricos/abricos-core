@@ -538,7 +538,7 @@ class Ab_CoreBrickBuilder {
 			
 			// добавление css файлов
 			foreach ($this->_cssfile as $value){
-				$brick->param->var['css'] .= "<style type='text/css' media='screen, projection, print'>/*<![CDATA[*/	@import '".$value."'; /*]]>*/</style>";
+				$brick->param->var['css'] .= "<link href='".$value."' type='text/css' rel='stylesheet' />\n";
 			}
 		}
 		
