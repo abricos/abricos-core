@@ -330,7 +330,7 @@ class UserManager extends Ab_ModuleManager {
 	 * 4 - пользователь заблокирован,
 	 * 5 - пользователь не прошел верификацию email
 	 * 
-	 * @param String $username имя пользователя
+	 * @param String $username имя пользователя или емайл
 	 * @param String $password пароль
 	 * @return Integer
 	 */
@@ -342,7 +342,8 @@ class UserManager extends Ab_ModuleManager {
 	
 		// if (!$this->UserVerifyName($username)){ return 1; }
 		
-		$user = UserQuery::UserByName($this->db, $username);
+		$user = UserQuery::UserByName($this->db, $username, true);
+		
 		if (empty($user)){ return 2; }
 		$this->_usercache = $user;
 

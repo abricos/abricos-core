@@ -405,11 +405,12 @@ class UserQuery {
 		return $user;
 	}
 	
-	public static function UserByName(Ab_Database $db, $username){
+	public static function UserByName(Ab_Database $db, $username, $orByEmail = false){
 		$sql = "
 			SELECT *
 			FROM ".$db->prefix."user
 			WHERE username='".bkstr($username)."'
+				".($orByEmail ? " OR email='".bkstr($username)."'" : "")."
 			LIMIT 1
 		";
 		$user = $db->query_first($sql);
