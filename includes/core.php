@@ -64,6 +64,12 @@ final class Abricos {
 	 */
 	public static $LNG = 'ru';
 	
+	/**
+	 * Идентификатор домена (мультидоменная система)
+	 * @var string
+	 */
+	public static $DOMAIN = '';
+	
 	private static $_notification = null;
 	
 	/**
@@ -237,6 +243,8 @@ class CMSRegistry {
 		
 		define('LNG', $this->config['Misc']['language']);
 		Abricos::$LNG = $this->config['Misc']['language'];
+		
+		Abricos::$DOMAIN = $this->config['Misc']['domain'];
 		
 		$db = new Ab_DatabaseMySql($this, $this->config['Database']['tableprefix']);
 		$db->connect(

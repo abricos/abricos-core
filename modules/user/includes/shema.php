@@ -258,5 +258,16 @@ if ($updateManager->isUpdate('0.2.5.4') && !$updateManager->isInstall()){
 	");
 }
 
+if ($updateManager->isUpdate('0.2.5.5')){
+	
+	// Принадлежность пользователя к домену (мультидоменная система)
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS ".$pfx."userdomain (
+			`userid` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '',
+			`domain` varchar(15) NOT NULL default '',
+		  	UNIQUE KEY `userdomain` (`userid`,`domain`)
+		)".$charset
+	);
+}
 
 ?>

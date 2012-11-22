@@ -362,7 +362,6 @@ class UserManager extends Ab_ModuleManager {
 			UserQueryExt::UserDoubleLogAppend($this->db, $guserid, $user['userid'], $_SERVER['REMOTE_ADDR']);
 		}
 		
-		
 		if ($autologin){
 			// установить куки для автологина
 			$privateKey = $this->module->GetSessionPrivateKey();
@@ -373,6 +372,8 @@ class UserManager extends Ab_ModuleManager {
 		
 		// Удалить пользователей не прошедших верификацию email (редкая операция)
 		UserQueryExt::RegistrationActivateClear($this->db);
+		
+		$this->UserDomainUpdate($user['userid']);
 		
 		return 0;
 	}
@@ -464,6 +465,18 @@ class UserManager extends Ab_ModuleManager {
 		return 0;		
 	}
 	
+	public function UserDomainUpdate($userid = 0){
+		// если в конфиге домен не определен, то нечего обновлять
+		if (empty(Abricos::$DOMAIN)){ 
+			return; 
+		}
+		if ($userid == 0){
+			$userid = $this->userid;
+		}
+		
+		UserQueryExt::UserDomainUpdate($this->db, $userid, Abricos::$DOMAIN);
+	}
+	
 	/**
 	 * Зарегистрировать пользователя, в случае неудачи вернуть номер ошибки:
 	 * 0 - ошибки нет, пользователь успешно зарегистрирован,
@@ -497,6 +510,7 @@ class UserManager extends Ab_ModuleManager {
 		}else{
 			$userid = UserQueryExt::UserAppend($this->db, $user, User::UG_GUEST, $_SERVER['REMOTE_ADDR'], true);
 			Abricos::$user->AntibotUserDataUpdate($userid);
+			$this->UserDomainUpdate($userid);
 		}
 		
 		if (!$sendMail){ 

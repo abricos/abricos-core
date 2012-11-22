@@ -154,6 +154,15 @@ class UserQueryExt extends UserQuery {
 		return 2;
 	}
 	
+	public static function UserDomainUpdate(Ab_Database $db, $userid, $domain){
+		$sql = "
+			INSERT IGNORE INTO `".$db->prefix."userdomain` (`userid`, `domain`) VALUES (
+				".bkint($userid).",
+				'".bkstr($domain)."'
+			)
+		";
+		$db->query_write($sql);
+	}
 	
 	/**
 	 * Добавить пользователя в базу
