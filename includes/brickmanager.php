@@ -515,6 +515,9 @@ class Ab_CoreBrickBuilder {
 					if (!file_exists(CWD.$webcssfile)){ continue; }
 					if ( filesize(CWD.$webcssfile) <= 5){ continue; }
 					
+					$mod = Abricos::GetModule($modname);
+					$webcssfile .= "?v=".$mod->version;
+					
 					$this->AddCSSFile($webcssfile);
 				}
 			}
@@ -533,6 +536,7 @@ class Ab_CoreBrickBuilder {
 					if ( filesize($override) <= 5){ continue; }
 					$webcssfile = $weboverride; 
 				}
+				$webcssfile .= "?v=".$mod->version;
 				$this->AddCSSFile($webcssfile);
 			}
 			
