@@ -675,10 +675,15 @@ class UserManager extends Ab_ModuleManager {
 		$ph = Brick::$builder->phrase;
 		$sitename = $ph->Get('sys', 'site_name');
 		
-		$subject = sprintf($ph->Get('user','pwdres_changemail_subj'), $sitename);
-				
-		$emlmsg = nl2br($ph->Get('user','pwdres_changemail'));
-		$message = sprintf($emlmsg, $user['username'], $newpass, $sitename);
+		$brick = Brick::$builder->LoadBrickS('user', 'templates', null, null);
+		
+		$subject = $brick->param->var['pwdres_changemail_subj'];
+		$subject = str_replace("%1", $sitename, $subject);
+		
+		$message = nl2br($brick->param->var['pwdres_changemail']);
+		$message = str_replace("%1", $user['username'], $message);
+		$message = str_replace("%2", $newpass, $message);
+		$message = str_replace("%3", $sitename, $message);
 		
 		$this->core->GetNotification()->SendMail($user['email'], $subject, $message);
 		
