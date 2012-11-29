@@ -987,11 +987,17 @@ Brick.env.user = {
 	id: 0,
 	
 	/**
-	 * Имя (логин) пользователя
+	 * Учетная запись (логин)
 	 * @property name
 	 * @type String
 	 */
 	name: 'guest',
+	
+	// Имя
+	firstname: '',
+	
+	// Фамилия
+	lastname: '',
 	
 	/**
 	 * Идентификатор сессии
