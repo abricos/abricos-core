@@ -189,7 +189,7 @@ class UserQueryExt extends UserQuery {
 		
 		UserQueryExt::UserGroupUpdate($db, $userid, array($groupid));
 		
-		if ($groupid != User::UG_GUEST){ return; }
+		if ($groupid != User::UG_GUEST){ return $userid; }
 		
 		$usernew = UserQuery::User($db, $userid);
 		
