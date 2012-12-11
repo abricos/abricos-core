@@ -352,7 +352,13 @@ class UserManager extends Ab_ModuleManager {
 		$passcrypt = $this->UserPasswordCrypt($password, $user["salt"]);
 		if ($passcrypt != $user["password"]){ return 2; }
 		
-		$session = $this->module->session; 
+		$this->LoginMethod($user);
+		
+		return 0;
+	}
+	
+	public function LoginMethod($user, $autologin = false){
+		$session = $this->module->session;
 		$session->Set('userid', $user['userid']);
 		
 		$guserid = $session->Get('guserid');
@@ -375,8 +381,6 @@ class UserManager extends Ab_ModuleManager {
 		UserQueryExt::RegistrationActivateClear($this->db);
 		
 		$this->UserDomainUpdate($user['userid']);
-		
-		return 0;
 	}
 	
 	public function LoginExt($username, $password, $autologin = false){
