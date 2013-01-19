@@ -1,0 +1,3 @@
+[submodule "modules/widget"]
+	path = modules/widget
+	url = git@github.com:abricos/abricos-mod-widget.git
