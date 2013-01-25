@@ -26,8 +26,7 @@ Component.entryPoint = function(){
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
 
-	var TM = this.template,
-		BU = Brick.util;
+	var TM = this.template;
 
 	var isFileUploadRole = false;
 
@@ -357,27 +356,31 @@ Component.entryPoint = function(){
 	    			__self.set('mode', Editor.MODE_VISUAL);
 	    		}
 	    	});
-	    	this._buttons['tb_full'] = new EditorButton(this, {
-	    		name: 'tb_full',
-	    		image: '/modules/sys/images/ed_tb_full.gif',
-	    		onClick: function(){
-	    			__self.set('toolbar', Editor.TOOLBAR_FULL);
-	    		}
-	    	});
-	    	this._buttons['tb_standart'] = new EditorButton(this, {
-	    		name: 'tb_standart',
-	    		image: '/modules/sys/images/ed_tb_standart.gif',
-	    		onClick: function(){
-	    			__self.set('toolbar', Editor.TOOLBAR_STANDART);
-	    		}
-	    	});
-	    	this._buttons['tb_minimal'] = new EditorButton(this, {
-	    		name: 'tb_minimal',
-	    		image: '/modules/sys/images/ed_tb_minimal.gif',
-	    		onClick: function(){
-	    			__self.set('toolbar', Editor.TOOLBAR_MINIMAL);
-	    		}
-	    	});
+	    	
+	    	var isToolbarExpert = this.get('toolbarExpert');
+	    	if (isToolbarExpert){
+		    	this._buttons['tb_full'] = new EditorButton(this, {
+		    		name: 'tb_full',
+		    		image: '/modules/sys/images/ed_tb_full.gif',
+		    		onClick: function(){
+		    			__self.set('toolbar', Editor.TOOLBAR_FULL);
+		    		}
+		    	});
+		    	this._buttons['tb_standart'] = new EditorButton(this, {
+		    		name: 'tb_standart',
+		    		image: '/modules/sys/images/ed_tb_standart.gif',
+		    		onClick: function(){
+		    			__self.set('toolbar', Editor.TOOLBAR_STANDART);
+		    		}
+		    	});
+		    	this._buttons['tb_minimal'] = new EditorButton(this, {
+		    		name: 'tb_minimal',
+		    		image: '/modules/sys/images/ed_tb_minimal.gif',
+		    		onClick: function(){
+		    			__self.set('toolbar', Editor.TOOLBAR_MINIMAL);
+		    		}
+		    	});
+		    }
 	    	if (isFileUploadRole){
 		    	this._buttons['filemanager'] = new EditorButton(this, {
 		    		name: 'filemanager',
@@ -399,10 +402,13 @@ Component.entryPoint = function(){
 	    	var showOrHide = function(show, buttons){
 	    		var arr = buttons.split(',');
 	    		for (var i=0;i<arr.length;i++){
-	    			if (show){
-	    				btns[arr[i]].show();
-	    			}else{
-	    				btns[arr[i]].hide();
+	    			var el = btns[arr[i]];
+	    			if (el){
+		    			if (show){
+		    				el.show();
+		    			}else{
+		    				el.hide();
+		    			}
 	    			}
 	    		}
 	    	};
@@ -410,6 +416,7 @@ Component.entryPoint = function(){
 	    	var isConfigButtons = this.get('configButtons');
 	    	
 	    	if(isConfigButtons){
+	    		
 		    	var mode = this.get('mode');
 		    	if (mode == Editor.MODE_CODE){
 		    		showOrHide(true, 'visual');
@@ -422,6 +429,7 @@ Component.entryPoint = function(){
 		    	if (isFileUploadRole){
 		    		showOrHide(this.get('fileManager'), 'filemanager');
 		    	}
+		    	/**/
 	    	} else {
 	    		for (var n in btns){
 	    			btns[n].hide();
@@ -568,6 +576,18 @@ Component.entryPoint = function(){
             			|| value == Editor.TOOLBAR_MINIMAL;
                 }
             });
+            
+            /**
+             * Включить возможность изменения режима Toolbar-a
+             * 
+             * @attribute toolbarExpert
+             * @type Boolean
+             * @default false
+             */
+            this.setAttributeConfig('toolbarExpert',{
+            	value: attr.toolbarExpert || false
+            });
+            
 
             /**
              * Показать кнопки конфигурации редактора (группа кнопок справа).
