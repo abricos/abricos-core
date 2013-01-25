@@ -19,3 +19,6 @@
 [submodule "modules/uprofile"]
 	path = modules/uprofile
 	url = git@github.com:abricos/abricos-mod-uprofile.git
+[submodule "install"]
+	path = install
+	url = git://github.com/abricos/abricos-install

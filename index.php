@@ -1,11 +1,9 @@
 <?php
 /**
- * @version $Id$
  * @package Abricos
  * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
+ * @author Alexander Kuzmin <roosit@abricos.org>
  * @ignore
  */
 
@@ -46,7 +44,7 @@ if (!file_exists( PATH_CONFIGURATION . DS . 'config.php' ) || filesize( PATH_CON
 		echo 'No configuration file found and no installation code available. Exiting...';
 		exit();
 	}
-}else if(file_exists( PATH_CONFIGURATION . DS . 'config.php' ) && is_dir(PATH_INSTALLATION)){
+}else if(file_exists (PATH_CONFIGURATION.DS.'config.php' ) && is_dir(PATH_INSTALLATION) && file_exists(PATH_INSTALLATION.DS."index.php")){
 	header( 'Location: /install/index.php?content=7' );
 }else if ($scriptPath == "/install/index.php?content=7"){
 	header( 'Location: /' );
