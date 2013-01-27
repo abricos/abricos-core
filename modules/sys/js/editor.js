@@ -552,7 +552,7 @@ Component.entryPoint = function(){
              * @type String
              */
             this.setAttributeConfig('mode', {
-                value: attr.mode || Editor.MODE_CODE,
+                value: attr.mode || Editor.MODE_VISUAL,
                 validator: function(value) {
             		return value == Editor.MODE_CODE || value == Editor.MODE_VISUAL;
                 }
@@ -588,6 +588,16 @@ Component.entryPoint = function(){
             	value: attr.toolbarExpert || false
             });
             
+            /**
+             * Разделять текст на введение и основной текст (разделить тег <cut>)
+             * 
+             * @attribute separateIntro
+             * @type Boolean
+             * @default false
+             */
+            this.setAttributeConfig('separateIntro',{
+            	value: attr.separateIntro || false
+            });
 
             /**
              * Показать кнопки конфигурации редактора (группа кнопок справа).
@@ -672,6 +682,38 @@ Component.entryPoint = function(){
 	    	}else{
 	    		return this._ve.getContent();
 	    	}
+	    },
+	    
+	    /**
+	     * Получить разделенный контент (intro - введение, body - основной текст) 
+	     * @param cut optional разделитель
+	     * @returns {object}
+	     */
+	    getSplitContent: function(cut){
+	    	cut = cut || "<cut>";
+	    	var text = this.getContent(), sIntro = "", sBody = "";
+	    	var brToP = function(s){
+				var aa = s.split('<br />');
+				var ss= "";
+				for (var i=0;i<aa.length;i++){
+					ss += "<p>"+aa[i]+"</p>";
+				}
+				ss = ss.replace(/<p><\/p>/g, '');
+				return ss;
+			};
+
+			text = text.replace(/<p[^>]*>/g, '');
+			text = text.replace(/<\/p>/g, '<br />');
+			text = text.replace(/\n/g, '').replace(/\r/g, '');
+			var a = text.split(cut);
+			for (var i=0;i<a.length;i++){
+				if (i == 0){
+					sIntro = brToP(a[i]);
+				}else{
+					sBody +=  brToP(a[i]);
+				}
+			}
+			return {'intro': sIntro, 'body': sBody};
 	    },
 	    
 	    /**
