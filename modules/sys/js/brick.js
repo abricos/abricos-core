@@ -1,7 +1,5 @@
 /*
-@copyright Copyright (C) 2011 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-@version $Id$
 */
 
 /**
@@ -314,7 +312,16 @@ Brick.console = function(obj){
 		component.template = new Brick.Template(component);
 		component._counter = counter++;
 		
-		component.language = Brick.util.Language.geta(['mod', moduleName]);
+		component.language = Brick.util.Language.geta(['mod', moduleName]) || {};
+		component.language.get = function(path){
+			var d=path.split("."), o=component.language;
+			for (var j=0; j<d.length; j++) {
+				if (typeof o[d[j]] == 'undefined'){ return path; }
+				if (typeof o[d[j]] == 'string'){ return o[d[j]]; }
+				o=o[d[j]];
+			}
+			return o;
+		};
 		
 		var initCSS = false;
 		
