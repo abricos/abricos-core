@@ -313,8 +313,11 @@ Brick.console = function(obj){
 		component._counter = counter++;
 		
 		component.language = Brick.util.Language.geta(['mod', moduleName]) || {};
-		component.language.get = function(path){
+		component.language.get = function(path, mName){
 			var d=path.split("."), o=component.language;
+			if (mName){
+				o = Brick.util.Language.geta(['mod', mName]) || {};
+			}
 			for (var j=0; j<d.length; j++) {
 				if (typeof o[d[j]] == 'undefined'){ return path; }
 				if (typeof o[d[j]] == 'string'){ return o[d[j]]; }
