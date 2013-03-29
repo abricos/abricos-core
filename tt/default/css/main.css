@@ -56,9 +56,9 @@ h5 { font-size: 100%; }
 	margin-bottom: 10px;
 }
 .yui-g {
-	padding: 7px 10px 15px 10px !important;
+	padding: 18px 10px 15px 12px !important;
 	overflow: hidden;
-	min-height: 300px;
+	min-height: 475px;
 	margin-bottom: 10px;
 }
 .box {
