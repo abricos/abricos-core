@@ -22,20 +22,30 @@ Component.entryPoint = function(NS){
 	};
 	NS.Item = Item;
 	
-	var ItemList = function(d, itemClass){
+	var ItemList = function(d, itemClass, cfg){
 		d = d || [];
 		itemClass = itemClass || Item;
-		this.init(d, itemClass);
+		
+		cfg = L.merge({
+			'order': null
+		}, cfg || {});
+		
+		this.init(d, itemClass, cfg);
 	};
 	ItemList.prototype = {
-		init: function(d, itemClass){
+		init: function(d, itemClass, cfg){
 			this._itemClass = itemClass;
 			this.list = [];
+			this.cfg = cfg;
 			this.update(d);
 		},
 		add: function(item){
 			if (!L.isNull(this.get(item.id))){ return; }
 			this.list[this.list.length] = item;
+			
+			if (!this._isDisableOrder){
+				this.setOrder(this.cfg['order']);
+			}
 		},
 		get: function(id){
 			var lst = this.list;
@@ -58,6 +68,8 @@ Component.entryPoint = function(NS){
 		update: function(d, isRemove){
 			if (!L.isArray(d)){ return; }
 			
+			this.__isDisableOrder = true;
+			
 			var ids = {};
 			for (var i=0;i<d.length;i++){
 				var di = d[i],
@@ -72,23 +84,81 @@ Component.entryPoint = function(NS){
 				}
 			}
 			
-			if (!isRemove){ return; }
-			
-			var lst = this.list, rem = [];
-			for (var i=0;i<lst.length;i++){
-				var item = lst[i];
-				if (!ids[item.id]){
-					rem[rem.length] = item;
+			if (isRemove){ 
+				var lst = this.list, rem = [];
+				for (var i=0;i<lst.length;i++){
+					var item = lst[i];
+					if (!ids[item.id]){
+						rem[rem.length] = item;
+					}
+				}
+				for (var i=0;i<rem.length;i++){
+					this.remove(rem[i].id);
 				}
 			}
-			for (var i=0;i<rem.length;i++){
-				this.remove(rem[i].id);
-			}
+			this.__isDisableOrder = false;
+
+			this.setOrder(this.cfg['order']);
 		},
-		foreach: function(f){
+		sort: function(order){ // вернуть отсортированный список
+			var list = null;
+			
+			if (L.isString(order)){
+				var sort = [], a = order.split(',');
+				for (var i=0;i<a.length;i++){
+					 var st = L.trim(a[i]), si = {};
+					 
+					 if (st[0] == '!'){
+						 si['desc'] = true;
+						 si['field'] = L.trim(st.substring(1));
+					 }else{
+						 si['field'] = st;
+					 }
+					 sort[sort.length] = si;
+				}
+				order = sort;
+			}
+			
+			if (L.isArray(order)){
+				list = this.list.sort(function(item1, item2){
+					var si;
+					for (var i=0; i<order.length; i++){
+						si = order[i];
+						
+						if (item1[si['field']] > item2[si['field']]){ 
+							return si['desc'] ? -1 : 1; 
+						}
+						
+						if (item1[si['field']] < item2[si['field']]){ 
+							return si['desc'] ? 1 : -1; 
+						}
+					}
+					return 0;
+				});
+			}
+			
+			if (L.isFunction(order)){
+				list = this.list.sort(order);
+			}
+			
+			return list;
+		},
+		setOrder: function(order){ // отсортировать текущий список
+			this.cfg['order'] = order;
+			var list = this.sort(order);
+			if (L.isNull(list)){ return; }
+			this.list = list;
+		},
+		foreach: function(f, order){
 			if (!L.isFunction(f)){ return; }
-			for (var i=0;i<this.list.length;i++){
-				if (f(this.list[i])){ return; }
+
+			var list = this.sort(order);
+			if (L.isNull(list)){
+				list = this.list;
+			}
+			
+			for (var i=0;i<list.length;i++){
+				if (f(list[i])){ return; }
 			}
 		},
 		count: function(){
