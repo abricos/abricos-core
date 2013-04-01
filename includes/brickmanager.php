@@ -390,6 +390,10 @@ class Ab_CoreBrickBuilder {
 		$this->_cssmod[$moduleName][$file] = true;
 	}
 	
+	public function GetCSSModFiles(){
+		return $this->FetchCSSModVars();
+	}
+	
 	/**
 	 * Добавление JS файлов
 	 */
@@ -484,6 +488,33 @@ class Ab_CoreBrickBuilder {
 		print substr($content, $position, strlen($content)-$posiiton);
 	}
 	
+	private function FetchCSSModVars(){
+		$ret = array();
+		
+		foreach ($this->_cssmod as $modname => $files){
+			foreach ($files as $file => $value){
+				$webcssfile = "/modules/".$modname."/css/".$file;
+					
+				$weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$file;
+				if (file_exists(CWD.$weboverride)){
+					$webcssfile = $weboverride;
+				}
+				if (!file_exists(CWD.$webcssfile)){
+					continue;
+				}
+				if ( filesize(CWD.$webcssfile) <= 5){
+					continue;
+				}
+					
+				$mod = Abricos::GetModule($modname);
+				$ret[$webcssfile] = $modname;
+					
+				$this->AddCSSFile($webcssfile."?v=".$mod->version);
+			}
+		}
+		return $ret;
+	}
+	
 	private function FetchVars(Ab_CoreBrick $brick){
 
 		if ($brick->type == Brick::BRICKTYPE_TEMPLATE){
@@ -504,23 +535,7 @@ class Ab_CoreBrickBuilder {
 				$brick->param->var['js'] .= "<script src='".$value."' language='JavaScript' type='text/javascript' charset='utf-8'></script>";
 			}
 			
-			foreach ($this->_cssmod as $modname => $files){
-				foreach ($files as $file => $value){
-					$webcssfile = "/modules/".$modname."/css/".$file;
-					
-					$weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$file;
-					if (file_exists(CWD.$weboverride)){
-						$webcssfile = $weboverride; 
-					}
-					if (!file_exists(CWD.$webcssfile)){ continue; }
-					if ( filesize(CWD.$webcssfile) <= 5){ continue; }
-					
-					$mod = Abricos::GetModule($modname);
-					$webcssfile .= "?v=".$mod->version;
-					
-					$this->AddCSSFile($webcssfile);
-				}
-			}
+			$this->FetchCSSModVars();
 			
 			// проверка css модулей по умолчания
 			foreach ($this->_usemod as $modname => $value){
