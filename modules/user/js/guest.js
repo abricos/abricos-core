@@ -16,23 +16,17 @@ Component.requires = {
 	     {name: 'user', files: ['api.js']}
 	]
 };
-Component.entryPoint = function(){
+Component.entryPoint = function(NS){
 	
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
 	
-	var NS = this.namespace,
-		API = this.namespace.API;
+	var API = this.namespace.API;
 	
 	var buildTemplate = this.buildTemplate;
 	var LNG = this.language;
  
-	var TMG = this.template,
-		TM = TMG.build(),
-		T = TM.data,
-		TId = TM.idManager;
-	
 	/**
 	 * Панель авторизации пользователя.<br>
 	 * Для авторизации использует метод <a href="Brick.mod.user.API.html#method_login">Brick.mod.user.API.login()</a>
@@ -58,7 +52,7 @@ Component.entryPoint = function(){
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
 		initTemplate: function(){
-			return buildTemplate('loginpanel').replace('loginpanel');
+			return buildTemplate(this, 'loginpanel').replace('loginpanel');
 		},
 		onLoad: function(){
 			var __self = this;
@@ -98,6 +92,20 @@ Component.entryPoint = function(){
 	});
 	
 	NS.LoginPanel = LoginPanel;
+	
+	var EasyAuthRegPanel = function(config){
+		this.configWidget = config; 
+		EasyAuthRegPanel.superclass.constructor.call(this, {});
+	};
+	YAHOO.extend(EasyAuthRegPanel, Brick.widget.Dialog, {
+		initTemplate: function(){
+			return buildTemplate(this, 'authregpanel').replace('authregpanel');
+		},
+		onLoad: function(){
+			this.EasyAuthRegPanel = new NS.EasyAuthRegWidget(this._TM.getEl('authregpanel.widget'), this.configWidget);
+		}
+	});
+	NS.EasyAuthRegPanel = EasyAuthRegPanel;
 	
 	var EasyAuthRegWidget = function(container, config){
 		config = L.merge({
@@ -505,21 +513,19 @@ Component.entryPoint = function(){
 	 * @extends Brick.widget.Panel
 	 */
 	var PwdRestPanel = function (){
-		PwdRestPanel.superclass.constructor.call(this, {
-			resize: false,
-			fixedcenter: true
-		});
+		PwdRestPanel.superclass.constructor.call(this, {});
 	};
 	YAHOO.extend(PwdRestPanel, Brick.widget.Dialog, {
-		el: function(name){ return Dom.get(TId['password'][name]); },
+		el: function(name){ return Dom.get(this._TId['password'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		initTemplate: function(){
-			return T['password'];
+			return buildTemplate(this, 'password').replace('password');
 		},
 		onClick: function(el){
+			var tp = this._TId['password'];
 			switch(el.id){
-			case TId['password']['bsend']: this.send(); return true;
-			case TId['password']['bcancel']: this.close(); return true;
+			case tp['bsend']: this.send(); return true;
+			case tp['bcancel']: this.close(); return true;
 			}
 			return false;
 		},

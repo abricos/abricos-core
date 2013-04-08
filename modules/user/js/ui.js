@@ -47,6 +47,12 @@ Component.entryPoint = function(NS){
 			if (Dom.hasClass(el, 'showlogin')){
 				var lw = new LW(container);
 				F('user', 'api', 'showLoginPanel', '', function(){lw.hide();});
+			}else if (Dom.hasClass(el, 'showauthregpanel')){
+				var lw = new LW(container);
+				Brick.ff('user', 'guest', function(){
+					lw.hide();
+					new NS.EasyAuthRegPanel();
+				});
 			}else if (Dom.hasClass(el, 'showregister')){
 				var lw = new LW(container);
 				F('user', 'guest', 'showRegisterPanel', '', function(){lw.hide();});

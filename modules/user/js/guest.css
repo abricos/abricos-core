@@ -37,6 +37,15 @@
     text-align: right;
     width: 160px;
 }
+.aw-user .ufields p {
+    line-height: 28px;
+    padding-bottom: 12px;
+    text-align: justify;
+}
+
+.aw-user .uauthform dt {
+	text-align: left;
+}
 .aw-user .ufields .agreement {
 	text-align: center;
 }
@@ -69,7 +78,7 @@
 .aw-user .termsofuse h3 {
     font-size: 1.7em;
 }
-.aw-user .termsofuse  p {
+.aw-user .termsofuse p {
     font-size: 1.1em;
     line-height: 1.7em;
     margin-top: 0.5em;

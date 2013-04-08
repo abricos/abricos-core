@@ -1,28 +1,36 @@
-<!--{loginpanel}--><div class='hd'>{#mod.user.guest.loginpanel.1}</div>
-<div class='bd'>
-	<form name="userloginform" id="{i#form}" method="post" action="#" onSubmit="return false;">
-		<div id="{i#error}" style="color: red; display: none;" ></div>
-		<div class="field">
+<!--{loginpanel}-->
+<div class='hd'>{#mod.user.guest.loginpanel.1}</div>
+<div class='bd aw-user'>
+	<form class="uauthform" id="{i#form}" method="post" action="#" onSubmit="return false;">
+		<div class="ufields">
+		
+			<dl class="username">
+				<dt>{#mod.user.guest.loginpanel.2}</dt>
+				<dd>
+					<input id="{i#username}" type="text" class="inp" placeholder="" />
+				</dd>
+			</dl>
+		
+			<dl class="password">
+				<dt>{#mod.user.guest.loginpanel.3}</dt>
+				<dd>
+					<input id="{i#userpass}" type="password" class="inp" placeholder="" />
+				</dd>
+			</dl>
+			
+			<div class="buttons right">
+				<span id="{i#error}" class="uregerr"></span>
+				<input id="{i#blogin}" type="button" value="{#mod.user.guest.loginpanel.4}" class="btn"/>
+				<input id="{i#bcancel}" type="button" value="{#mod.user.guest.loginpanel.5}" class="btn"/>
+
+				<input id="{i#bloginsub}" type="submit" value="{#mod.user.guest.loginpanel.6}" style="display: none" />
+				
+				<span id="{i#saved}" class="saved" style="display: none">
+					<img src="/images/loading.gif" />Авторизация...
+				</span>
+			</div>
+			
 			<table>
-			<tr>
-				<td><label>{#mod.user.guest.loginpanel.2}</label>&nbsp;</td>
-				<td>
-					<input name="username" id="{i#username}" type="text" style="font-size: 160%" size="10"/>
-				</td>
-			</tr>
-			<tr>
-				<td><label>{#mod.user.guest.loginpanel.3}</label>&nbsp;</td>
-				<td><input name="userpassword" id="{i#userpass}" type="password" style="font-size: 160%" size="10" /></td>
-			</tr>
-			<tr>
-				<td colspan="2" align="center">
-					<div class="right">
-						<input id="{i#blogin}" type="button" value="{#mod.user.guest.loginpanel.4}" class="btn"/>
-						<input id="{i#bcancel}" type="button" value="{#mod.user.guest.loginpanel.5}" class="btn"/>
-					</div>
-					<input id="{i#bloginsub}" type="submit" value="{#mod.user.guest.loginpanel.6}" style="display: none" />
-				</td>
-			</tr>
 			<tr><td colspan="2">
 			    <a href="#" id="{i#breg}" title="{#mod.user.guest.loginpanel.7}">{#mod.user.guest.loginpanel.8}</a>
 			</td></tr>
@@ -33,20 +41,34 @@
 		</div>
 	</form>
 </div>
-<!--{password}--><div class='hd'>Восстановление пароля</div>
-<div class='bd'>
-	<form id='{i#form}'>
-		<p>Введите E-mail, указанный при регистрации.</p>
-		<p>Вам будет выслана инструкция по переустановке пароля.</p>
-		<p>
-			E-mail: <input id='{i#email}' type="text" size="50" />
-		</p>
-		<div style="margin-top:6px; text-align: right" >
-			<input id='{i#bsend}' type="button" value="Восстановить Имя пользователя / Пароль" />&nbsp;&nbsp;&nbsp;
-			<input id='{i#bcancel}' type="button" value="Отмена" />
-		</div>
-	</form>
+
+<!--{password}-->
+<div class='hd'>Восстановление пароля</div>
+<div class='bd aw-user'>
+	<div class="uregform">
+		<form id='{i#form}' class="ufields">
+			
+			<p>
+				Введите E-mail указанный при регистрации. <br />
+				Вам будет выслана инструкция по переустановке пароля.
+			</p>
+			
+			<dl class="email">
+				<dt>E-mail</dt>
+				<dd>
+					<input id="{i#email}" type="text" class="inp" />
+				</dd>
+			</dl>
+			
+			<div class="buttons right">
+				<input id='{i#bsend}' type="button" value="Восстановить" class="btn"/>
+				<input id='{i#bcancel}' type="button" value="Отмена" class="btn"/>
+			</div>
+			
+		</form>
+	</div>
 </div>
+
 <!--{pwdokpanel}--><div class='hd'>{#mod.user.guest.pwdokpanel.1}</div>
 <div class='bd'>
 	<div style="font-size: 120%">
@@ -57,6 +79,13 @@
 		</div>
 	</div>
 </div>
+
+<!--{authregpanel}-->
+<div class='hd'>Вход на сайт</div>
+<div class='bd'>
+	<div id="{i#widget}"></div>
+</div>
+
 
 <!--{authregwidget}-->
 <div class="aw-user" id="{i#id}">
