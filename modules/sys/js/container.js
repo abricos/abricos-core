@@ -15,10 +15,11 @@ Component.requires = {
 };
 Component.entryPoint = function(){
 	
+	this.buildTemplate({},''); // применить css
+	
 	Brick.namespace('widget');
-
+	
 	var Dom = YAHOO.util.Dom,
-		UA = YAHOO.env.ua,
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
 
@@ -348,6 +349,9 @@ Component.entryPoint = function(){
         		return; 
         	}
         	var cfg = this.cfg;
+        	if (!(cfg && !L.isNull(cfg) && L.isFunction(cfg.getProperty))){
+        		return; // TODO: заплатка в лоб
+        	}
 
 			var resizeconfig = {
 				minWidth: cfg.getProperty('minwidth'),
