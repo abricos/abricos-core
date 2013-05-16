@@ -24,7 +24,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.5.5.1";
+		$this->version = "0.5.5.2";
 		$this->name = "sys";
 		
 		$this->permission = new Ab_CoreSystemPermission($this);

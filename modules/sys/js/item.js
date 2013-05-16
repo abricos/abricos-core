@@ -68,7 +68,7 @@ Component.entryPoint = function(NS){
 		update: function(d, isRemove){
 			if (!L.isArray(d)){ return; }
 			
-			this.__isDisableOrder = true;
+			this._isDisableOrder = true;
 			
 			var ids = {};
 			for (var i=0;i<d.length;i++){
@@ -96,11 +96,13 @@ Component.entryPoint = function(NS){
 					this.remove(rem[i].id);
 				}
 			}
-			this.__isDisableOrder = false;
+			this._isDisableOrder = false;
 
 			this.setOrder(this.cfg['order']);
 		},
 		sort: function(order){ // вернуть отсортированный список
+			if (this._isDisableOrder){ return null; }
+
 			var list = null;
 			
 			if (L.isString(order)){
@@ -143,11 +145,14 @@ Component.entryPoint = function(NS){
 			
 			return list;
 		},
-		setOrder: function(order){ // отсортировать текущий список
+		setOrder: function(order){ // сортировать текущий список
 			this.cfg['order'] = order;
 			var list = this.sort(order);
-			if (L.isNull(list)){ return; }
+			if (!L.isArray(list)){ return; }
 			this.list = list;
+		},
+		reorder: function(){
+			this.setOrder(this.cfg['order']);
 		},
 		foreach: function(f, order){
 			if (!L.isFunction(f)){ return; }
