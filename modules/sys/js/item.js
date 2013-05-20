@@ -23,20 +23,17 @@ Component.entryPoint = function(NS){
 	NS.Item = Item;
 	
 	var ItemList = function(d, itemClass, cfg){
-		d = d || [];
-		itemClass = itemClass || Item;
-		
-		cfg = L.merge({
-			'order': null
-		}, cfg || {});
-		
 		this.init(d, itemClass, cfg);
 	};
 	ItemList.prototype = {
 		init: function(d, itemClass, cfg){
-			this._itemClass = itemClass;
+			d = d || [];
+
+			this._itemClass = itemClass || Item;
 			this.list = [];
-			this.cfg = cfg;
+			this.cfg =  L.merge({
+				'order': null
+			}, cfg || {});
 			this.update(d);
 		},
 		add: function(item){
