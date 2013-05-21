@@ -7,14 +7,13 @@
  * @todo Необходимо реализовать провайдеры для других типов БД
  * @todo Документирован на 50%
  * 
- * @version $Id$
- * @package Abricos 
+ * @package Abricos
  * @subpackage Core
- * @category Database
- * @author Alexander Kuzmin <roosit@abricos.org>
- * @copyright Copyright (C) 2008-2011 Abricos All rights reserved.
+ * @link http://abricos.org
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin <roosit@abricos.org>
  * 
+ * @category Database
  * @abstract
  */
 abstract class Ab_Database extends CMSDatabase {

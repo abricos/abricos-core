@@ -83,6 +83,7 @@ if (!defined('CWD')){
 	define('CWD', (($getcwd = getcwd()) ? $getcwd : '.'));
 }
 
+require_once('includes/classes.php');
 require_once('includes/deprecated.php');
 require_once('includes/global_define.php');
 require_once('includes/functions.php');
