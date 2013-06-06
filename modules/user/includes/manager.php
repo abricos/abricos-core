@@ -352,7 +352,7 @@ class UserManager extends Ab_ModuleManager {
 		$passcrypt = $this->UserPasswordCrypt($password, $user["salt"]);
 		if ($passcrypt != $user["password"]){ return 2; }
 		
-		$this->LoginMethod($user);
+		$this->LoginMethod($user, $autologin);
 		
 		return 0;
 	}
@@ -368,7 +368,6 @@ class UserManager extends Ab_ModuleManager {
 		if ($guserid > 0 && $guserid != $user['userid']){
 			UserQueryExt::UserDoubleLogAppend($this->db, $guserid, $user['userid'], $_SERVER['REMOTE_ADDR']);
 		}
-		
 		if ($autologin){
 			// установить куки для автологина
 			$privateKey = $this->module->GetSessionPrivateKey();

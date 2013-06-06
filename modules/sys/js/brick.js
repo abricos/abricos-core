@@ -45,7 +45,7 @@ Brick.objectExists = function(namespace){
 Brick.convertToObject = function(path){
 	var d=path.split(".");
 	var o=Brick;
-	for (j=(d[0] == "Brick")?1:0; j<d.length; j++) {
+	for (var j=(d[0] == "Brick")?1:0; j<d.length; j++) {
 		if (typeof o[d[j]] == 'undefined'){ return null; }
 		o=o[d[j]];
 	}
