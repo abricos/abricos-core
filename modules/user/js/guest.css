@@ -62,6 +62,9 @@
 	color: red;
 	margin-right: 10px;
 }
+.aw-user .ufields .autologin .rmlbl {
+	margin-left: 5px;
+}
 
 /* * * * * * TermsOfUse * * * * * */
 .aw-user .termsofuse .cont {

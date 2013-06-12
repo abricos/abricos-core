@@ -244,7 +244,8 @@ Component.entryPoint = function(NS){
 				
 			var sd = {
 				'username': L.trim(gel('username').value),
-				'password': L.trim(gel('password').value)
+				'password': L.trim(gel('password').value),
+				'autologin': gel('autologin').checked ? 1 : 0
 			};
 
 			if (!fill(sd['username']) || !fill(sd['password'])){
@@ -272,7 +273,7 @@ Component.entryPoint = function(NS){
 			sd['do'] = 'auth';
 			this._savedata = sd;
 			
-			API.userLogin(sd['username'], sd['password'], 0, function(err, userid){
+			API.userLogin(sd['username'], sd['password'], sd['autologin'], function(err, userid){
 				
 				Dom.setStyle(gel('bauth'), 'display', '');
 				Dom.setStyle(gel('saved'), 'display', 'none');
