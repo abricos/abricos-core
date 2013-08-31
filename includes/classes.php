@@ -34,7 +34,7 @@ class AbricosList {
 		$this->_map = array();
 	}
 
-	public function Add(AbricosItem $item = null){
+	public function Add($item){
 		if (empty($item)){
 			return;
 		}
