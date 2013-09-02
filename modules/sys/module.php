@@ -2,11 +2,9 @@
 /**
  * Системный модуль
  * 
- * @version $Id$
  * @package Abricos
  * @subpackage Core
  * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin <roosit@abricos.org>
  */
@@ -24,7 +22,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.5.5.2";
+		$this->version = "0.5.5.3";
 		$this->name = "sys";
 		
 		$this->permission = new Ab_CoreSystemPermission($this);
