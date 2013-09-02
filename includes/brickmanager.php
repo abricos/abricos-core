@@ -694,7 +694,7 @@ class Ab_CoreBrickManager {
 	 * @param integer $brickType - тип кирпича
 	 * @param string $brickName - имя кирпича
 	 */
-	public function BuildOutput($owner, $brickName, $brickType, $parent = null, $inparam = array()){
+	public function BuildOutput($owner, $brickName, $brickType, $parent = null, $inparam = null,  $isFile = false){
 		$cache = null;
 		$db = $this->registry->db;
 		$recache = false;
@@ -727,7 +727,11 @@ class Ab_CoreBrickManager {
 		$brick = null;
 		if (empty($customBrick)){
 			// кирпич не найден в БД, читаем из файла
-			$brickFF = Ab_CoreBrickReader::ReadBrick($owner, $brickName, $brickType);
+			if ($isFile){
+				$brickFF = Ab_CoreBrickReader::ReadBrickFromFile($brickName, $owner);
+			}else{
+				$brickFF = Ab_CoreBrickReader::ReadBrick($owner, $brickName, $brickType);
+			}
 			$brick = new Ab_CoreBrick($owner, $brickName, $brickType, $brickFF->body, $brickFF->param, $parent);
 			$this->SyncParam($owner, $brickName, $brickType, $brick->param);
 		}else{

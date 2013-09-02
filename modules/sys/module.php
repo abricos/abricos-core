@@ -43,6 +43,31 @@ class Ab_CoreSystemModule extends Ab_Module {
 		return $this->_manager;
 	}
 	
+	private $_superContentFile;
+	
+	/**
+	 * Запрашивается ли супер-контент
+	 * Супер-контент должен распологаться по адресу /content/[lang]/...
+	 */
+	public function IsSuperContent(){
+		$adr = Abricos::$adress;
+		
+		$path = $adr->uri;
+		
+		$path = str_replace("\\", "/", $path);
+		$path = str_replace("..", "", $path);
+		$path = preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $path);
+		
+		$path = CWD."/content/".Abricos::$LNG.$path;
+		
+		if (!file_exists($path)){ 
+			return false;
+		}
+		
+		$this->_superContentFile = $path;
+		
+		return true;
+	}
 	
 	/**
 	 * Сборка вывода клиенту
@@ -53,8 +78,14 @@ class Ab_CoreSystemModule extends Ab_Module {
 		$adress = $this->registry->adress;
 		$modules = $this->registry->modules;
 		$modman = null;
-
-		if ($adress->level >= 2 && $adress->dir[0] == 'ajax'){
+		
+		$isSuperContent = false;
+		
+		if ($this->IsSuperContent()){
+			$modman = $this;
+			$contentName = $this->_superContentFile;
+			$isSuperContent = true;
+		}else if ($adress->level >= 2 && $adress->dir[0] == 'ajax'){
 			$modman = $this;
 			$contentName = 'ajax';
 		}else if ($adress->level >= 2 && $adress->dir[0] == 'tajax'){
@@ -130,7 +161,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 		Brick::$session = $this->registry->user; 
 		Brick::$style = Brick::$builder->phrase->Get('sys', 'style', 'default');
 		
-		// возможно стиль предопределен в конфике для этого урла
+		// возможно стиль предопределен в конфиге для этого урла
 		
 		if (!empty($this->registry->config["Template"])){
 			$uri = $this->registry->adress->requestURI;
@@ -181,7 +212,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 			}
 		}
 
-		$brick = $bm->BuildOutput($modman->name, $contentName, Brick::BRICKTYPE_CONTENT);
+		$brick = $bm->BuildOutput($modman->name, $contentName, Brick::BRICKTYPE_CONTENT, null, null, $isSuperContent);
 		if ($this->registry->pageStatus == PAGESTATUS_500){
 			header("HTTP/1.1 500 Internal Server Error");
 			exit;
