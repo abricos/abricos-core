@@ -45,7 +45,7 @@ class Ab_UserText {
 			
 			// Устанавливаем разрешённые теги. (Все не разрешенные теги считаются запрещенными.)
 			$jevix->cfgAllowTags(array(
-				'cut','a', 'img', 'i', 'b', 'u', 's', 'video', 'em',  'strong', 'nobr', 'li', 'ol', 'ul', 'sup', 'abbr', 'sub', 'acronym', 'h4', 'h5', 'h6', 'br', 'hr', 'pre', 'code', 'object', 'param', 'embed', 'blockquote', 'iframe','table','th','tr','td'
+				'cut', 'a', 'p', 'img', 'i', 'b', 'u', 's', 'video', 'em',  'strong', 'nobr', 'li', 'ol', 'ul', 'sup', 'abbr', 'sub', 'acronym', 'h4', 'h5', 'h6', 'br', 'hr', 'pre', 'code', 'object', 'param', 'embed', 'blockquote', 'iframe','table','th','tr','td'
 			));
 			
 			// Устанавливаем коротие теги. (не имеющие закрывающего тега)
@@ -82,7 +82,7 @@ class Ab_UserText {
 
 			// Устанавливаем автозамену
 			$jevix->cfgSetAutoReplace(array('+/-', '(c)', '(с)', '(r)', '(C)', '(С)', '(R)'), array('±', '©', '©', '®', '©', '©', '®'));
-				
+
 			// Устанавливаем атрибуты тегов, которые будут добавлятся автоматически
 			// $jevix->cfgSetTagParamsAutoAdd('a', array('rel' => 'nofollow'));
 			$jevix->cfgSetTagParamDefault('a', 'rel', 'nofollow', true);
@@ -263,6 +263,30 @@ class Ab_UserText {
 	 * @return array
 	 */
 	public function Cut($sText) {
+
+		// вынести тег cut из p
+		$sTextTemp = $sText;
+		$sTextTemp=str_replace("\r\n",'[<rn>]',$sTextTemp);
+		$sTextTemp=str_replace("\n",'[<n>]',$sTextTemp);
+		
+		if (preg_match_all("#<p>(.*)</p>#sUi", $sTextTemp, $aTMatch)) {
+				
+			for ($i=0;$i<count($aTMatch[0]);$i++){
+				if (preg_match("/^(.*)<cut(.*)\/>(.*)$/Ui",$aTMatch[0][$i], $aMatch)) {
+
+					// выносим cut за пределы тега p
+					$sNewLine = "<cut".$aMatch[2]."/>";
+					if ($aMatch[1].$aMatch[3] != "<p></p>"){
+						$sNewLine .= $aMatch[1]." ".$aMatch[3];
+					}
+					$sTextTemp = str_replace($aMatch[0], $sNewLine, $sTextTemp);
+				}
+			}
+			$sTextTemp=str_replace('[<rn>]', "\r\n",$sTextTemp);
+			$sTextTemp=str_replace('[<n>]',"\n",$sTextTemp);
+			$sText = $sTextTemp;
+		}
+
 		$sTextShort = $sText;
 		$sTextBody	= "";
 		$sTextNew   = $sText;
@@ -271,7 +295,7 @@ class Ab_UserText {
 		$sTextTemp=str_replace("\r\n",'[<rn>]',$sText);
 		$sTextTemp=str_replace("\n",'[<n>]',$sTextTemp);
 	
-		if (preg_match("/^(.*)<cut(.*)>(.*)$/Ui",$sTextTemp,$aMatch)) {
+		if (preg_match("/^(.*)<cut(.*)\/>(.*)$/Ui",$sTextTemp,$aMatch)) {
 			$aMatch[1]=str_replace('[<rn>]',"\r\n",$aMatch[1]);
 			$aMatch[1]=str_replace('[<n>]',"\r\n",$aMatch[1]);
 			$aMatch[3]=str_replace('[<rn>]',"\r\n",$aMatch[3]);
