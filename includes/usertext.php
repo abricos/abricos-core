@@ -67,6 +67,7 @@ class Ab_UserText {
 			$jevix->cfgAllowTagParams('td', array('colspan'=>'#int','rowspan'=>'#int','align'=>array('right', 'left', 'center', 'justify'),'height'=>'#int','width'=>'#int'));
 			$jevix->cfgAllowTagParams('table', array('border'=>'#int','cellpadding'=>'#int','cellspacing'=>'#int','align'=>array('right', 'left', 'center'),'height'=>'#int','width'=>'#int'));
 			$jevix->cfgAllowTagParams('pre', array('class' => '#text', 'value' => '#text'));
+			$jevix->cfgAllowTagParams('code', array('class' => '#text', 'value' => '#text'));
 				
 			// Устанавливаем параметры тегов являющиеся обязательными. Без них вырезает тег оставляя содержимое.
 			$jevix->cfgSetTagParamsRequired('img', 'src');
@@ -84,7 +85,6 @@ class Ab_UserText {
 			$jevix->cfgSetAutoReplace(array('+/-', '(c)', '(с)', '(r)', '(C)', '(С)', '(R)'), array('±', '©', '©', '®', '©', '©', '®'));
 
 			// Устанавливаем атрибуты тегов, которые будут добавлятся автоматически
-			// $jevix->cfgSetTagParamsAutoAdd('a', array('rel' => 'nofollow'));
 			$jevix->cfgSetTagParamDefault('a', 'rel', 'nofollow', true);
 			$jevix->cfgSetTagParamDefault('embed', 'wmode', 'opaque', true);
 				
@@ -213,10 +213,16 @@ class Ab_UserText {
 		return $sText;
 	}
 	
-	public function SourceCodeUnparser($sText){
-		$sText=str_replace('<pre class="prettyprint"><code>', '<code>', $sText);
-		$sText=str_replace('</code></pre>', '</code>', $sText);
-
+	private function SourceCodeUnparser($sText){
+		// заменить <pre class="prettyprint"><code class="..."> на <code class="...">
+		if (preg_match_all("#<pre(.*)><code(.*)>(.*)</code></pre>#sUi", $sText, $aMatch)) {
+			for($i=0; $i<count($aMatch[0]); $i++){
+				$sText = str_replace($aMatch[0][$i], 
+						"<code".$aMatch[2][$i].">".$aMatch[3][$i]."</code>", 
+						$sText
+				);
+			}
+		}
 		return $sText;
 	}
 	
@@ -227,8 +233,14 @@ class Ab_UserText {
 	 * @return string
 	 */
 	public function SourceCodeParser($sText) {
-		$sText=str_replace('<code>', '<pre class="prettyprint"><code>', $sText);
-		$sText=str_replace('</code>', '</code></pre>', $sText);
+		if (preg_match_all("#<code(.*)>(.*)</code>#sUi", $sText, $aMatch)) {
+			for($i=0; $i<count($aMatch[0]); $i++){
+				$sText = str_replace($aMatch[0][$i],
+						'<pre class="prettyprint"><code'.$aMatch[1][$i].">".$aMatch[2][$i]."</code></pre>",
+						$sText
+				);
+			}
+		}
 		
 		return $sText;
 	}
@@ -242,7 +254,7 @@ class Ab_UserText {
 		$text = $this->SourceCodeUnparser($text); // заплатка в лоб возможного бага при повторном сохранении
 		$text = $this->FlashParamParser($text);
 		$text = $this->JevixParser($text);
-		$text = $this->VideoParser($text);		
+		$text = $this->VideoParser($text);
 		$text = $this->SourceCodeParser($text);
 		return $text;
 	}
