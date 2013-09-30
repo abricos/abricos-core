@@ -40,7 +40,7 @@ class Ab_DatabaseMySql extends Ab_Database {
 	}
 	
  	protected function connect_pt($servername, $port, $username, $password){
- 		$lnk = mysql_connect("$servername:$port", $username, $password);
+ 		$lnk = @mysql_connect("$servername:$port", $username, $password);
  		@mysql_query ("SET NAMES `utf8`");
 		return $lnk;
 	}
