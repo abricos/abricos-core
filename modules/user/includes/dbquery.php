@@ -169,12 +169,16 @@ class UserQueryExt extends UserQuery {
 	 *
 	 * @param Ab_Database $db
 	 * @param Array $user данные пользователя
+	 * @param integer $groupid
+	 * @param string $ip
+	 * @param boolean $agreement True-согласен с пользовательским соглашением
+	 * @param boolean $isVirtual True-виртуальный пользователь
 	 */
-	public static function UserAppend(Ab_Database $db, &$user, $groupid = User::UG_GUEST, $ip='', $agreement = false){
+	public static function UserAppend(Ab_Database $db, &$user, $groupid = User::UG_GUEST, $ip='', $agreement = false, $isVirtual = false){
 		
 		$db->query_write("
 			INSERT INTO `".$db->prefix."user` 
-				(language, username, password, email, emailconfirm, joindate, salt, ipadress, agreement) VALUES (
+				(language, username, password, email, emailconfirm, joindate, salt, ipadress, agreement, isvirtual) VALUES (
 				'".Abricos::$LNG."',
 				'".bkstr($user['username'])."', 
 				'".bkstr($user['password'])."', 
@@ -183,7 +187,8 @@ class UserQueryExt extends UserQuery {
 				'".bkstr($user['joindate'])."', 
 				'".bkstr($user['salt'])."',
 				'".bkstr($ip)."',
-				".($agreement ? 1 : 0)."
+				".($agreement ? 1 : 0).",
+				".($isVirtual ? 1 : 0)."
 		)");
 		$userid = $db->insert_id();
 		

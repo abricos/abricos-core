@@ -43,6 +43,7 @@ if ($updateManager->isInstall()){
 		  `lastvisit` int(10) unsigned NOT NULL default '0',
 		  `agreement` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
 		  `ipadress` varchar(15) NOT NULL default '',
+		  `isvirtual` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '1-виртуальный пользователь'
 		  `salt` char(3) NOT NULL default '',
 		  `upddate` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'Дата обновления',
 		  `deldate` int(10) NOT NULL default '0',
@@ -269,5 +270,13 @@ if ($updateManager->isUpdate('0.2.5.5')){
 		)".$charset
 	);
 }
+
+if ($updateManager->isUpdate('0.2.5.6') && !$updateManager->isInstall()){
+	$db->query_write("
+		ALTER TABLE `".$pfx."user` 
+			ADD `isvirtual` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '1-виртуальный пользователь'
+	");
+}
+
 
 ?>
