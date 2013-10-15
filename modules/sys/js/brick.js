@@ -415,8 +415,6 @@ Brick.console = function(obj){
 		 */
 		this.requires = {};
 		
-		var __self = this;
-		
 		/**
 		 * Точка входа в компонент. Вход будет осуществлен после
 		 * загрузки всех необходимых дополнительных компонентов.
@@ -628,9 +626,6 @@ Brick.console = function(obj){
 	Brick.f = Brick.Component.API.fire;
 	Brick.ff = Brick.Component.API.fireFunction;
 	
-	var templateId = 1;
-	var templates = {};
-	
 	/**
 	 * Шаблон компонента.
 	 * 
@@ -670,7 +665,7 @@ Brick.console = function(obj){
 		var BT = Brick.util.Template;
 		if (BT[moduleName] && BT[moduleName][componentName]){
 			this.source = BT[moduleName][componentName];
-			Brick.util.Template.fillLanguage(this.source);
+			Brick.util.Template.fillLanguage(moduleName, componentName, this.source);
 		}
 	};
 	
@@ -1131,27 +1126,50 @@ Brick.namespace('util');
 	 * @static
 	 * @param {String} t Текст шаблона
 	 */
-	Template.fillLanguage = function(t){
+	Template.fillLanguage = function(mName, cName, t){
 		if (typeof t == 'undefined'){
 			return;
 		}
+		var key, phrase, L = YAHOO.lang;
 		
-		var lang = Brick.env.language;
-		var exp = new RegExp("(\{\#[a-zA-Z0-9_\.\-]+\})", "g"), s, arr, key, phrase, i;
+		// полная замена
+		var exp = new RegExp("(\{\#[a-zA-Z0-9_\.\-]+\})", "g");
 		for (var name in t){
-			s = t[name];
-			arr = s.match(exp);
-			if (YAHOO.lang.isArray(arr)){
-				for (i=0;i<arr.length;i++){
-					key = arr[i].replace(/[\{#\}]/g, '');
-					phrase = Brick.util.Language.getc(key);
-					if (!YAHOO.lang.isNull(phrase)){
-						s = s.replace(arr[i], phrase);
-					}
+			var s = t[name], arr = s.match(exp);
+
+			if (!L.isArray(arr)){ continue; }
+			
+			for (var i=0;i<arr.length;i++){
+				key = arr[i].replace(/[\{#\}]/g, '');
+				phrase = Brick.util.Language.getc(key);
+				if (L.isValue(phrase)){
+					s = s.replace(arr[i], phrase);
 				}
 			}
+			
 			t[name] = s;
 		}
+				
+		// полная замена
+		var exp = new RegExp("(\{\##[a-zA-Z0-9_\.\-]+\})", "g");
+		for (var name in t){
+			var s = t[name], arr = s.match(exp);
+
+			if (!L.isArray(arr)){ continue; }
+			
+			for (var i=0;i<arr.length;i++){
+				key = arr[i].replace(/[\{##\}]/g, '');
+				if (key == ''){ continue; }
+				key = 'mod.'+mName+'.'+cName+'.'+key;
+				phrase = Brick.util.Language.getc(key);
+				if (L.isValue(phrase)){
+					s = s.replace(arr[i], phrase);
+				}
+			}
+			
+			t[name] = s;
+		}
+
 	};
 	
 	/**
