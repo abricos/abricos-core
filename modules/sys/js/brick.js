@@ -755,13 +755,15 @@ Brick.console = function(obj){
 		 */
 		this.id = id;
 		
+		var L = YAHOO.lang;
+		
 		var _clone = function(t){
 			
 			var ct = {};
 			if (names != ''){
 				var arr = names.split(',');
 				for (var i=0;i<arr.length;i++){
-					var name = YAHOO.lang.trim(arr[i]);
+					var name = L.trim(arr[i]);
 					if (t[name]){
 						ct[name] = t[name];
 					}
@@ -771,6 +773,18 @@ Brick.console = function(obj){
 					ct[name] = t[name]; 
 				};
 			}
+			
+			// перегрузка
+			if (L.isObject(override)){
+				
+				var tos = override.template.source;
+				for (var name in ct){
+					if (tos[name]){
+						ct[name] = tos[name];
+					}
+				}
+			}
+
 			return ct;
 		};
 		
