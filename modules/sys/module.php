@@ -22,7 +22,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.5.5.3";
+		$this->version = "0.5.5.4";
 		$this->name = "sys";
 		
 		$this->permission = new Ab_CoreSystemPermission($this);

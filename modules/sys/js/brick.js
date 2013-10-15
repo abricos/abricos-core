@@ -328,7 +328,7 @@ Brick.console = function(obj){
 		
 		var initCSS = false;
 		
-		component.buildTemplate = function(w, ts){
+		component.buildTemplate = function(w, ts, override){
 			if (!initCSS){
 				var CSS = Brick.util.CSS;
 				if (CSS[moduleName] && CSS[moduleName][componentName]){
@@ -337,7 +337,8 @@ Brick.console = function(obj){
 				}
 				initCSS = true;
 			}
-			w._TM = component.template.build(ts); w._T = w._TM.data; w._TId = w._TM.idManager;
+			w._TM = component.template.build(ts, override);
+			w._T = w._TM.data; w._TId = w._TM.idManager;
 			return w._TM;
 		};
 		
@@ -660,12 +661,11 @@ Brick.console = function(obj){
 		 */
 		this.source = {};
 		
-		var moduleName = component.moduleName;
-		var componentName = component.name;
-		var BT = Brick.util.Template;
-		if (BT[moduleName] && BT[moduleName][componentName]){
-			this.source = BT[moduleName][componentName];
-			Brick.util.Template.fillLanguage(moduleName, componentName, this.source);
+		var mName = component.moduleName,
+			cName = component.name,
+			BT = Brick.util.Template;
+		if (BT[mName] && BT[mName][cName]){
+			this.source = BT[mName][cName];
 		}
 	};
 	
@@ -681,9 +681,9 @@ Brick.console = function(obj){
 		 * разделов.
 		 * @return {Brick.Template.Manager}
 		 */
-		build: function(names){
+		build: function(names, override){
 			names = names || '';
-			return new Brick.Template.Manager(this, '', names);
+			return new Brick.Template.Manager(this, '', names, override);
 		},
 		
 		/**
@@ -736,12 +736,11 @@ Brick.console = function(obj){
 	 * @param {String} id
 	 * @param {String} names
 	 */
-	Brick.Template.Manager = function(owner, id, names){
-
+	Brick.Template.Manager = function(owner, id, names, override){
 		names = names || '';
 
 		/**
-		 * Основатель.
+		 * Основатель
 		 * 
 		 * @property owner
 		 * @type Brick.Template
@@ -775,13 +774,18 @@ Brick.console = function(obj){
 			return ct;
 		};
 		
+		var source = _clone(owner.source);
+		
+		// заполнить фразы языка
+		Brick.util.Template.fillLanguage(source, this.owner.component, override);
+		
 		/**
 		 * Хеш элементов шаблона.
 		 * 
 		 * @property data
 		 * @type Object
 		 */
-		this.data = _clone(owner.source);
+		this.data = source;
 		
 		/**
 		 * Менеджер идентификаторов HTML элементов шаблона.
@@ -1126,13 +1130,33 @@ Brick.namespace('util');
 	 * @static
 	 * @param {String} t Текст шаблона
 	 */
-	Template.fillLanguage = function(mName, cName, t){
+	Template.fillLanguage = function(t, component, override){
 		if (typeof t == 'undefined'){
 			return;
 		}
 		var key, phrase, L = YAHOO.lang;
 		
-		// полная замена
+		var getPhrase = function(lngKey){
+			// перегрузка языковых фраз
+			if (L.isObject(component) && L.isObject(override)){
+				var cName = component.name, 
+					mName = component.moduleName,
+					coName = override.name,
+					moName = override.moduleName;
+
+				var tmpLngKey = lngKey.replace(
+						'mod.'+mName+'.'+cName+'.', 
+						'mod.'+moName+'.'+coName+'.'
+					);
+				var ret = Brick.util.Language.getc(tmpLngKey);
+				if (L.isString(ret)){
+					return ret;
+				}
+			}
+			return Brick.util.Language.getc(lngKey);
+		};
+		
+		// полная замена {#...}
 		var exp = new RegExp("(\{\#[a-zA-Z0-9_\.\-]+\})", "g");
 		for (var name in t){
 			var s = t[name], arr = s.match(exp);
@@ -1141,7 +1165,7 @@ Brick.namespace('util');
 			
 			for (var i=0;i<arr.length;i++){
 				key = arr[i].replace(/[\{#\}]/g, '');
-				phrase = Brick.util.Language.getc(key);
+				phrase = getPhrase(key);
 				if (L.isValue(phrase)){
 					s = s.replace(arr[i], phrase);
 				}
@@ -1149,8 +1173,15 @@ Brick.namespace('util');
 			
 			t[name] = s;
 		}
+		
+		if (!L.isObject(component)){
+			return;
+		}
+		
+		var cName = component.name, 
+			mName = component.moduleName;
 				
-		// полная замена
+		// короткая замена {##...}
 		var exp = new RegExp("(\{\##[a-zA-Z0-9_\.\-]+\})", "g");
 		for (var name in t){
 			var s = t[name], arr = s.match(exp);
@@ -1160,8 +1191,9 @@ Brick.namespace('util');
 			for (var i=0;i<arr.length;i++){
 				key = arr[i].replace(/[\{##\}]/g, '');
 				if (key == ''){ continue; }
+				
 				key = 'mod.'+mName+'.'+cName+'.'+key;
-				phrase = Brick.util.Language.getc(key);
+				phrase = getPhrase(key);
 				if (L.isValue(phrase)){
 					s = s.replace(arr[i], phrase);
 				}
@@ -1341,7 +1373,7 @@ Brick.namespace('util');
 			}
 		}
 		return l;
-	}
+	};
 	
 	/**
 	 * Получить объект фраз текущего языка
