@@ -418,6 +418,7 @@ class Ab_CoreModuleManager {
 	}
 	
 	function GetModuleFileName($name){
+		$name = preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $name);
 		return CWD."/modules/".$name."/module.php";
 	}
 
