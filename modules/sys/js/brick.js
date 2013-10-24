@@ -242,6 +242,7 @@ Brick.console = function(obj){
 				var mod = mods[i];
 				var files = mod.files || [];
 				for (var ii=0;ii<files.length;ii++){
+					if (typeof files[ii] != 'string'){ continue; }
 					var ccName = files[ii].replace(/\.js$/, '');
 					if (!Brick.componentExists(mod.name, ccName)){
 						// Brick.console('ops: '+this.mName+':'+this.cName+'=>'+mod.name+':'+ ccName);
