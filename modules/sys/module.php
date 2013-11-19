@@ -17,12 +17,12 @@ class Ab_CoreSystemModule extends Ab_Module {
 	 */
 	public $adress = null;
 	
-	public static $YUIVersion = "2.8.1r1";
+	public static $YUIVersion = "3.13.0";
 	
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.5.5.4";
+		$this->version = "0.5.6";
 		$this->name = "sys";
 		
 		$this->permission = new Ab_CoreSystemPermission($this);
