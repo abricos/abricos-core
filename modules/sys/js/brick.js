@@ -1400,15 +1400,16 @@ Brick.dateExt = function(){
 	};
 	
 	var cfgYUILoader = {
-		filter: 'min',
-        combine: true,
+        combine: false,
         comboBase: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
+        base: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
+        root: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
         comboSep: ',',
         root: "",
 	    groups: {
 	        yui2: {
-	            combine: true,
-	            base: '/js/yui/2in3/',
+	            combine: false,
+	            base: "/gzip.php?base=/js/yui/2in3&file=",
 	            comboBase: '/gzip.php?file=',
 	            root: '/js/yui/2in3/',
 	            patterns:  {
@@ -1637,7 +1638,7 @@ Brick.dateExt = function(){
 	Brick._ldCk = {};
 	Brick._ldReqId = {};
 	
-	YUI(cfgYUILoader).use('node', 'yui2-dom', function (Y) {
+	YUI(cfgYUILoader).use('yui2-dom', function (Y) {
 		YAHOO = Y.YUI2;
 		var old = Brick.Loader;
 		Brick.Loader = new Loader();
