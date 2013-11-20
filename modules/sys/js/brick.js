@@ -351,7 +351,6 @@ Brick.namespace('util');
 			this.isReg = true;
 			
 			var moduleName = this.mName,
-				componentName = this.cName,
 				component = this.component;
 				
 			var namespace = 'mod';
@@ -364,7 +363,6 @@ Brick.namespace('util');
 			if (!NS['API']){
 				NS['API'] = new Brick.Component.API(moduleName);
 			}
-
 			component.entryPoint(NS);
 
 			delete component.entryPoint;
@@ -436,8 +434,7 @@ Brick.namespace('util');
 		component.requires = component.requires || {};
 		var loadinfo = component.requires;
 		
-		var rg = new RegEngine(moduleName, componentName, component);
-		waiter[waiter.length] = rg;
+		waiter[waiter.length] = new RegEngine(moduleName, componentName, component);
 		
 		loadinfo.onSuccess = function() {
 			// проверить, все ли вложенные компоненты прогружены
@@ -456,8 +453,6 @@ Brick.namespace('util');
 				
 			} while(isReg);
 		};
-		
-		// Brick.console(loadinfo);
 		
 		Brick.Loader.add(loadinfo);
 	};
@@ -1634,6 +1629,8 @@ Brick.dateExt = function(){
 			loader.require(requires);
 			var __self = this;
 			loader.load(function(evt){
+				Brick.console(ylib);
+				Brick.console(Y);
 				__self._event(evt.msg != 'success'); 
 			});
 		}		
@@ -1641,11 +1638,14 @@ Brick.dateExt = function(){
 	Brick._ldCk = {};
 	Brick._ldReqId = {};
 	
-	YUI(cfgYUILoader).use('yui2-dom', function (Y) {
-		YAHOO = Y.YUI2;
+	/*
+	YUI(cfgYUILoader).use('yui2-dom', function (y) {
+		Y = y;
+		
 		var old = Brick.Loader;
 		Brick.Loader = new Loader();
 		Brick.Loader.addRange(old.mods);
 	});
+	/**/
 	
 })();
