@@ -403,7 +403,7 @@ Brick.namespace('util');
 
 		component.template = new Brick.Template(component);
 		component._counter = counter++;
-		
+
 		component.language = Brick.util.Language.geta(['mod', moduleName]) || {};
 		component.language.get = function(path, mName){
 			var d=path.split("."), o=component.language;
@@ -419,7 +419,6 @@ Brick.namespace('util');
 		};
 		
 		var initCSS = false;
-		
 		component.buildTemplate = function(w, ts, override){
 			if (!initCSS){
 				var CSS = Brick.util.CSS;
@@ -441,7 +440,6 @@ Brick.namespace('util');
 		waiter[waiter.length] = rg;
 		
 		loadinfo.onSuccess = function() {
-			
 			// проверить, все ли вложенные компоненты прогружены
 			var isReg = false;
 			do {
@@ -458,6 +456,9 @@ Brick.namespace('util');
 				
 			} while(isReg);
 		};
+		
+		// Brick.console(loadinfo);
+		
 		Brick.Loader.add(loadinfo);
 	};
 	
@@ -1400,6 +1401,7 @@ Brick.dateExt = function(){
 	};
 	
 	var cfgYUILoader = {
+		timeout: 15000,
         combine: false,
         comboBase: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
         base: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
@@ -1427,7 +1429,7 @@ Brick.dateExt = function(){
 	    }
 	};
 	
-	var module = function(o){
+	var Module = function(o){
 		this.yahoo = [];
 		this.ext = [];
 		this.mod = [];
@@ -1435,7 +1437,7 @@ Brick.dateExt = function(){
 		this.event = null;
 		this.init(o);
 	};
-	module.prototype = {
+	Module.prototype = {
 		init: function(o){
 			if (typeof o.yahoo != 'undefined'){ this.yahoo = o.yahoo; }
 			if (typeof o.ext != 'undefined'){ this.ext = o.ext; }
@@ -1454,7 +1456,9 @@ Brick.dateExt = function(){
 			this._countModule = 0;
 			this._modules = [];
 			this._reqYUI = {};
+			this._cacheReqMod = {};
 			
+			/*
 			var __self = this;
 			this._yuiLoader = new Y.Loader(cfgYUILoader);
 			this._yuiLoader.onSuccess = function(){
@@ -1463,9 +1467,10 @@ Brick.dateExt = function(){
 			this._yuiLoader.onFailure = function (err){
 				__self._event(true); alert ('Ошибка загрузки модуля: ' + YAHOO.lang.dump(err) );
 			};
+			/**/
 		},
 		add: function(param){
-		var m = new module(param);
+			var m = new Module(param);
 			this._addModule(m);
 			if (!this._isProccess){
 				this._start();
@@ -1474,7 +1479,7 @@ Brick.dateExt = function(){
 		addRange: function(o){
 			var m, i;
 			for (i=0;i<o.length;i++){
-				m = new module(o[i]);
+				m = new Module(o[i]);
 				this._addModule(m);
 			}
 			if (!this._isProccess){ this._start(); }
@@ -1483,7 +1488,7 @@ Brick.dateExt = function(){
 			this._modules[this._modules.length] = m;
 		},
 		_event: function(error){
-			var __self = this;
+
 			this._isProccess = false;
 			// Если в процессе загрузки модулей были добавлены еще модули,
 			// то события предыдущих модулей остаются в ожидании и производится запуск
@@ -1510,6 +1515,9 @@ Brick.dateExt = function(){
 				//try{
 					if (typeof f == 'function'){
 						f();
+					}else{
+						Brick.console('error');						
+						Brick.console(m);						
 					}
 				//}catch(e){ alert(YAHOO.lang.dump(e)); }
 			}
@@ -1523,116 +1531,111 @@ Brick.dateExt = function(){
 		_start: function(){
 			this._isProccess = true;
 			this._countModule = this._modules.length;
-			
+	
 			var i, m, j, k, r, ylib = [], elib = [], mlib = [];
 			
 			for (i=0;i<this._modules.length;i++){
 				m = this._modules[i];
-				if (!m.isLoad){
-					m.isLoad = true;
-					// Brick Module
-					for (j=0;j<m.mod.length;j++){ mlib[mlib.length] = m.mod[j]; }
-					// Ext
-					for (j=0;j<m.ext.length;j++){ elib[elib.length] = m.ext[j]; }
-					// YUI2
-					for (j=0;j<m.yahoo.length;j++){
-						r = m.yahoo[j];
-						if (typeof this._reqYUI[r] == 'undefined'){
-							this._reqYUI[r] = true;
-							ylib[ylib.length] = 'yui2-'+r; 
-						}
+				if (m.isLoad){ continue; }
+				m.isLoad = true;
+				
+				// Brick Module
+				for (j=0;j<m.mod.length;j++){ mlib[mlib.length] = m.mod[j]; }
+				// Ext
+				for (j=0;j<m.ext.length;j++){ elib[elib.length] = m.ext[j]; }
+				// YUI2
+				for (j=0;j<m.yahoo.length;j++){
+					r = m.yahoo[j];
+					if (typeof this._reqYUI[r] == 'undefined'){
+						this._reqYUI[r] = true;
+						ylib[ylib.length] = 'yui2-'+r; 
 					}
 				}
 			}
-			var loader = this._yuiLoader;
 			
-			if (ylib.length > 0){
-				for (i=0;i<ylib.length;i++){
-					loader.calculate({require: ylib[i]});
-				}
-			}
+			var loader =  new Y.Loader(Y.merge(cfgYUILoader, {
+				'require': ylib
+			}));
+			
+			var requires = [];
+			
 			if (elib.length > 0){
 				var l = [], nm;
 				for (i=0;i<elib.length;i++){
 					nm = elib[i].name;
-					l[l.length] = nm;
-					loader.addModule({name: nm, type: elib[i].type, fullpath: elib[i].fullpath});
+					// l[l.length] = nm;
+					requires[requires.length] = nm;
+					loader.addModule({
+						'name': nm, 
+						'type': elib[i].type, 
+						'fullpath': elib[i].fullpath
+					});
 				}				
-				loader.require(l);
 			}
 			
 			if (mlib.length > 0){
 				var mm, mb, mv, minfo, rq=[];
-				var count = mlib.length;
-				for (var ii=0;ii<count;ii++){
-					if (mlib[ii]){
-						mm = mlib[ii].name;
-						minfo = Brick.Modules[mm];
-						
-						if (minfo){
-							for (j=0;j<mlib[ii].files.length;j++){
-								mb = mlib[ii].files[j];
-								mv = "";
-								for (k=0;k<minfo.length;k++){
-									if (minfo[k]['f'] == mb){ mv = minfo[k]['k']; }
-								}
-								if (mv == ""){
-									
-								}else{
-									var ldCk = Brick._ldCk[mm] = Brick._ldCk[mm] || {};
-									ldCk = ldCk[mb] = ldCk[mb] || {'ok': false, 'n': 0};
-									
-									var samm = mm.split("/"),
-										src = "";
-									if (samm.length == 2){
-										
-										var nHost = samm[0],
-											nPort = 80,
-											nModName = samm[1];
-										
-										aHost = nHost.split(':');
-										if (aHost.length == 2){
-											nHost = aHost[0];
-											if (aHost[1]*1 != 0){
-												nPort = aHost[1]*1 ;
-											}
-										}
-										src = "/app/gzip/"+nHost
-											+"/"+nPort
-											+"/"+nModName
-											+"/"+mv
-											+"/"+mb;
-									}else{
-										src = "/gzip.php?type=mod&module="+mm
-											+"&version="+mv
-											+"&tt="+Brick.env.ttname
-											+"&n="+ldCk['n']
-											+"&lang="+Brick.env.language
-											+"&file="+mb;
-									}
-
-									var reqid='n'+ldCk['n']+mm+mb;
+				
+				for (var ii=0;ii<mlib.length;ii++){
+					if (!mlib[ii]){ continue; }
 					
-									if (!Brick._ldReqId[reqid]){
-										Brick._ldReqId[reqid] = true;
-										
-										rq[rq.length]=reqid;
-										
-										loader.addModule({
-											name: reqid, 
-											type: "js", 
-											fullpath: src
-										});
-									
-									}
+					mm = mlib[ii].name;
+					minfo = Brick.Modules[mm];
+					
+					if (!minfo){ continue; }
+					
+					for (j=0;j<mlib[ii].files.length;j++){
+						mb = mlib[ii].files[j];
+						mv = "";
+						for (k=0;k<minfo.length;k++){
+							if (minfo[k]['f'] == mb){ mv = minfo[k]['k']; }
+						}
+						if (mv == ""){ continue; }
+						
+						var ldCk = Brick._ldCk[mm] = Brick._ldCk[mm] || {};
+						ldCk = ldCk[mb] = ldCk[mb] || {'ok': false, 'n': 0};
+						
+						var samm = mm.split("/"), src = "";
+						
+						if (samm.length == 2){
+							var nHost = samm[0], nPort = 80, nModName = samm[1];
+							aHost = nHost.split(':');
+							if (aHost.length == 2){
+								nHost = aHost[0];
+								if (aHost[1]*1 != 0){
+									nPort = aHost[1]*1 ;
 								}
 							}
+							src = "/app/gzip/"+nHost+"/"+nPort+"/"+nModName+"/"+mv+"/"+mb;
+						}else{
+							src = "/gzip.php?type=mod&module="+mm
+								+"&version="+mv
+								+"&tt="+Brick.env.ttname
+								+"&n="+ldCk['n']
+								+"&lang="+Brick.env.language
+								+"&file="+mb;
 						}
+
+						var reqid='n'+ldCk['n']+mm+mb;
+	
+						if (Brick._ldReqId[reqid]){ continue; }	
+						Brick._ldReqId[reqid] = true;
+						
+						requires[requires.length] = reqid;
+						
+						loader.addModule({
+							name: reqid, 
+							type: "js", 
+							fullpath: src
+						});
 					}
 				}
-				loader.require(rq);
 			}
-			loader.insert();
+			loader.require(requires);
+			var __self = this;
+			loader.load(function(evt){
+				__self._event(evt.msg != 'success'); 
+			});
 		}		
 	};
 	Brick._ldCk = {};
