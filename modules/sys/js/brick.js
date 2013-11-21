@@ -2,8 +2,6 @@
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-var Y = YUI();
-
 /**
  * Ядро Abricos! User Interface Library 
  * @module Sys
@@ -19,6 +17,10 @@ if (typeof Brick == 'undefined' || !Brick){
 	 */
 	Brick = {};
 }
+
+var Y = YUI();
+Brick.YUI = Y;
+
 
 /**
  * Переменные окружения платформы 
@@ -1609,7 +1611,9 @@ Brick.dateExt = function(){
 			if (typeof o.mod != 'undefined'){ this.mod = o.mod; }
 			this.event = { onSuccess: o.onSuccess, onFailure: o.onFailure, executed: false};
 		}
-	};	
+	};
+	
+	var _isLoadYUI2 = false;
 
 	// основной загрузчик включается в работу после инициализации YUI3
 	var Loader = function(){
@@ -1692,7 +1696,10 @@ Brick.dateExt = function(){
 			this._isProccess = true;
 			this._countModule = this._modules.length;
 	
-			var i, m, j, k, r, ylib = [], elib = [], mlib = [];
+			var i, m, j, k, r, elib = [], mlib = [];
+			
+			var ylib = _isLoadYUI2 ? [] : ['yui2-dom', 'yui2-event'];
+			_isLoadYUI2 = true;
 			
 			for (i=0;i<this._modules.length;i++){
 				m = this._modules[i];
@@ -1714,29 +1721,18 @@ Brick.dateExt = function(){
 			}
 			
 			var __self = this;
-			
-			Y.use(ylib, function(){
-
+			var loadOverLib = function(){
 				var requires = [], ldMod = {};
 	
 				if (elib.length > 0){
-					var l = [], nm;
 					for (i=0;i<elib.length;i++){
-						nm = elib[i].name;
-						// l[l.length] = nm;
+						var nm = elib[i].name;
 						requires[requires.length] = nm;
 						ldMod[nm] = {
 							'name': nm, 
 							'type': elib[i].type, 
 							'fullpath': elib[i].fullpath
 						};
-						/*
-						loader.addModule({
-							'name': nm, 
-							'type': elib[i].type, 
-							'fullpath': elib[i].fullpath
-						});
-						/**/
 					}				
 				}
 				
@@ -1798,24 +1794,31 @@ Brick.dateExt = function(){
 						}
 					}
 				}
-				
+
 				YUI(Y.merge(cfgYUILoader, {
 					'modules': ldMod
 				})).use(requires, function (Y) {
 					__self._event(false); 
+				});				
+			};
+			
+			if (ylib.length == 0){
+				loadOverLib();
+			}else{
+				Brick.YUI.use(ylib, function(Y){
+					Brick.YUI = Y;
+					YAHOO = Y.YUI2;
+					loadOverLib();
 				});
-			});
+			}
+			
 		}		
 	};
 	Brick._ldCk = {};
 	Brick._ldReqId = {};
 
-	YUI(cfgYUILoader).use(['yui2-dom', 'yui2-event'], function (y) {
-		Y = y;
-		YAHOO = Y.YUI2;
-		var old = Brick.Loader;
-		Brick.Loader = new Loader();
-		Brick.Loader.addRange(old.mods);
-	});
+	var old = Brick.Loader;
+	Brick.Loader = new Loader();
+	Brick.Loader.addRange(old.mods);
 	
 })();

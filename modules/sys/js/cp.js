@@ -1,6 +1,4 @@
 /*
-@version $Id$
-@copyright Copyright (C) 2008 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
@@ -14,7 +12,8 @@ Component.requires = {
 };
 Component.entryPoint = function(){
 	
-	if (!Brick.env.user.isAdmin()){ return; }
+	if (Brick.Permission.check('user', '50') != 1){ return; }
+	
 	var cp = Brick.mod.user.cp;
 
 	var menuItem = new cp.MenuItem(this.moduleName, 'manager');

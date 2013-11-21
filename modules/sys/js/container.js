@@ -36,7 +36,6 @@ Component.entryPoint = function(){
 	// счетчик глобального идентификатора каждой панели 
 	var _globalIdCounter = 0;
 	
-	Brick.console(YAHOO);
 	YAHOO.widget.Overlay.VIEWPORT_OFFSET = 0;
 
 	/**
