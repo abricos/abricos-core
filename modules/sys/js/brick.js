@@ -103,8 +103,6 @@ Brick.env.user = {
 	session: ''
 };
 
-
-
 Brick.namespace = function() {
 	var a=arguments, o=null, i, j, d;
 	for (i=0; i<a.length; i=i+1) {
@@ -123,6 +121,111 @@ Brick.console = function(obj){
 	if (!console){ return; }
 	if (typeof console['log'] != 'function'){ return; }
 	console.log(obj);
+};
+
+
+/**
+ * Вернуть True, если объект определен, иначе False
+ * <p><strong>Usage:</strong><br>
+ * <code> if (!Brick.objectExists('Brick.mod.mymodule')){ return; }</code></p>
+ * @method objectExists
+ * @static
+ * @param {String} namespace Идентификатор объекта, 
+ * например "Brick.mod.user.API"
+ * @return {Boolean}
+ */
+Brick.objectExists = function(namespace){
+	var obj = Brick.convertToObject(namespace);
+	return !YAHOO.lang.isNull(obj);
+};
+
+/**
+ * Конвертировать идентификатор объекта в объект.
+ * 
+ * @method convertToObject
+ * @static
+ * @param {String} path Идентификатор объекта, 
+ * например "Brick.mod.blog.API.showTopicListByUserWidget"
+ * @return {Object}
+ */
+Brick.convertToObject = function(path){
+	var d=path.split(".");
+	var o=Brick;
+	for (var j=(d[0] == "Brick")?1:0; j<d.length; j++) {
+		if (typeof o[d[j]] == 'undefined'){ return null; }
+		o=o[d[j]];
+	}
+	return o;
+};
+
+
+/**
+ * Найти в Dom элементы типа SCRIPT, удалить их, при этом 
+ * собрав весь JavaScript текст 
+ * @method cleanScript
+ * @static
+ * @param {Object} el Dom элемент 
+ * @return {String} JavaScript текст
+ */
+Brick.cleanScript = function(el){
+	if (!el.childNodes.length){
+		return "";
+	}
+	var i, s = "", c;
+	for (i=0;i<el.childNodes.length;i++){
+		c = el.childNodes[i];
+		if (typeof c.tagName != 'undefined'){
+			if (c.tagName.toLowerCase() == 'script'){
+				s += c.innerHTML;
+				el.removeChild(c);
+			}else{
+				s += Brick.cleanScript(c);
+			}
+		}
+	}
+	return s;
+};
+
+/**
+ * Удалить все дочернии элементы Dom элемента 
+ * @method elClear
+ * @static
+ * @param {Object} el Dom элемент  
+ */
+Brick.elClear = function(el){ 
+	while(el.childNodes.length){
+		el.removeChild(el.childNodes[0]);
+	} 
+};
+
+/**
+ * Вернуть новый Dom элемент, если в параметрах указан элемент контейнер, 
+ * то поместить этот элемент в него.
+ * @method elCreate
+ * @static
+ * @param {String} tag Имя типа элемента, например 'DIV'
+ * @param {Object} parent (optional) Элемент контейнер
+ */
+Brick.elCreate = function(tag, parent){
+	var el = document.createElement(tag);
+	if (typeof parent != 'undefined'){
+		parent.appendChild(el);
+	}
+	return el;
+};
+
+/**
+ * Выполнить JavaScript text
+ * 
+ * @method readScript
+ * @static
+ * @param {String} text JavaScript текст 
+ */
+Brick.readScript = function(text){
+	var s = document.createElement("script");
+	s.charset = "utf-8";
+	s.text = text;
+	document.body.appendChild(s);
 };
 
 /**
@@ -1213,6 +1316,73 @@ Brick.namespace('util');
 })();
 
 
+(function(){
+	
+	var querycount = 0; 
+	var uniqurl = function(){
+		querycount++;
+		return (querycount++) + (new Date().getTime());
+	};
+
+	var readScript = Brick.readScript;
+
+	var sendPost = function(module, brick, cfg ){
+		cfg = cfg || {};
+		cfg['json'] = cfg['json'] || {};
+
+		var post = "json="+encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['json']));
+		YAHOO.util.Connect.asyncRequest("POST", 
+			'/ajax/' + module + '/' + brick +'/'+ uniqurl()+'/', {
+				success: function(o) {
+					readScript(o.responseText);
+					if (typeof cfg.success == 'function'){
+						cfg.success(o);
+					}
+				}, 
+				failure: function(o){ 
+					// alert("CONNECTION FAILED!"); 
+				}
+			}, 
+			post
+		);
+	};
+	
+	/**
+	 * Менеджер AJAX запросов
+	 * 
+	 * @class Connection
+	 * @namespace Brick.util
+	 * @static
+	 */
+	Brick.util.Connection = {};
+	
+	/**
+	 * Отправить AJAX запрос кирпичу определенного модуля
+	 * 
+	 * @method sendCommand
+	 * @static
+	 * @param {String} module Имя модуля
+	 * @param {String} brick Имя кирпича
+	 * @param {Object} cfg Параметры запроса, в т.ч. и POST данные.
+	 * Если cfg['hidden'] == True, то запрос будет происходить в фоновом режиме, 
+	 * иначе будет показана панель "ожидания процесса"   
+	 */
+	Brick.util.Connection.sendCommand = function(module, brick, cfg){
+		if (typeof YAHOO.util.Connect == 'undefined' || typeof YAHOO.lang.JSON == 'undefined'){
+			Brick.Loader.add({
+			    yahoo: ['connection', 'json'],
+			    onSuccess: function() {
+					sendPost(module, brick, cfg);
+				},
+				onFailure: function(){
+				}
+			});
+		}else{
+			sendPost(module, brick, cfg);
+		}
+	};
+})();
+
 //типизированный AJAX
 (function(){
 	
@@ -1507,14 +1677,9 @@ Brick.dateExt = function(){
 				m.event.executed = true;
 				var f = error ? m.event.onFailure : m.event.onSuccess;
 
-				//try{
-					if (typeof f == 'function'){
-						f();
-					}else{
-						Brick.console('error');						
-						Brick.console(m);						
-					}
-				//}catch(e){ alert(YAHOO.lang.dump(e)); }
+				if (typeof f == 'function'){
+					f();
+				}
 			}
 			this._isProccess = false;
 			
@@ -1548,104 +1713,109 @@ Brick.dateExt = function(){
 				}
 			}
 			
-			var loader =  new Y.Loader(Y.merge(cfgYUILoader, {
-				'require': ylib
-			}));
+			var __self = this;
 			
-			var requires = [];
-			
-			if (elib.length > 0){
-				var l = [], nm;
-				for (i=0;i<elib.length;i++){
-					nm = elib[i].name;
-					// l[l.length] = nm;
-					requires[requires.length] = nm;
-					loader.addModule({
-						'name': nm, 
-						'type': elib[i].type, 
-						'fullpath': elib[i].fullpath
-					});
-				}				
-			}
-			
-			if (mlib.length > 0){
-				var mm, mb, mv, minfo, rq=[];
-				
-				for (var ii=0;ii<mlib.length;ii++){
-					if (!mlib[ii]){ continue; }
-					
-					mm = mlib[ii].name;
-					minfo = Brick.Modules[mm];
-					
-					if (!minfo){ continue; }
-					
-					for (j=0;j<mlib[ii].files.length;j++){
-						mb = mlib[ii].files[j];
-						mv = "";
-						for (k=0;k<minfo.length;k++){
-							if (minfo[k]['f'] == mb){ mv = minfo[k]['k']; }
-						}
-						if (mv == ""){ continue; }
-						
-						var ldCk = Brick._ldCk[mm] = Brick._ldCk[mm] || {};
-						ldCk = ldCk[mb] = ldCk[mb] || {'ok': false, 'n': 0};
-						
-						var samm = mm.split("/"), src = "";
-						
-						if (samm.length == 2){
-							var nHost = samm[0], nPort = 80, nModName = samm[1];
-							aHost = nHost.split(':');
-							if (aHost.length == 2){
-								nHost = aHost[0];
-								if (aHost[1]*1 != 0){
-									nPort = aHost[1]*1 ;
-								}
-							}
-							src = "/app/gzip/"+nHost+"/"+nPort+"/"+nModName+"/"+mv+"/"+mb;
-						}else{
-							src = "/gzip.php?type=mod&module="+mm
-								+"&version="+mv
-								+"&tt="+Brick.env.ttname
-								+"&n="+ldCk['n']
-								+"&lang="+Brick.env.language
-								+"&file="+mb;
-						}
+			Y.use(ylib, function(){
 
-						var reqid='n'+ldCk['n']+mm+mb;
+				var requires = [], ldMod = {};
 	
-						if (Brick._ldReqId[reqid]){ continue; }	
-						Brick._ldReqId[reqid] = true;
-						
-						requires[requires.length] = reqid;
-						
+				if (elib.length > 0){
+					var l = [], nm;
+					for (i=0;i<elib.length;i++){
+						nm = elib[i].name;
+						// l[l.length] = nm;
+						requires[requires.length] = nm;
+						ldMod[nm] = {
+							'name': nm, 
+							'type': elib[i].type, 
+							'fullpath': elib[i].fullpath
+						};
+						/*
 						loader.addModule({
-							name: reqid, 
-							type: "js", 
-							fullpath: src
+							'name': nm, 
+							'type': elib[i].type, 
+							'fullpath': elib[i].fullpath
 						});
+						/**/
+					}				
+				}
+				
+				if (mlib.length > 0){
+					var mm, mb, mv, minfo, rq=[];
+					
+					for (var ii=0;ii<mlib.length;ii++){
+						if (!mlib[ii]){ continue; }
+						
+						mm = mlib[ii].name;
+						minfo = Brick.Modules[mm];
+						
+						if (!minfo){ continue; }
+						
+						for (j=0;j<mlib[ii].files.length;j++){
+							mb = mlib[ii].files[j];
+							mv = "";
+							for (k=0;k<minfo.length;k++){
+								if (minfo[k]['f'] == mb){ mv = minfo[k]['k']; }
+							}
+							if (mv == ""){ continue; }
+							
+							var ldCk = Brick._ldCk[mm] = Brick._ldCk[mm] || {};
+							ldCk = ldCk[mb] = ldCk[mb] || {'ok': false, 'n': 0};
+							
+							var samm = mm.split("/"), src = "";
+							
+							if (samm.length == 2){
+								var nHost = samm[0], nPort = 80, nModName = samm[1];
+								aHost = nHost.split(':');
+								if (aHost.length == 2){
+									nHost = aHost[0];
+									if (aHost[1]*1 != 0){
+										nPort = aHost[1]*1 ;
+									}
+								}
+								src = "/app/gzip/"+nHost+"/"+nPort+"/"+nModName+"/"+mv+"/"+mb;
+							}else{
+								src = "/gzip.php?type=mod&module="+mm
+									+"&version="+mv
+									+"&tt="+Brick.env.ttname
+									+"&n="+ldCk['n']
+									+"&lang="+Brick.env.language
+									+"&file="+mb;
+							}
+	
+							var reqid='n'+ldCk['n']+mm+mb;
+		
+							if (Brick._ldReqId[reqid]){ continue; }	
+							Brick._ldReqId[reqid] = true;
+							
+							requires[requires.length] = reqid;
+							
+							ldMod[reqid] = {
+								name: reqid, 
+								type: "js", 
+								fullpath: src
+							};
+						}
 					}
 				}
-			}
-			loader.require(requires);
-			var __self = this;
-			loader.load(function(evt){
-				Brick.console(ylib);
-				Brick.console(Y);
-				__self._event(evt.msg != 'success'); 
+				
+				YUI(Y.merge(cfgYUILoader, {
+					'modules': ldMod
+				})).use(requires, function (Y) {
+					__self._event(false); 
+				});
 			});
 		}		
 	};
 	Brick._ldCk = {};
 	Brick._ldReqId = {};
-	
-	/*
-	YUI(cfgYUILoader).use('yui2-dom', function (y) {
+
+	YUI(cfgYUILoader).use(['yui2-dom', 'yui2-event'], function (y) {
 		Y = y;
-		
+		YAHOO = Y.YUI2;
 		var old = Brick.Loader;
 		Brick.Loader = new Loader();
 		Brick.Loader.addRange(old.mods);
 	});
-	/**/
 	
 })();
