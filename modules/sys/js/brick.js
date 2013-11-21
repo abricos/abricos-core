@@ -1570,8 +1570,8 @@ Brick.dateExt = function(){
 	var cfgYUILoader = {
 		timeout: 15000,
         combine: false,
-        comboBase: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
         base: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
+        comboBase: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
         root: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
         comboSep: ',',
         root: "",
@@ -1595,9 +1595,11 @@ Brick.dateExt = function(){
 	        }
 	    }
 	};
+	Brick.YUI = YUI(cfgYUILoader);
 	
 	var Module = function(o){
-		this.yahoo = [];
+		this.yahoo = [];	// YUI2
+		this.yui = [];		// YUI3
 		this.ext = [];
 		this.mod = [];
 		this.isLoad = false;
@@ -1606,7 +1608,9 @@ Brick.dateExt = function(){
 	};
 	Module.prototype = {
 		init: function(o){
+			o = o || {};
 			if (typeof o.yahoo != 'undefined'){ this.yahoo = o.yahoo; }
+			if (typeof o.yui != 'undefined'){ this.yui = o.yui; }
 			if (typeof o.ext != 'undefined'){ this.ext = o.ext; }
 			if (typeof o.mod != 'undefined'){ this.mod = o.mod; }
 			this.event = { onSuccess: o.onSuccess, onFailure: o.onFailure, executed: false};
@@ -1626,17 +1630,6 @@ Brick.dateExt = function(){
 			this._modules = [];
 			this._reqYUI = {};
 			this._cacheReqMod = {};
-			
-			/*
-			var __self = this;
-			this._yuiLoader = new Y.Loader(cfgYUILoader);
-			this._yuiLoader.onSuccess = function(){
-				__self._event(false); 
-			};
-			this._yuiLoader.onFailure = function (err){
-				__self._event(true); alert ('Ошибка загрузки модуля: ' + YAHOO.lang.dump(err) );
-			};
-			/**/
 		},
 		add: function(param){
 			var m = new Module(param);
@@ -1712,10 +1705,18 @@ Brick.dateExt = function(){
 				for (j=0;j<m.ext.length;j++){ elib[elib.length] = m.ext[j]; }
 				// YUI2
 				for (j=0;j<m.yahoo.length;j++){
-					r = m.yahoo[j];
+					r = 'yui2-'+m.yahoo[j];
 					if (typeof this._reqYUI[r] == 'undefined'){
 						this._reqYUI[r] = true;
-						ylib[ylib.length] = 'yui2-'+r; 
+						ylib[ylib.length] = r; 
+					}
+				}
+				// YUI3
+				for (j=0;j<m.yui.length;j++){
+					r = m.yui[j];
+					if (typeof this._reqYUI[r] == 'undefined'){
+						this._reqYUI[r] = true;
+						ylib[ylib.length] = r; 
 					}
 				}
 			}
