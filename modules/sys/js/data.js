@@ -10,13 +10,12 @@ Brick.namespace('util.data.byid');
 
 var Component = new Brick.Component();
 Component.requires = {
-	yahoo: ['dom']
+	'yui': ['dom']
 };
 Component.entryPoint = function(){
 
-	var Dom = YAHOO.util.Dom,
-		E = YAHOO.util.Event,
-		L = YAHOO.lang;
+	var Y = Brick.YUI,
+		L = Y.Lang;
 	
 	var NS = this.namespace;
 	
@@ -1178,7 +1177,7 @@ Component.entryPoint = function(){
 		if (L.isString(list)){
 			list = [list];
 		}
-		cfg = L.merge({
+		cfg = Y.merge({
 			'owner': null,
 			'disableCheckFill': false
 		}, cfg || {});

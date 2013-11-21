@@ -1568,6 +1568,7 @@ Brick.dateExt = function(){
 	};
 	
 	var cfgYUILoader = {
+		skin: 'sam',
 		timeout: 15000,
         combine: false,
         base: "/gzip.php?base=/js/yui/"+Brick.env.lib.yui+"&file=",
@@ -1591,6 +1592,7 @@ Brick.dateExt = function(){
 	                        }
 	                    }
 	                }
+	
 	            }
 	        }
 	    }
@@ -1714,6 +1716,7 @@ Brick.dateExt = function(){
 				// YUI3
 				for (j=0;j<m.yui.length;j++){
 					r = m.yui[j];
+	
 					if (typeof this._reqYUI[r] == 'undefined'){
 						this._reqYUI[r] = true;
 						ylib[ylib.length] = r; 
@@ -1738,7 +1741,7 @@ Brick.dateExt = function(){
 				}
 				
 				if (mlib.length > 0){
-					var mm, mb, mv, minfo, rq=[];
+					var mm, mb, mv, minfo;
 					
 					for (var ii=0;ii<mlib.length;ii++){
 						if (!mlib[ii]){ continue; }

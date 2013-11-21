@@ -1,12 +1,10 @@
 /*
-* @version $Id$
-* @copyright Copyright (C) 2008 Abricos. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ */
 
 var Component = new Brick.Component();
 Component.requires = {
-	yahoo: ['tabview','dragdrop'],
+	yui: ['tabview'],
 	mod:[
 		{name: 'sys', files: ['data.js', 'form.js', 'container.js','widgets.js']},
 		{name: 'user', files: ['guest.js']}
@@ -17,6 +15,9 @@ if (Brick.componentExists('antibot', 'bot')){
 	rm[rm.length] = {name: 'antibot', files: ['bot.js']}; 
 }
 Component.entryPoint = function(NS){
+	
+	var Y = Brick.YUI,
+		L = Y.Lang;
 	
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
@@ -40,7 +41,11 @@ Component.entryPoint = function(NS){
 			
 			container.innerHTML = TM.replace('manager');
 			
-			var tabView = new YAHOO.widget.TabView(TM.getElId('manager.tab'));
+			// new YAHOO.widget.TabView();
+			var tabView = new Y.TabView({
+				'srcNode': '#'+TM.getElId('manager.tab')
+			});
+			tabView.render();
 			
 			var pages = {};
 			pages['users'] = new NS.UsersWidget(TM.getEl('manager.users'));
