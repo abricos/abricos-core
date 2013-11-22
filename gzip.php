@@ -25,7 +25,7 @@ $lang = getParam("lang", "ru");
 $libType = getParam("type", "");
 $templateName = getParam("tt", "default");
 $module = getParam("module", "");
-$mime = getParam("mime", "js");
+$mime = getParam("mime", "");
 
 $diskCache = getParam("diskcache", "true") == "true";
 $compress = getParam("compress", "true") == "true";
@@ -40,15 +40,6 @@ $cacheKey = "";
 $realPath = realpath(".");
 $cachePath = $realPath."/cache";
 $diskCacheFileKey = "";
-
-switch($mime){
-	case "js":
-		$headContentType = "Content-type: text/javascript; charset=utf-8";
-		break;
-	case "css":
-		$headContentType = "Content-type: text/css; charset=utf-8";
-		break;
-}
 
 if ($libType == 'sys'){
 	$files = array('/modules/sys/js/brick.js');
@@ -66,7 +57,28 @@ if ($libType == 'sys'){
 		}
 	}
 	$files = $newFiles;
+}else if (count($files)>0 && empty($mime)){
+	$fi = pathinfo($files[0]);
+	$ext = strtolower($fi['extension']);
+	switch ($ext){
+		case "js":
+			$mime = "js";
+			break;
+		case "css":
+			$mime = "css";
+			break;
+	}
 }
+
+switch($mime){
+	case "js":
+		$headContentType = "Content-type: text/javascript; charset=utf-8";
+		break;
+	case "css":
+		$headContentType = "Content-type: text/css; charset=utf-8";
+		break;
+}
+
 
 // if (is_browser('ie')){ $compress = false; }
 if ($compress){

@@ -13,6 +13,7 @@
 [mod=user]userblock[/mod]
 [mod=rss]meta[/mod]
 [var=version][/var]
+[var=jsyui][/var]
 [mcss=sys]widget.css[/mcss]
 [*]--><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru" dir="ltr">
@@ -21,17 +22,29 @@
 	<meta name="keywords" content="[var]meta_keys[/var]" />
 	<meta name="description" content="[var]meta_desc[/var]" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	[mod]rss:meta[/mod]
-	
-	<link rel="stylesheet" href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=0.2" type="text/css" />
-	[bkvar]css[/bkvar]
+
+	<link rel="stylesheet" href="/gzip.php?base=/js/yui/[var]jsyui[/var]&file=cssreset/cssreset-min.css,cssfonts/cssfonts-min.css,cssgrids/cssgrids-min.css,cssbase/cssbase-min.css,node-menunav/assets/skins/sam/node-menunav.css" type="text/css" />
 
 	[mod]sys:jsvar[/mod]
+	
+	<link rel="stylesheet" href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=0.3" type="text/css" />
+	[bkvar]css[/bkvar]
+
 	[bkvar]js[/bkvar]
 	
+	[mod]rss:meta[/mod]
 </head>
-<body class="yui-skin-sam">
-	<div id="doc4" class="yui-t3">
+<body class="yui3-skin-sam">
+
+	<div class="page-header">
+		<div class="yui3-g">
+			<div class="yui3-u-1-2">1</div>
+			<div class="yui3-u-1-2">2</div>
+			<div class="yui3-u-1-2">3</div>
+		</div>
+	</div>
+
+	<div id="doc3" class="yui-t3">
 		<div id="hd">
 			<div class="tllogo">
 				<a href="/" title="Home">

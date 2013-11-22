@@ -1,8 +1,6 @@
 /*
-@version $Id$
-@copyright Copyright (C) 2008 Abricos. All rights reserved.
-@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ */
 
 /**
  * @module Sys
@@ -22,10 +20,10 @@ Component.requires = {
 };
 Component.entryPoint = function(){
 	
-	var Dom = YAHOO.util.Dom,
-		E = YAHOO.util.Event,
-		L = YAHOO.lang;
-
+	var Y = Brick.YUI,
+		L = Y.Lang,
+		Dom = Y.DOM;
+	
 	var TM = this.template;
 
 	var isFileUploadRole = false;
@@ -332,7 +330,7 @@ Component.entryPoint = function(){
 	        
 	        var par = el.parentNode;
 	        par.replaceChild(this._wrap, el);
-	        Dom.get(TId['editor']['editowrap']).appendChild(el);
+	        Dom.byId(TId['editor']['editowrap']).appendChild(el);
 	    },
 	    
 	    _initButtons: function(){
@@ -500,10 +498,10 @@ Component.entryPoint = function(){
 	        
 	        if (!L.isString(id)) {
 	            if (id.tagName && (id.tagName.toLowerCase() == 'textarea')) {
-	                id = Dom.generateId(id);                    
+	                id = Y.guid(id);                    
 	            } else { return false; }
 	        } else {
-	            var el = Dom.get(id);
+	            var el = Dom.byId(id);
 	            if (el.tagName && el.tagName.toLowerCase() == 'textarea') {
 	                //All good
 	            } else { return false; }
@@ -749,8 +747,8 @@ Component.entryPoint = function(){
     var _buttonsAddedCss = {};
     
     var EditorButton = function(owner, config){
-    	config = L.merge({
-    		name: Dom.generateId(),
+    	config = Y.merge({
+    		name: Y.guid(),
     		image: '',
     		title: '',
     		titleId: '',
