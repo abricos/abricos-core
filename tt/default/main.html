@@ -15,7 +15,7 @@
 [var=version][/var]
 [var=jsyui][/var]
 [mcss=sys]widget.css[/mcss]
-[*]--><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+[*]--><!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru" dir="ltr">
 <head>
 	<title>[var]meta_title[/var]</title>
@@ -23,7 +23,7 @@
 	<meta name="description" content="[var]meta_desc[/var]" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-	<link rel="stylesheet" href="/gzip.php?base=/js/yui/[var]jsyui[/var]&file=cssreset/cssreset-min.css,cssfonts/cssfonts-min.css,cssgrids/cssgrids-min.css,cssbase/cssbase-min.css,node-menunav/assets/skins/sam/node-menunav.css" type="text/css" />
+	<link rel="stylesheet" href="/gzip.php?base=/js/yui/[var]jsyui[/var]&type=css&file=cssreset/cssreset-min.css,cssfonts/cssfonts-min.css,cssgrids/cssgrids-min.css,cssbase/cssbase-min.css,node-menunav/assets/skins/sam/node-menunav.css" type="text/css" />
 
 	[mod]sys:jsvar[/mod]
 	
@@ -36,51 +36,56 @@
 </head>
 <body class="yui3-skin-sam">
 
-	<div class="page-header">
-		<div class="yui3-g">
-			<div class="yui3-u-1-2">1</div>
-			<div class="yui3-u-1-2">2</div>
-			<div class="yui3-u-1-2">3</div>
-		</div>
-	</div>
-
-	<div id="doc3" class="yui-t3">
-		<div id="hd">
-			<div class="tllogo">
-				<a href="/" title="Home">
-					<img src="/tt/[bkvar]ttowner[/bkvar]/images/logo.png" />
-				</a>
+	<div id="doc">
+		<div id="hd"><header>
+			<div class="gwrap">
+				<div class="yui3-g">
+					<div class="yui3-u-1-4">
+						<h1 class="site-name">
+							<a href="/">[ph]sys:site_name[/ph]</a>
+						</h1>
+					</div>
+					<div class="yui3-u-1-2">
+						<div class="site-desc">
+							[ph]sys:site_title[/ph]
+						</div>
+					</div>
+					<div class="yui3-u-1-4">
+						<div class="small smalluserblock">
+							[mod]user:userblock[/mod]
+						</div>
+					</div>
+				
+					<span class="tl"></span>
+					<p class="dsc"></p>
+				</div>
 			</div>
-			<div class="tlcont">
-				<span class="tl">[ph]sys:site_name[/ph]</span>
-				<p class="dsc">[ph]sys:site_title[/ph]</p>
-			</div>
-			[mod]sitemap:breadcrumb[/mod]
-		</div>
+		</header></div>
+		
 		<div id="bd">
-			<div id="yui-main">
-				<div class="yui-b">
-					<div class="yui-g box">
+			<div class="gwrap">
+				[mod]sitemap:breadcrumb[/mod]
+				<div class="yui3-g">
+					<div class="yui3-u-3-4">
 						[tt]content[/tt]
+					</div>
+					<div class="yui3-u-1-4">
+						[mod]sitemap:vmenu[/mod]
+						[mod]news:newsblock[/mod]
+						[mod]blog:lasttopic[/mod]
+						[mod]blog:commentlive[/mod]
+						[mod]blog:tagblock[/mod]
+						[mod]blog:catblock[/mod]
 					</div>
 				</div>
 			</div>
-			<div class="yui-b sidebar">
-				[mod]sitemap:vmenu[/mod]
-				[mod]news:newsblock[/mod]
-				[mod]blog:lasttopic[/mod]
-				[mod]blog:commentlive[/mod]
-				[mod]blog:tagblock[/mod]
-				[mod]blog:catblock[/mod]
-			</div>
 		</div>
 		<div id="ft">
-			<p>&#169; [ph]sys:site_name[/ph] - all rights reserved. Powered by <a href="http://abricos.org" title="Abricos - Content Management System (CMS), Web Application Platform (WebOS)">Abricos</a> [var]version[/var]</p>
+			<div class="gwrap">
+				<p>&#169; [ph]sys:site_name[/ph] - all rights reserved. Powered by <a href="http://abricos.org" title="Abricos - Content Management System (CMS), Web Application Platform (WebOS)">Abricos</a> [var]version[/var]</p>
+			</div>
 		</div>
-		<div class="small smalluserblock">
-			[mod]user:userblock[/mod]
-		</div>
+		
 	</div>
 </body>
-
 </html>

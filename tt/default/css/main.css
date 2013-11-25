@@ -1,0 +1,35 @@
+body #doc {
+	color: #575757;
+}
+
+#doc .gwrap {
+	width: 970px;
+	margin: 0 auto;
+}
+
+#doc #hd {
+    background: -moz-linear-gradient(center top, #23282b 0px, #6E7D87 100%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+    border-bottom: 1px solid #DFDFDF;
+	height: 80px;
+}
+
+#doc #hd .site-name {
+	padding-top: 5px;
+	margin: 0;
+	font-size: 25px;
+	font-weight: normal;
+}
+#doc #hd .site-name a {
+	color: #FFFFFF;
+	text-decoration: none;	
+}
+#doc #hd .site-desc {
+	padding-top: 14px;
+	color: #858585;
+}
+
+
+#doc #bd {
+	background-color: #F2F2F2;
+	color: #295F9F;
+}
