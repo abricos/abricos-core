@@ -1,11 +1,9 @@
 <?php
 /**
- * @version $Id$
  * @package Abricos
  * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
+ * @author Alexander Kuzmin <roosit@abricos.org>
  * @ignore
  */
 
@@ -42,12 +40,15 @@ $cachePath = $realPath."/cache";
 $diskCacheFileKey = "";
 
 if ($libType == 'sys'){
+	$mime = 'js';
 	$files = array('/modules/sys/js/brick.js');
 	$module = "sys";
 }else if ($libType == 'fullcssforie'){
+	$mime = 'css';
 	$files = array('fullcssforie');
 	$module = "sys";
 }else if ($libType == 'mod'){
+	$mime = 'js';
 	$newFiles = array();
 	foreach($files as $file){
 		if ($module == "_template"){
@@ -79,6 +80,7 @@ switch($mime){
 		break;
 }
 
+header($headContentType);
 
 // if (is_browser('ie')){ $compress = false; }
 if ($compress){
@@ -104,7 +106,7 @@ if ($compress){
 // Setup cache info
 if ($diskCache) {
 	if (!$cachePath){
-		header($headContentType);
+		// header($headContentType);
 		die("alert('Real path failed.');");
 	}
 	
@@ -144,7 +146,6 @@ if ($cacheFileExists){
   }
 }
 
-header($headContentType);
 header("Vary: Accept-Encoding");  // Handle proxies
 
 header("ETag: $etag");

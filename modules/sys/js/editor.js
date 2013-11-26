@@ -320,7 +320,7 @@ Component.entryPoint = function(){
         _createTextArea: function() {
     	
     		var el = this.get('element');
-
+    		
     		var T = _T[el.id];
     		var TId = _TId[el.id];
     		
@@ -491,22 +491,21 @@ Component.entryPoint = function(){
 	     * @method init
 	     * @private
 	     */
-        init: function(p_oElement, p_oAttributes) {
-    		Editor.superclass.init.call(this, p_oElement, p_oAttributes);
+        init: function(el, p_oAttributes) {
+    		Editor.superclass.init.call(this, el, p_oAttributes);
+    		
+    		if (L.isString(el)){
+    			el = Dom.byId(el);
+    		}
+    		if (!L.isValue(el) || !el.tagName || el.tagName.toLowerCase() != 'textarea') {
+    			return false;
+            }
+    		if (el.id == ''){
+    			el.id = Y.guid(id);
+    		}
 
-	        var id = p_oElement;
-	        
-	        if (!L.isString(id)) {
-	            if (id.tagName && (id.tagName.toLowerCase() == 'textarea')) {
-	                id = Y.guid(id);                    
-	            } else { return false; }
-	        } else {
-	            var el = Dom.byId(id);
-	            if (el.tagName && el.tagName.toLowerCase() == 'textarea') {
-	                //All good
-	            } else { return false; }
-	        }
-	
+	        var id = el.id;
+   
 	        Editor._instances[id] = this;
 
 	        var tm = TM.get(id);

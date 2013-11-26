@@ -3,20 +3,22 @@
 [ph=sys:meta_title][/ph][ph=sys:meta_keys][/ph][ph=sys:meta_desc][/ph]
 [ph=sys:site_name]Site Name[/ph]
 [ph=sys:site_title]Brief description of your site[/ph]
+
 [bkvar=ttowner]default[/bkvar]
 [bkvar=js][/bkvar]
 [bkvar=css][/bkvar]
 [mod=sys]jsvar[/mod]
 [mod=news]newsblock[/mod]
 [mod=blog]lasttopic,commentlive,catblock,tagblock[/mod]
-[mod=sitemap]vmenu,breadcrumb[/mod]
 [mod=user]userblock[/mod]
 [mod=rss]meta[/mod]
 [var=version][/var]
 [var=jsyui][/var]
-[mcss=sys]widget.css[/mcss]
+
+[mod=sitemap]hmenu,breadcrumb[/mod]
+
 [*]--><!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru" dir="ltr">
+<html lang="ru" class="yui3-loading">
 <head>
 	<title>[var]meta_title[/var]</title>
 	<meta name="keywords" content="[var]meta_keys[/var]" />
@@ -55,10 +57,8 @@
 							[mod]user:userblock[/mod]
 						</div>
 					</div>
-				
-					<span class="tl"></span>
-					<p class="dsc"></p>
 				</div>
+				[mod]sitemap:hmenu[/mod]
 			</div>
 		</header></div>
 		
@@ -70,7 +70,6 @@
 						[tt]content[/tt]
 					</div>
 					<div class="yui3-u-1-4">
-						[mod]sitemap:vmenu[/mod]
 						[mod]news:newsblock[/mod]
 						[mod]blog:lasttopic[/mod]
 						[mod]blog:commentlive[/mod]

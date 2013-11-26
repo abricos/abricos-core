@@ -18,10 +18,6 @@ if (typeof Brick == 'undefined' || !Brick){
 	Brick = {};
 }
 
-var Y = YUI();
-Brick.YUI = Y;
-
-
 /**
  * Переменные окружения платформы 
  * 
@@ -104,6 +100,42 @@ Brick.env.user = {
 	 */
 	session: ''
 };
+
+var vsYUI = Brick.env.lib.yui;
+
+var cfgYUILoader = {
+	// skin: 'sam',
+	timeout: 15000,
+    combine: false,
+    base: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
+    comboBase: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
+    root: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
+    comboSep: ',',
+    groups: {
+        yui2: {
+            combine: false,
+            base: "/gzip.php?base=/js/yui/2in3&file=",
+            comboBase: '/gzip.php?file=',
+            root: '/js/yui/2in3/',
+            patterns:  {
+                'yui2-': {
+                    configFn: function(me) {
+                        if(/-skin|reset|fonts|grids|base/.test(me.name)) {
+                            me.type = 'css';
+                            me.path = me.path.replace(/\.js/, '.css');
+                            me.path = me.path.replace(/\/yui2-skin/, '/assets/skins/sam/yui2-skin');
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+};
+Brick.YUI = YUI(cfgYUILoader);
+
+var Y = Brick.YUI;
+Brick.YUI = Y;
 
 Brick.namespace = function() {
 	var a=arguments, o=null, i, j, d;
@@ -1567,39 +1599,6 @@ Brick.dateExt = function(){
 		}
 	};
 	
-	var vsYUI = Brick.env.lib.yui;
-	
-	var cfgYUILoader = {
-		// skin: 'sam',
-		timeout: 15000,
-        combine: false,
-        base: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
-        comboBase: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
-        root: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
-        comboSep: ',',
-	    groups: {
-	        yui2: {
-	            combine: false,
-	            base: "/gzip.php?base=/js/yui/2in3&file=",
-	            comboBase: '/gzip.php?file=',
-	            root: '/js/yui/2in3/',
-	            patterns:  {
-	                'yui2-': {
-	                    configFn: function(me) {
-	                        if(/-skin|reset|fonts|grids|base/.test(me.name)) {
-	                            me.type = 'css';
-	                            me.path = me.path.replace(/\.js/, '.css');
-	                            me.path = me.path.replace(/\/yui2-skin/, '/assets/skins/sam/yui2-skin');
-	                        }
-	                    }
-	                }
-	
-	            }
-	        }
-	    }
-	};
-	Brick.YUI = YUI(cfgYUILoader);
-	
 	var Module = function(o){
 		this.yahoo = [];	// YUI2
 		this.yui = [];		// YUI3
@@ -1825,5 +1824,4 @@ Brick.dateExt = function(){
 	var old = Brick.Loader;
 	Brick.Loader = new Loader();
 	Brick.Loader.addRange(old.mods);
-	
 })();
