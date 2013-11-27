@@ -28,6 +28,8 @@ Component.entryPoint = function(){
 		T = TM.data,
 		TId = TM.idManager;
 	
+	Dom.addClass(document.body, 'yui-skin-sam');
+	
 	var m_oMinimizedIconTemplate,
 		m_oMaximizedIconTemplate,
 		m_oNormalIconTemplate,

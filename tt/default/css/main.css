@@ -1,8 +1,7 @@
-body #doc {
+#doc {
 	color: #575757;
 }
-a,
-a:visited {
+a, a:visited {
 	color: #295f9f;
 }
 
@@ -15,6 +14,9 @@ a:visited {
 	background-color: #1b1e1f;
 }
 
+#doc #hd a {
+    color: #bebebe;
+}
 #doc #hd .tline {
 	background-color: #23282b;
 	border-bottom: 1px solid #2f3538;
