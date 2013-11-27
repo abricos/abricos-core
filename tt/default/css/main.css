@@ -1,6 +1,10 @@
 body #doc {
 	color: #575757;
 }
+a,
+a:visited {
+	color: #295f9f;
+}
 
 #doc .gwrap {
 	width: 970px;
@@ -29,18 +33,93 @@ body #doc {
 	padding-top: 14px;
 	color: #858585;
 }
-#doc #hd .mline {
-}
+
+/* * * * * * * * * * * * * * * * * * * * */
+/*            Page Content               */
+/* * * * * * * * * * * * * * * * * * * * */
+#doc #bd .content h1 {font-size:138.5%}
+#doc #bd .content h2 { font-size:123.1%}
+#doc #bd .content h3 {font-size:108%}
+#doc #bd .content h1,
+#doc #bd .content h2,
+#doc #bd .content h3 {margin:1em 0}
+#doc #bd .content h1,
+#doc #bd .content h2,
+#doc #bd .content h3,
+#doc #bd .content h4,
+#doc #bd .content h5,
+#doc #bd .content h6,
+#doc #bd .content strong {font-weight:bold}
+#doc #bd .content abbr,
+#doc #bd .content acronym{border-bottom:1px dotted #000;cursor:help}
+#doc #bd .content em{font-style:italic}
+#doc #bd .content blockquote,
+#doc #bd .content ul,
+#doc #bd .content ol,
+#doc #bd .content dl {margin:1em}
+#doc #bd .content ol,
+#doc #bd .content ul,
+#doc #bd .content dl{margin-left:2em}
+#doc #bd .content ol{list-style:decimal outside}
+#doc #bd .content ul{list-style:disc outside}
+#doc #bd .content dl dd{margin-left:1em}
+#doc #bd .content th,
+#doc #bd .content td{border:1px solid #000;padding:.5em}
+#doc #bd .content th{font-weight:bold;text-align:center}
+#doc #bd .content caption{margin-bottom:.5em;text-align:center}
+#doc #bd .content p,
+#doc #bd .content fieldset,
+#doc #bd .content table,
+#doc #bd .content pre{margin-bottom:1em}
+#doc #bd .content input[type=text],
+#doc #bd .content input[type=password],
+#doc #bd .content textarea{width:12.25em;*width:11.9em}
+#yui3-css-stamp.cssbase{display:none}
 
 #doc #bd {
+	padding: 25px 0;
 	background-color: #F2F2F2;
-	color: #295F9F;
+	border-bottom: 1px solid #d7d7d7;
+}
+#doc #bd .content {
+	border: 1px solid #d7d7d7;
+	background-color: #fff;
+	padding: 20px 30px;
 }
 
-/* * * * * * * * * * * * Nav Menu Bar * * * * * * * * * */
-/*                     Взято с YUI 3.13.0               */
-/* * * * * * * * * * * * * * * * * *  * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * */
+/*               SideBar                 */
+/* * * * * * * * * * * * * * * * * * * * */
+#doc #bd .sidebar {
+	padding-left: 25px;
+}
+#doc #bd .sidebar .box {
+	padding: 10px 20px 7px 20px;
+	border: 1px solid #d7d7d7;
+	background-color: #fff;
+	margin-bottom: 25px;
+}
+#doc #bd .sidebar h3 {
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 20px;
+	margin-bottom: 10px;
+}
 
+/* * * * * * * * * * * * * * * * * * * * */
+/*            Page Footer               */
+/* * * * * * * * * * * * * * * * * * * * */
+#doc #ft {
+	padding: 25px 0;
+}
+
+
+/* * * * * * * * * * * * * * *  * * * * * */
+/*    NavMenuBar (взято с YUI 3.13.0)     */
+/* * * * * * * * * * * * * * *  * * * * * */
+.yui3-menu a {
+    color: #bebebe;
+}
 /* Vertical menus and submenus */
 .yui3-menu-content, 
 .yui3-menu .yui3-menu .yui3-menu-content {
@@ -100,6 +179,7 @@ body #doc {
 	margin: 0;
 	width: 158px;
 }
+
 .yui3-menu-horizontal .yui3-menu-label,
 .yui3-menu-horizontal .yui3-menuitem-content {
     padding: 0 26px 0 0;

@@ -8,24 +8,23 @@
 [bkvar=js][/bkvar]
 [bkvar=css][/bkvar]
 [mod=sys]jsvar[/mod]
-[mod=news]newsblock[/mod]
-[mod=blog]lasttopic,commentlive,catblock,tagblock[/mod]
 [mod=user]userblock[/mod]
 [mod=rss]meta[/mod]
 [var=version][/var]
 [var=jsyui][/var]
 
 [mod=sitemap]hmenu,breadcrumb[/mod]
+[mod=news]newsblock[/mod]
 
 [*]--><!DOCTYPE html>
 <html lang="ru" class="yui3-loading">
 <head>
 	<title>[var]meta_title[/var]</title>
-	<meta name="keywords" content="[var]meta_keys[/var]" />
-	<meta name="description" content="[var]meta_desc[/var]" />
+	<meta name="keywords" content="[var]meta_keys[/var]">
+	<meta name="description" content="[var]meta_desc[/var]">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-	<link rel="stylesheet" href="/gzip.php?base=/js/yui/[var]jsyui[/var]&type=css&file=cssreset/cssreset-min.css,cssfonts/cssfonts-min.css,cssgrids/cssgrids-min.css,cssbase/cssbase-min.css,node-menunav/assets/node-menunav-core.css" type="text/css" />
+	<link rel="stylesheet" href="/gzip.php?base=/js/yui/[var]jsyui[/var]&type=css&file=cssreset/cssreset-min.css,cssfonts/cssfonts-min.css,cssgrids/cssgrids-min.css,node-menunav/assets/node-menunav-core.css" type="text/css" />
 
 	[mod]sys:jsvar[/mod]
 	
@@ -69,17 +68,19 @@
 		
 		<div id="bd">
 			<div class="gwrap">
-				[mod]sitemap:breadcrumb[/mod]
 				<div class="yui3-g">
 					<div class="yui3-u-3-4">
-						[tt]content[/tt]
+						<div class="content">
+				[mod]sitemap:breadcrumb[/mod]
+							[tt]content[/tt]
+						</div>
 					</div>
 					<div class="yui3-u-1-4">
-						[mod]news:newsblock[/mod]
-						[mod]blog:lasttopic[/mod]
-						[mod]blog:commentlive[/mod]
-						[mod]blog:tagblock[/mod]
-						[mod]blog:catblock[/mod]
+						<div class="sidebar">
+							<div class="sidebaritem">
+								[mod]news:newsblock[/mod]
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
