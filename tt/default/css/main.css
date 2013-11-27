@@ -8,14 +8,15 @@ body #doc {
 }
 
 #doc #hd {
-    background: -moz-linear-gradient(center top, #23282b 0px, #6E7D87 100%) repeat scroll 0 0 rgba(0, 0, 0, 0);
-	background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#23282b),color-stop(100%,#6E7D87));    
-    border-bottom: 1px solid #DFDFDF;
-	height: 80px;
+	background-color: #1b1e1f;
 }
 
+#doc #hd .tline {
+	background-color: #23282b;
+	border-bottom: 1px solid #2f3538;
+}
 #doc #hd .site-name {
-	padding-top: 5px;
+	padding: 7px 0 10px;
 	margin: 0;
 	font-size: 25px;
 	font-weight: normal;
@@ -28,9 +29,160 @@ body #doc {
 	padding-top: 14px;
 	color: #858585;
 }
-
+#doc #hd .mline {
+}
 
 #doc #bd {
 	background-color: #F2F2F2;
 	color: #295F9F;
+}
+
+/* * * * * * * * * * * * Nav Menu Bar * * * * * * * * * */
+/*                     Взято с YUI 3.13.0               */
+/* * * * * * * * * * * * * * * * * *  * * * * * * * * * */
+
+/* Vertical menus and submenus */
+.yui3-menu-content, 
+.yui3-menu .yui3-menu .yui3-menu-content {
+    font-size: 93%;  /* 12px */
+    line-height: 2.1;  /* 18px */
+    *line-height: 2.05; /* For IE */
+    border: solid 1px #1b1e1f;
+    background: #1b1e1f;
+    padding: 3px 0;
+}
+.yui3-menu .yui3-menu .yui3-menu-content {
+	font-size: 100%;
+}
+/* Horizontal menus */
+.yui3-menu-horizontal .yui3-menu-content {
+    line-height: 3;  
+    *line-height: 2.8;
+    padding: 0;
+}
+.yui3-menu ul,
+.yui3-menu ul ul {
+	margin-top: 3px;
+	padding-top: 3px;
+    /* border-top: solid 1px #ccc; /**/
+}
+.yui3-menu ul.first-of-type {
+    border: 0;
+	margin: 0;
+	padding: 0;    
+}
+.yui3-menu-horizontal ul {
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+.yui3-menu li,
+.yui3-menu .yui3-menu li {
+    _border-bottom: solid 1px #fff;
+}
+.yui3-menu-horizontal li {
+	_border-bottom: 0;
+}
+.yui3-menubuttonnav li li,
+.yui3-splitbuttonnav li li {
+	border-right: 0;
+}
+/* Menuitems and menu labels */
+.yui3-menu-label,
+.yui3-menu .yui3-menu .yui3-menu-label,
+.yui3-menuitem-content,
+.yui3-menu .yui3-menu .yui3-menuitem-content {
+    padding: 0 1em;
+    color: #bebebe;
+    text-decoration: none;
+	float: none;
+	border: 0;
+	margin: 0;
+	width: 158px;
+}
+.yui3-menu-horizontal .yui3-menu-label,
+.yui3-menu-horizontal .yui3-menuitem-content {
+    padding: 0 26px 0 0;
+    margin: -1px 0;
+    float: left; 	
+    width: auto;
+}
+.yui3-menu-label,
+.yui3-menu .yui3-menu .yui3-menu-label {
+	background: url(../i/vertical-menu-submenu-indicator.png) right center no-repeat;
+}
+.yui3-menu-horizontal .yui3-menu-label {
+    /* background: url(../i/sprite.png) repeat-x 0 0; /**/
+}
+.yui3-menubuttonnav .yui3-menu-label,
+.yui3-splitbuttonnav .yui3-menu-label {
+	background-image: none;
+}
+.yui3-menubuttonnav .yui3-menu-label {
+    padding-right: 0;
+}
+.yui3-menubuttonnav .yui3-menu-label em {
+	font-style: normal;
+	padding-right: 20px;
+    display: block;
+    background: url(../i/horizontal-menu-submenu-indicator.png) right center no-repeat;
+}
+.yui3-splitbuttonnav .yui3-menu-label {
+	padding: 0;
+}
+.yui3-splitbuttonnav .yui3-menu-label a {
+	float: left;
+	width: auto;
+    color: #000;
+    text-decoration: none;
+    cursor: default;
+	padding: 0 5px 0 10px;
+}
+.yui3-splitbuttonnav .yui3-menu-label .yui3-menu-toggle {
+	padding: 0;	/* Overide padding applied by the preceeding rule. */
+	border-left: solid 1px #ccc; 
+	width: 15px;
+	overflow: hidden;
+	text-indent: -1000px;
+    background: url(../i/horizontal-menu-submenu-indicator.png) 3px center no-repeat;	
+}
+/* Selected menuitem */
+.yui3-menu-label-active,
+.yui3-menu-label-menuvisible,
+.yui3-menu .yui3-menu .yui3-menu-label-active,
+.yui3-menu .yui3-menu .yui3-menu-label-menuvisible {
+	/* background-color: #B3D4FF; /**/
+}
+.yui3-menuitem-active .yui3-menuitem-content,
+.yui3-menu .yui3-menu .yui3-menuitem-active .yui3-menuitem-content {
+	border-left-width: 0;
+    margin-left: 0;
+    color: #fffefe;
+    
+}
+.yui3-menu-horizontal .yui3-menu-label-active,
+.yui3-menu-horizontal .yui3-menuitem-active .yui3-menuitem-content,
+.yui3-menu-horizontal .yui3-menu-label-menuvisible {
+    color: #fffefe;
+}
+.yui3-menu-horizontal .yui3-menu .yui3-menuitem-active .yui3-menuitem-content {
+    background-color: #272c2f;
+}
+
+.yui3-menubuttonnav .yui3-menu-label-active,
+.yui3-menubuttonnav .yui3-menuitem-active .yui3-menuitem-content,
+.yui3-menubuttonnav .yui3-menu-label-menuvisible,
+.yui3-splitbuttonnav .yui3-menu-label-active,
+.yui3-splitbuttonnav .yui3-menuitem-active .yui3-menuitem-content,
+.yui3-splitbuttonnav .yui3-menu-label-menuvisible {
+    border-left-width: 1px;
+    margin-left: -1px;
+}
+.yui3-splitbuttonnav .yui3-menu-label-menuvisible {
+    /* border-color: #808080; /**/
+    background: transparent;
+}
+.yui3-splitbuttonnav .yui3-menu-label-menuvisible .yui3-menu-toggle {
+    /* border-color: #7D98B8; /**/
+    background: url(../i/horizontal-menu-submenu-toggle.png) left center no-repeat;
 }
