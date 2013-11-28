@@ -103,13 +103,12 @@ Brick.env.user = {
 
 var vsYUI = Brick.env.lib.yui;
 
-var cfgYUILoader = {
-	// skin: 'sam',
+YUI_config = {
 	timeout: 15000,
     combine: false,
-    base: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
-    comboBase: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
-    root: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
+    base: "/gzip.php?file=/js/yui/"+vsYUI+"/",
+    // comboBase: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
+    // root: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
     comboSep: ',',
     groups: {
         yui2: {
@@ -132,10 +131,7 @@ var cfgYUILoader = {
         }
     }
 };
-Brick.YUI = YUI(cfgYUILoader);
-
-var Y = Brick.YUI;
-Brick.YUI = Y;
+var Y = Brick.YUI = YUI();
 
 Brick.namespace = function() {
 	var a=arguments, o=null, i, j, d;
@@ -1799,7 +1795,7 @@ Brick.dateExt = function(){
 					}
 				}
 
-				YUI(Y.merge(cfgYUILoader, {
+				YUI(Y.merge(YUI_config, {
 					'modules': ldMod
 				})).use(requires, function (Y) {
 					__self._event(false); 

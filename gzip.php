@@ -23,7 +23,7 @@ $lang = getParam("lang", "ru");
 $libType = getParam("type", "");
 $templateName = getParam("tt", "default");
 $module = getParam("module", "");
-$mime = getParam("mime", "");
+// $mime = getParam("mime", "");
 
 $diskCache = getParam("diskcache", "true") == "true";
 $compress = getParam("compress", "true") == "true";
@@ -36,8 +36,10 @@ $encodings = array();
 $enc = "";
 $cacheKey = "";
 $realPath = realpath(".");
-$cachePath = $realPath."/cache";
+$cachePath = $realPath."/cache/gzip";
 $diskCacheFileKey = "";
+
+@mkdir($cachePath, 0777, true);
 
 if ($libType == 'sys'){
 	$mime = 'js';
@@ -82,7 +84,6 @@ switch($mime){
 
 header($headContentType);
 
-// if (is_browser('ie')){ $compress = false; }
 if ($compress){
 	if (isset($_SERVER['HTTP_ACCEPT_ENCODING']))
 		$encodings = explode(',', strtolower(preg_replace("/\s+/", "", $_SERVER['HTTP_ACCEPT_ENCODING'])));
@@ -296,9 +297,9 @@ function getParam($name, $def = false) {
 function getFileContents($path, $notcheck = false) {
 	$path = realpath($path);
 	$fi = pathinfo($path);
+	$extension = strtolower($fi["extension"]);
 	
 	if (!$notcheck){
-		$extension = strtolower($fi["extension"]);
 		switch($extension){
 			case "css": case "htm": case "js": break;
 			default:
@@ -309,18 +310,54 @@ function getFileContents($path, $notcheck = false) {
 	if (!$path || !@is_file($path))
 		return "";
 
-	if (function_exists("file_get_contents"))
-		return @file_get_contents($path);
+	if (function_exists("file_get_contents")){
+		$content = @file_get_contents($path);
+	}else{
+		$content = "";
+		$fp = @fopen($path, "r");
+		if (!$fp)
+			return "";
+		
+		while (!feof($fp))
+			$content .= fgets($fp);
+		
+		fclose($fp);
+	}
+	
+	if ($extension == "css"){
+		
+		$realPath = realpath(".");
+		$rBase = str_replace($realPath, "", $fi['dirname']);
+		
+		$pattern = '#((url\()([^\\|^\/|^\.\.]\S+)(\)))#';
 
-	$content = "";
-	$fp = @fopen($path, "r");
-	if (!$fp)
-		return "";
+		//Handle image path corrections (order is important)
+		$content = preg_replace($pattern, 
+			'${2}'.$rBase.'/${3}${4}', 
+			$content, -1, $count
+		); // just filename or subdirs/filename (e.g) url(foo.png),
+		// url(foo/foo.png)
+		
+		preg_match_all('/(url\()(\.\.\/\S+)(\))/', $content, $matches);
+		
+		$urls = $matches[2]; $reps = array();
+		for ($i=0; $i<count($urls); $i++){
+			$url = $urls[$i];
+			if ($reps[$url]){ continue; }
+			$reps[$url] = true;
 
-	while (!feof($fp))
-		$content .= fgets($fp);
-
-	fclose($fp);
+			$urlFile = realpath($fi['dirname']."/".$url);
+			if (empty($urlFile)){ continue; }
+			
+			$absUrl = str_replace($realPath, "", $urlFile);
+			if ($absUrl == $urlFile){ continue; }
+			
+			
+			$tmp = str_replace($url, $absUrl, $matches[0][$i]);
+			
+			$content = str_replace($matches[0][$i], $tmp, $content);
+		}
+	}
 
 	return $content;
 }
@@ -334,138 +371,6 @@ function putFileContents($path, $content) {
 		fwrite($fp, $content);
 		fclose($fp);
 	}
-}
-
-
-function is_browser($browser, $version = 0){
-	static $is;
-	if (!is_array($is))	{
-		$useragent = strtolower($_SERVER['HTTP_USER_AGENT']);
-		$regs = array();
-		$is = array(
-			'opera' => 0,
-			'ie' => 0,
-			'mozilla' => 0,
-			'firebird' => 0,
-			'firefox' => 0,
-			'camino' => 0,
-			'konqueror' => 0,
-			'safari' => 0,
-			'webkit' => 0,
-			'webtv' => 0,
-			'netscape' => 0,
-			'mac' => 0
-		);
-
-		// detect opera
-			# Opera/7.11 (Windows NT 5.1; U) [en]
-			# Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 5.0) Opera 7.02 Bork-edition [en]
-			# Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 4.0) Opera 7.0 [en]
-			# Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.0 [en]
-			# Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 5.0 [en]
-		if (strpos($useragent, 'opera') !== false) {
-			preg_match('#opera(/| )([0-9\.]+)#', $useragent, $regs);
-			$is['opera'] = $regs[2];
-		}
-
-		// detect internet explorer
-			# Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; Q312461)
-			# Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.0.3705)
-			# Mozilla/4.0 (compatible; MSIE 5.22; Mac_PowerPC)
-			# Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC; e504460WanadooNL)
-		if (strpos($useragent, 'msie ') !== false AND !$is['opera'])		{
-			preg_match('#msie ([0-9\.]+)#', $useragent, $regs);
-			$is['ie'] = $regs[1];
-		}
-
-		// detect macintosh
-		if (strpos($useragent, 'mac') !== false) {
-			$is['mac'] = 1;
-		}
-
-		// detect safari
-			# Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-us) AppleWebKit/74 (KHTML, like Gecko) Safari/74
-			# Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/51 (like Gecko) Safari/51
-		if (strpos($useragent, 'applewebkit') !== false AND $is['mac']) {
-			preg_match('#applewebkit/(\d+)#', $useragent, $regs);
-			$is['webkit'] = $regs[1];
-
-			if (strpos($useragent, 'safari') !== false) {
-				preg_match('#safari/([0-9\.]+)#', $useragent, $regs);
-				$is['safari'] = $regs[1];
-			}
-		}
-
-		// detect konqueror
-			# Mozilla/5.0 (compatible; Konqueror/3.1; Linux; X11; i686)
-			# Mozilla/5.0 (compatible; Konqueror/3.1; Linux 2.4.19-32mdkenterprise; X11; i686; ar, en_US)
-			# Mozilla/5.0 (compatible; Konqueror/2.1.1; X11)
-		if (strpos($useragent, 'konqueror') !== false) {
-			preg_match('#konqueror/([0-9\.-]+)#', $useragent, $regs);
-			$is['konqueror'] = $regs[1];
-		}
-
-		// detect mozilla
-			# Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.4b) Gecko/20030504 Mozilla
-			# Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.2a) Gecko/20020910
-			# Mozilla/5.0 (X11; U; Linux 2.4.3-20mdk i586; en-US; rv:0.9.1) Gecko/20010611
-		if (strpos($useragent, 'gecko') !== false AND !$is['safari'] AND !$is['konqueror']) {
-			preg_match('#gecko/(\d+)#', $useragent, $regs);
-			$is['mozilla'] = $regs[1];
-
-			// detect firebird / firefox
-				# Mozilla/5.0 (Windows; U; WinNT4.0; en-US; rv:1.3a) Gecko/20021207 Phoenix/0.5
-				# Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4b) Gecko/20030516 Mozilla Firebird/0.6
-				# Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4a) Gecko/20030423 Firebird Browser/0.6
-				# Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.6) Gecko/20040206 Firefox/0.8
-			if (strpos($useragent, 'firefox') !== false OR strpos($useragent, 'firebird') !== false OR strpos($useragent, 'phoenix') !== false) {
-				preg_match('#(phoenix|firebird|firefox)( browser)?/([0-9\.]+)#', $useragent, $regs);
-				$is['firebird'] = $regs[3];
-				if ($regs[1] == 'firefox') {
-					$is['firefox'] = $regs[3];
-				}
-			}
-
-			// detect camino
-				# Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-US; rv:1.0.1) Gecko/20021104 Chimera/0.6
-			if (strpos($useragent, 'chimera') !== false OR strpos($useragent, 'camino') !== false) {
-				preg_match('#(chimera|camino)/([0-9\.]+)#', $useragent, $regs);
-				$is['camino'] = $regs[2];
-			}
-		}
-
-		// detect web tv
-		if (strpos($useragent, 'webtv') !== false) {
-			preg_match('#webtv/([0-9\.]+)#', $useragent, $regs);
-			$is['webtv'] = $regs[1];
-		}
-
-		// detect pre-gecko netscape
-		if (preg_match('#mozilla/([1-4]{1})\.([0-9]{2}|[1-8]{1})#', $useragent, $regs)){
-			$is['netscape'] = "$regs[1].$regs[2]";
-		}
-	}
-
-	// sanitize the incoming browser name
-	$browser = strtolower($browser);
-	if (substr($browser, 0, 3) == 'is_') {
-		$browser = substr($browser, 3);
-	}
-
-	// return the version number of the detected browser if it is the same as $browser
-	if ($is["$browser"]) {
-		// $version was specified - only return version number if detected version is >= to specified $version
-		if ($version) {
-			if ($is["$browser"] >= $version) {
-				return $is["$browser"];
-			}
-		}else{
-			return $is["$browser"];
-		}
-	}
-
-	// if we got this far, we are not the specified browser, or the version number is too low
-	return 0;
 }
 
 ?>
