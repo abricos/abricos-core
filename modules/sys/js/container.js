@@ -28,8 +28,6 @@ Component.entryPoint = function(){
 		T = TM.data,
 		TId = TM.idManager;
 	
-	Dom.addClass(document.body, 'yui-skin-sam');
-	
 	var m_oMinimizedIconTemplate,
 		m_oMaximizedIconTemplate,
 		m_oNormalIconTemplate,
@@ -49,6 +47,9 @@ Component.entryPoint = function(){
 	 * @param {Object} config Конфигурация панели. 
 	 */
 	var Panel = function(config){
+		
+		Dom.addClass(document.body, 'yui-skin-sam');
+		
 		
 		/**
 		 * Уникальный идентификатор панели.

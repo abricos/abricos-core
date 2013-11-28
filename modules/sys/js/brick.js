@@ -106,11 +106,18 @@ var vsYUI = Brick.env.lib.yui;
 YUI_config = {
 	timeout: 15000,
     combine: false,
-    base: "/gzip.php?file=/js/yui/"+vsYUI+"/",
+    base: "/gzip.php?base=js/yui/"+vsYUI+"&file=",
     // comboBase: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
     // root: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
     comboSep: ',',
     groups: {
+    	gallery: {
+    	    combine: false,
+    	    base: "/gzip.php?base=js/yui/gallery&file=",
+            patterns:  {
+                'gallery-': { }
+            }
+    	},
         yui2: {
             combine: false,
             base: "/gzip.php?base=/js/yui/2in3&file=",
