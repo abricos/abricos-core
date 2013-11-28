@@ -8,13 +8,13 @@
 [bkvar=js][/bkvar]
 [bkvar=css][/bkvar]
 [mod=sys]jsvar[/mod]
-[mod=user]userblock[/mod]
 [mod=rss]meta[/mod]
 [var=version][/var]
 [var=jsyui][/var]
 
 [mod=sitemap]hmenu,breadcrumb[/mod]
 [mod=news]newsblock[/mod]
+[mod=user]userline[/mod]
 
 [*]--><!DOCTYPE html>
 <html lang="ru" class="yui3-loading">
@@ -54,9 +54,11 @@
 						</div>
 						
 						<div class="yui3-u-1-2">
-							<div class="small smalluserblock">
-								[mod]user:userblock[/mod]
-							</div>
+						</div>
+					</div>
+					<div id="userauthblock">
+						<div class="small smalluserblock">
+							[mod]user:userline[/mod]
 						</div>
 					</div>
 				</div>
@@ -90,9 +92,9 @@
 		<div id="ft">
 			<div class="gwrap">
 				<p>&#169; [ph]sys:site_name[/ph] - all rights reserved. Powered by <a href="http://abricos.org" title="Abricos - Content Management System (CMS), Web Application Platform (WebOS)">Abricos</a> [var]version[/var]</p>
+				
 			</div>
 		</div>
-		
 	</div>
 </body>
 </html>

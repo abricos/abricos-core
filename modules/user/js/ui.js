@@ -1,16 +1,17 @@
 /*
-* @version $Id$
-* @copyright Copyright (C) 2008 Abricos All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ */
 
 // Обработчик интерфейса размещенного на страницах сайта
 var Component = new Brick.Component();
 Component.requires = {
-	yahoo: ['dom'],
+	'yui': ['node'],
 	mod:[{name: 'sys', files: ['wait.js']}]
 };
 Component.entryPoint = function(NS){
+	
+	var Y = Brick.YUI,
+		L = Y.Lang;
 	
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,

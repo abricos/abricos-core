@@ -13,6 +13,9 @@ a, a:visited {
 #doc #hd {
 	background-color: #1b1e1f;
 }
+#doc #hd .gwrap {
+	position: relative;
+}
 
 #doc #hd a {
     color: #bebebe;
@@ -32,9 +35,23 @@ a, a:visited {
 	text-decoration: none;	
 }
 #doc #hd .site-desc {
-	padding-top: 14px;
+	padding-top: 15px;
 	color: #858585;
 }
+
+#doc #hd #userauthblock {
+	position: absolute;
+	top: 13px;
+	right: 0;
+}
+
+#userblock .autuser #appbosuilist {
+	z-index: 1000;
+}
+#userblock .autuser #appbosuilist a {
+	/* color: #295f9f;/**/
+}
+
 
 /* * * * * * * * * * * * * * * * * * * * */
 /*            Page Content               */
@@ -107,6 +124,7 @@ a, a:visited {
 	line-height: 20px;
 	margin-bottom: 10px;
 }
+
 
 /* * * * * * * * * * * * * * * * * * * * */
 /*            Page Footer               */
