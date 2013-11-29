@@ -1,0 +1,44 @@
+<!--[*]
+[script]userblock.php[/script]
+
+[mcss=user]user.css[/mcss]
+
+[bkvar=guest]
+	<div class="guestline">
+		<a href="#" class="showauthregpanel">Вход</a> | <a href="#" class="showregister">Регистрация</a>
+	</div>
+[/bkvar]
+
+[bkvar=user]
+	<div class="autuser">
+		<a href="/user/" class="showcp" title="{#brick.userblock.9}">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="{#brick.userblock.10}">{#brick.userblock.10}</a>)
+		<br />
+		<a href="/user/" class="showcp" title="{#brick.userblock.12}">{#brick.userblock.11}</a>
+	</div>
+[/bkvar]
+
+[bkvar=bosuser]
+	<div class="autuser">
+		<div class="authbtns">
+			<a href="/bos/#app=uprofile/ws/showws/" class="showprofile" title="{#brick.userblock.13}">{v#username}</a> (<a href="/user/logout/" class="showlogout" title="{#brick.userblock.14}">{#brick.userblock.14}</a>)
+			<a id="bshowbosui" href="/bos/" class="showbos" title="{#brick.userblock.15}">{#brick.userblock.16}</a>
+		</div>
+		<div id="appbosuicont" class="appbosuicont">
+			<div id="appbosuilist" class="aw-bos">
+				<div class="loading">
+					<img src="/images/loading.gif" /> {#brick.userblock.17}
+					<br />
+					{#brick.userblock.18}
+				</div>
+			</div>
+		</div>
+	</div>
+[/bkvar]
+
+[bkvar=result][/bkvar]
+
+[*]-->
+<div id="userblock">
+	[bkvar]result[/bkvar]
+</div>
+<script>Brick.ff('user','ui',function(){Brick.mod.user.ui.userblockInit('userblock');});</script>
