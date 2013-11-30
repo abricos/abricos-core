@@ -1,0 +1,21 @@
+.mod-sitemap .vmenuaccord .yui3-accordion {
+    border: 1px solid #d7d7d7;
+}
+.mod-sitemap .vmenuaccord .yui3-accordion-item .yui3-widget-hd {
+	background-color: #FFF;
+    border: 1px solid #d7d7d7;
+    padding-left: 10px;
+}
+.mod-sitemap .vmenuaccord .yui3-accordion-item .yui3-widget-hd:hover {
+	background-color: #FFD470;
+	border-color: #FFD470;
+}
+.mod-sitemap .vmenuaccord .yui3-accordion-item-label {
+    text-decoration: none;
+    background: transparent;
+    overflow: hidden;
+    color: #525252;
+}
+.mod-sitemap .vmenuaccord .yui3-accordion-item-label:hover{
+    text-decoration: underline;
+}
