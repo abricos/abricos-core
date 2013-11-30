@@ -106,7 +106,7 @@ var vsYUI = Brick.env.lib.yui;
 YUI_config = {
 	timeout: 15000,
     combine: false,
-    base: "/gzip.php?base=js/yui/"+vsYUI+"&file=",
+    base: "/gzip.php?base=js/yui/build&v="+vsYUI+"&file=",
     // comboBase: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
     // root: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
     comboSep: ',',

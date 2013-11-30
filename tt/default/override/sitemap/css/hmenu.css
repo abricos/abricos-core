@@ -1,0 +1,152 @@
+/* * * * * * * * * * * * * * *  * * * * * */
+/*    NavMenuBar (взято с YUI 3.13.0)     */
+/* * * * * * * * * * * * * * *  * * * * * */
+.mod-sitemap .hmenu .yui3-menu a {
+    color: #bebebe;
+}
+/* Vertical menus and submenus */
+.mod-sitemap .hmenu .yui3-menu-content, 
+.mod-sitemap .hmenu .yui3-menu .yui3-menu .yui3-menu-content {
+    font-size: 93%;  /* 12px */
+    line-height: 2.1;  /* 18px */
+    *line-height: 2.05; /* For IE */
+    border: solid 1px #1b1e1f;
+    background: #1b1e1f;
+    padding: 3px 0;
+}
+.mod-sitemap .hmenu .yui3-menu .yui3-menu .yui3-menu-content {
+	font-size: 100%;
+}
+/* Horizontal menus */
+.mod-sitemap .hmenu .yui3-menu-horizontal .yui3-menu-content {
+    line-height: 3;  
+    *line-height: 2.8;
+    padding: 0;
+}
+.mod-sitemap .hmenu .yui3-menu ul,
+.mod-sitemap .hmenu .yui3-menu ul ul {
+	margin-top: 3px;
+	padding-top: 3px;
+    /* border-top: solid 1px #ccc; /**/
+}
+.mod-sitemap .hmenu .yui3-menu ul.first-of-type {
+    border: 0;
+	margin: 0;
+	padding: 0;    
+}
+.mod-sitemap .hmenu .yui3-menu-horizontal ul {
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+.mod-sitemap .hmenu .yui3-menu li,
+.mod-sitemap .hmenu .yui3-menu .yui3-menu li {
+    _border-bottom: solid 1px #fff;
+}
+.mod-sitemap .hmenu .yui3-menu-horizontal li {
+	_border-bottom: 0;
+}
+.mod-sitemap .hmenu .yui3-menubuttonnav li li,
+.mod-sitemap .hmenu .yui3-splitbuttonnav li li {
+	border-right: 0;
+}
+/* Menuitems and menu labels */
+.mod-sitemap .hmenu .yui3-menu-label,
+.mod-sitemap .hmenu .yui3-menu .yui3-menu .yui3-menu-label,
+.mod-sitemap .hmenu .yui3-menuitem-content,
+.mod-sitemap .hmenu .yui3-menu .yui3-menu .yui3-menuitem-content {
+    padding: 0 1em;
+    color: #bebebe;
+    text-decoration: none;
+	float: none;
+	border: 0;
+	margin: 0;
+	width: 158px;
+}
+
+.mod-sitemap .hmenu .yui3-menu-horizontal .yui3-menu-label,
+.mod-sitemap .hmenu .yui3-menu-horizontal .yui3-menuitem-content {
+    padding: 0 26px 0 0;
+    margin: -1px 0;
+    float: left; 	
+    width: auto;
+}
+.mod-sitemap .hmenu .yui3-menu-label,
+.mod-sitemap .hmenu .yui3-menu .yui3-menu .yui3-menu-label {
+	background: url(../i/vertical-menu-submenu-indicator.png) right center no-repeat;
+}
+.mod-sitemap .hmenu .yui3-menu-horizontal .yui3-menu-label {
+    /* background: url(../i/sprite.png) repeat-x 0 0; /**/
+}
+.mod-sitemap .hmenu .yui3-menubuttonnav .yui3-menu-label,
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menu-label {
+	background-image: none;
+}
+.mod-sitemap .hmenu .yui3-menubuttonnav .yui3-menu-label {
+    padding-right: 0;
+}
+.mod-sitemap .hmenu .yui3-menubuttonnav .yui3-menu-label em {
+	font-style: normal;
+	padding-right: 20px;
+    display: block;
+    background: url(../i/horizontal-menu-submenu-indicator.png) right center no-repeat;
+}
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menu-label {
+	padding: 0;
+}
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menu-label a {
+	float: left;
+	width: auto;
+    color: #000;
+    text-decoration: none;
+    cursor: default;
+	padding: 0 5px 0 10px;
+}
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menu-label .yui3-menu-toggle {
+	padding: 0;	/* Overide padding applied by the preceeding rule. */
+	border-left: solid 1px #ccc; 
+	width: 15px;
+	overflow: hidden;
+	text-indent: -1000px;
+    background: url(../i/horizontal-menu-submenu-indicator.png) 3px center no-repeat;	
+}
+/* Selected menuitem */
+.mod-sitemap .hmenu .yui3-menu-label-active,
+.mod-sitemap .hmenu .yui3-menu-label-menuvisible,
+.mod-sitemap .hmenu .yui3-menu .yui3-menu .yui3-menu-label-active,
+.mod-sitemap .hmenu .yui3-menu .yui3-menu .yui3-menu-label-menuvisible {
+	/* background-color: #B3D4FF; /**/
+}
+.mod-sitemap .hmenu .yui3-menuitem-active .yui3-menuitem-content,
+.mod-sitemap .hmenu .yui3-menu .yui3-menu .yui3-menuitem-active .yui3-menuitem-content {
+	border-left-width: 0;
+    margin-left: 0;
+    color: #fffefe;
+    
+}
+.mod-sitemap .hmenu .yui3-menu-horizontal .yui3-menu-label-active,
+.mod-sitemap .hmenu .yui3-menu-horizontal .yui3-menuitem-active .yui3-menuitem-content,
+.mod-sitemap .hmenu .yui3-menu-horizontal .yui3-menu-label-menuvisible {
+    color: #fffefe;
+}
+.mod-sitemap .hmenu .yui3-menu-horizontal .yui3-menu .yui3-menuitem-active .yui3-menuitem-content {
+    background-color: #272c2f;
+}
+
+.mod-sitemap .hmenu .yui3-menubuttonnav .yui3-menu-label-active,
+.mod-sitemap .hmenu .yui3-menubuttonnav .yui3-menuitem-active .yui3-menuitem-content,
+.mod-sitemap .hmenu .yui3-menubuttonnav .yui3-menu-label-menuvisible,
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menu-label-active,
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menuitem-active .yui3-menuitem-content,
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menu-label-menuvisible {
+    border-left-width: 1px;
+    margin-left: -1px;
+}
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menu-label-menuvisible {
+    /* border-color: #808080; /**/
+    background: transparent;
+}
+.mod-sitemap .hmenu .yui3-splitbuttonnav .yui3-menu-label-menuvisible .yui3-menu-toggle {
+    /* border-color: #7D98B8; /**/
+    background: url(../i/horizontal-menu-submenu-toggle.png) left center no-repeat;
+}
