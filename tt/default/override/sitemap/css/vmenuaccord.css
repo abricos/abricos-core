@@ -10,6 +10,10 @@
 	background-color: #FFD470;
 	border-color: #FFD470;
 }
+.mod-sitemap .vmenuaccord .yui3-menu-content, 
+.mod-sitemap .vmenuaccord .yui3-menu .yui3-menu .yui3-menu-content {
+    border: 1px solid #d7d7d7;
+}
 .mod-sitemap .vmenuaccord .yui3-accordion-item-label {
     text-decoration: none;
     background: transparent;
