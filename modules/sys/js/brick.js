@@ -111,6 +111,14 @@ YUI_config = {
     // root: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
     comboSep: ',',
     groups: {
+    	aui: {
+    	    combine: false,
+    	    base: "/gzip.php?base=js/alloy-ui&file=",
+    	    // filter: 'raw',
+            patterns:  {
+                'aui-': { }
+            }
+    	},
     	gallery: {
     	    combine: false,
     	    base: "/gzip.php?base=js/yui/gallery&file=",
