@@ -103,7 +103,8 @@ Brick.env.user = {
 
 var vsYUI = Brick.env.lib.yui;
 
-YUI_config = {
+YUI.GlobalConfig = {
+// filter: 'raw',
 	timeout: 15000,
     combine: false,
     base: "/gzip.php?base=js/yui/build&v="+vsYUI+"&file=",
@@ -114,7 +115,6 @@ YUI_config = {
     	aui: {
     	    combine: false,
     	    base: "/gzip.php?base=js/alloy-ui&file=",
-    	    // filter: 'raw',
             patterns:  {
                 'aui-': { }
             }
@@ -1810,9 +1810,7 @@ Brick.dateExt = function(){
 					}
 				}
 
-				YUI(Y.merge(YUI_config, {
-					'modules': ldMod
-				})).use(requires, function (Y) {
+				YUI({'modules': ldMod}).use(requires, function (Y) {
 					__self._event(false); 
 				});				
 			};
