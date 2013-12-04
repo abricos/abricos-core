@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('datatype-date-math', function (Y, NAME) {
 
 /**
@@ -211,4 +204,4 @@ Y.namespace("DataType");
 Y.DataType.Date = Y.Date;
 
 
-}, '3.13.0', {"requires": ["yui-base"]});
+}, 'release-v3.14.0', {"requires": ["yui-base"]});

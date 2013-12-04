@@ -1,22 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
-(function () {
-var GLOBAL_ENV = YUI.Env;
-
-if (!GLOBAL_ENV._ready) {
-    GLOBAL_ENV._ready = function() {
-        GLOBAL_ENV.DOMReady = true;
-        GLOBAL_ENV.remove(YUI.config.doc, 'DOMContentLoaded', GLOBAL_ENV._ready);
-    };
-
-    GLOBAL_ENV.add(YUI.config.doc, 'DOMContentLoaded', GLOBAL_ENV._ready);
-}
-})();
 YUI.add('event-base', function (Y, NAME) {
 
 /*
@@ -1379,4 +1360,4 @@ Y.Env.evt.plugins.contentready = {
 };
 
 
-}, '3.13.0', {"requires": ["event-custom-base"]});
+}, 'release-v3.14.0', {"requires": ["event-custom-base"]});

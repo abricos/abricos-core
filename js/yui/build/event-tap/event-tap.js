@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('event-tap', function (Y, NAME) {
 
 /**
@@ -148,9 +141,9 @@ Y.Event.define(EVT_TAP, {
     @static
     **/
     delegate: function (node, subscription, notifier, filter) {
-        subscription[HANDLES.START] = node.delegate(EVT_START, function (e) {
+        subscription[HANDLES.START] = Y.delegate(EVT_START, function (e) {
             this._start(e, node, subscription, notifier, true);
-        }, filter, this);
+        }, node, filter, this);
     },
 
     /**
@@ -299,4 +292,4 @@ Y.Event.define(EVT_TAP, {
 });
 
 
-}, '3.13.0', {"requires": ["node-base", "event-base", "event-touch", "event-synthetic"]});
+}, 'release-v3.14.0', {"requires": ["node-base", "event-base", "event-touch", "event-synthetic"]});

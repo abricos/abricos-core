@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('slider-value-range', function (Y, NAME) {
 
 /**
@@ -307,7 +300,10 @@ Y.SliderValueRange = Y.mix( SliderValueRange, {
          * @protected
          */
         _setNewValue: function ( value ) {
-            return round( this._nearestValue( value ) );
+            if ( Y.Lang.isNumber( value ) ) {
+                return round( this._nearestValue( value ) );
+            }
+            return Y.Attribute.INVALID_VALUE;
         },
 
         /**
@@ -419,4 +415,4 @@ Y.SliderValueRange = Y.mix( SliderValueRange, {
 }, true );
 
 
-}, '3.13.0', {"requires": ["slider-base"]});
+}, 'release-v3.14.0', {"requires": ["slider-base"]});

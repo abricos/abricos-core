@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('dom-base', function (Y, NAME) {
 
 /**
@@ -95,7 +88,8 @@ Y.mix(Y_DOM, {
         var ret = '';
         if (el && attr && el.getAttribute) {
             attr = Y_DOM.CUSTOM_ATTRIBUTES[attr] || attr;
-            ret = el.getAttribute(attr, ieAttr);
+            // BUTTON value issue for IE < 8
+            ret = (el.tagName === "BUTTON" && attr === 'value') ? Y_DOM.getValue(el) : el.getAttribute(attr, ieAttr);
 
             if (ret === null) {
                 ret = ''; // per DOM spec
@@ -321,7 +315,9 @@ var re_tag = /<([a-z]+)/i,
     re_tbody = /(?:\/(?:thead|tfoot|tbody|caption|col|colgroup)>)+\s*<tbody/,
 
     TABLE_OPEN = '<table>',
-    TABLE_CLOSE = '</table>';
+    TABLE_CLOSE = '</table>', 
+    
+    selectedIndex;
 
 Y.mix(Y.DOM, {
     _fragClones: {},
@@ -389,8 +385,7 @@ Y.mix(Y.DOM, {
             create = Y_DOM._create,
             custom = creators,
             ret = null,
-            creator,
-            tag, nodes;
+            creator, tag, node, nodes;
 
         if (html != undefined) { // not undefined or null
             if (m && m[1]) {
@@ -401,16 +396,19 @@ Y.mix(Y.DOM, {
                     tag = creator;
                 }
             }
-
-            nodes = create(html, doc, tag).childNodes;
+            
+            node = create(html, doc, tag);
+            nodes = node.childNodes;
 
             if (nodes.length === 1) { // return single node, breaking parentNode ref from "fragment"
-                ret = nodes[0].parentNode.removeChild(nodes[0]);
+                ret = node.removeChild(nodes[0]);
             } else if (nodes[0] && nodes[0].className === 'yui3-big-dummy') { // using dummy node to preserve some attributes (e.g. OPTION not selected)
+                selectedIndex = node.selectedIndex;
+                
                 if (nodes.length === 2) {
                     ret = nodes[0].nextSibling;
                 } else {
-                    nodes[0].parentNode.removeChild(nodes[0]);
+                    node.removeChild(nodes[0]);
                     ret = Y_DOM._nl2frag(nodes, doc);
                 }
             } else { // return multiple nodes as a fragment
@@ -520,6 +518,12 @@ Y.mix(Y.DOM, {
             node.appendChild(newNode);
         }
 
+        // `select` elements are the only elements with `selectedIndex`.
+        // Don't grab the dummy `option` element's `selectedIndex`.
+        if (node.nodeName == "SELECT" && selectedIndex > 0) {
+            node.selectedIndex = selectedIndex - 1;
+        }
+        
         return ret;
     },
 
@@ -688,4 +692,4 @@ Y.mix(Y.DOM, {
 });
 
 
-}, '3.13.0', {"requires": ["dom-core"]});
+}, 'release-v3.14.0', {"requires": ["dom-core"]});

@@ -64,7 +64,7 @@ Brick.env.lib = {
 	 * @property yui
 	 * @type String
 	 */
-	yui: '3.13.0'
+	yui: '3.14.0'
 };
 
 /**
@@ -112,6 +112,7 @@ YUI.GlobalConfig = {
     // root: "/gzip.php?base=/js/yui/"+vsYUI+"&file=",
     comboSep: ',',
     groups: {
+    	/*
     	aui: {
     	    combine: false,
     	    base: "/gzip.php?base=js/alloy-ui&file=",
@@ -119,6 +120,7 @@ YUI.GlobalConfig = {
                 'aui-': { }
             }
     	},
+    	/**/
     	gallery: {
     	    combine: false,
     	    base: "/gzip.php?base=js/yui/gallery&file=",

@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('jsonp', function (Y, NAME) {
 
 var isFunction = Y.Lang.isFunction;
@@ -255,4 +248,4 @@ if (!YUI.Env.JSONP) {
 }
 
 
-}, '3.13.0', {"requires": ["get", "oop"]});
+}, 'release-v3.14.0', {"requires": ["get", "oop"]});

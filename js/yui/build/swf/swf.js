@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('swf', function (Y, NAME) {
 
 /**
@@ -208,4 +201,4 @@ Y.augment(SWF, Y.EventTarget);
 Y.SWF = SWF;
 
 
-}, '3.13.0', {"requires": ["event-custom", "node", "swfdetect", "escape"]});
+}, 'release-v3.14.0', {"requires": ["event-custom", "node", "swfdetect", "escape"]});

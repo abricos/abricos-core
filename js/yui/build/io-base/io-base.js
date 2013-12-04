@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('io-base', function (Y, NAME) {
 
 /**
@@ -1012,4 +1005,4 @@ Y.mix(Y.IO.prototype, {
 
 
 
-}, '3.13.0', {"requires": ["event-custom-base", "querystring-stringify-simple"]});
+}, 'release-v3.14.0', {"requires": ["event-custom-base", "querystring-stringify-simple"]});

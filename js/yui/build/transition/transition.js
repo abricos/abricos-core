@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('transition', function (Y, NAME) {
 
 /**
@@ -514,7 +507,7 @@ Y.Node.prototype.transition = function(name, config, callback) {
 
         fxConfig = Transition.fx[name];
 
-        if (config && typeof config !== 'boolean') {
+        if (config && typeof config === 'object') {
             config = Y.clone(config);
 
             for (prop in fxConfig) {
@@ -762,4 +755,4 @@ Y.mix(Transition.toggles, {
 });
 
 
-}, '3.13.0', {"requires": ["node-style"]});
+}, 'release-v3.14.0', {"requires": ["node-style"]});

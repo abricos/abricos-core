@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('frame', function (Y, NAME) {
 
     /*jshint maxlen: 500 */
@@ -465,7 +458,7 @@ YUI.add('frame', function (Y, NAME) {
             var str = '';
             if (!this._ready) {
                 Y.each(urls, function(v) {
-                    if (v !== '') {
+                    if (v) {
                         str += '<link rel="stylesheet" href="' + v + '" type="text/css">';
                     }
                 });
@@ -1048,4 +1041,4 @@ YUI.add('frame', function (Y, NAME) {
 
 
 
-}, '3.13.0', {"requires": ["base", "node", "plugin", "selector-css3", "yui-throttle"]});
+}, 'release-v3.14.0', {"requires": ["base", "node", "plugin", "selector-css3", "yui-throttle"]});

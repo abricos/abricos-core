@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('event-custom-complex', function (Y, NAME) {
 
 
@@ -674,4 +667,4 @@ for (key in FACADE) {
 }
 
 
-}, '3.13.0', {"requires": ["event-custom-base"]});
+}, 'release-v3.14.0', {"requires": ["event-custom-base"]});

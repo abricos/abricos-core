@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('dd-plugin', function (Y, NAME) {
 
 
@@ -204,4 +197,4 @@ YUI.add('dd-plugin', function (Y, NAME) {
 
 
 
-}, '3.13.0', {"optional": ["dd-constrain", "dd-proxy"], "requires": ["dd-drag"]});
+}, 'release-v3.14.0', {"optional": ["dd-constrain", "dd-proxy"], "requires": ["dd-drag"]});

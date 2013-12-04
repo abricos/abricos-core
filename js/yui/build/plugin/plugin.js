@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('plugin', function (Y, NAME) {
 
     /**
@@ -267,4 +260,4 @@ YUI.add('plugin', function (Y, NAME) {
     Y.namespace("Plugin").Base = Plugin;
 
 
-}, '3.13.0', {"requires": ["base-base"]});
+}, 'release-v3.14.0', {"requires": ["base-base"]});

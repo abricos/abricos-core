@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('dom-screen', function (Y, NAME) {
 
 (function(Y) {
@@ -609,4 +602,4 @@ Y.mix(DOM, {
 })(Y);
 
 
-}, '3.13.0', {"requires": ["dom-base", "dom-style"]});
+}, 'release-v3.14.0', {"requires": ["dom-base", "dom-style"]});

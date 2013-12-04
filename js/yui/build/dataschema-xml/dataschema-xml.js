@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('dataschema-xml', function (Y, NAME) {
 
 /**
@@ -387,4 +380,4 @@ SchemaXML = {
 Y.DataSchema.XML = Y.mix(SchemaXML, Y.DataSchema.Base);
 
 
-}, '3.13.0', {"requires": ["dataschema-base"]});
+}, 'release-v3.14.0', {"requires": ["dataschema-base"]});

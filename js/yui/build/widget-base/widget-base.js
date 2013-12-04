@@ -1,10 +1,3 @@
-/*
-YUI 3.13.0 (build 508226d)
-Copyright 2013 Yahoo! Inc. All rights reserved.
-Licensed under the BSD License.
-http://yuilibrary.com/license/
-*/
-
 YUI.add('widget-base', function (Y, NAME) {
 
 /**
@@ -784,7 +777,7 @@ Y.extend(Widget, Y.Base, {
      * For the Widget class, this will most commonly be null (resulting in a new
      * boundingBox node instance being created), unless a srcNode was provided
      * and CONTENT_TEMPLATE is null, in which case it will be srcNode.
-     * This behavior was introduced in 3.13.0 to accomodate single-box widgets
+     * This behavior was introduced in release-v3.14.0 to accomodate single-box widgets
      * whose BB & CB both point to srcNode (e.g. Y.Button).
      *
      * @method _defaultBB
@@ -1282,7 +1275,7 @@ Y.extend(Widget, Y.Base, {
 Y.Widget = Widget;
 
 
-}, '3.13.0', {
+}, 'release-v3.14.0', {
     "requires": [
         "attribute",
         "base-base",

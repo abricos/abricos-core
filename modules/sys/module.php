@@ -17,7 +17,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 	 */
 	public $adress = null;
 	
-	public static $YUIVersion = "3.13.0";
+	public static $YUIVersion = "3.14.0";
 	
 	private $_manager = null;
 	
