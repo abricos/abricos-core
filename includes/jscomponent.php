@@ -2,10 +2,8 @@
 /**
  * JavaScript компонент
  * 
- * @version $Id$
  * @package Abricos
  * @subpackage Core
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin <roosit@abricos.org>
  */
@@ -19,7 +17,8 @@ class Ab_CoreJSCFile {
 	public $fileJS = "";
 	public $fileHTML = "";
 	public $fileCSS = "";
-	public $fileLANG = "";
+	// public $fileLANG = "";
+	public $fileLangs = array();
 	
 	public function __construct($pModule, $pComponent, $pTname = "default", $pLang = "ru"){
 		$tname = $this->parseName($pTname);
@@ -60,7 +59,9 @@ class Ab_CoreJSCFile {
 			}
 		}
 		
-		$this->fileLANG = $modPath."/langs/".$component."_".$lang.".js";
+		// $this->fileLANG = $modPath."/langs/".$component."_".$lang.".js";
+		
+		$this->fileLangs = globa($modPath."/langs/".$component."_*.js");
 	}
 	
 	public function error(){
@@ -80,10 +81,10 @@ class Ab_CoreJSCFile {
 		$js = $this->readJS();
 		$htm = $this->readHTML();
 		$css = $this->readCSS();
-		$lang = $this->readLANG();
+		$langs = $this->readLangs();
 		
 		$jscomp = new Ab_CoreJSCBuilder($this->module, $this->component);
-		return $jscomp->build($js, $htm, $css, $lang);
+		return $jscomp->build($js, $htm, $css, $langs);
 	}
 	
 	public function readJS(){
@@ -98,8 +99,18 @@ class Ab_CoreJSCFile {
 		return $this->read($this->fileHTML);
 	}
 	
+	/*
 	public function readLANG(){
 		return $this->read($this->fileLANG);
+	}
+	/**/
+	
+	public function readLangs(){
+		$ret = array();
+		foreach ($this->fileLangs as $fileLang){
+			array_push($ret, $this->read($fileLang));
+		}
+		return $ret;
 	}
 	
 	public function read($path) {
@@ -167,12 +178,12 @@ class Ab_CoreJSCBuilder {
 		$this->component = $component;
 	}
 	
-	public function build($js, $htm, $css, $lang){
+	public function build($js, $htm, $css, $langs){
 		$module = $this->module;
 		$component = $this->component;
 		
 		$content = $js;
-		$content .= $this->buildLanguage($lang);
+		$content .= $this->buildLanguage($langs);
 		$content .= $this->buildHTML($htm);
 		$content .= $this->buildCSS($css);
 
@@ -201,10 +212,15 @@ class Ab_CoreJSCBuilder {
 		return $content;
 	}
 	
-	public function buildLanguage($lang){
-		if (empty($lang)){ return ""; }
+	public function buildLanguage($langs){
+		$ret = "";
+		if (is_array($langs)){
+			foreach($langs as $lang){
+				$ret .= "(function(){".$lang."})();";
+			}
+		}
 		
-		return "(function(){".$lang."})();";
+		return $ret;
 	}
 	
 	public function buildHTML($htm){
