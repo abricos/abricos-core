@@ -1,10 +1,17 @@
-/* *
- * abricos.js - Template management framework (JavaScript)
- * http://github.com/abricos/abricos.js
+/*
+ * Template management framework (JavaScript)
  * 
  * The algorithm used based Abricos Platform (http://abricos.org)
  * 
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://github.com/abricos/abricos.js
+ * 
  * The MIT License
+ */
+
+/**
+ * @module abricos-core
+ * @author Alexander Kuzmin <roosit@abricos.org>
  */
 
 if (typeof Abricos == 'undefined' || !Abricos){
@@ -24,39 +31,170 @@ var _initAbricos = function(){
 
 	A._loading = true;
 	
+	/**
+	 * Global config object
+	 * 
+	 * @class Abricos.config
+	 * @static
+	 */
 	var CONF = A.config = Y.merge({
-		'lang': 'en',
-		'defModName': '_module_',
-		'defCompName': '_component_'
+		
+		/**
+		 * @property {String} lang
+		 * @default 'en'
+		 */
+		lang: 'en'
+			
 	}, Abricos_Config || {});
 	
 	A.Env = {
 		'DOMReady': false,
-		'mods': {},
+		'comps': {},
 		'temps': {},
 		'langs': {},
 		'css': {}
 	};
 	
-	A.mod = A.mod || {};
+	/**
+	 * The Key class specifies the path(namespace) to templates,
+	 * phrases of localization, components of module and etc.
+	 * 
+	 * @class Abricos.Key
+	 * @constructor
+	 * @param key {String|Array|Abricos.Key}
+	 * @example
+	 * 
+	 * 	var key = new A.Key("mod.mymod.mycomp.widget");
+	 * 	console.log(key.toArray()); // ["mod", "mymod", "mycomp", "widget"]
+	 */
+	var Key = function(key){
+		this.init(key);
+	};
+	Key.prototype = {
+		/**
+		 * Initialization.
+		 * @param key {String|Array|Abricos.Key}
+		 * @method init
+		 * @protected
+		 * @return {String}
+		 */
+		init: function(key){
+			
+			/**
+			 * Key elements of an array
+			 * @property path
+			 * @type array
+			 */
+			this.path = [];
+
+			
+			if (key instanceof Key){
+				key = key.toArray();
+			}else if (L.isString(key)){
+				key = key.split('.');
+			}
+			var i, p = this.path;
+			for (i=0;i<key.length;i++){
+				p[p.length] = L.trim(key[i]);
+			}
+		},
+		
+		/**
+		 * Return a string.
+		 * @method toString
+		 * @return {String}
+		 */
+		toString: function(){
+			return this.path.join(".");
+		},
+		
+		/**
+		 * Return a array.
+		 * @method toArray
+		 * @return {String}
+		 */
+		toArray: function(){
+			return this.path.slice(0);
+		},
+		
+		/**
+		 * @return {Abricos.Key}
+		 * @method clone
+		 */
+		clone: function(){
+			return new A.Key(this);
+		},
+		
+		/**
+		 * Executes the supplied function on each item in the key
+		 * @param fn {Function} Function to execute on each item in 
+		 * the key. The function will receive the following arguments:
+		 * 	@param {String} fn.item Current key item.
+		 * 	@param {Number} fn.index Current key index.
+		 * @method each
+		 */
+		each: function(fn){
+			if (!L.isFunction(fn)){ return; }
+			var p = this.path, i;
+			for (i=0;i<p.length;i++){
+				fn(p[i], i);
+			}
+		},
+		
+		/**
+		 * Add a new item(s) to the end an key.
+		 * @param ki {String|Array|Abricos.Key} Key item.
+		 * @param [clone=false] {Boolean} If TRUE - creates a new 
+		 * instance of the class.
+		 * @return {Abricos.Key}
+		 * @method push
+		 */
+		push: function(ki, clone){
+			var key = clone ? this.clone(): this,
+				pkey = new A.Key(ki);
+			pkey.each(function(item){
+				key.path.push(item);
+			});
+			return key;
+		},
+		
+		/**
+		 * Remove the last element of an key.
+		 * @param [clone=false] {Boolean} If TRUE - creates a new 
+		 * instance of the class.
+		 * @return {Abricos.Key}
+		 * @method pop
+		 */
+		pop: function(clone){
+			var key = clone ? this.clone(): this;
+			key.path.pop();
+			return key;
+		}
+	};
+	A.Key = Key;
 	
 	/**
-	 * The Language class manages phrases localization
-	 * 
-	 * @class Language
+	 * The Language class manages phrases localization.
+	 * @class Abricos.Language
 	 * @static
 	 */
-
 	var LNG = A.Language = {};
 
-	// Clone languge data (private function)
-	var cloneLang = function(from, to){
+	/**
+	 * Clone object
+	 * 
+	 * @param from {Object} From data
+	 * @param to {Object} To data
+	 * @method clone
+	 * @static
+	 */
+	LNG.clone = function(from, to){
 		for (var n in from){
 			if (L.isObject(from[n]) || L.isArray(from[n])){
 				if (typeof to[n] == 'undefined'){
 					to[n] = {};
 				}
-				cloneLang(from[n], to[n]);
+				LNG.clone(from[n], to[n]);
 			}else{
 				to[n] = from[n];
 			}
@@ -64,207 +202,141 @@ var _initAbricos = function(){
 	};
 	
 	/**
-	 * Add a language phrases in global storage
-	 * @param {String} Language ID
-	 * @param {Object} Language phrases
+	 * Add a language phrases in global storage.
+	 * @param key {String|Array|Abricos.Key} Namespace language phrases.
+	 * @param lang {String} Language ID.
+	 * @param seed {Object} Language phrases
 	 * @method add
 	 * @static
-	 */
-	LNG.add = function(lang, o){
-
-		var cfg = {
-				'modName': CONF.defModName,
-				'compName': CONF.defCompName,
-				'inRoot': false // True - ignore component namespace (mod.modname.compname)
-			},
-			d = A.Env.langs,
-			dLang = d[lang] || (d[lang] = {}),
-			args = SLICE.call(arguments, 0),
-			aln = args.length;
-		
-		if (aln > 2 && L.isObject(args[aln-1])){
-			cfg = L.merge(cfg, args[aln-1]);
-		}
-		
-		if (cfg.inRoot){
-			cloneLang(o, dLang);
-		}else{
-			if (aln >= 4){
-				cfg = Y.merge(cfg, {
-					'modName': args[2],
-					'compName': args[3]
-				});
-			}
-			var mnm = cfg.modName, cnm = cfg.compName,
-				no = {'mod': {}};
-			
-			no['mod'][mnm] = {};
-			no['mod'][mnm][cnm] = o;
-	
-			cloneLang(no, dLang);
-		}
-	};
-	
-	/**
-	 * Get a phrase or phrases collection by ID.
-	 * Example: 
-	 * 	Abricos.Language.get('mod.mymod.mycomp.title')
-	 * 	or
-	 * 	Abricos.Language.get(['mod', 'mymod', 'mycomp', 'title'])
-	 * @method add
-	 * @static
-	 */
-	LNG.get = function(key, cfg){
-		
-		cfg = Y.merge({
-			'lang': A.config.lang
-		}, cfg || {});
-		
-		var d = A.Env.langs[cfg.lang];
-		if (!d){ return ''; }
-
-		if (L.isString(key)){
-			key = key.split('.');
-		}
-		if (!L.isArray(key)){
-			return '';
-		}
-		
-		var i, l = d;
-		for (i=0;i<key.length;i++){
-			l = l[key[i]];
-			if (!L.isValue(l)){
-				return '';
-			}
-		}
-		return l;
-	};
-	
-	/**
-	 * Replace language IDs in text.
-	 * @param {String} s Source.
-	 * @param {Object|NULL} cfg Config.
-	 * @return {String} Text filled language phrases.
-	 * @method fillText
-	 * @static
-	 */
-	LNG.fillText = function(s, cfg){
-
-		cfg = Y.merge({
-			'lang': 'en',
-			'modName': null,
-			'compName': null,
-			'tName': null
-		}, cfg || {});
-		
-		// replacement of long IDs {#...}
-		var exp = new RegExp("(\{\#[a-zA-Z0-9_\.\-]+\})", "g"),		
-			arr = s.match(exp);
-
-		if (L.isArray(arr)){ 
-			var i, key, ph;
-			for (i=0;i<arr.length;i++){
-				key = arr[i].replace(/[\{#\}]/g, '');
-				
-				ph =  LNG.get(key);
-				s = s.replace(arr[i], ph);
-			}
-		}
-
-		// replacement of short IDs {##...}
-		if (L.isValue(cfg['modName']) 
-				&& L.isValue(cfg['compName'])
-				&& L.isValue(cfg['tName'])){
-
-			var exp = new RegExp("(\{\##[a-zA-Z0-9_\.\-]+\})", "g"),
-				arr = s.match(exp);
-
-			if (L.isArray(arr)){ 
-				var i, key, ph;
-				for (i=0;i<arr.length;i++){
-					key = arr[i].replace(/[\{##\}]/g, '');
-					
-					key = 'mod.'+cfg['modName']+'.'+cfg['compName']+'.'
-						+cfg['tName']+'.'+key;
-
-					ph =  LNG.get(key);
-					s = s.replace(arr[i], ph);
-				}
-			}
-		}
-		
-		return s;
-	};
-	
-	/**
-	 * The CSS class
+	 * @example
 	 * 
-	 * @class Language
-	 * @static
+	 * 	LNG.add('org.abricosjs.examples.page', 'en', {
+	 * 		'widget': {
+	 * 			'title': 'Hello World!',
+	 * 			'button': 'Close'
+	 * 		}
+	 * 	});
+	 *
+	 * 	LNG.add('org.abricosjs.examples.page', 'ru', {
+	 * 		'widget': {
+	 * 			'title': 'Привет мир!',
+	 * 			'button': 'Закрыть'
+	 * 		}
+	 * 	});
 	 */
-
-	var CSS = A.CSS = {};
-	
+	LNG.add = function(key, lang, seed){
+		var d = A.Env.langs,
+			dLang = d[lang] || (d[lang] = {}),
+			phs = A.objectByKey(dLang, key, true);
+		
+		LNG.clone(seed, phs);
+		
+		return phs;
+	};
 	
 	/**
-	 * Get the css source of a specific component.
-	 * @param {String} mnm The name of the module.
-	 * @param {String} cnm The name of the component.
+	 * Add a several language phrases in global storage.
+	 * @param key {String|Array|Abricos.Key} Namespace language phrases.
+	 * @param seed {Object} Language phrases including language ID.
+	 * @method addMulti
+	 * @static
+	 * @example
+	 * 
+	 * 	LNG.addMulti('org.abricosjs.examples.page', {
+	 * 		'en': {
+	 * 			'widget': {
+	 * 				'title': 'Hello World!',
+	 * 				'button': 'Close'
+	 * 			}
+	 * 		},
+	 * 		'ru': {
+	 * 			'widget': {
+	 * 				'title': 'Привет мир!',
+	 * 				'button': 'Закрыть'
+	 * 			}
+	 * 		}
+	 * 	});
+	 */
+	LNG.addMulti = function(key, seed){
+		if (!L.isObject(seed)){ return; }
+		
+		for (var n in seed){
+			LNG.add(key, n, seed[n]);
+		}
+	};
+	
+	/**
+	 * Get a phrase/phrases collection by ID.
+	 * 
+	 * @param key {String|Array|Abricos.Key} Phrase ID
+	 * @param [lang=Abricos.config.lang] {String} Language ID
+	 * @return {String} Phrase
 	 * @method get
-	 * @return {Object}
+	 * @static
+	 * @example
+	 * 
+	 * 	var ph = LNG.get('widget.title');
+	 * 	console.log(ph); // > Hello World!
+	 * 
+	 * or
+	 * 
+	 * 	var ph = LNG.get(['widget', 'button'], 'ru');
+	 * 	console.log(ph); // > Закрыть
+	 * 
+	 */
+	LNG.get = function(key, lang){
+		lang = lang || A.config.lang;
+		
+		var ph = A.objectByKey(A.Env.langs[lang], key);
+		
+		return L.isString(ph) ? ph : '';
+	};
+	
+	/**
+	 * The CSS class 
+	 * 
+	 * @class Abricos.CSS
 	 * @static
 	 */
-	CSS.get = function(mnm, cnm){
-		var t = A.Env.css;
-		
-		if (t[mnm] && t[mnm][cnm]){
-			return t[mnm][cnm];
-		}
-		return null;
-	};
-	
-	CSS.add = function(seed, mnm, cnm, cfg){
-		
-		if (!L.isString(seed)){ return; }
-		
-		var cfg = {
-				'modName': CONF.defModName,
-				'compName': CONF.defCompName
-			},
-			args = SLICE.call(arguments, 0),
-			aln = args.length,
-			css = A.Env.css;
-		
-		var source = L.trim(args[0]);
-		
-		if (source.indexOf('#') === 0){
-			var el = document.getElementById(source.substring(1));
-			if (!el){
-				source = "";
-			}else{
-				source = el.innerHTML;
-			}
-			seed = source;
-		}
-		
-		if (aln >= 3){
-			cfg = Y.merge(cfg, {
-				'modName': args[1],
-				'compName': args[2]
-			});
-		}
-		
-		mnm = cfg.modName;
-		cnm = cfg.compName;			
+	var CSS = A.CSS = {};
 
-		var cssm = css[mnm] || (css[mnm] = {});
-		cssm[cnm] = seed;
-		
-		return seed;
+	/**
+	 * Add CSS source in global storage.
+	 * @param key {String|Array|Abricos.Key} CSS ID.
+	 * @param seed {String} CSS source
+	 * @method add
+	 * @static
+	 */
+	CSS.add = function(key, seed){
+		var obj = A.objectByKey(A.Env.css, key, true);
+		obj.__src = L.isString(seed) ? seed : "";
 	};
 	
-	CSS.apply = function(mnm, cnm){
-		var css = CSS.get(mnm, cnm);
+	/**
+	 * Get a CSS source by ID.
+	 * 
+	 * @param key {String|Array|Abricos.Key} CSS ID.
+	 * @return {String} CSS source.
+	 * @method get
+	 * @static
+	 */
+	CSS.get = function(key){
+		var obj = A.objectByKey(A.Env.css, key, true);
+		if (!L.isValue(obj) || !obj.__src){ return ""; }
+		return obj.__src;
+	};
+	
+	/**
+	 * CSS style apply.
+	 * 
+	 * @param key {String|Array|Abricos.Key} CSS ID.
+	 * @return {String} CSS source.
+	 * @method apply
+	 * @static
+	 */
+	CSS.apply = function(key){
+		
+		var css = CSS.get(key);
 		if (!L.isValue(css)){ return null; }
 		
 		if (CSS.disable){ return; }
@@ -282,43 +354,112 @@ var _initAbricos = function(){
 		var hh1 = document.getElementsByTagName('head')[0];
 		hh1.appendChild(style);
 	};
-	
+
+
 	/**
-	 * The Template class manages template elements
+	 * The Template class manages elements of template
 	 * 
-	 * @class Template
+	 * @class Abricos.Template
 	 * @static
 	 */
 
 	var T = A.Template = {};
 	
 	/**
-	 * Get templates of a specific component.
-	 * @param {String} mnm The name of the module.
-	 * @param {String} cnm The name of the component.
-	 * @method get
-	 * @return {Object}
+	 * Add elements of template in global storage.
+	 * @param key {String|Array|Abricos.Key} Template ID.
+	 * @param seed {String|Object} Templates data.
+	 * @return {Object} Templates
+	 * @method add
 	 * @static
+	 * @example
+	 * 
+	 * 	T.add({
+	 * 		"widget": "<div id='{i#id}'>{#widget.title}</div>"
+	 * 	});
+	 * 
+	 * 	T.add("mymod.mycomp", "<!--{widget}--><div id='{i#id}'>{#widget.title}</div>");
 	 */
-	T.get = function(mnm, cnm){
-		
-		var args = SLICE.call(arguments, 0);
-		if (L.isObject(args[0])){
-			var cfg = args[0];
-			mnm = cfg.modName;
-			cnm = cfg.compName;
-		}
-		mnm = mnm || CONF['defModName'];
-		cnm = cnm || CONF['defCompName'];
+	T.add = function(key, seed){
+		var args = SLICE.call(arguments, 0),
+			alen = args.length;
 
-		var t = A.Env.temps;
-		
-		if (t[mnm] && t[mnm][cnm]){
-			return t[mnm][cnm];
+		if (alen == 1){
+			key = "";
+			seed = args[0];
 		}
-		return null;
+		
+		if (L.isString(seed)){
+			seed = T.parse(seed);
+		}
+
+		var t = A.objectByKey(A.Env.temps, key, true);
+		
+		for (var tName in seed){
+			
+			if (!L.isString(seed[tName])){ continue; }
+			
+			t[tName] = seed[tName];
+		}
+		return t;
 	};
 	
+	/**
+	 * Add element of template in global storage.
+	 * @param [key] {String|Array} Template ID.
+	 * @param name {String} Name a the element of template
+	 * @param source {String} Text a the element of template.
+	 * @return {Object} Templates
+	 * @method addElement
+	 * @static
+	 * @example
+	 * 
+	 * 	T.add("widget", "<div id='{i#id}'>{#widget.title}</div>");
+	 * 
+	 * 	T.add("mymod.mycomp", "widget", "<div id='{i#id}'>{#widget.title}</div>");
+	 */
+	T.addElement = function(key, name, source){
+		var args = SLICE.call(arguments, 0),
+			alen = args.length;
+		
+		if (alen == 2){
+			key = "";
+			name = args[0];
+			source = args[1];
+		}
+
+		var seed = {};
+		seed[name] = source;
+		return T.add(key, seed);
+	};
+
+	/**
+	 * Parse text on the elements of template
+	 * @param source {String} Source code of the template.
+	 * @return {Object}
+	 * @method parse
+	 * @static
+	 * 
+	 * @example
+	 * 
+	 * on html page
+	 * 
+	 * 	<script id="abricosjs-template" type="text/x-abricosjs-template">
+	 * 		<!--{widget}-->
+	 * 		<div class='widget'>{#widget.title}</div>
+	 * 		
+	 * 		<!--{panel}-->
+	 * 		<div class='panel'>
+	 * 			<div class='hd'>{#panel.title}</div>
+	 * 		</div>
+	 * 	</script>
+	 * 
+	 * in JavaScript
+	 * 
+	 * 	var el = document.getElementById('abricosjs-template'),
+	 * 		t = T.parse(el.innerHTML);
+	 * 	console.log(t); // > {widget: "<div class='widget'>...</div>", panel: "<div class='panel'>...</div>"}
+	 */
 	T.parse = function(source){
 		if (!L.isString(source)){ return {}; }
 		
@@ -328,7 +469,7 @@ var _initAbricos = function(){
 			lre = new RegExp(sre),
 			ma = source.match(re),
 			i, lma, pos, tnm;
-			
+		
 		for (i=ma.length-1;i>=0;i--){
 			lma = ma[i].match(lre);
 			tnm = lma[1];
@@ -339,192 +480,198 @@ var _initAbricos = function(){
 		}
 		return t;
 	};
-	
-	// T.add(oSeed, sModName, sCompName)
-	// T.add(sTElName, sTElBody, sModName, sCompName);
-	// T.add(sSeed, sModName, sCompName)
-	// T.add('#htmlElId', sModName, sCompName);
-	T.add = function(){
 
+	/**
+	 * Get a template collection by ID (namespace).
+	 * 
+	 * @param key {String|Array|Abricos.Key} Template ID.
+	 * @return {Object} Templates
+	 * @method get
+	 * @static
+	 */
+	T.get = function(key){
+		return A.objectByKey(A.Env.temps, key);
+	};
+	
+
+	/**
+	 * The TemplateManager class.
+	 * @class Abricos.TemplateManager
+	 * @constructor
+	 * @param [key] {String|Array|Abricos.Key} Template ID.
+	 * @param [names] {String} Name element of template.
+	 * @param [cfg] {Object} Config.
+	 * 	@param [cfg.idPrefix='abricos_'] ID Prefix. Default 'abricos_'.
+	 * 	@param [cfg.lang=Abricos.config.lang] Language.
+	 * 	@param [cfg.defTName] Default name of element of template (for gel).
+	 */
+	var TemplateManager = function(key, names, cfg){
+		key = key || "";
+		
 		var args = SLICE.call(arguments, 0),
-			alen = args.length, 
-			mnm = CONF['defModName'], // module name 
-			cnm = CONF['defCompName'], // component name
-			seed,
-			isSetMC = false;
+			alen = args.length;
 		
-		if (L.isObject(args[0])){ // T.add(oSeed, sModName, sCompName)
-			isSetMC = alen == 3;
-			seed = args[0];
-		}else if (L.isString(args[0])){
-			var source = L.trim(args[0]);
-			
-			if (source.indexOf('#') === 0){
-				var el = document.getElementById(source.substring(1));
-				if (!el){
-					source = "";
-				}else{
-					source = el.innerHTML;
-				}
-			}
-			
-			if (alen==2 || alen==4){// T.add(sTElName, sTElBody, sModName, sCompName);
-				isSetMC = alen == 4;
-
-				
-			}else if (alen==1 || alen==3){// T.add(sSeed, sModName, sCompName)
-				isSetMC = alen == 3;
-				
-				seed = T.parse(source);
-			}
+		if (alen == 2 && L.isObject(args[1])){
+			names = '';
+			cfg = args[1];
 		}
 		
-		if (isSetMC){
-			mnm = args[alen-2];
-			cnm = args[alen-1];
-		}
-		
-		var t = A.Env.temps,
-			tm = t[mnm] || (t[mnm] = {}),
-			tmc = tm[cnm] || (tm[cnm] = {});
-
-		if (L.isObject(seed)){
-			// Template.add({...}, modName, compName)
-			for (var tName in seed){
-				
-				if (!L.isString(seed[tName])){ continue; }
-				
-				tmc[tName] = seed[tName];
-			}
-		}else if (L.isString(seed)){
-			
-		}
-		
-		return T.get(mnm, cnm);
-	};
-	
-	T.build = function(names, cfg){
-		cfg = Y.merge({
-			'modName': CONF.defModName,
-			'compName': CONF.defCompName,
-			'defTName': null
-		}, cfg || {});
-		
-		var t = T.get(cfg);
-		if (!L.isObject(t)){
-			t = {};
-		}
-		
-		names = L.isString(names) ? names : '';
-		
-		// cloning template elements
-		var ct = {};
-		if (names != ''){
-			var arr = names.split(','), i, name, defTName = null;
-			for (i=0;i<arr.length;i++){
-				name = L.trim(arr[i]);
-				
-				if (!t[name]){ continue; }
-				ct[name] = t[name];
-				if (!defTName){
-					defTName = name;
-				}
-			}
-			if (!L.isValue(cfg['defTName'])){
-				cfg['defTName'] = defTName;
-			}
-		}else{
-			for (var name in t){
-				ct[name] = t[name]; 
-			}
-		}
-		
-		var css = CSS.get(cfg.modName, cfg.compName);
-		if (L.isValue(css) && !css._cssApplied){
-			css._cssApplied = true;
-			
-			// applying CSS on the first call buildTemplate
-			CSS.apply(cfg.modName, cfg.compName);
-		}
-	
-		return new A.TemplateManager(ct, cfg);
-	};
-	
-	var TemplateManager = function(t, cfg){
-		
-		t = t || {};
+		names = L.isString(names) ? L.trim(names) : '';
 		
 		cfg = Y.merge({
-			'modName': null,
-			'compName': null,
 			'idPrefix': 'abricos_',
+			'lang': null,
 			'defTName': null
 		}, cfg || {});
 		
-		this.init(t, cfg);
+		if (L.isNull(cfg.lang)){
+			cfg.lang = CONF.lang;
+		}
+		
+		this.init(key, names, cfg);
 	};
 	
 	TemplateManager._counter = 1;
 	
 	TemplateManager.prototype = {
-		init: function(t, cfg){
+		init: function(key, names, cfg){
+			/**
+			 * Key.
+			 * @property key
+			 * @type Abricos.Key
+			 */
+			this.key = key = new A.Key(key);
+			
+			/**
+			 * Config.
+			 * @property cfg
+			 * @type Object
+			 */
 			this.cfg = cfg;
 			
-			// map unique identifiers in the template
+			/**
+			 * Map unique identifiers in the template
+			 * @proprty idMap
+			 * @type Object
+			 */
 			this.idMap = {};
-			
-			// fill identifiers language phrases
-			var lngCfg = Y.merge(cfg);
-			for (var name in t){
-				if (!L.isValue(cfg['defTName'])){
-					cfg['defTName'] = name;
+
+			/**
+			 * Elements of template data
+			 * @property data
+			 * @type Object
+			 */
+			this.data = {};
+
+			// replace language IDs in text.
+			// before filling phrases need to add them in storage
+			var tOrig = T.get(key), 
+				t = {},
+				expLong = new RegExp("(\{\#[a-zA-Z0-9_\.\-]+\})", "g"),
+				expShort = new RegExp("(\{\##[a-zA-Z0-9_\.\-]+\})", "g"),
+				expId = new RegExp("(\{i\#[a-z0-9_\-]+\})", "gi"),
+				s, arr, i, rkey, ph, skey,
+				aNames = (names.length > 0 ? names.split(',') : []), ii;
+							
+			for (var name in tOrig){
+				if (aNames.length > 0){
+					var find = false;
+					for (ii=0;ii<aNames.length;ii++){
+						if (L.trim(aNames[ii]) == name){
+							find = true;
+							break;
+						}
+					}
+					if (!find){ continue; }
 				}
-				lngCfg['tName'] = name;
 				
-				t[name] = LNG.fillText(t[name], lngCfg);
-			}
-			
-			// create a map of unique identifiers in the template
-			// Eexample: "<div id='{i#mydiv}'>...</div>" => (idMap[mydiv] = 'abricos_8462') 
-			var exp = new RegExp("(\{i\#[a-z0-9_\-]+\})", "gi");
-			for (var name in t){
-				var s = t[name],
-					arr = s.match(exp);
-				
-				if (!L.isArray(arr)) { continue; }
-				
-				var i, key, genid,
-					tIdMap = this.idMap[name] = {};
-				for (i=0;i<arr.length;i++){
-					key = arr[i].replace(/\{i#([a-zA-Z0-9_\-]+)\}/, '$1');
-					
-					if (tIdMap[key]){ continue; }
-					
-					tIdMap[key] = genid = this.genid(name);
-					
-					t[name] = s = s.replace(new RegExp(arr[i], "gi"), genid);
+				if (!L.isValue(cfg.defTName)){
+					cfg.defTName = name;
 				}
+				s = tOrig[name];
+	
+				// replacement of long IDs {#...}
+				arr = s.match(expLong);
+				if (L.isArray(arr)){ 
+					for (i=0;i<arr.length;i++){
+						skey = arr[i].replace(/[\{#\}]/g, '');
+						
+						ph = LNG.get(skey, cfg.lang);
+						s = s.replace(arr[i], ph);
+					}
+				}
+				
+				// replacement of short IDs {##...}
+				arr = s.match(expShort);
+				if (L.isArray(arr)){
+					
+					for (i=0;i<arr.length;i++){
+						skey = arr[i].replace(/[\{##\}]/g, '');
+						rkey = key.push(name+"."+skey, true);
+						
+						ph = LNG.get(rkey, cfg.lang);
+						s = s.replace(arr[i], ph);
+					}
+				}
+
+				// create a map of unique identifiers in the template
+				// Eexample: "<div id='{i#mydiv}'>...</div>" => (idMap[mydiv] = 'abricos_8462') 
+				arr = s.match(expId);
+				if (L.isArray(arr)) { 
+					var genid,
+						tIdMap = this.idMap[name] = {};
+					for (i=0;i<arr.length;i++){
+						skey = arr[i].replace(/\{i#([a-zA-Z0-9_\-]+)\}/, '$1');
+						
+						if (tIdMap[skey]){ continue; }
+						
+						tIdMap[skey] = genid = this.genid(name);
+						
+						s = s.replace(new RegExp(arr[i], "gi"), genid);
+					}
+				}
+				t[name] = s;
 			}
-			
+
 			this.data = t;
+			
+			CSS.apply(key);
 		},
+		/**
+		 * Generate unique ID prefix.
+		 * @param name {String} Name of element of template.
+		 * @method genid
+		 * @return {String} ID prefix.
+		 */
 		genid: function(name){
 			var cfg = this.cfg,
-				id = cfg.idPrefix+name;
-
-			if (L.isString(cfg.modName) && L.isString(cfg.compName)){
-				id += '_'+cfg.modName.substring(0,3);
-				id += '_'+cfg.compName.substring(0,3);
-			}
+				id = cfg.idPrefix;
 			
+			id += this.key.toString().replace(".", "_")+name;
 			id += '_'+(TemplateManager._counter++);
 			
 			return id;
 		},
-		get: function(tnm){
-			return (this.data[tnm] || "");
+		
+		/**
+		 * Get element of template
+		 * @param name {String}
+		 * @return {String}
+		 * @method get
+		 */
+		get: function(name){
+			return (this.data[name] || "");
 		},
-		replace: function(tnm, o){
+		
+		/**
+		 * Replace values ​​for the variables in the template.
+		 * @param tnm {String} Name of element of template.
+		 * @param obj {Object|String} Variables and their values.
+		 * @param [val] {String} If type `obj` is String, then this parameter 
+		 * must contain a value.
+		 * @return {String}
+		 */
+		replace: function(tnm, obj){
 			var t = this.get(tnm),
 				args = SLICE.call(arguments, 0);
 			
@@ -535,23 +682,28 @@ var _initAbricos = function(){
 				o = no;
 			}
 			
-			if (!L.isObject(o)){ return t; }
+			if (!L.isObject(obj)){ return t; }
 			
 			var exp;
-			for (var nm in o){
+			for (var nm in obj){
 				exp = new RegExp("\{v\#"+nm+"\}", "g");
-				t = t.replace(exp, o[nm]);
+				t = t.replace(exp, obj[nm]);
 			}
 			
 			return t;
 		},
 		
-		// Get HTML element Id
-		gelid: function(key){
-			if (!L.isString(key)){ return null; }
+		/**
+		 * Get HTML element Id
+		 * @param idKey {String}
+		 * @method gelid
+		 * @return {String}
+		 */
+		gelid: function(idKey){
+			if (!L.isString(idKey)){ return null; }
 			
 			var tName = this.cfg['defTName'],
-				a = key.split('.');
+				a = idKey.split('.');
 			
 			if (!L.isString(tName)){ return null; }
 			
@@ -560,17 +712,22 @@ var _initAbricos = function(){
 				if (tnm.length > 0){
 					tName = tnm;
 				}
-				key = a[1];
+				idKey = a[1];
 			}
 			var ta = this.idMap[tName];
 			if (!ta){ return null; }
 			
-			return ta[key] || null;
+			return ta[idKey] || null;
 		},
 		
-		// Get HTML element
-		gel: function(key){
-			var id = this.gelid(key);
+		/**
+		 * Get HTML element
+		 * @param idKey {String}
+		 * @return {String}
+		 * @method gel
+		 */
+		gel: function(idKey){
+			var id = this.gelid(idKey);
 			if (!L.isValue(id)){ return null; }
 			
 			var el = document.getElementById(id);
@@ -579,180 +736,309 @@ var _initAbricos = function(){
 		}
 	};
 	A.TemplateManager = TemplateManager;
-
 	
-	var Component = function(cfg){
+	/**
+	 * The Component class
+	 * @class Abricos.Component
+	 * @constructor
+	 * @param key {String|Array|Abricos.Key} Key.
+	 * 
+	 * @param [cfg] {Object} Component config.
+	 * 	@param [cfg.template] {String|Object} Templates data.
+	 * 	@param [cfg.language] {Object} Language phrases.
+	 * 	@param [cfg.css] {String} CSS Style source.
+	 * 	@param [cfg.entryPoint] {Function} Function containing component code. This
+	 * 		function will be executed whenever the component is attached to a
+	 * 		specific Abricos instance.
+	 * 
+	 * 		@param cfg.entryPoint.NS {Object} Component namespace.
+	 * 		@param cfg.entryPoint.CMP {Abricos.Component} Component instance.
+	 * 
+	 */
+	var Component = A.Component = function(key, cfg){
 		cfg = Y.merge({
-			'entryPoint': null
+			'entryPoint': null,
+			'template': null,
+			'language': null,
+			'css': null
 		}, cfg || {});
-		
-		this.init(cfg);
+		this.init(key, cfg);
 	};
 	Component.prototype = {
-		init: function(cfg){
-		
-			this.moduleName = cfg['modName'];
+		init: function(key, cfg){
 			
-			this.name = cfg['compName'];
+			/**
+			 * Key
+			 * @propery key
+			 * @type Abricos.Key
+			 */
+			this.key = new A.Key(key);
 			
-			this.entryPoint = cfg['entryPoint'];
-			
-			this.namespace = A.mod[this.moduleName] || (A.mod[this.moduleName] = {});
-			
-			this.template = new A.ComponentTemplate(this);
-			
-			this.language = new A.ComponentLanguage(this);
+			/**
+			 * Function containing component code. This
+			 * 	function will be executed whenever the component is attached to a
+			 * 	specific Abricos instance.
+			 * @property entryPoint
+			 * @type Function
+			 */
+			this.entryPoint = cfg.entryPoint;
 
+			/**
+			 * Component template manager.
+			 * @property template
+			 * @type Abricos.ComponentTemplate
+			 */
+			this.template = new ComponentTemplate(this);
+
+			if (L.isValue(cfg.template)){
+				T.add(key, cfg.template);
+			}
+			
+			if (L.isObject(cfg.language)){
+				LNG.addMulti(key, cfg.language);
+			}
+
+			if (L.isString(cfg.css)){
+				CSS.add(key, cfg.css);
+			}
+			
+			var keyNS = this.key.pop(true),
+				ns = A.objectByKey(A.mod, keyNS, true);
+			
+			/**
+			 * Namespace.
+			 * @property namespace
+			 * @type Object
+			 */
+			this.namespace = ns;
+
+			/**
+			 * Component language.
+			 * @property language
+			 * @type Abricos.ComponentLanauge
+			 */
+			this.language = new A.ComponentLanguage(this);
+			
 			// TODO: necessary to implement
 			this.requires = {};
 		}
 	};
 	A.Component = Component;
 	
-	var ComponentTemplate = function(component){
-		this.init(component);
+	/**
+	 * The ComponentTemplate class.
+	 * @class Abricos.ComponentTemplate
+	 * @constructor
+	 * @param cmp {Abricos.Component} Component instance.
+	 */
+	var ComponentTemplate = function(cmp){
+		this.init(cmp);
 	};
 	ComponentTemplate.prototype = {
-		init: function(component){
-			this.component = component;
+		init: function(cmp){
+			this.component = cmp;
 		},
-		getItems: function(){
-			var comp = this.component,
-				ts = T.get(comp.moduleName, comp.name);
-			
-			return L.isValue ? ts : {};
-		},
-		get: function(name){
-			var ts = this.getItems();
-			return ts[name] || null; 
-		},
-		build: function(){
+		/**
+		 * Build template
+		 * @method build
+		 * @return {Abricos.TemplateManager}
+		 */
+		build: function(bind, tNames, cfg){
 			var args = SLICE.call(arguments, 0),
-				comp = this.component,
-				mnm = comp.moduleName,
-				cnm = comp.name,
-				tNames = "";
+				alen = args.length,
+				comp = this.component;
 			
-			if (L.isObject(args[0])){
-				// TODO: bind TM functions
-				
-				if (L.isString(args[1])){
-					tNames = args[1];
-				}
+			// CMP.template.build(oBind, sTNames [,(oCfg|null)]);
+			if (L.isObject(args[0]) && L.isString(args[0])){
+				bind = args[0];
+				tNames = args[1];
 			}
+
+			// CMP.template.build(sTNames [,(oCfg|null)]);
 			if (L.isString(args[0])){
 				tNames = args[0];
 			}
-			
-			return T.build(tNames, {
-				'modName': mnm, 
-				'compName': cnm 
-			});
+
+			if (L.isObject(args[alen-1])){
+				cfg = args[alen-1];
+			}
+		
+			return new A.TemplateManager(comp.key, tNames, cfg);
 		}
+		
 	};
 	A.ComponentTemplate = ComponentTemplate;
 	
-	var ComponentLanguage = function(component){
-		this.init(component);
+	/**
+	 * The ComponentLanguage class.
+	 * @class Abricos.ComponentLanguage
+	 */
+	var ComponentLanguage = function(cmp){
+		this.init(cmp);
 	};
 	ComponentLanguage.prototype = {
-		init: function(component){
-			this.component = component;
+		init: function(cmp){
+			this.component = cmp;
 		},
-		get: function(key, cfg){
-			var comp = this.component;
-			
-			return LNG.get('mod.'+comp.moduleName+'.'+comp.name+'.'+key);
+		/**
+		 * Get
+		 * @param [lang] {String}
+		 * @method get
+		 */
+		get: function(lang){
+			return LNG.get(this.component.key, lang);
 		}
 	};
 	A.ComponentLanguage = ComponentLanguage;
-	
+
     /**
-     * The Abricos global namespace object
+     * The Abricos global namespace object.
      * 
      * @class Abricos
      * @static
      */
-
 	
 	/**
-	 * Determines if the component with the given name exists.
-	 * 
-	 * @param {String} mnm The name of the module.
-	 * @param {String} cnm The name of the component.
-	 * @return {Boolean} True if the component exists, false if not.
+	 * Get text from HTML element
+	 * @param node {String|HTMLElement} a node or Selector
+	 * @return {String}
+	 * @method source
+	 * @static
+	 */
+	A.source = function(node){
+		if (!node){ return ""; }
+		
+		if (L.isString(node)){
+			node = L.trim(node);
+			
+			if (node.indexOf('#') === 0){
+				var el = document.getElementById(node.substring(1));
+                if (!el){
+                	return "";
+                }else{
+                	return el.innerHTML;
+                }
+			}
+		}else if (node.innerHTML){
+			return node.innerHTML;
+		}
+		return "";
+	};
+	
+	/**
+	 * Namespace components.
+	 * @property mod
+	 * @type Object
+	 * @static
+	 */
+	A.mod = A.mod || {};
+
+	/**
+	 * Get namespace components.
+	 * @param key {String|Array|Abricos.Key} Namespace component.
+	 * @return {Object}
+	 * @method ns
+	 * @static
+	 */
+	A.ns = function(key){
+		return A.objectByKey(A.mod, key);
+	};
+
+	/**
+	 * Get component.
+	 * @param key {String|Array|Abricos.Key} Component ID.
+	 * @return {Abricos.Component} Component
+	 * @method get
+	 * @static
+	 */
+	A.get = function(key){
+		var obj = A.objectByKey(A.Env.comps, key);
+		if (!L.isValue(obj) || !obj.__component){ return null; }
+		return obj.__component;
+	};
+	
+	/**
+	 * Check availability component.
+	 * @param key {String|Array|Abricos.Key} Component ID.
+	 * @return {Boolean} Component
 	 * @method exists
 	 * @static
 	 */
-	A.exists = function(mnm, cnm){
-		var mods = A.Env.mods;
-
-		if (!mods[mnm]){ return false; }
-
-		return !!(mods[mnm][cnm]);
+	A.exists = function(key){
+		return L.isValue(A.get(key));
 	};
-
+	
 	var stackUse = [];
-	
+
 	A.use = function(){
-        var args = SLICE.call(arguments, 0),
-        	callback = args[args.length - 1];
-        
-        if (L.isFunction(callback)){
-        	args.pop();
-        }else{
-        	callback = null;
-        }
+	    var args = SLICE.call(arguments, 0),
+	    	callback = args[args.length - 1];
+	    
+	    if (L.isFunction(callback)){
+	    	args.pop();
+	    }else{
+	    	callback = null;
+	    }
 
-    	stackUse[stackUse.length] = [args, callback];
+		stackUse[stackUse.length] = [args, callback];
 
-        if (!A._loading){
-        	A._use();
-        }
+	    if (!A._loading){
+	    	A._use();
+	    }
 	};
-	
+
 	A._use = function(){
 		if (stackUse.length == 0){ return; }
 
 		var su = stackUse.pop(),	
-			args = su[0],
+			// args = su[0],
 			callback = su[1];
 
 		if (L.isFunction(callback)){
-			callback();
+			callback(A);
 		}
 		A._use();
 	};
 
+	/**
+	 * Registration of the component in the core
+	 * @param comp {Abricos.Component}
+	 * @return {Abricos.Component} Component
+	 * @method add
+	 * @static
+	 */
+
+	/**
+	 * Registration of the component in the core
+	 * @param key {String|Array|Abricos.Key} Component name or namespace with name.
+	 * @param cfg {Object} Component config. 
+	 * 	See {{#crossLink "Abricos.Component"}}{{/crossLink}}
+	 * @return {Abricos.Component} Component
+	 * @method add
+	 * @static
+	 */
 	
 	var stackModsToInit = [];
 	
-	A.add = function(mnm, cnm, o){
-		var mods = A.Env.mods;
+	A.add = function(){
+		var args = SLICE.call(arguments, 0),
+			comp;
 
-		if (A.exists(mnm, cnm)){
-			throw new Error("Component is already registered: module="+mnm+", component="+cnm);
+		// A.add(component);
+		if (args[0] instanceof Component){
+			comp = args[0];
+		}else if(args.length >= 2 && L.isObject(args[1])){	// A.add(key, cfg);
+			comp = new Component(args[0], args[1]);
+		}else{
+			throw new Error("Unable to add a component");
 		}
 		
-		var comp;
-
-		if (o instanceof Component){
-			comp = o;
-		}else if (L.isFunction(o)){
-			comp = new Component({
-				'entryPoint': o
-			});
-		}else if (L.isObject(o)){
-			comp = new Component(o);
-		} else {
-			return;
+		if (A.exists(comp.key)){
+			throw new Error("Component is already registered: key="+comp.key);
 		}
 		
-		comp.moduleName = mnm;
-		comp.name = cnm;
-		
-		var m = mods[mnm] || (mods[mnm] = {});
-		m[cnm] = comp;
+		var obj = A.objectByKey(A.Env.comps, comp.key, true);
+		obj.__component = obj;
 
 		stackModsToInit[stackModsToInit.length] = comp;
 
@@ -763,15 +1049,10 @@ var _initAbricos = function(){
 	
 	A._add = function(){
 		if (stackModsToInit.length == 0){ return; }
-		
 		var comp = stackModsToInit.pop();
 
 		if (L.isFunction(comp.entryPoint)){
-			
-			var mnm = comp.moduleName, 
-				NS = A.mod[mnm] || (A.mod[mnm] = {});
-			
-			comp.entryPoint(NS, comp);
+			comp.entryPoint(comp.namespace, comp);
 		}
 		A._add();
 	};
@@ -782,18 +1063,59 @@ var _initAbricos = function(){
 		A._add();
 		A._use();
 	};
-	
+
 	(function() {
 	    if (document.addEventListener) {
 	        return document.addEventListener('DOMContentLoaded', onDOMReady, false);
 	    }
 	    window.attachEvent('onload', onDOMReady);
 	}) ();
+
+
+	/**
+	 * Get object by key (namespace).
+	 * If the element of object does not exist, it is created.
+	 * @param obj {Object} Object.
+	 * @param key {String|Array} Key.
+	 * @param [create=false] {Boolean} If TRUE -method will create 
+	 * 		an object if it is not found on a key.
+	 * @method objectByKey
+	 * @static
+	 * @return {Object}
+	 * 
+	 * @example
+	 * 
+	 * 	var d = {mod: {}};
+	 * 	A.objectByKey(d, 'mod.mymod.mycomp', true);
+	 * 	console.log(d); // > {mod:{mymod:{mycomp:{}}}}
+	 * 	
+	 * 	var d1 = A.objectByKey(d, 'mod.mymod');
+	 * 	console.log(d1); // > {mycomp:{}}
+	 * 	
+	 * 	var d2 = A.objectByKey(d, 'mod.test');
+	 * 	console.log(d2); // > null
+	 */
+	A.objectByKey = function(obj, key, create){
+		if (!L.isObject(obj)){ return null; }
+
+		key = new A.Key(key);
+		
+		var l = obj;
+		key.each(function(ki){
+			if (!l[ki]){
+				if (!create){ return null; }
+				l[ki] = {};
+			}
+			l = l[ki];
+		});
+		return l;
+	};
 	
 };
 
 
-/* 
+/**
+ *  
  * The minimum set of basic functions taken from the YUI library (http://yuilibrary.com/).
  * 
  * All of the features of this wonderful library, you can get a call using the line:
@@ -829,6 +1151,8 @@ var _initAbricos = function(){
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * @class YUI
  */
 
 if (typeof YUI == 'undefined' || !YUI.Lang){
@@ -853,6 +1177,7 @@ if (typeof YUI == 'undefined' || !YUI.Lang){
 	@method merge
 	@param {Object} objects* One or more objects to merge.
 	@return {Object} A new merged object.
+	@static
 	**/
 	Y.merge = function () {
 	    var i      = 0,
@@ -876,8 +1201,8 @@ if (typeof YUI == 'undefined' || !YUI.Lang){
 	
 	/**
 	 * Provides core language utilites and extensions used throughout YUI.
-	 *
-	 * @class Lang
+	 * 
+	 * @class YUI.Lang
 	 * @static
 	 */
 
