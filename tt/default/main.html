@@ -28,11 +28,11 @@
 	<meta name="description" content="[var]meta_desc[/var]">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-	<link rel="stylesheet" href="/gzip.php?base=/js/yui/build&v=[var]jsyui[/var]&file=cssreset/cssreset-min.css,cssfonts/cssfonts-min.css,cssgrids/cssgrids-min.css" type="text/css" />
-
 	[mod]sys:jsvar[/mod]
 	
-	<link rel="stylesheet" href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=0.3" type="text/css" />
+	<link href="/gzip.php?file=/css/pure/pure-min.css&v=[var]version[/var]" type="text/css" rel="stylesheet" >
+	
+	<link href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=0.3" type="text/css" rel="stylesheet" />
 	[bkvar]css[/bkvar]
 
 	[bkvar]js[/bkvar]
@@ -46,14 +46,14 @@
 		<div id="hd"><header>
 			<div class="tline">
 				<div class="gwrap">
-					<div class="yui3-g">
+					<div class="pure-g">
 					
-						<div class="yui3-u-1-4">
+						<div class="pure-u-1-4">
 							<h1 class="site-name">
 								<a href="/">[ph]sys:site_name[/ph]</a>
 							</h1>
 						</div>
-						<div class="yui3-u-1-2">
+						<div class="pure-u-1-2">
 							<div class="site-desc">
 								[ph]sys:site_title[/ph]
 							</div>
@@ -76,14 +76,14 @@
 		
 		<div id="bd">
 			<div class="gwrap">
-				<div class="yui3-g">
-					<div class="yui3-u-3-4">
+				<div class="pure-g">
+					<div class="pure-u-3-4">
 						<div class="content">
 							[mod]sitemap:breadcrumb[/mod]
 							[tt]content[/tt]
 						</div>
 					</div>
-					<div class="yui3-u-1-4">
+					<div class="pure-u-1-4">
 						<div class="sidebar">
 							<div class="sidebaritem">
 								[mod]news:newsblock[/mod]
