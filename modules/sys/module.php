@@ -56,7 +56,11 @@ class Ab_CoreSystemModule extends Ab_Module {
 		$path = str_replace("..", "", $path);
 		$path = preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $path);
 		
-		$path = CWD."/content/".Abricos::$LNG.$path;
+		if (!empty(Abricos::$config['supercontent']['path'])){
+			$path = Abricos::$config['supercontent']['path']."/".Abricos::$LNG.$path;
+		}else{
+			$path = CWD."/content/".Abricos::$LNG.$path;
+		}
 		
 		if (!file_exists($path)){ 
 			return false;
