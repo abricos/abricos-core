@@ -1,0 +1,35 @@
+{
+  "name": "abricos",
+  "description": "Abricos Platform - Content Management System (CMS) and Internet Application Platform (WebOS)",
+  "version": "0.5.6",
+  "author": {
+    "name": "Alexander Kuzmin",
+    "email": "roosit@abricos.org",
+    "web": "http://abricosjs.org",
+    "twitter": "roositab"
+  },
+  "license": "GPLv2",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/abricos/abricos-core.git"
+  },
+  "keywords": [
+    "abricos",
+    "cms",
+    "abricosjs"
+  ],
+  "bugs": {
+    "url": "https://github.com/abricos/abricos-core/issues"
+  },
+  "homepage": "http://abricoscms.org",
+  "devDependencies": {
+    "async": "0.2.9",
+    "command": "0.0.4",
+    "grunt": "~0.4.2",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-compress": "~0.6.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-bower-task": "~0.3.4"
+  }
+}

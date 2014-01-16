@@ -2,7 +2,7 @@
 /.settings
 /.project
 /.buildpath
-/.htaccess
-/i
-/install
-/content
+/build
+/release
+/node_modules
+/bower_components
