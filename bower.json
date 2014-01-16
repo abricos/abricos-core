@@ -2,6 +2,7 @@
   "name": "abricos",
   "version": "0.5.6",
   "dependencies": {
-    "pure": "~0.3.0"
+    "pure": "~0.3.0",
+    "alloyui": "https://github.com/liferay/alloy-ui/releases/download/2.0.0/alloy-2.0.0.zip"
   }
 }

@@ -3,6 +3,7 @@
 /.project
 /.buildpath
 /build
+/build_temp
 /release
 /node_modules
 /bower_components

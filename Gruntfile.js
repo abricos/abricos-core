@@ -10,24 +10,36 @@ module.exports = function(grunt) {
         },		
 
 		clean: {
-	        build: ['build/'],
-	        release  : ['release/<%= pkg.version %>/']
-	    },
+		        build: ['build/', 'build/temp/'],
+		        release  : ['release/<%= pkg.version %>/']
+		},
 	    
-        copy: {
-            main: {
-            	expand: true,
-            	cwd: 'src/',
-                src: '**',
-                dest: 'build/'
-            }
-        },
-        
         bower: {
             install: {
             	options: {
-            		targetDir: './build/external'
+            		targetDir: './build_temp'
             	}
+            }
+        },
+        
+        copy: {
+            main: {
+	        	files: [{
+	        	    expand: true,
+	            	    cwd: 'src/',
+	            	    src: '**',
+	            	    dest: 'build/'
+	        	},{
+	        	    expand: true,
+	            	    cwd: 'build_temp/',
+	            	    src: 'pure/**',
+	            	    dest: 'build/external/'
+	        	},{
+	        	    expand: true,
+	            	    cwd: 'build_temp/alloyui/',
+	            	    src: ['build/**', '*.md'],
+	            	    dest: 'build/external/alloyui/'
+	        	}]
             }
         },
         
@@ -58,6 +70,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-bower-task');    
     
-    grunt.registerTask('default', ['clean:build', 'copy', 'bower:install']);
+    grunt.registerTask('default', ['clean:build', 'bower:install', 'copy']);
     grunt.registerTask('release', ['default', 'clean:release', 'compress:release']);
 };
