@@ -8,7 +8,7 @@
  */
 
 var TASK = {
-    name: 'init',
+    name: 'depends-init',
     description: 'Clone or update dependencies.'
 };
 
