@@ -1,5 +1,7 @@
 var path = require('path');
 
+var ROOT = process.cwd();
+
 module.exports = function(grunt) {
 	grunt.initConfig({
 		
@@ -7,11 +9,11 @@ module.exports = function(grunt) {
 		
 		init: {
             dependencies: '<%= pkg.dependencies %>'
-        },		
+        },
 
 		clean: {
-		        build: ['build/', 'build/temp/'],
-		        release  : ['release/<%= pkg.version %>/']
+	        build: ['build/', 'build/temp/'],
+	        release  : ['release/<%= pkg.version %>/']
 		},
 	    
         bower: {
@@ -26,19 +28,23 @@ module.exports = function(grunt) {
             main: {
 	        	files: [{
 	        	    expand: true,
-	            	    cwd: 'src/',
-	            	    src: '**',
-	            	    dest: 'build/'
+            	    cwd: 'src/',
+            	    src: '**',
+            	    dest: 'build/'
 	        	},{
 	        	    expand: true,
-	            	    cwd: 'build_temp/',
-	            	    src: 'pure/**',
-	            	    dest: 'build/external/'
+            	    cwd: 'build_temp/',
+            	    src: 'pure/**',
+            	    dest: 'build/external/'
 	        	},{
 	        	    expand: true,
-	            	    cwd: 'build_temp/alloyui/',
-	            	    src: ['build/**', '*.md'],
-	            	    dest: 'build/external/alloyui/'
+            	    cwd: 'build_temp/alloyui/',
+            	    src: ['build/**', '*.md'],
+            	    dest: 'build/external/alloyui/'
+	        	},{
+	        		expand: false,
+	        		src: path.join(ROOT, '<%= pkg.dependencies["abricos.js"].folder %>', 'src/abricos.js'),
+	        		dest: 'build/external/abricos.js/abricos.js'
 	        	}]
             }
         },
@@ -46,7 +52,6 @@ module.exports = function(grunt) {
         compress: {
             release: {
                 options: {
-                    
                 	archive: 'release/<%= pkg.name %>-<%= pkg.version %>.zip'
                 },
 
