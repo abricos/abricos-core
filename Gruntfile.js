@@ -32,18 +32,18 @@ module.exports = function(grunt) {
                     {expand: true, cwd: 'build_temp/alloyui/build/', src: '**', dest: 'build/external/alloyui/'}, 
                     {expand: true, cwd: 'build_temp/alloyui/', src: '*.md', dest: 'build/external/alloyui/'}, 
                     
+                    // Copy Jevix
+                    {expand: true, cwd: 'build_temp/jevix/', src: ['jevix.class.php', 'readme.mediawiki'], dest: 'build/external/jevix'}, 
+                    
                     // Copy abricos.js files
                     {
                         expand: true,
                         flatten: true,
                         cwd: path.join(ROOT, '<%= pkg.dependencies["abricos.js"].folder %>'),
-                        src: [
-                            'build/*',
-                            'README.md',
-                            'LICENSE'
-                        ],
+                        src: ['build/*', 'README.md', 'LICENSE'],
                         dest: 'build/external/abricos.js/'
-                    }]
+                    }
+                ]
             }
         },
         compress: {
