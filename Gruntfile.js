@@ -21,25 +21,28 @@ module.exports = function(grunt) {
         },
         copy: {
             main: {
-                files: [{
+                files: [
+                    // Copy Abricos Core
+                    {expand: true, cwd: 'src/', src: '**', dest: 'build/'},
+                    
+                    // Copy PureCSS
+                    {expand: true, cwd: 'build_temp/', src: 'pure/**', dest: 'build/external/'}, 
+                    
+                    // Copy Alloy-ui 
+                    {expand: true, cwd: 'build_temp/alloyui/build/', src: '**', dest: 'build/external/alloyui/'}, 
+                    {expand: true, cwd: 'build_temp/alloyui/', src: '*.md', dest: 'build/external/alloyui/'}, 
+                    
+                    // Copy abricos.js files
+                    {
                         expand: true,
-                        cwd: 'src/',
-                        src: '**',
-                        dest: 'build/'
-                    }, {
-                        expand: true,
-                        cwd: 'build_temp/',
-                        src: 'pure/**',
-                        dest: 'build/external/'
-                    }, {
-                        expand: true,
-                        cwd: 'build_temp/alloyui/',
-                        src: ['build/**', '*.md'],
-                        dest: 'build/external/alloyui/'
-                    }, {
-                        expand: false,
-                        src: path.join(ROOT, '<%= pkg.dependencies["abricos.js"].folder %>', 'src/abricos.js'),
-                        dest: 'build/external/abricos.js/abricos.js'
+                        flatten: true,
+                        cwd: path.join(ROOT, '<%= pkg.dependencies["abricos.js"].folder %>'),
+                        src: [
+                            'build/*',
+                            'README.md',
+                            'LICENSE'
+                        ],
+                        dest: 'build/external/abricos.js/'
                     }]
             }
         },
@@ -73,7 +76,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-subgrunt');
 
-    grunt.registerTask('default', ['clean:build', 'bower:install', 'copy']);
-    grunt.registerTask('init', ['depends-init', 'subgrunt:abricosjs']);
+    grunt.registerTask('default', ['clean:build', 'copy']);
+    grunt.registerTask('init', ['depends-init', 'subgrunt:abricosjs', 'bower:install']);
     grunt.registerTask('release', ['default', 'clean:release', 'compress:release']);
 };
