@@ -14,6 +14,7 @@ var ROOT = process.cwd();
 var path = require('path');
 var async = require('async');
 var _ = require('lodash');
+var command = require('command');
 
 module.exports = function(grunt) {
     grunt.registerTask(TASK.name, TASK.description, function() {
@@ -69,14 +70,12 @@ module.exports = function(grunt) {
         var dpDir = path.join(ROOT, "deploy", dpName);
         var dpCfg = grunt.config([TASK.name, dpName]);
 
-        console.log(dpCfg);
-
         var dependencyName;
         var stack = [];
 
         for (dependencyName in dpCfg.dependencies) {
             var dp = dpCfg.dependencies[dependencyName];
-            
+
             dp._folder = path.join(dpDir, dp.folder);
 
             // Wraps in a closure to hold dependency reference
@@ -93,7 +92,10 @@ module.exports = function(grunt) {
                 }
             })(dp);
         }
-        callback();
+
+        async.parallel(stack, function() {
+            callback();
+        });
     };
 
     exports._updateDependency = function(dependency, depCallback) {
@@ -134,9 +136,9 @@ module.exports = function(grunt) {
                             mainCallback();
                         });
             }],
-            function() {
-                depCallback();
-            }
+                function() {
+                    depCallback();
+                }
         );
     };
 

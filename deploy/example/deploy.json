@@ -4,9 +4,9 @@
     "dependencies": {
         "sitemap": {
             "type": "module",
-            "folder": "abricos-mod-sitemap",
+            "folder": "../../../abricos-mod-sitemap",
             "repo": "https://github.com/abricos/abricos-mod-sitemap.git",
-            "version": "master"
+            "version": "dev"
         }
     }
 }
