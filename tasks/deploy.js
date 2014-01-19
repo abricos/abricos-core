@@ -53,7 +53,13 @@ module.exports = function(grunt) {
     });
 
     exports._getDeployJSONDir = function(deployName) {
-        return path.join(ROOT, "deploy", deployName);
+        var cwd = grunt.config([TASK.name, deployName, "cwd"]);
+        
+        if (!cwd){
+            cwd = path.join(ROOT, "deploy", deployName);
+        }
+
+        return cwd;
     };
 
     exports._getDeployJSONFile = function(deployName) {
@@ -78,6 +84,36 @@ module.exports = function(grunt) {
     exports._setGruntConfig = function(deployName, mainCallback) {
         deployName = deployName || "default";
 
+        var options = grunt.option.flags();
+
+        options.forEach(function(option) {
+            var key;
+            var value;
+            var valueIndex;
+
+            // Normalize option
+            option = option.replace(/^--(no-)?/, '');
+
+            valueIndex = option.lastIndexOf('=');
+
+            // String parameter
+            if (valueIndex !== -1) {
+                key = option.substring(0, valueIndex);
+                value = option.substring(valueIndex + 1);
+            }
+            // Boolean parameter
+            else {
+                key = option;
+                value = grunt.option(key);
+            }
+
+            if (key === "cwd") {
+                grunt.config([TASK.name, deployName, "cwd"],
+                        path.join(ROOT, value, deployName));
+            }
+        });
+
+        // deploy.json
         var deployJSONFile = exports._getDeployJSONFile(deployName);
 
         if (!grunt.file.exists(deployJSONFile)) {
@@ -237,7 +273,7 @@ module.exports = function(grunt) {
         var cwd = depend._folder;
         var src = path.join(cwd, 'src');
         var dest = path.join(cwd, 'build', 'modules', depend.name);
-        
+
         fs.copy(src, dest, function(err) {
             if (err) {
                 mainCallback(err);

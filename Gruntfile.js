@@ -24,17 +24,16 @@ module.exports = function(grunt) {
                 files: [
                     // Copy Abricos Core
                     {expand: true, cwd: 'src/', src: '**', dest: 'build/'},
-                    
                     // Copy PureCSS
-                    {expand: true, cwd: 'build_temp/', src: 'pure/**', dest: 'build/external/'}, 
-                    
+                    {expand: true, cwd: 'build_temp/', src: 'pure/**', dest: 'build/external/'},
                     // Copy Alloy-ui 
-                    {expand: true, cwd: 'build_temp/alloyui/build/', src: '**', dest: 'build/external/alloyui/'}, 
-                    {expand: true, cwd: 'build_temp/alloyui/', src: '*.md', dest: 'build/external/alloyui/'}, 
-                    
+                    {expand: true, cwd: 'build_temp/alloyui/build/', src: '**', dest: 'build/external/alloyui/'},
+                    {expand: true, cwd: 'build_temp/alloyui/', src: '*.md', dest: 'build/external/alloyui/'},
+                    // Copy YUI3-2in3
+                    {expand: true, cwd: 'build_temp/yui2in3/build/', src: '**', dest: 'build/external/yui2in3/'},
+                    {expand: true, cwd: 'build_temp/yui2in3/', src: 'README.textile', dest: 'build/external/yui2in3/'},
                     // Copy Jevix
-                    {expand: true, cwd: 'build_temp/jevix/', src: ['jevix.class.php', 'readme.mediawiki'], dest: 'build/external/jevix'}, 
-                    
+                    {expand: true, cwd: 'build_temp/jevix/', src: ['jevix.class.php', 'readme.mediawiki'], dest: 'build/external/jevix'},
                     // Copy abricos.js files
                     {
                         expand: true,
