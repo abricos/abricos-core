@@ -34,9 +34,12 @@ module.exports = function(grunt) {
             },
             function(mainCallback) {
                 exports._deployAbricosCore(deployName, mainCallback);
-            },            
+            },
             function(mainCallback) {
                 exports._initDependencies(deployName, mainCallback);
+            },
+            function(mainCallback) {
+                exports._deploySiteSrc(deployName, mainCallback);
             }],
                 function(err) {
                     if (err) {
@@ -111,6 +114,22 @@ module.exports = function(grunt) {
         });
     };
 
+    exports._deploySiteSrc = function(deployName, mainCallback) {
+        grunt.log.ok('Deploy Site source');
+
+        var src = exports._getDeploySrcDir(deployName);
+        var dest = exports._getDeployDestDir(deployName);
+
+        fs.copy(src, dest, function(err) {
+            if (err) {
+                mainCallback(err);
+            }
+            else {
+                mainCallback();
+            }
+        });
+    };
+
     exports._initDependencies = function(deployName, mainCallback) {
 
         var deployJSONDir = exports._getDeployJSONDir(deployName);
@@ -155,8 +174,7 @@ module.exports = function(grunt) {
             return;
         }
 
-        grunt.log.ok('Updating: ' + depend.repo +
-                ' [' + depend.version + ']');
+        grunt.log.ok('Updating: ' + depend.repo + ' [' + depend.version + ']');
 
         async.series([
             function(mainCallback) {
@@ -219,7 +237,7 @@ module.exports = function(grunt) {
         var cwd = depend._folder;
         var src = path.join(cwd, 'src');
         var dest = path.join(cwd, 'build', 'modules', depend.name);
-
+        
         fs.copy(src, dest, function(err) {
             if (err) {
                 mainCallback(err);
