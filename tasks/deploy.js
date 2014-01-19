@@ -10,23 +10,29 @@ var TASK = {
 };
 
 var ROOT = process.cwd();
+var DEPLOYOPTDEF = {
+    src: "src",
+    dest: "www",
+    deploy_components: "../../deploy_components/",
+    dependencies: {}
+};
 
+var command = require('command');
 var path = require('path');
 var async = require('async');
 var _ = require('lodash');
-var command = require('command');
 
 module.exports = function(grunt) {
     grunt.registerTask(TASK.name, TASK.description, function() {
-        var dpName = arguments[0] || "default";
-
+        var deployName = arguments[0] || "default";
         var done = this.async();
+
         async.series([
-            function(callback) {
-                exports._setGruntConfig(dpName, callback);
+            function(mainCallback) {
+                exports._setGruntConfig(deployName, mainCallback);
             },
-            function(callback) {
-                exports._initDependencies(dpName, callback);
+            function(mainCallback) {
+                exports._initDependencies(deployName, mainCallback);
             }],
                 function(err) {
                     if (err) {
@@ -38,63 +44,79 @@ module.exports = function(grunt) {
                 }
         );
     });
-
-    exports._setGruntConfig = function(dpName, callback) {
-        dpName = dpName || "default";
-
-        var dpDir = path.join(ROOT, "deploy", dpName);
-        var dpCfgFile = path.join(dpDir, "deploy.json");
-
-        if (!grunt.file.exists(dpCfgFile)) {
-            grunt.fail.fatal("Deploy config file (" + dpCfgFile + ") not found");
-        }
-
-        var dpCfgDef = {
-            src: "src",
-            dest: "www",
-            dependencies: {}
-        };
-        var dpCfgFile = grunt.file.readJSON(dpCfgFile);
-        var dpCfgGrunt = grunt.config([TASK.name, dpName]) || {};
-
-        var dpCfg = _.assign(dpCfgDef, dpCfgFile);
-        dpCfg = _.assign(dpCfgGrunt, dpCfg);
-
-        grunt.config([TASK.name, dpName], dpCfg);
-
-        callback();
+    
+    exports._getDeployJSONDir = function(deployName){
+        return path.join(ROOT, "deploy", deployName);
     };
 
-    exports._initDependencies = function(dpName, callback) {
+    exports._getDeployJSONFile = function(deployName){
+        var deployJSONDir = exports._getDeployJSONDir(deployName);
+        return path.join(deployJSONDir, "deploy.json");
+    };
 
-        var dpDir = path.join(ROOT, "deploy", dpName);
-        var dpCfg = grunt.config([TASK.name, dpName]);
+    exports._setGruntConfig = function(deployName, mainCallback) {
+        deployName = deployName || "default";
 
-        var dependencyName;
+        var deployJSONFile = exports._getDeployJSONFile(deployName);
+
+        if (!grunt.file.exists(deployJSONFile)) {
+            grunt.fail.fatal("Deploy config file (" + deployJSONFile + ") not found");
+        }
+
+        var deployFileOptions = grunt.file.readJSON(deployJSONFile);
+        var deployGruntOptions = grunt.config([TASK.name, deployName]) || {};
+
+        var deployOptions = _.assign(
+                DEPLOYOPTDEF,
+                _.assign(deployGruntOptions, deployFileOptions)
+                );
+
+        // Set deploy options in 
+        grunt.config([TASK.name, deployName], deployOptions);
+
+        mainCallback();
+    };
+
+    exports._initDependencies = function(deployName, mainCallback) {
+
+        var deployJSONDir = exports._getDeployJSONDir(deployName);
+        var deployOptions = grunt.config([TASK.name, deployName]);
+        var deployComponentsDir = path.join(deployJSONDir, deployOptions.deploy_components);
+
+        var dependName;
         var stack = [];
 
-        for (dependencyName in dpCfg.dependencies) {
-            var dp = dpCfg.dependencies[dependencyName];
+        for (dependName in deployOptions.dependencies) {
+            var depend = deployOptions.dependencies[dependName];
 
-            dp._folder = path.join(dpDir, dp.folder);
+            // Set default value if empty
+            depend = _.assign({
+                update: true,
+                name: dependName
+            }, depend);
+            
+            // Absolute directory for dependency project
+            depend._folder = path.join(deployComponentsDir, dependName);
 
             // Wraps in a closure to hold dependency reference
-            (function(dp) {
-                if (grunt.file.exists(dp._folder)) {
-                    stack.push(function(depCallback) {
-                        exports._updateDependency(dp, depCallback);
-                    });
+            (function(depend) {
+                if (grunt.file.exists(depend._folder)) {
+                    if (depend.update) {
+                        stack.push(function(depCallback) {
+                            exports._updateDependency(depend, depCallback);
+                        });
+                    }
                 }
                 else {
                     stack.push(function(depCallback) {
-                        exports._cloneDependency(dp, depCallback);
+                        exports._cloneDependency(depend, depCallback);
                     });
                 }
-            })(dp);
+            })(depend);
         }
 
         async.parallel(stack, function() {
-            callback();
+            mainCallback();
         });
     };
 
