@@ -111,6 +111,9 @@ module.exports = function(grunt) {
                 grunt.config([TASK.name, deployName, "cwd"],
                         path.join(ROOT, value, deployName));
             }
+            if (key == "depend"){
+                grunt.config([TASK.name, deployName, "depend"], value);
+            }
         });
 
         // deploy.json
@@ -135,6 +138,13 @@ module.exports = function(grunt) {
     };
 
     exports._deployAbricosCore = function(deployName, mainCallback) {
+        var onlyDependName = grunt.config([TASK.name, deployName, "depend"]);
+        
+        if (onlyDependName){
+            mainCallback();
+            return;
+        }
+        
         grunt.log.ok('Deploy Abricos core');
 
         var src = path.join(ROOT, 'build');
@@ -168,6 +178,8 @@ module.exports = function(grunt) {
 
     exports._initDependencies = function(deployName, mainCallback) {
 
+        var onlyDependName = grunt.config([TASK.name, deployName, "depend"]);
+
         var deployJSONDir = exports._getDeployJSONDir(deployName);
         var deployOptions = grunt.config([TASK.name, deployName]);
         var deployComponentsDir = path.join(deployJSONDir, deployOptions.deploy_components);
@@ -176,6 +188,11 @@ module.exports = function(grunt) {
         var stack = [];
 
         for (dependName in deployOptions.dependencies) {
+
+            if (onlyDependName && onlyDependName !== dependName){
+                continue;
+            }
+
             var depend = deployOptions.dependencies[dependName];
 
             // Set default value if empty
