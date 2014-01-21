@@ -300,6 +300,39 @@ module.exports = function(grunt) {
         });
     };
 
+    exports._buildAbricosTemplateDependency = function(depend, mainCallback) {
+        grunt.log.ok('Build Abricos template: ' + depend.dependName);
+
+        var cwd = depend._folder;
+        var src = path.join(cwd, 'src');
+        var dest = path.join(cwd, 'build', 'tt', depend.name);
+
+        fs.copy(src, dest, function(err) {
+            if (err) {
+                mainCallback(err);
+            }
+            else {
+                mainCallback();
+            }
+        });
+    };
+
+    exports._deployAbricosTemplateDependency = function(depend, mainCallback) {
+        grunt.log.ok('Deploy Abricos template: ' + depend.dependName);
+
+        var src = path.join(depend._folder, 'build');
+        var dest = exports._getDeployDestDir(depend.deployName);
+
+        fs.copy(src, dest, function(err) {
+            if (err) {
+                mainCallback(err);
+            }
+            else {
+                mainCallback();
+            }
+        });
+    };
+
     exports._deployDependency = function(depend, deployCallback) {
         var stack = [];
 
@@ -321,6 +354,12 @@ module.exports = function(grunt) {
                 });
                 break;
             case "template":
+                stack.push(function(depCallback) {
+                    exports._buildAbricosTemplateDependency(depend, depCallback);
+                });
+                stack.push(function(depCallback) {
+                    exports._deployAbricosTemplateDependency(depend, depCallback);
+                });
                 break;
         }
 
