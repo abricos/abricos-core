@@ -3,18 +3,19 @@
     "dest": "www",
     "deploy_components": "../../deploy_components/",
     "dependencies": {
-        "abricos-mod-sitemap": {
+        "mod-sitemap": {
             "name": "sitemap",
             "type": "module",
             "repo": "https://github.com/abricos/abricos-mod-sitemap.git",
             "version": "master",
-            "update": false
+            "update": true
         },
-        "abricos-mod-filemanager": {
+        "mod-filemanager": {
             "name": "filemanager",
             "type": "module",
             "repo": "https://github.com/abricos/abricos-mod-filemanager.git",
-            "version": "master"
+            "version": "master",
+            "update": true
         }
     }
 }

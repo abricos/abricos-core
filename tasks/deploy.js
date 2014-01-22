@@ -4,6 +4,8 @@
  * https://github.com/abricos/abricos-core/blob/master/LICENSE.md
  */
 
+"use strict";
+
 var TASK = {
     name: 'deploy',
     description: 'Deploy Abricos Platform.'
@@ -17,13 +19,17 @@ var DEPLOYOPTDEF = {
     dependencies: {}
 };
 
-var command = require('command');
 var path = require('path');
 var async = require('async');
 var fs = require('fs-extra');
 var _ = require('lodash');
 
+var chalk = require('chalk');
+var exec = require('child_process').exec;
+var util = require('util')
+
 module.exports = function(grunt) {
+    
     grunt.registerTask(TASK.name, TASK.description, function() {
         var deployName = arguments[0] || "default";
         var done = this.async();
@@ -161,10 +167,15 @@ module.exports = function(grunt) {
     };
 
     exports._deploySiteSrc = function(deployName, mainCallback) {
-        grunt.log.ok('Deploy Site source');
-
         var src = exports._getDeploySrcDir(deployName);
         var dest = exports._getDeployDestDir(deployName);
+        
+        if (!grunt.file.exists(src)) {
+            mainCallback();
+            return;
+        }
+        
+        grunt.log.ok('Deploy Site source');
 
         fs.copy(src, dest, function(err) {
             if (err) {
@@ -200,9 +211,14 @@ module.exports = function(grunt) {
                 update: true,
                 name: dependName
             }, depend);
-
-            // Absolute directory for dependency project
-            depend._folder = path.join(deployComponentsDir, dependName);
+            
+            depend.info = {
+                // Absolute directory for dependency project
+                folder: path.join(deployComponentsDir, dependName),
+                
+                // True - there is a change
+                isChanges: false
+            };
 
             depend.deployName = deployName;
             depend.dependName = dependName;
@@ -215,53 +231,62 @@ module.exports = function(grunt) {
             })(depend);
         }
 
-        async.parallel(stack, function() {
+        async.parallelLimit(stack, 5, function() {
             mainCallback();
         });
     };
+    
+    exports._shell = function(cmd, args, options, callback){
+        if (util.isArray(args)){
+            args = args.join(' ');
+        }
+        cmd += ' ' + args;
+        exec(cmd, options, function(err, stdout, stderr){
+            if (err){
+                grunt.log.error(stderr);
+            }
+            else {
+                grunt.log.writeln(stderr);
+            }
+            callback(err, stdout, stderr);
+        });
+    };
+    
+    exports._checkStatusDependency = function(depend, depCallback) {
+        exports._shell("git", ['status', '-s'], {
+                cwd: depend.info.folder
+            }, function(err, stdout, stderr){
+                if (stdout.trim().length > 0){
+                    depend.info.isChanges = true;
+                }
+                depCallback();
+            });
+    };
 
     exports._updateDependency = function(depend, depCallback) {
-
-        if (!depend.update) {
-            depCallback();
-            return;
-        }
-
         grunt.log.ok('Updating: ' + depend.repo + ' [' + depend.version + ']');
 
         async.series([
             function(mainCallback) {
-                command.open(ROOT)
-                        .on('stdout', command.writeTo(process.stdout))
-                        .on('stderr', command.writeTo(process.stderr))
-                        .exec('git', ['fetch', depend.repo, depend.version, '--progress'], {
-                            cwd: depend._folder
-                        })
-                        .then(function() {
-                            mainCallback();
-                        });
+                exports._shell("git", ['fetch', depend.repo, depend.version, '--progress'], {
+                    cwd: depend.info.folder
+                }, function(){
+                    mainCallback();
+                });
             },
             function(mainCallback) {
-                command.open(ROOT)
-                        .on('stdout', command.writeTo(process.stdout))
-                        .on('stderr', command.writeTo(process.stderr))
-                        .exec('git', ['checkout', depend.version, '-f'], {
-                            cwd: depend._folder
-                        })
-                        .then(function() {
-                            mainCallback();
-                        });
+                exports._shell("git", ['checkout', depend.version, '-f'], {
+                    cwd: depend.info.folder
+                }, function(){
+                    mainCallback();
+                });
             },
             function(mainCallback) {
-                command.open(ROOT)
-                        .on('stdout', command.writeTo(process.stdout))
-                        .on('stderr', command.writeTo(process.stderr))
-                        .exec('git', ['pull', '--rebase', depend.repo, depend.version, '--progress'], {
-                            cwd: depend._folder
-                        })
-                        .then(function() {
-                            mainCallback();
-                        });
+                exports._shell("git", ['pull', '--rebase', depend.repo, depend.version, '--progress'], {
+                    cwd: depend.info.folder
+                }, function(){
+                    mainCallback();
+                });
             }],
                 function() {
                     depCallback();
@@ -273,21 +298,17 @@ module.exports = function(grunt) {
         grunt.log.ok('Cloning: ' + depend.repo +
                 ' [' + depend.version + ']');
 
-        command.open(ROOT)
-                .on('stdout', command.writeTo(process.stdout))
-                .on('stderr', command.writeTo(process.stderr))
-                .exec('git', ['clone', depend.repo, '-b', depend.version, depend._folder, '--progress'], {
-                    cwd: ROOT
-                })
-                .then(function() {
-                    depCallback();
-                });
+        exports._shell("git", ['clone', depend.repo, '-b', depend.version, depend.info.folder, '--progress'], {
+            cwd: ROOT
+        }, function(){
+            depCallback();
+        });
     };
 
     exports._buildAbricosModuleDependency = function(depend, mainCallback) {
         grunt.log.ok('Build Abricos module: ' + depend.dependName);
 
-        var cwd = depend._folder;
+        var cwd = depend.info.folder;
         var src = path.join(cwd, 'src');
         var dest = path.join(cwd, 'build', 'modules', depend.name);
 
@@ -304,7 +325,7 @@ module.exports = function(grunt) {
     exports._deployAbricosModuleDependency = function(depend, mainCallback) {
         grunt.log.ok('Deploy Abricos module: ' + depend.dependName);
 
-        var src = path.join(depend._folder, 'build');
+        var src = path.join(depend.info.folder, 'build');
         var dest = exports._getDeployDestDir(depend.deployName);
 
         fs.copy(src, dest, function(err) {
@@ -320,7 +341,7 @@ module.exports = function(grunt) {
     exports._buildAbricosTemplateDependency = function(depend, mainCallback) {
         grunt.log.ok('Build Abricos template: ' + depend.dependName);
 
-        var cwd = depend._folder;
+        var cwd = depend.info.folder;
         var src = path.join(cwd, 'src');
         var dest = path.join(cwd, 'build', 'tt', depend.name);
 
@@ -337,7 +358,7 @@ module.exports = function(grunt) {
     exports._deployAbricosTemplateDependency = function(depend, mainCallback) {
         grunt.log.ok('Deploy Abricos template: ' + depend.dependName);
 
-        var src = path.join(depend._folder, 'build');
+        var src = path.join(depend.info.folder, 'build');
         var dest = exports._getDeployDestDir(depend.deployName);
 
         fs.copy(src, dest, function(err) {
@@ -354,8 +375,15 @@ module.exports = function(grunt) {
         var stack = [];
 
         stack.push(function(depCallback) {
-            if (grunt.file.exists(depend._folder)) {
-                exports._updateDependency(depend, depCallback);
+            if (grunt.file.exists(depend.info.folder)) {
+                exports._checkStatusDependency(depend, function(){
+                    if (depend.info.isChanges) {
+                        grunt.log.ok('There are local changes: ' + depend.repo + ' [' + depend.version + ']');
+                        depCallback();
+                    }else{
+                        exports._updateDependency(depend, depCallback);
+                    }
+                });
             } else {
                 exports._cloneDependency(depend, depCallback);
             }
