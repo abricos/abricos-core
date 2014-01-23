@@ -20,7 +20,7 @@ class Ab_UserText {
 	
 	public function __construct($fullerase = false){
 		
-		require_once 'jevix/jevix.class.php';
+		require_once CWD.'/vendor/jevix/jevix.class.php';
 		
 		$this->JevixConfigure($fullerase);
 	}
