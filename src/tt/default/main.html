@@ -22,86 +22,86 @@
 
 [*]--><!DOCTYPE html>
 <html lang="ru" class="yui3-loading">
-<head>
-	<title>[var]meta_title[/var]</title>
-	<meta name="keywords" content="[var]meta_keys[/var]">
-	<meta name="description" content="[var]meta_desc[/var]">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <head>
+        <title>[var]meta_title[/var]</title>
+        <meta name="keywords" content="[var]meta_keys[/var]">
+        <meta name="description" content="[var]meta_desc[/var]">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-	[mod]sys:jsvar[/mod]
-	
-	<link href="/gzip.php?file=/css/pure/pure-min.css&v=[var]version[/var]" type="text/css" rel="stylesheet" >
-	
-	<link href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=0.3" type="text/css" rel="stylesheet" />
-	[bkvar]css[/bkvar]
+        [mod]sys:jsvar[/mod]
 
-	[bkvar]js[/bkvar]
+        <link href="/gzip.php?file=/vendor/pure/pure-min.css&v=[var]version[/var]" type="text/css" rel="stylesheet" >
 
-	<link rel="stylesheet" href="/tt/[bkvar]ttowner[/bkvar]/css/override.css?v=0.3" type="text/css" />
+        <link href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=0.3" type="text/css" rel="stylesheet" />
+        [bkvar]css[/bkvar]
 
-	[mod]rss:meta[/mod]
-</head>
-<body>
-	<div id="doc">
-		<div id="hd"><header>
-			<div class="tline">
-				<div class="gwrap">
-					<div class="pure-g">
-					
-						<div class="pure-u-1-4">
-							<h1 class="site-name">
-								<a href="/">[ph]sys:site_name[/ph]</a>
-							</h1>
-						</div>
-						<div class="pure-u-1-2">
-							<div class="site-desc">
-								[ph]sys:site_title[/ph]
-							</div>
-						</div>
-						
-					</div>
-					<div id="userauthblock">
-						<div class="small smalluserblock">
-							[mod]user:userline[/mod]
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="mline">
-				<div class="gwrap">
-					[mod]sitemap:hmenu[/mod]
-				</div>
-			</div>
-		</header></div>
-		
-		<div id="bd">
-			<div class="gwrap">
-				<div class="pure-g">
-					<div class="pure-u-3-4">
-						<div class="content">
-							[mod]sitemap:breadcrumb[/mod]
-							[tt]content[/tt]
-						</div>
-					</div>
-					<div class="pure-u-1-4">
-						<div class="sidebar">
-							<div class="sidebaritem">
-								[mod]news:newsblock[/mod]
-							</div>
-							<div class="sidebaritem">
-								[mod]sitemap:vmenuaccord[/mod]
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="ft">
-			<div class="gwrap">
-				<p>&#169; [ph]sys:site_name[/ph] - all rights reserved. Powered by <a href="http://abricos.org" title="Abricos - Content Management System (CMS), Web Application Platform (WebOS)">Abricos</a> [var]version[/var]</p>
-				
-			</div>
-		</div>
-	</div>
-</body>
+        [bkvar]js[/bkvar]
+
+        <link rel="stylesheet" href="/tt/[bkvar]ttowner[/bkvar]/css/override.css?v=0.3" type="text/css" />
+
+        [mod]rss:meta[/mod]
+    </head>
+    <body>
+        <div id="doc">
+            <div id="hd"><header>
+                    <div class="tline">
+                        <div class="gwrap">
+                            <div class="pure-g">
+
+                                <div class="pure-u-1-4">
+                                    <h1 class="site-name">
+                                        <a href="/">[ph]sys:site_name[/ph]</a>
+                                    </h1>
+                                </div>
+                                <div class="pure-u-1-2">
+                                    <div class="site-desc">
+                                        [ph]sys:site_title[/ph]
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div id="userauthblock">
+                                <div class="small smalluserblock">
+                                    [mod]user:userline[/mod]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mline">
+                        <div class="gwrap">
+                            [mod]sitemap:hmenu[/mod]
+                        </div>
+                    </div>
+                </header></div>
+
+            <div id="bd">
+                <div class="gwrap">
+                    <div class="pure-g">
+                        <div class="pure-u-3-4">
+                            <div class="content">
+                                [mod]sitemap:breadcrumb[/mod]
+                                [tt]content[/tt]
+                            </div>
+                        </div>
+                        <div class="pure-u-1-4">
+                            <div class="sidebar">
+                                <div class="sidebaritem">
+                                    [mod]news:newsblock[/mod]
+                                </div>
+                                <div class="sidebaritem">
+                                    [mod]sitemap:vmenuaccord[/mod]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="ft">
+                <div class="gwrap">
+                    <p>&#169; [ph]sys:site_name[/ph] - all rights reserved. Powered by <a href="http://abricos.org" title="Abricos - Content Management System (CMS), Web Application Platform (WebOS)">Abricos</a> [var]version[/var]</p>
+
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

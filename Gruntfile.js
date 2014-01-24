@@ -29,6 +29,14 @@ module.exports = function(grunt) {
                     // Copy Alloy-ui 
                     {expand: true, cwd: 'build_temp/alloyui/build/', src: '**', dest: 'build/vendor/alloyui/'},
                     {expand: true, cwd: 'build_temp/alloyui/', src: '*.md', dest: 'build/vendor/alloyui/'},
+                    // YUI3 Gallery (by filter)
+                    {
+                        expand: true, cwd: 'build_temp/yui3gallery/build/', 
+                        src: [
+                            'gallery-sm-*/**',
+                        ], 
+                        dest: 'build/vendor/yui3gallery/'
+                    },
                     // Copy YUI3-2in3
                     {expand: true, cwd: 'build_temp/yui2in3/build/', src: '**', dest: 'build/vendor/yui2in3/'},
                     {expand: true, cwd: 'build_temp/yui2in3/', src: 'README.textile', dest: 'build/vendor/yui2in3/'},

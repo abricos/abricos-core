@@ -118,15 +118,13 @@ YUI.GlobalConfig = {
             }
     	},
     	/**/
-        /*
     	gallery: {
     	    combine: false,
-    	    base: "/gzip.php?base=js/yui/gallery&file=",
+    	    base: "/gzip.php?base=vendor/yui3gallery&file=",
             patterns:  {
                 'gallery-': { }
             }
     	},
-        /**/
         yui2: {
             combine: false,
             base: "/gzip.php?base=vendor/yui2in3&file=",
