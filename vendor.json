@@ -1,0 +1,27 @@
+{
+    "files": {
+        "pure": "*",
+        "alloyui": [
+            {
+                "src": "build/**",
+                "dest": ""
+            },
+            {
+                "src": "*.md",
+                "dest": ""
+            }
+        ],
+        "yui3gallery": {
+            "src": "gallery-sm-*/**",
+            "dest": ""
+        },
+        "yui2in3": [
+            "build/**",
+            "README.textile"
+        ],
+        "jevix": [
+            "jevix.class.php",
+            "readme.mediawiki"
+        ]
+    }
+}
