@@ -1,9 +1,10 @@
 {
     "files": {
-        "pure": "*",
+        "pure": "**/*",
         "alloyui": [
             {
-                "src": "build/**",
+                "cwd": "build",
+                "src": "**",
                 "dest": ""
             },
             {
@@ -12,11 +13,15 @@
             }
         ],
         "yui3gallery": {
+            "cwd": "build",
             "src": "gallery-sm-*/**",
             "dest": ""
         },
         "yui2in3": [
-            "build/**",
+            {
+                "cwd": "build",
+                "src": "**"
+            },
             "README.textile"
         ],
         "jevix": [
