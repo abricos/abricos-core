@@ -27,6 +27,22 @@
         "jevix": [
             "jevix.class.php",
             "readme.mediawiki"
+        ],
+        "bootstrap": [
+            {
+                "cwd": "dist",
+                "src": "**",
+                "dest": ""
+            },
+            "README.md",
+            "LICENSE"
+        ],
+        "jquery": [
+            {
+                "cwd": "dist",
+                "src": "**"
+            },
+            "MIT-LICENSE.txt"
         ]
     }
 }
