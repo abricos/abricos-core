@@ -43,6 +43,9 @@
                 "src": "**"
             },
             "MIT-LICENSE.txt"
+        ],
+        "font-awesome": [
+            "fonts/**", "css/**", "README.md"
         ]
     }
 }
