@@ -12,11 +12,6 @@
                 "dest": ""
             }
         ],
-        "yui3gallery": {
-            "cwd": "build",
-            "src": "gallery-sm-*/**",
-            "dest": ""
-        },
         "yui2in3": [
             {
                 "cwd": "build",
