@@ -184,7 +184,7 @@ if ($libType == 'fullcssforie'){
 	
 		$cssfiles = globa($jsdir."/*.css");
 		foreach ($cssfiles as $file){
-			$content .= getFileContents($file);
+			$content .= "\n".getFileContents($file);
 		}
 	}
 	
@@ -195,12 +195,12 @@ if ($libType == 'fullcssforie'){
 		$cname = basename($file, ".js");
 		
 		$jsCompFile = new Ab_CoreJSCFile($module, $cname, $templateName, $lang);
-		$content .= $jsCompFile->build();
+		$content .= "\n".$jsCompFile->build();
 	}
 	
 }else{
 	foreach ($files as $file){
-		$content .= getFileContents($realPath."/".$basedir."/". $file);
+		$content .= "\n".getFileContents($realPath."/".$basedir."/". $file);
 	}
 }
 
