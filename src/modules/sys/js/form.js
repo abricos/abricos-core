@@ -139,61 +139,45 @@ Component.entryPoint = function(NS){
     Waiting.ATTRS = {
         waiting: {
             value: false
-            /*
-            setter: function(){
-                this._setWaiting(val);
-            },
-            getter: function(){
-                return this.getWaiting();
-            },
-            lazyAdd: false
-            /**/
         }
     };
     Waiting.WAITING_CLASS_NAME = Y.Widget.getClassName(WAITING);
     Waiting.prototype = {
         initializer: function(){
-            Y.after(this._renderUIWaiting, this, RENDERUI);
             Y.after(this._syncUIWaiting, this, SYNCUI);
             Y.after(this._bindUIWaiting, this, BINDUI);
-        },
-        _renderUIWaiting: function(){
-            // this._waitingNode.addClass(Waiting.WAITING_CLASS_NAME);
         },
         _syncUIWaiting: function(){
             this._uiSetWaiting(this.get('waiting'));
         },
         _bindUIWaiting: function(){
             this.after('waitingChange', this._afterWaitingChange);
-            console.log('waitingi after');
         },
         _afterWaitingChange: function(e){
-            console.log(e);
             if (e.src != UI){
                 this._uiSetWaiting(e.newVal);
             }
         },
         _uiSetWaiting: function(val){
-            console.log(val);
+            var boundingBox = this.get(BOUNDING_BOX);
+            boundingBox.all('[data-wait]').each(function(node){
+                var flag = node.getData('wait');
+                switch (flag) {
+                    case 'show':
+                        node.setStyle('display', val ? '' : 'none');
+                        break;
+                    case 'hide':
+                        node.setStyle('display', val ? 'none' : '');
+                        break;
+                    case 'disable':
+                        node.set('disabled', val);
+                        break;
+                    case 'enable':
+                        node.set('disabled', !val);
+                        break;
+                }
+            }, this);
         }
-            /*
-            _onWatingChange: function(val){
-                console.log(arguments);
-                var boundingBox = this.get(BOUNDING_BOX);
-                console.log(boundingBox);
-                boundingBox.all('[data-wait="show"]').each(function(node){
-                    console.log(node);
-                }, this);
-            }
-            /*
-             initializer: function(){
-             this.after('waitingChange', this._onWaitingChange);
-             },
-             _onWaitingChange: function(e){
-
-             console.log(e);
-             }
-             /**/
     };
     NS.WidgetWaiting = Waiting;
 
