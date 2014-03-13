@@ -43,6 +43,7 @@ Component.entryPoint = function(NS){
                 headers = Y.merge(AJAX.HTTP_HEADERS, options.header),
                 timeout = options.timeout || AJAX.HTTP_TIMEOUT,
                 csrfToken = options.csrfToken || AJAX.CSRF_TOKEN,
+                context = options.context || this,
                 entity = 'data=' + Y.JSON.stringify(data);
 
             if (csrfToken){
@@ -50,8 +51,8 @@ Component.entryPoint = function(NS){
             }
 
             this._sendAJAXIORequest({
-                // action: 'POST',
                 callback: callback,
+                context: context,
                 entity: entity,
                 headers: headers,
                 method: method,
@@ -60,15 +61,14 @@ Component.entryPoint = function(NS){
             });
         },
         _sendAJAXIORequest: function(config){
-
             return Y.io(config.url, {
                 arguments: {
-                    // action: config.action,
+                    context: config.context,
                     callback: config.callback,
                     url: config.url
                 },
 
-                context: this,
+                context: config.context,
                 data: config.entity,
                 headers: config.headers,
                 method: config.method,
@@ -85,18 +85,38 @@ Component.entryPoint = function(NS){
         _onAJAXIOEnd: function(txId, details){
         },
         _onAJAXIOFailure: function(txId, res, details){
-            var callback = details.callback;
-            if (callback){
-                callback({
+            var callback = details.callback,
+                context = details.context,
+                err = {
                     code: res.status,
                     msg: res.statusText
-                }, res);
+                },
+                request = new NS.AJAXRequest({
+                    request: res
+                });
+
+            if (callback){
+
+                if (context){
+                    callback.apply(context, [err, request]);
+                } else {
+                    callback(err, request);
+                }
             }
         },
         _onAJAXIOSuccess: function(txId, res, details){
-            var callback = details.callback;
+            var callback = details.callback,
+                context = details.context,
+                request = new NS.AJAXRequest({
+                    request: res
+                });
+
             if (callback){
-                callback(null, res);
+                if (context){
+                    callback.apply(context, [null, request]);
+                } else {
+                    callback(null, request);
+                }
             }
         },
         _onAJAXIOStart: function(txId, details){
@@ -104,4 +124,14 @@ Component.entryPoint = function(NS){
     };
     NS.AJAX = AJAX;
 
+    var AJAXRequest = function(config){
+        this._init(config);
+    };
+    AJAXRequest.prototype = {
+        _init: function(config){
+            config || (config || {});
+            this.request = config.request;
+        }
+    };
+    NS.AJAXRequest = AJAXRequest;
 };
