@@ -119,6 +119,9 @@ Component.entryPoint = function(NS){
             this.fire('resetForm');
         },
         _onSubmitFormAction: function(e){
+
+            e.halt();
+
             this._syncFieldsFromUIForm();
             var res = this.fire('submitForm');
             if (!res){
@@ -180,6 +183,5 @@ Component.entryPoint = function(NS){
         }
     };
     NS.WidgetWaiting = Waiting;
-
 
 };
