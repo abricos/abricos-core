@@ -227,9 +227,15 @@ class Ab_CoreJSCBuilder {
 		if (empty($htm)){ return ""; }
 
 		$module = $this->module;
-		$content = "(function(){var mt=Brick.util.Template; if(typeof mt['".$module."']=='undefined'){mt['".$module."']={}};var t=mt['".$module."'];";
+		$content = "
+(function(){
+    var mt=Brick.util.Template;
+    if(typeof mt['".$module."']=='undefined'){mt['".$module."']={}};
+    var t=mt['".$module."'];
+";
 		$content .= $this->parseHTML($htm);
-		$content .= "})();";
+		$content .= "
+})();";
 		
 		return $content;
 	}
@@ -266,14 +272,10 @@ class Ab_CoreJSCBuilder {
 		if (empty($css)){ return ""; }
 		
 		$module = $this->module;
-		
+
 		$content = "
-(function(){
-	var mcss=Brick.util.CSS; 
-	if(typeof mcss['".$module."']=='undefined'){mcss['".$module."']={};};
-	var css=mcss['".$module."'];
-	css['".$this->component."']='".$this->parseCSS($css)."';
-})();";
+Abricos.CSS.add('mod.".$module.".".$this->component."', '".$this->parseCSS($css)."');
+		";
 		return $content;
 	}
 	

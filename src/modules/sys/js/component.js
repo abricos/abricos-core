@@ -9,14 +9,7 @@ Component.requires = {
 };
 Component.entryPoint = function(NS){
 
-    var Y = Brick.YUI,
-        RENDERUI = 'renderUI',
-        BINDUI = 'bindUI',
-        SYNCUI = 'syncUI',
-
-        UI = Y.Widget.UI_SRC,
-
-        BOUNDING_BOX = 'boundingBox';
+    var Y = Brick.YUI;
 
     var Template = function(){
 
@@ -24,14 +17,24 @@ Component.entryPoint = function(NS){
     Template.ATTRS = {
         component: {
             value: null
+        },
+        templateNames: {
+            value: null
         }
     };
     Template.prototype = {
         initializer: function(){
-            var cmp = this.get('component');
+            var component = this.get('component');
+
+            if (component){
+               // this.template = component.buildTemplate();
+                this.template = {
+                    replace: function(){}
+                };
+            }
         }
     };
-    NS.TemplateManager = Template;
+    NS.Template = Template;
 
 
     var Language = function(){

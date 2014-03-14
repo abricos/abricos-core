@@ -3,9 +3,9 @@
 */
 
 /**
- * Ядро Abricos! User Interface Library 
+ * Ядро Abricos! User Interface Library
  * @module Sys
- * @namespace 
+ * @namespace
  * @title Brick Global
  */
 
@@ -19,36 +19,36 @@ if (typeof Brick == 'undefined' || !Brick){
 }
 
 /**
- * Переменные окружения платформы 
- * 
+ * Переменные окружения платформы
+ *
  * @class Brick.env
  * @static
  */
 Brick.env = Brick.env || {
-	
+
 	/**
 	 * Версия ядра
 	 * @property version
 	 * @type String
 	 */
 	version: '0',
-	
+
 	/**
 	 * Идентификатор языка сайта, 'ru' - русский, 'en' - английский и т.п.
 	 * @property language
 	 * @type String
 	 */
 	language: 'ru',
-	
+
 	/**
 	 * Имя хоста (не используется, оставлено для совместимости с предыдущими версиями модулей)
 	 * @property host
 	 * @type String
 	 */
 	host: document.location.hostname,
-	
+
 	enmod: [],
-	
+
 	ttname: ''
 };
 
@@ -58,7 +58,7 @@ Brick.env = Brick.env || {
  * @static
  */
 Brick.env.lib = {
-	
+
 	/**
 	 * Версия YAHOO! User Interface Library
 	 * @property yui
@@ -80,20 +80,20 @@ Brick.env.user = {
 	 * @type Integer
 	 */
 	id: 0,
-	
+
 	/**
 	 * Учетная запись (логин)
 	 * @property name
 	 * @type String
 	 */
 	name: 'guest',
-	
+
 	// Имя
 	firstname: '',
-	
+
 	// Фамилия
 	lastname: '',
-	
+
 	/**
 	 * Идентификатор сессии
 	 * @property session
@@ -174,7 +174,7 @@ Brick.console = function(obj){
  * <code> if (!Brick.objectExists('Brick.mod.mymodule')){ return; }</code></p>
  * @method objectExists
  * @static
- * @param {String} namespace Идентификатор объекта, 
+ * @param {String} namespace Идентификатор объекта,
  * например "Brick.mod.user.API"
  * @return {Boolean}
  */
@@ -185,10 +185,10 @@ Brick.objectExists = function(namespace){
 
 /**
  * Конвертировать идентификатор объекта в объект.
- * 
+ *
  * @method convertToObject
  * @static
- * @param {String} path Идентификатор объекта, 
+ * @param {String} path Идентификатор объекта,
  * например "Brick.mod.blog.API.showTopicListByUserWidget"
  * @return {Object}
  */
@@ -204,11 +204,11 @@ Brick.convertToObject = function(path){
 
 
 /**
- * Найти в Dom элементы типа SCRIPT, удалить их, при этом 
- * собрав весь JavaScript текст 
+ * Найти в Dom элементы типа SCRIPT, удалить их, при этом
+ * собрав весь JavaScript текст
  * @method cleanScript
  * @static
- * @param {Object} el Dom элемент 
+ * @param {Object} el Dom элемент
  * @return {String} JavaScript текст
  */
 Brick.cleanScript = function(el){
@@ -231,19 +231,19 @@ Brick.cleanScript = function(el){
 };
 
 /**
- * Удалить все дочернии элементы Dom элемента 
+ * Удалить все дочернии элементы Dom элемента
  * @method elClear
  * @static
- * @param {Object} el Dom элемент  
+ * @param {Object} el Dom элемент
  */
-Brick.elClear = function(el){ 
+Brick.elClear = function(el){
 	while(el.childNodes.length){
 		el.removeChild(el.childNodes[0]);
-	} 
+	}
 };
 
 /**
- * Вернуть новый Dom элемент, если в параметрах указан элемент контейнер, 
+ * Вернуть новый Dom элемент, если в параметрах указан элемент контейнер,
  * то поместить этот элемент в него.
  * @method elCreate
  * @static
@@ -260,10 +260,10 @@ Brick.elCreate = function(tag, parent){
 
 /**
  * Выполнить JavaScript text
- * 
+ *
  * @method readScript
  * @static
- * @param {String} text JavaScript текст 
+ * @param {String} text JavaScript текст
  */
 Brick.readScript = function(text){
 	var s = document.createElement("script");
@@ -273,14 +273,14 @@ Brick.readScript = function(text){
 };
 
 /**
- * Проверить, существует ли компонент модуля в наличие на сервере. 
+ * Проверить, существует ли компонент модуля в наличие на сервере.
  * Осуществляет поиск в Brick.Modules
- * 
+ *
  * @method componentExists
  * @static
- * @param {String} moduleName Имя модуля 
+ * @param {String} moduleName Имя модуля
  * @param {String} componentName Имя компонента
- * @return {Boolean}  
+ * @return {Boolean}
  */
 Brick.componentExists = function(moduleName, componentName){
 	if (!Brick.Modules[moduleName]){ return false;}
@@ -308,45 +308,6 @@ Brick.componentExists = function(moduleName, componentName){
 Brick.namespace('util');
 
 
-//////////////////////////CSS Style Manager //////////////////////////
-/**
- * Менеджер CSS стилей
- * @class CSS
- * @namespace Brick.util
- * @static
- */
-(function(){
-	var CSS = {};
-	CSS.disableCSSComponent = false;
-	
-	/**
-	 * Добавить CSS стиль на текущую страницу в браузере
-	 * 
-	 * @method update
-	 * @static
-	 * @param {String} t Текст CSS
-	 */
-	CSS.update = function(t){
-		if (typeof t == 'undefined' || CSS.disableCSSComponent){
-			return;
-		}
-		var style = document.createElement('style');
-		style['type'] = 'text/css';
-		
-		if (style.styleSheet){ // IE
-			style.styleSheet.cssText = t;
-		}else{
-			var tt1 = document.createTextNode(t);
-			style.appendChild(tt1);
-		}
-		
-		var hh1 = document.getElementsByTagName('head')[0];
-		hh1.appendChild(style);
-	};
-	
-	Brick.util.CSS = CSS;
-})();
-
 //////////////////////////Language Manager ////////////////////////// 
 (function(){
 	var clone = function(from, to){
@@ -363,25 +324,25 @@ Brick.namespace('util');
 
 	/**
 	 * Менеджер локализации
-	 * 
+	 *
 	 * @class Language
 	 * @namespace Brick.util
 	 * @static
 	 */
 	var Language = {};
-	
+
 	var _dict = {};
-	
+
 	Language.getData = function(){
 		return _dict[Brick.env.language];
 	};
-	
+
 	Language.add = function(lang, o){
 		if (typeof _dict[lang] == 'undefined')
 			_dict[lang] = {};
 		clone(o, _dict[lang]);
 	};
-	
+
 	Language.get = function(lang, key){
 		var l = _dict[lang], k = key.split('.'), i;
 		if (typeof l == 'undefined'){
@@ -393,16 +354,16 @@ Brick.namespace('util');
 				return [];
 			}
 		}
-		
+
 		return l;
 	};
-	
+
 	Language.geta = function(arr){
 		var l = _dict[Brick.env.language];
 		if (typeof l == 'undefined'){
 			return [];
 		}
-		
+
 		for (var i=0;i<arr.length;i++){
 			l = l[arr[i]];
 			if (typeof l == 'undefined'){
@@ -411,10 +372,10 @@ Brick.namespace('util');
 		}
 		return l;
 	};
-	
+
 	/**
 	 * Получить объект фраз текущего языка
-	 * 
+	 *
 	 * @method getc
 	 * @static
 	 * @param {String} key Идентификатор (namespace путь) фразы, например: "mod.mymodule.hello"
@@ -423,50 +384,50 @@ Brick.namespace('util');
 	Language.getc = function(key){
 		return this.get(Brick.env.language, key);
 	};
-	
+
 	Language.dump = function(lang){
 		alert(YAHOO.lang.dump(_dict[lang]));
 	};
-	
+
 	Brick.util.Language = Language;
-	
+
 })();
 
 
 (function(){
 
 
-	
+
 	// Ассоциативный массив компонентов
 	var components = {};
-	
+
 	/**
-	 * Проверить, загружен ли компонент модуля 
-	 * 
+	 * Проверить, загружен ли компонент модуля
+	 *
 	 * @method componentLoaded
 	 * @static
-	 * @param {String} moduleName Имя модуля 
+	 * @param {String} moduleName Имя модуля
 	 * @param {String} componentName Имя компонента
-	 * @return {Boolean}  
+	 * @return {Boolean}
 	 */
 	Brick.componentLoaded = function(moduleName, componentName){
 		return components[moduleName] && components[moduleName][componentName];
 	};
-	
+
 	Brick.componentRegistered = function(moduleName, componentName){
 		var cp = components[moduleName] && components[moduleName][componentName];
 		if (!cp){ return false; }
 		return cp.isRegistered;
 	};
 
-	
+
 	var RegEngine = function(moduleName, componentName, component){
 		this.init(moduleName, componentName, component);
 	};
 	RegEngine.prototype = {
 		init: function(mName, cName, component){
 			this.id = mName+':'+cName;
-			this.mName = mName; 
+			this.mName = mName;
 			this.cName = cName;
 			this.component = component;
 			this.isReg = false;
@@ -496,17 +457,17 @@ Brick.namespace('util');
 		register: function(){
 			if (this.isReg){ return; }
 			this.isReg = true;
-			
+
 			var moduleName = this.mName,
 				component = this.component;
-				
+
 			var namespace = 'mod';
-			
+
 			var NS = Brick.namespace(namespace);
 			NS[moduleName] = NS[moduleName] || {};
 			NS = NS[moduleName];
 			component.namespace = NS;
-			
+
 			if (!NS['API']){
 				NS['API'] = new Brick.Component.API(moduleName);
 			}
@@ -519,9 +480,9 @@ Brick.namespace('util');
 			fireChecker(component);
 		}
 	};
-	
+
 	var waiter = [], counter = 0;
-	
+
 	/**
 	 * Инициализация и регистрация JS компонента указанного модуля платформы Abricos
 	 * @method add
@@ -541,7 +502,7 @@ Brick.namespace('util');
 		Brick._ldCk[moduleName][componentName+'.js']['ok'] = true;
 
 		component.isRegistered = false;
-		
+
 		components[moduleName][componentName] = component;
 		component.moduleName = moduleName;
 		component.name = componentName;
@@ -562,27 +523,26 @@ Brick.namespace('util');
 			}
 			return o;
 		};
-		
+
 		var initCSS = false;
 		component.buildTemplate = function(w, ts, override){
+            // TODO:  Brick.util.CSS.disableCSSComponent - release for IE
 			if (!initCSS){
-				var CSS = Brick.util.CSS;
-				if (CSS[moduleName] && CSS[moduleName][componentName]){
-					CSS.update(CSS[moduleName][componentName]);
-					delete CSS[moduleName][componentName];
-				}
+                var key = new Abricos.Key(['mod', moduleName, componentName]);
+                Abricos.CSS.apply(key);
+
 				initCSS = true;
 			}
 			w._TM = component.template.build(ts, override);
 			w._T = w._TM.data; w._TId = w._TM.idManager;
 			return w._TM;
 		};
-		
+
 		component.requires = component.requires || {};
 		var loadinfo = component.requires;
-		
+
 		waiter[waiter.length] = new RegEngine(moduleName, componentName, component);
-		
+
 		loadinfo.onSuccess = function() {
 			// проверить, все ли вложенные компоненты прогружены
 			var isReg = false;
@@ -597,16 +557,16 @@ Brick.namespace('util');
 						}
 					}
 				}
-				
+
 			} while(isReg);
 		};
-		
+
 		Brick.Loader.add(loadinfo);
 	};
-	
+
 	/**
-	 * Компонент модуля платформы Abricos. 
-	 * 
+	 * Компонент модуля платформы Abricos.
+	 *
 	 * @class Brick.Component
 	 * @constructor
 	 * @param {Object} config (optional) Конфигурация компонента
@@ -615,10 +575,10 @@ Brick.namespace('util');
 
 		/**
 		 * Конфигурация компонента.
-		 * Имеет значения: 
-		 * config.buildTemplate - сформировать шаблон и менеджер его 
+		 * Имеет значения:
+		 * config.buildTemplate - сформировать шаблон и менеджер его
 		 * идентификаторов, по умолчанию True.
-		 * 
+		 *
 		 * @property config
 		 * @type Object
 		 */
@@ -632,74 +592,74 @@ Brick.namespace('util');
 		 * @type String
 		 */
 		this.name = '';
-		
+
 		/**
 		 * Имя модуля которому принадлежит этот компонент.
 		 * @property moduleName
 		 * @type String
 		 */
 		this.moduleName = '';
-		
+
 		/**
-		 * Дополнительные компоненты (сторонние JavaScript и CSS файлы, компоненты 
+		 * Дополнительные компоненты (сторонние JavaScript и CSS файлы, компоненты
 		 * платформы Abricos), которые должны быть загружены, перед инициализацей
 		 * данного компонента.
 		 * См. <a href="Brick.Loader.html">Brick.Loader</a>.
-		 * 
+		 *
 		 * @property requires
 		 * @type Object
 		 */
 		this.requires = {};
-		
+
 		/**
 		 * Точка входа в компонент. Вход будет осуществлен после
 		 * загрузки всех необходимых дополнительных компонентов.
-		 * 
+		 *
 		 * @property source
 		 * @type Function
 		 */
 		this.entryPoint = function(){};
-		
+
 		/**
 		 * Выполняется после того, как компонент загружен и инициализирован. <br>
 		 * Особой надобности в этом методе нет, создан для удобства. Если слишком
 		 * большой файл и необходимо выполнить ряд функций в конце инициализации всех
 		 * классов, то удобнее этот ряд функций разместить в начале файла в этом методе.
-		 *  
-		 * @method onLoad 
+		 *
+		 * @method onLoad
 		 */
 		this.onLoad = function(){};
-		
+
 		/**
 		 * Шаблон компонента.
-		 * 
+		 *
 		 * @property template
 		 * @type Brick.Template
 		 */
 		this.template = null;
-		
+
 	};
-	
+
 	/**
-	 * API модуля. 
-	 * 
+	 * API модуля.
+	 *
 	 * @class Brick.Component.API
 	 * @constructor
 	 * @param {String} name Имя модуля
 	 */
-	Brick.Component.API = function(name){ 
+	Brick.Component.API = function(name){
 		var widgets = {};
-		
+
 		/**
 		 * Имя модуля которому принадлежит API
-		 * 
+		 *
 		 * @property name
 		 * @type String
 		 */
 		this.name = name;
-		
+
 		/**
-		 * Выполнить функцию, предварительно загрузив необходимый компонент 
+		 * Выполнить функцию, предварительно загрузив необходимый компонент
 		 * из текущего модуля.
 		 * Использует статичный метод <a href="Brick.Component.API.html#method_fire">Brick.Component.API.fire()</a>.
 		 * @method fn
@@ -709,23 +669,23 @@ Brick.namespace('util');
 		this.fn = function(componentName, fn){
 			Brick.Component.API.fireFunction(this.name, componentName, fn);
 		};
-		
+
 		/**
 		 * Добавить виджет в коллекцию
-		 * 
+		 *
 		 * @method addWidget
 		 * @param {String} name Имя виджета
-		 * @param {Object} widget Объект виджета 
+		 * @param {Object} widget Объект виджета
 		 */
 		this.addWidget = function(name, widget){
 			this.removeWidget(name);
 			widgets[name] = widget;
 		};
-		
+
 		/**
-		 * Удалить виджет из коллекции. Если у виджета определен 
+		 * Удалить виджет из коллекции. Если у виджета определен
 		 * метод destroy, то вызвать его.
-		 * 
+		 *
 		 * @method removeWidget
 		 * @param {String} name Имя виджета
 		 */
@@ -738,10 +698,10 @@ Brick.namespace('util');
 				delete widgets[name];
 			}
 		};
-		
+
 		/**
 		 * Получить виджет из коллекции.
-		 * 
+		 *
 		 * @method getWidget
 		 * @param {String} name Имя виджета
 		 * @return {Object}
@@ -750,9 +710,9 @@ Brick.namespace('util');
 			return widgets[name];
 		};
 	};
-	
+
 	/**
-	 * Вызвать метод API компонента из указанного модуля. 
+	 * Вызвать метод API компонента из указанного модуля.
 	 * <p>
 	 * Принцип работы метода:
 	 * <ul>
@@ -764,12 +724,12 @@ Brick.namespace('util');
 	 * 2. Делает запрос загрузчику загрузить компонент из указанного модуля.
 	 * </li>
 	 * <li>
-	 * 3. Проверяет, есть ли данный метод в API 
+	 * 3. Проверяет, есть ли данный метод в API
 	 * (Brick.mod.[moduleName].[componentName].API.[methodName]), если да,
 	 * то выплняет его, иначе...
 	 * </li>
 	 * </ul>
-	 * 
+	 *
 	 * </p>
 	 * @method fire
 	 * @static
@@ -777,18 +737,18 @@ Brick.namespace('util');
 	 * @param {String} componentName Имя компонента
 	 * @param {String} methodName Имя метода
 	 * @param {Object} param (optional) Параметры для вызываемого метода
-	 * @param {Function} func (optional) Дополнительная функция, которая будет 
+	 * @param {Function} func (optional) Дополнительная функция, которая будет
 	 * выполнена по окончанию запуска метода.
 	 */
 	Brick.Component.API.fire = function(moduleName, componentName, methodName, param, func){
 		var fr = new APIFireElement(moduleName, componentName, methodName, param, func);
 		fr.start();
 	};
-	
+
 	/**
 	 * Выполнить указанную функцию, при необходимости, предварительно
 	 * загрузить компонент модуля.
-	 *   
+	 *
 	 * @method fireFunction
 	 * @static
 	 * @param {String} moduleName Имя модуля
@@ -799,7 +759,7 @@ Brick.namespace('util');
 		var fr = new APIFireElement(moduleName, componentName, fn);
 		fr.start();
 	};
-	
+
 	var fireElements = {};
 	var fireElementsIdInc = 0;
 	var fireChecker = function(component){
@@ -814,7 +774,7 @@ Brick.namespace('util');
 			}
 		}
 	};
-	
+
 	var APIFireElement = function(moduleName, componentName, method, param, func){
 		this.id = fireElementsIdInc++;
 		this.moduleName = moduleName;
@@ -849,22 +809,22 @@ Brick.namespace('util');
 			}
 		}
 	};
-	
+
 	Brick.f = Brick.Component.API.fire;
 	Brick.ff = Brick.Component.API.fireFunction;
-	
+
 	/**
 	 * Шаблон компонента.
-	 * 
+	 *
 	 * @class Brick.Template
 	 * @constructor
 	 * @param {Brick.Component} component Компонент модуля
 	 */
 	Brick.Template = function(component){
-		
+
 		/**
 		 * Компонент модуля.
-		 * 
+		 *
 		 * @property component
 		 * @type Brick.Component
 		 */
@@ -872,21 +832,21 @@ Brick.namespace('util');
 
 		/**
 		 * Хеш менеджеров шаблона.
-		 * 
+		 *
 		 * @property _managers
 		 * @private
 		 * @type Object
 		 */
 		this._managers = {};
-		
+
 		/**
 		 * Исходный шаблон комонента.
-		 * 
+		 *
 		 * @property source
 		 * @type Object
 		 */
 		this.source = {};
-		
+
 		var mName = component.moduleName,
 			cName = component.name,
 			BT = Brick.util.Template;
@@ -894,16 +854,16 @@ Brick.namespace('util');
 			this.source = BT[mName][cName];
 		}
 	};
-	
+
 	Brick.Template.prototype = {
-			
+
 		/**
 		 * Подготовить шаблона для работы.
-		 * 
+		 *
 		 * @method build
 		 * @param {String} names (optional) Разделы в шаблоне указанные через
-		 * запятую из которых будет подготовлен шаблон для работы. 
-		 * Если параметр не указан, то шаблон будет подготовлен из всех 
+		 * запятую из которых будет подготовлен шаблон для работы.
+		 * Если параметр не указан, то шаблон будет подготовлен из всех
 		 * разделов.
 		 * @return {Brick.Template.Manager}
 		 */
@@ -911,16 +871,16 @@ Brick.namespace('util');
 			names = names || '';
 			return new Brick.Template.Manager(this, '', names, override);
 		},
-		
+
 		/**
 		 * Получить подготовленный для работы шаблон.
 		 * <b>Не используется, оставлено для совместимости.</b>
-		 * 
+		 *
 		 * @method get
 		 * @param {String} id (optional) Идентификатор менеджера шаблона.
 		 * @param {String} names (optional) Разделы в шаблоне указанные через
-		 * запятую из которых будет подготовлен шаблон для работы. 
-		 * Если параметр не указан, то шаблон будет подготовлен из всех 
+		 * запятую из которых будет подготовлен шаблон для работы.
+		 * Если параметр не указан, то шаблон будет подготовлен из всех
 		 * разделов.
 		 * @return {Brick.Template.Manager}
 		 */
@@ -932,7 +892,7 @@ Brick.namespace('util');
 			}
 			return this._managers[id];
 		},
-		
+
 		/**
 		 * Удалить менеджер шаблона.
 		 *
@@ -942,10 +902,10 @@ Brick.namespace('util');
 		remove: function(id){
 			delete this._managers[id];
 		},
-		
+
 		/**
 		 * Очистить хеш таблицу менеджеров шаблона.
-		 * 
+		 *
 		 * @method clear
 		 */
 		clear: function(){
@@ -955,7 +915,7 @@ Brick.namespace('util');
 
 	/**
 	 * Менеджер подготовленного для работы шаблона.
-	 * 
+	 *
 	 * @class Brick.Template.Manager
 	 * @constructor
 	 * @param {Brick.Template} owner
@@ -967,7 +927,7 @@ Brick.namespace('util');
 
 		/**
 		 * Основатель
-		 * 
+		 *
 		 * @property owner
 		 * @type Brick.Template
 		 */
@@ -975,16 +935,16 @@ Brick.namespace('util');
 
 		/**
 		 * Идентификатор менеджера подготовленого шаблона.
-		 * 
+		 *
 		 * @property id
 		 * @type String
 		 */
 		this.id = id;
-		
+
 		var L = YAHOO.lang;
-		
+
 		var _clone = function(t){
-			
+
 			var ct = {};
 			if (names != ''){
 				var arr = names.split(',');
@@ -996,13 +956,13 @@ Brick.namespace('util');
 				}
 			}else{
 				for (var name in t){
-					ct[name] = t[name]; 
+					ct[name] = t[name];
 				};
 			}
-			
+
 			// перегрузка
 			if (L.isObject(override)){
-				
+
 				var tos = override.template.source;
 				for (var name in ct){
 					if (tos[name]){
@@ -1013,35 +973,35 @@ Brick.namespace('util');
 
 			return ct;
 		};
-		
+
 		var source = _clone(owner.source);
-		
+
 		// заполнить фразы языка
 		Brick.util.Template.fillLanguage(source, this.owner.component, override);
-		
+
 		/**
 		 * Хеш элементов шаблона.
-		 * 
+		 *
 		 * @property data
 		 * @type Object
 		 */
 		this.data = source;
-		
+
 		/**
 		 * Менеджер идентификаторов HTML элементов шаблона.
-		 * 
+		 *
 		 * @property idManager
 		 * @type Brick.util.TIdManager
 		 */
 		this.idManager = new Brick.util.TIdManager(this.data);
 	};
-	
+
 	Brick.Template.Manager.prototype = {
 
 		/**
 		 * Получить элемент шаблона по имени и заменить
 		 * в нем имена переменных на их значения.
-		 * 
+		 *
 		 * @method replace
 		 * @param {String} tname Имя элемента шаблона.
 		 * @param {Object} obj Имена переменных и их значения.
@@ -1049,7 +1009,7 @@ Brick.namespace('util');
 		 */
 		replace: function(tname, obj){
 			var t = this.data[tname];
-			if (!t){ 
+			if (!t){
 				return "";
 			}
 			return Brick.util.Template.setPropertyArray(t, obj);
@@ -1057,7 +1017,7 @@ Brick.namespace('util');
 
 		/**
 		 * Получить идентификатор элемента по его пути в шаблоне.<br>
-		 * Путь идентификатор в шаблоне: <i>tname</i>.<i>elname</i>, где <i>tname</i> - 
+		 * Путь идентификатор в шаблоне: <i>tname</i>.<i>elname</i>, где <i>tname</i> -
 		 * элемент шаблона, <i>elname</i> - имя идентификатора HTML элемента в шаблоне.<br>
 		 *
 		 * @method getElId
@@ -1075,19 +1035,19 @@ Brick.namespace('util');
 			}
 			return idM[arr[0]][arr[1]];
 		},
-		
+
 		/**
 		 * Получить элемент опираясь на данные из шаблона.
-		 * 
+		 *
 		 * @method getEl
 		 * @param {String} teId Путь идентификатора HTML элемента в шаблоне.
 		 * @return {HTMLElement}
 		 */
 		getEl: function(teId){
 			var id = this.getElId(teId);
-			
+
 			if (!YAHOO.util.Dom){
-				var el = document.getElementById(id); 
+				var el = document.getElementById(id);
 				if (!el){
 					return null;
 				}
@@ -1112,40 +1072,40 @@ Brick.namespace('util');
 
 	/**
 	 * Перегрузить страницу в браузере
-	 * 
+	 *
 	 * @method reload
 	 * @static
-	 * @param {String} url (optional) URL открываемой страницы 
+	 * @param {String} url (optional) URL открываемой страницы
 	 */
 	Brick.Page.reload = function(url){
 		if (url){
 			window.location.href = url;
 			return;
 		}
-		
+
 		var cpage = window.location.pathname;
 		for (var i=0;i<notPages.length;i++){
 			var npage = notPages[i];
 			if (npage.length <= cpage.length &&
 				cpage.substring(0, npage.length) == npage){
-				
+
 				window.location.href = "/";
 				return;
 			}
 		}
 		window.location.reload(false);
 	};
-	
+
 	/**
 	 * Добавить адрес страницы, которая не может быть перегружена.
-	 * Если будет запрос на перезагрузку страницы в браузере, и текущий 
+	 * Если будет запрос на перезагрузку страницы в браузере, и текущий
 	 * адрес страницы будет в списке NotOverloadPage, то будет открыта
-	 * главная страница. 
+	 * главная страница.
 	 */
 	Brick.Page.addNotOverloadPage = function(pageAdress){
 		notPages[notPages.length] = pageAdress;
 	};
-	
+
 })();
 
 
@@ -1159,11 +1119,11 @@ Brick.namespace('util');
 	 * @static
 	 */
 	var Template = {};
-	
+
 	/**
-	 * Заменить в тексте шаблона идентификаторы фраз языка на 
+	 * Заменить в тексте шаблона идентификаторы фраз языка на
 	 * значения текущего языка.
-	 * 
+	 *
 	 * @method fillLanguage
 	 * @static
 	 * @param {String} t Текст шаблона
@@ -1173,17 +1133,17 @@ Brick.namespace('util');
 			return;
 		}
 		var key, phrase, L = YAHOO.lang;
-		
+
 		var getPhrase = function(lngKey){
 			// перегрузка языковых фраз
 			if (L.isObject(component) && L.isObject(override)){
-				var cName = component.name, 
+				var cName = component.name,
 					mName = component.moduleName,
 					coName = override.name,
 					moName = override.moduleName;
 
 				var tmpLngKey = lngKey.replace(
-						'mod.'+mName+'.'+cName+'.', 
+						'mod.'+mName+'.'+cName+'.',
 						'mod.'+moName+'.'+coName+'.'
 					);
 				var ret = Brick.util.Language.getc(tmpLngKey);
@@ -1193,14 +1153,14 @@ Brick.namespace('util');
 			}
 			return Brick.util.Language.getc(lngKey);
 		};
-		
+
 		// полная замена {#...}
 		var exp = new RegExp("(\{\#[a-zA-Z0-9_\.\-]+\})", "g");
 		for (var name in t){
 			var s = t[name], arr = s.match(exp);
 
 			if (!L.isArray(arr)){ continue; }
-			
+
 			for (var i=0;i<arr.length;i++){
 				key = arr[i].replace(/[\{#\}]/g, '');
 				phrase = getPhrase(key);
@@ -1208,43 +1168,43 @@ Brick.namespace('util');
 					s = s.replace(arr[i], phrase);
 				}
 			}
-			
+
 			t[name] = s;
 		}
-		
+
 		if (!L.isObject(component)){
 			return;
 		}
-		
-		var cName = component.name, 
+
+		var cName = component.name,
 			mName = component.moduleName;
-				
+
 		// короткая замена {##...}
 		var exp = new RegExp("(\{\##[a-zA-Z0-9_\.\-]+\})", "g");
 		for (var name in t){
 			var s = t[name], arr = s.match(exp);
 
 			if (!L.isArray(arr)){ continue; }
-			
+
 			for (var i=0;i<arr.length;i++){
 				key = arr[i].replace(/[\{##\}]/g, '');
 				if (key == ''){ continue; }
-				
+
 				key = 'mod.'+mName+'.'+cName+'.'+key;
 				phrase = getPhrase(key);
 				if (L.isValue(phrase)){
 					s = s.replace(arr[i], phrase);
 				}
 			}
-			
+
 			t[name] = s;
 		}
 
 	};
-	
+
 	/**
 	 * Заменить в тексте шаблона идентификаторы переменных на значения
-	 * 
+	 *
 	 * @method setProperty
 	 * @static
 	 * @param {String} t Текст шаблона
@@ -1257,9 +1217,9 @@ Brick.namespace('util');
 	};
 
 	/**
-	 * Заменить в тексте шаблона идентификаторы переменных на значения. 
+	 * Заменить в тексте шаблона идентификаторы переменных на значения.
 	 * Имя переменных и их значения взять из ассоциативного массива
-	 * 
+	 *
 	 * @method setPropertyArray
 	 * @static
 	 * @param {String} t Текст шаблона
@@ -1271,34 +1231,34 @@ Brick.namespace('util');
 		}
 		return t;
 	};
-	
+
 	Brick.util.Template = Template;
 })();
 
 ////////////////////////// Template Id Manager //////////////////////////
 (function(){
-	
+
 	/**
 	 * Коллекция уникальных идентификаторов Dom элементов, которые будут созданы из шаблона.<br>
-	 * В тексте шаблона ищет конструкции формата <strong>{i#<i>name</i>}</strong>, где 
+	 * В тексте шаблона ищет конструкции формата <strong>{i#<i>name</i>}</strong>, где
 	 * <i>name</i> - имя идентификатора, и заменяет их на уникальное значение. <br>
 	 * Необходимость данного менеджера заключается в том, чтобы создаваемые элементы Dom
 	 * из шаблона, имели уникальные идентификаторы.
 	 * <p>
-	 * Например: 
+	 * Например:
 	 * <pre class="brush: js">
-	 * var t = { 
+	 * var t = {
 	 * &nbsp;&nbsp;panel: "&lt;div id='{i#myid}'&gt;Hello world!&lt;/div&gt;"
-	 * }; 
+	 * };
 	 * var tID = new Brick.util.TIdManager(t);
-	 * 
+	 *
 	 * document.body.innerHTML = t['panel'];
-	 * 
-	 * // Получить Dom элемент по именнованому идентификатору myid  
+	 *
+	 * // Получить Dom элемент по именнованому идентификатору myid
 	 * var div = YAHOO.util.Dom.get(tID['panel']['myid']);
 	 * </pre>
 	 * </p>
-	 * 
+	 *
 	 * @class TIdManager
 	 * @namespace Brick.util
 	 * @constructor
@@ -1308,11 +1268,11 @@ Brick.namespace('util');
 		if (typeof t == 'undefined'){
 			return;
 		}
-		
+
 		this['_global'] = {};
-		
+
 		var s, arr, key, genid, i;
-		
+
 		// global id setting
 		var exp = new RegExp("(\{gi\#[a-z0-9_\-]+\})", "gi");
 
@@ -1324,16 +1284,16 @@ Brick.namespace('util');
 				for (i=0;i<arr.length;i++){
 					if (!uniq[arr[i]])
 						uniq[arr[i]] = 'bkgtid_'+counter++;
-					
+
 					s = s.replace(new RegExp(arr[i], "gi"), uniq[arr[i]]);
-					
+
 					key = arr[i].replace(/\{gi#([a-zA-Z0-9_\-]+)\}/, '$1');
 					this['_global'][key] = uniq[arr[i]];
 				}
 			}
 			t[name] = s;
 		}
-	
+
 		exp = new RegExp("(\{i\#[a-z0-9_\-]+\})", "gi");
 		for (var name in t){
 			s = t[name];
@@ -1350,19 +1310,19 @@ Brick.namespace('util');
 				}
 			}
 			t[name] = s;
-		}		
+		}
 	};
 
 	var counter = 0;
-	
+
 	Brick.util.TIdManager = TIdManager;
-	
+
 })();
 
 
 (function(){
-	
-	var querycount = 0; 
+
+	var querycount = 0;
 	var uniqurl = function(){
 		querycount++;
 		return (querycount++) + (new Date().getTime());
@@ -1375,41 +1335,41 @@ Brick.namespace('util');
 		cfg['json'] = cfg['json'] || {};
 
 		var post = "json="+encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['json']));
-		YAHOO.util.Connect.asyncRequest("POST", 
+		YAHOO.util.Connect.asyncRequest("POST",
 			'/ajax/' + module + '/' + brick +'/'+ uniqurl()+'/', {
 				success: function(o) {
 					readScript(o.responseText);
 					if (typeof cfg.success == 'function'){
 						cfg.success(o);
 					}
-				}, 
-				failure: function(o){ 
-					// alert("CONNECTION FAILED!"); 
+				},
+				failure: function(o){
+					// alert("CONNECTION FAILED!");
 				}
-			}, 
+			},
 			post
 		);
 	};
-	
+
 	/**
 	 * Менеджер AJAX запросов
-	 * 
+	 *
 	 * @class Connection
 	 * @namespace Brick.util
 	 * @static
 	 */
 	Brick.util.Connection = {};
-	
+
 	/**
 	 * Отправить AJAX запрос кирпичу определенного модуля
-	 * 
+	 *
 	 * @method sendCommand
 	 * @static
 	 * @param {String} module Имя модуля
 	 * @param {String} brick Имя кирпича
 	 * @param {Object} cfg Параметры запроса, в т.ч. и POST данные.
-	 * Если cfg['hidden'] == True, то запрос будет происходить в фоновом режиме, 
-	 * иначе будет показана панель "ожидания процесса"   
+	 * Если cfg['hidden'] == True, то запрос будет происходить в фоновом режиме,
+	 * иначе будет показана панель "ожидания процесса"
 	 */
 	Brick.util.Connection.sendCommand = function(module, brick, cfg){
 		if (typeof YAHOO.util.Connect == 'undefined' || typeof YAHOO.lang.JSON == 'undefined'){
@@ -1429,25 +1389,25 @@ Brick.namespace('util');
 
 //типизированный AJAX
 (function(){
-	
-	var querycount = 0; 
+
+	var querycount = 0;
 	var uniqurl = function(){
 		querycount++;
 		return (querycount++) + (new Date().getTime());
 	};
-	
+
 	var complete = function(module, cfg, o, failure){
 		if (!YAHOO.lang.isFunction(cfg['event'])){
 			return;
 		}
-		cfg['type'] = cfg['type'] || 'json';  
+		cfg['type'] = cfg['type'] || 'json';
 		failure = failure || false;
 
 		var data;
 		try{
 			if (cfg['type'] == 'json'){
 				var json = YAHOO.lang.JSON.parse(o.responseText);
-				data = json.data || null; 
+				data = json.data || null;
 			}else{
 				o.jsonParseError = true;
 			}
@@ -1463,25 +1423,25 @@ Brick.namespace('util');
 		cfg = cfg || {};
 
 		var post = "data="+encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['data'] || {}));
-		YAHOO.util.Connect.asyncRequest("POST", 
+		YAHOO.util.Connect.asyncRequest("POST",
 			'/tajax/' + module + '/' + uniqurl()+'/', {
-				success: function(o){complete(module, cfg, o, false);}, 
+				success: function(o){complete(module, cfg, o, false);},
 				failure: function(o){complete(module, cfg, o, true);}
-			}, 
+			},
 			post
 		);
 	};
-	
+
 	/**
-	 * Отправить типизированный запрос серверу. 
-	 * Принцип работы: клиент формирует запрос с параметрами определенному модулю, 
+	 * Отправить типизированный запрос серверу.
+	 * Принцип работы: клиент формирует запрос с параметрами определенному модулю,
 	 * отправляет его, при этом помечает его номером сессии. Ответ полученный от сервера
 	 * передает в функцию предварительно указанную в параметрах.
-	 * 
+	 *
 	 * Структура объекта cfg:
 	 * cfg.data {Object|null} данные
 	 * cfg.event {Function|null} событие обработчик
-	 * 
+	 *
 	 * @namespace Brick
 	 * @method sendCommand
 	 * @static
@@ -1499,7 +1459,7 @@ Brick.namespace('util');
 			sendPost(module, cfg);
 		}
 	};
-	
+
 })();
 
 
@@ -1527,15 +1487,15 @@ Brick.dateExt = function(){
 		}
 		return num;
 	};
-	
+
 	return {
 		convert: function(udate, type, hideTime){
 			var LNG = Brick.util.Language.getc('mod.sys.date')
 
-			var mp = LNG['monthp'], 
+			var mp = LNG['monthp'],
 				ds = LNG['dayst'];
 
-			
+
 			if (!udate || udate == null){ return ""; }
 			if (typeof udate['getTime'] == 'function'){
 				udate = udate.getTime()/1000;
@@ -1546,13 +1506,13 @@ Brick.dateExt = function(){
 			hideTime = hideTime || false;
 			var msec = udate*1000;
 			var cd = new Date(msec);
-			
+
 			var day = z(cd.getDate());
 			var mon = z(cd.getMonth()+1);// +1 т.к. нумерация идет с 0
 			var mons= mp[cd.getMonth()+1];
 			var min = z(cd.getMinutes());
 			var hour = z(cd.getHours());
-			
+
 			if (type == 1){
 				var s = day+'.'+mon+'.'+cd.getFullYear();
 				if (!hideTime){
@@ -1568,7 +1528,7 @@ Brick.dateExt = function(){
 			}else{
 				var ld = new Date(), s;
 				ld = new Date(ld.getFullYear(), ld.getMonth(), ld.getDate());
-	
+
 				var v = (Math.round(ld.getTime()/1000) - udate)/60/60/24;
 				if (v > 0 && v < 1){
 					s = ds[1];
@@ -1579,7 +1539,7 @@ Brick.dateExt = function(){
 				}
 				var tm = hour+':'+(min);
 				if (!hideTime){
-					s += ', ' + tm; 
+					s += ', ' + tm;
 				}
 				return s;
 			}
@@ -1600,7 +1560,7 @@ Brick.dateExt = function(){
 
 //////////////////////////JS Loader ////////////////////////// 
 (function(){
-	
+
 	// изначально лоадер работает как сборщик информации
 	Brick.Loader = {
 		mods: [],
@@ -1608,7 +1568,7 @@ Brick.dateExt = function(){
 			this.mods[this.mods.length] = o;
 		}
 	};
-	
+
 	var Module = function(o){
 		this.yahoo = [];	// YUI2
 		this.yui = [];		// YUI3
@@ -1628,7 +1588,7 @@ Brick.dateExt = function(){
 			this.event = { onSuccess: o.onSuccess, onFailure: o.onFailure, executed: false};
 		}
 	};
-	
+
 	var _isLoadYUI2 = false;
 
 	// основной загрузчик включается в работу после инициализации YUI3
@@ -1671,12 +1631,12 @@ Brick.dateExt = function(){
 				this._start();
 				return;
 			}
-			
-			// Установить флаг загрузки. Необходим для предотвращения запуска загрузки 
+
+			// Установить флаг загрузки. Необходим для предотвращения запуска загрузки
 			// добавляемых модулей в процессе выполнения событий загруженных модулей
 			this._isProccess = true;
-			
-			// выполнение событий по принципу fifo (последнии модули приоритетнее) 
+
+			// выполнение событий по принципу fifo (последнии модули приоритетнее)
 			var i, m, cnt = this._modules.length;
 			for(i=cnt-1;i>=0;i--){
 				m = this._modules[i];
@@ -1691,7 +1651,7 @@ Brick.dateExt = function(){
 				}
 			}
 			this._isProccess = false;
-			
+
 			// Во время выполнения событий были добавлены еще модули на загрузку.
 			if (this._modules.length != this._countModule){
 				this._start();
@@ -1700,17 +1660,17 @@ Brick.dateExt = function(){
 		_start: function(){
 			this._isProccess = true;
 			this._countModule = this._modules.length;
-	
+
 			var i, m, j, k, r, elib = [], mlib = [];
-			
+
 			var ylib = _isLoadYUI2 ? [] : ['yui2-dom', 'yui2-event'];
 			_isLoadYUI2 = true;
-			
+
 			for (i=0;i<this._modules.length;i++){
 				m = this._modules[i];
 				if (m.isLoad){ continue; }
 				m.isLoad = true;
-				
+
 				// Brick Module
 				for (j=0;j<m.mod.length;j++){ mlib[mlib.length] = m.mod[j]; }
 				// Ext
@@ -1720,47 +1680,47 @@ Brick.dateExt = function(){
 					r = 'yui2-'+m.yahoo[j];
 					if (typeof this._reqYUI[r] == 'undefined'){
 						this._reqYUI[r] = true;
-						ylib[ylib.length] = r; 
+						ylib[ylib.length] = r;
 					}
 				}
 				// YUI3
 				for (j=0;j<m.yui.length;j++){
 					r = m.yui[j];
-	
+
 					if (typeof this._reqYUI[r] == 'undefined'){
 						this._reqYUI[r] = true;
-						ylib[ylib.length] = r; 
+						ylib[ylib.length] = r;
 					}
 				}
 			}
-			
+
 			var __self = this;
 			var loadOverLib = function(){
 				var requires = [], ldMod = {};
-	
+
 				if (elib.length > 0){
 					for (i=0;i<elib.length;i++){
 						var nm = elib[i].name;
 						requires[requires.length] = nm;
 						ldMod[nm] = {
-							'name': nm, 
-							'type': elib[i].type, 
+							'name': nm,
+							'type': elib[i].type,
 							'fullpath': elib[i].fullpath
 						};
-					}				
+					}
 				}
-				
+
 				if (mlib.length > 0){
 					var mm, mb, mv, minfo;
-					
+
 					for (var ii=0;ii<mlib.length;ii++){
 						if (!mlib[ii]){ continue; }
-						
+
 						mm = mlib[ii].name;
 						minfo = Brick.Modules[mm];
-						
+
 						if (!minfo){ continue; }
-						
+
 						for (j=0;j<mlib[ii].files.length;j++){
 							mb = mlib[ii].files[j];
 							mv = "";
@@ -1768,12 +1728,12 @@ Brick.dateExt = function(){
 								if (minfo[k]['f'] == mb){ mv = minfo[k]['k']; }
 							}
 							if (mv == ""){ continue; }
-							
+
 							var ldCk = Brick._ldCk[mm] = Brick._ldCk[mm] || {};
 							ldCk = ldCk[mb] = ldCk[mb] || {'ok': false, 'n': 0};
-							
+
 							var samm = mm.split("/"), src = "";
-							
+
 							if (samm.length == 2){
 								var nHost = samm[0], nPort = 80, nModName = samm[1];
 								aHost = nHost.split(':');
@@ -1792,17 +1752,17 @@ Brick.dateExt = function(){
 									+"&lang="+Brick.env.language
 									+"&file="+mb;
 							}
-	
+
 							var reqid='n'+ldCk['n']+mm+mb;
-		
-							if (Brick._ldReqId[reqid]){ continue; }	
+
+							if (Brick._ldReqId[reqid]){ continue; }
 							Brick._ldReqId[reqid] = true;
-							
+
 							requires[requires.length] = reqid;
-							
+
 							ldMod[reqid] = {
-								name: reqid, 
-								type: "js", 
+								name: reqid,
+								type: "js",
 								fullpath: src
 							};
 						}
@@ -1810,10 +1770,10 @@ Brick.dateExt = function(){
 				}
 
 				YUI({'modules': ldMod}).use(requires, function (Y) {
-					__self._event(false); 
-				});				
+					__self._event(false);
+				});
 			};
-			
+
 			if (ylib.length == 0){
 				loadOverLib();
 			}else{
@@ -1823,8 +1783,8 @@ Brick.dateExt = function(){
 					loadOverLib();
 				});
 			}
-			
-		}		
+
+		}
 	};
 	Brick._ldCk = {};
 	Brick._ldReqId = {};
