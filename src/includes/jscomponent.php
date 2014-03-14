@@ -227,6 +227,8 @@ class Ab_CoreJSCBuilder {
 		if (empty($htm)){ return ""; }
 
 		$module = $this->module;
+
+        // TODO: remove old define of template
 		$content = "
 (function(){
     var mt=Brick.util.Template;
@@ -236,9 +238,22 @@ class Ab_CoreJSCBuilder {
 		$content .= $this->parseHTML($htm);
 		$content .= "
 })();";
-		
+
+        $content .= "
+Abricos.Template.add('mod.".$module.".".$this->component."', '".$this->parseHTMLnew($htm)."');
+        ";
+
 		return $content;
 	}
+
+    public function parseHTMLnew($htm){
+        $str = $htm;
+        $str = preg_replace("/[\n\r\t]+/", "", $str);
+        $str = preg_replace("/>[\s]+</", "><", $str);
+        $str = addslashes($str);
+
+        return $str;
+    }
 	
 	public function parseHTML($htm){
 		$str = $htm;
