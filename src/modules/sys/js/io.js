@@ -33,7 +33,7 @@ Component.entryPoint = function(NS){
         getAJAXURL: function(){
             var moduleName = this.get('moduleName') || 'undefined';
 
-            return '/tajax1/' + moduleName + '/' + uniqueURL() + '/';
+            return '/tajax/' + moduleName + '/' + uniqueURL() + '/';
         },
         ajax: function(data, callback, options){
             options || (options = {})
@@ -123,9 +123,20 @@ Component.entryPoint = function(NS){
         this._init(config);
     };
     AJAXRequest.prototype = {
+
+        request: null,
+
+        data: {},
+
         _init: function(config){
             config || (config || {});
+
             this.request = config.request;
+
+            var o = Y.JSON.parse(this.request.responseText);
+            if (o && o.data){
+                this.data = o.data;
+            }
         }
     };
     NS.AJAXRequest = AJAXRequest;

@@ -501,6 +501,8 @@ Brick.namespace('util');
 		}
 		Brick._ldCk[moduleName][componentName+'.js']['ok'] = true;
 
+        component.key = new Abricos.Key(['mod', moduleName, componentName]);
+
 		component.isRegistered = false;
 
 		components[moduleName][componentName] = component;
