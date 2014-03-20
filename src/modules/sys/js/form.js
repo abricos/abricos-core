@@ -51,13 +51,18 @@ Component.entryPoint = function(NS){
                 attrs = fields.getAttrs();
 
             Y.Object.each(attrs, function(v, n){
-                fields.after(n + 'Change', instance._syncFieldUIForm, instance);
+                fields.after(n + 'Change', instance._afterFieldChange, instance);
             }, instance);
         },
-        _syncFieldUIForm: function(e){
-            this._syncUIFromFieldsForm();
+        _afterFieldChange: function(e){
+            if (!this._filedsEventDisabled){
+                this._syncUIFromFieldsForm();
+            }
         },
         _syncFieldsFromUIForm: function(){
+
+            this._filedsEventDisabled = true;
+
             var boundingBox = this.get(BOUNDING_BOX),
                 fields = this.get('fields');
 
@@ -69,8 +74,11 @@ Component.entryPoint = function(NS){
                     fields.set(name, value);
                 }
             }, this);
+
+            this._filedsEventDisabled = false;
         },
         _syncUIFromFieldsForm: function(){
+
             var boundingBox = this.get(BOUNDING_BOX),
                 fields = this.get('fields');
 
@@ -119,7 +127,6 @@ Component.entryPoint = function(NS){
             this.fire('resetForm');
         },
         _onSubmitFormAction: function(e){
-
             e.halt();
 
             this._syncFieldsFromUIForm();
