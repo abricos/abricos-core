@@ -105,6 +105,43 @@ Component.entryPoint = function(NS){
     };
     NS.Form = Form;
 
+    var FormClick = function(){
+    };
+    FormClick.prototype = {
+        initializer: function(){
+            Y.after(this._bindUIFormClick, this, 'bindUI');
+        },
+        _bindUIFormClick: function(){
+            var boundingBox = this.get(BOUNDING_BOX);
+            boundingBox.on({
+                click: Y.bind(this._onClickFormClick, this)
+            });
+
+            this.publish({
+                clickForm: this._defClickFormClick
+            });
+        },
+        _defClickFormClick: function(){
+        },
+        _onClickFormClick: function(e){
+            if (!e || !e.target){
+                return;
+            }
+            var clickData = e.target.getData('click');
+            if (!clickData){
+                return;
+            }
+
+            var res = this.fire('clickForm', {
+                clickData: clickData
+            });
+            if (!res){
+                e.halt();
+            }
+        }
+    };
+    NS.FormClick = FormClick;
+
     var FormAction = function(){
     };
     FormAction.prototype = {
