@@ -6,7 +6,9 @@
 
 var Component = new Brick.Component();
 Component.requires = {
-    yui: ['widget']
+    mod: [
+        {name: 'sys', files: ['widget.js']}
+    ]
 };
 Component.entryPoint = function(NS){
 
@@ -105,43 +107,6 @@ Component.entryPoint = function(NS){
     };
     NS.Form = Form;
 
-    var FormClick = function(){
-    };
-    FormClick.prototype = {
-        initializer: function(){
-            Y.after(this._bindUIFormClick, this, 'bindUI');
-        },
-        _bindUIFormClick: function(){
-            var boundingBox = this.get(BOUNDING_BOX);
-            boundingBox.on({
-                click: Y.bind(this._onClickFormClick, this)
-            });
-
-            this.publish({
-                clickForm: this._defClickFormClick
-            });
-        },
-        _defClickFormClick: function(){
-        },
-        _onClickFormClick: function(e){
-            if (!e || !e.target){
-                return;
-            }
-            var clickData = e.target.getData('click');
-            if (!clickData){
-                return;
-            }
-
-            var res = this.fire('clickForm', {
-                clickData: clickData
-            });
-            if (!res){
-                e.halt();
-            }
-        }
-    };
-    NS.FormClick = FormClick;
-
     var FormAction = function(){
     };
     FormAction.prototype = {
@@ -179,53 +144,5 @@ Component.entryPoint = function(NS){
     };
     NS.FormAction = FormAction;
 
-    var WAITING = 'waiting';
-
-    var Waiting = function(){
-    };
-    Waiting.ATTRS = {
-        waiting: {
-            value: false
-        }
-    };
-    Waiting.WAITING_CLASS_NAME = Y.Widget.getClassName(WAITING);
-    Waiting.prototype = {
-        initializer: function(){
-            Y.after(this._syncUIWaiting, this, SYNCUI);
-            Y.after(this._bindUIWaiting, this, BINDUI);
-        },
-        _syncUIWaiting: function(){
-            this._uiSetWaiting(this.get('waiting'));
-        },
-        _bindUIWaiting: function(){
-            this.after('waitingChange', this._afterWaitingChange);
-        },
-        _afterWaitingChange: function(e){
-            if (e.src != UI){
-                this._uiSetWaiting(e.newVal);
-            }
-        },
-        _uiSetWaiting: function(val){
-            var boundingBox = this.get(BOUNDING_BOX);
-            boundingBox.all('[data-wait]').each(function(node){
-                var flag = node.getData('wait');
-                switch (flag) {
-                    case 'show':
-                        node.setStyle('display', val ? '' : 'none');
-                        break;
-                    case 'hide':
-                        node.setStyle('display', val ? 'none' : '');
-                        break;
-                    case 'disable':
-                        node.set('disabled', val);
-                        break;
-                    case 'enable':
-                        node.set('disabled', !val);
-                        break;
-                }
-            }, this);
-        }
-    };
-    NS.WidgetWaiting = Waiting;
 
 };
