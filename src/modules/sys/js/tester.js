@@ -12,26 +12,18 @@ Component.entryPoint = function(NS){
 
         SYS = Brick.mod.sys;
 
-/*
-    var _TestDialog = function(){
-    };
-    _TestDialog.NAME = '_testDialog';
-    _TestDialog.prototype = {
-
-    };
-    NS._TestDialog = _TestDialog;
-    /**/
-
     NS.TestPanel = Y.Base.create('testPanel', SYS.Panel, [], {
-        initializer: function(){
-            // console.log(this);
-        },
-        /*
         onClick: function(e){
-console.log('testPanel click');
-            console.log(e);
+            switch (e.dataClick){
+                case 'btest':
+                    this.increment();
+                    return true;
+            }
+        },
+        increment: function(){
+            var elInput = this.template.gel('input');
+            elInput.value += elInput.value;
         }
-        /**/
     }, {
         ATTRS: {
             component: {
@@ -46,42 +38,4 @@ console.log('testPanel click');
         }
     });
 
-
-    /*
-
-     var CatalogEditorDialog = function(cfg){
-     this.manCfg = L.merge({
-     'refreshAfterClose': false
-     }, cfg || {});
-
-     CatalogEditorDialog.superclass.constructor.call(this, {
-     'resize': true,
-     fixedcenter: true,
-     'width': '800px',
-     'height': '500px'
-     });
-     };
-     YAHOO.extend(CatalogEditorDialog, Brick.widget.Dialog, {
-     initTemplate: function(){
-     return buildTemplate(this, 'editordialog').replace('editordialog');
-     },
-     onLoad: function(){
-     var __self = this, cfg = this.manCfg;
-     this.viewWidget = new NS.CatalogEditorWdget(this._TM.getEl('editordialog.widget'), {
-     'catid': cfg['catid'],
-     'onCancelClick': function(){
-     Brick.console('oncancel');
-     __self.close();
-     },
-     'onSaveCallback': function(){
-     __self.close();
-     if (cfg['refreshAfterClose']){
-     Brick.Page.reload();
-     }
-     }
-     });
-     }
-     });
-     NS.CatalogEditorDialog = CatalogEditorDialog;
-     /**/
 };

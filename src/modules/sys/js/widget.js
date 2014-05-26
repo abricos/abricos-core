@@ -36,13 +36,10 @@ Component.entryPoint = function(NS){
             });
 
             this.publish({
-                beforeWidgetClick: this._defBeforeWidgetClick,
-                afterWidgetClick: this._defAfterWidgetClick
+                click: this._defWidgetClick
             });
         },
-        _defBeforeWidgetClick: function(){
-        },
-        _defAfterWidgetClick: function(){
+        _defWidgetClick: function(){
         },
         _onWidgetClick: function(e){
             if (!e || !e.target){
@@ -51,11 +48,6 @@ Component.entryPoint = function(NS){
 
             e.dataClick = e.target.getData('click');
 
-            if (!this.fire('beforeWidgetClick', {dataClick: e.dataClick})){
-                e.halt();
-                return;
-            }
-
             if (L.isFunction(this.onClick)
                 && this.onClick.apply(this, arguments)){
 
@@ -63,7 +55,7 @@ Component.entryPoint = function(NS){
                 return;
             }
 
-            if (!this.fire('afterWidgetClick', {dataClick: e.dataClick})){
+            if (!this.fire('click', {dataClick: e.dataClick})){
                 e.halt();
             }
         }

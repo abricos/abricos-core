@@ -1,5 +1,5 @@
 /*!
- * BootstrapPanel Module for Abricos Platform
+ * BootstrapModal Module for Abricos Platform
  * http://abricos.org
  *
  * Copyright 2014 Alexander Kuzmin <roosit@abricos.org>
@@ -27,62 +27,59 @@ Component.entryPoint = function(NS){
 
         getClassName = Y.ClassNameManager.getClassName;
 
-    var BootstrapPanel = function(){
+    var BootstrapModal = function(){
     };
-    BootstrapPanel.SECTION_CLASS_NAMES = {
+    BootstrapModal.SECTION_CLASS_NAMES = {
         header: 'modal-header',
         body: 'modal-body',
         footer: 'modal-footer'
     };
-    BootstrapPanel.TEMPLATES = {
+    BootstrapModal.TEMPLATES = {
         closeButton: '<button type="button" class="close" data-click="panel-close">&times;</button>',
         header: '<div class="modal-header"></div>',
         body: '<div class="modal-body"></div>',
         footer: '<div class="modal-footer"></div>'
     };
-    BootstrapPanel.prototype = {
+    BootstrapModal.prototype = {
 
         initializer: function(){
             this._bootsNode = this.get(CONTENT_BOX);
 
             this._uiSetStdModOrigin = this._uiSetStdMod;
-            this._uiSetStdMod = this._uiSetStdModBootstrap;
+            this._uiSetStdMod = this._uiSetStdModBootstrapModal;
 
-            Y.after(this._renderUIBootstrap, this, RENDERUI);
+            Y.after(this._renderUIBootstrapModal, this, RENDERUI);
 
             this.after('visibleChange', this._afterVisibleChange);
-            this.after('widgetClick', this._widgetClickBootstrapPanel);
         },
-        _widgetClickBootstrapPanel: function(e){
-            console.log();
-            if (e.clickData === 'panelClose'){
-                this.hide();
-            }
-        },
-        _renderUIBootstrap: function(){
+        _renderUIBootstrapModal: function(){
             var cbox = this.get(CONTENT_BOX);
             cbox.replaceClass(getClassName('panel-content'), 'modal-content');
 
             var bbox = this.get(BOUNDING_BOX);
             bbox.setStyle('position', 'absolute');
 
+            this.set('zIndex', 10000);
+
+            /*
             var modal = this.get('modal');
             if (modal){
                 this.set('zIndex', 10000);
             }
+            /**/
         },
         _getStdModTemplate: function(section){
-            return Y.Node.create(BootstrapPanel.TEMPLATES[section], this._stdModNode.get('ownerDocument'));
+            return Y.Node.create(BootstrapModal.TEMPLATES[section], this._stdModNode.get('ownerDocument'));
         },
         _findStdModSection: function(section){
-            return this.get(CONTENT_BOX).one("> ." + BootstrapPanel.SECTION_CLASS_NAMES[section]);
+            return this.get(CONTENT_BOX).one("> ." + BootstrapModal.SECTION_CLASS_NAMES[section]);
         },
-        _uiSetStdModBootstrap: function(section, content, where){
+        _uiSetStdModBootstrapModal: function(section, content, where){
             this._uiSetStdModOrigin(section, content, where);
             if (section === 'header'){
                 var node = this.getStdModNode(section);
                 if (node){
-                    var btnNode = Y.Node.create(BootstrapPanel.TEMPLATES.closeButton);
+                    var btnNode = Y.Node.create(BootstrapModal.TEMPLATES.closeButton);
                     node.appendChild(btnNode);
                 }
             }
@@ -91,7 +88,7 @@ Component.entryPoint = function(NS){
             this.destroy();
         }
     };
-    NS.BootstrapPanel = BootstrapPanel;
+    NS.BootstrapModal = BootstrapModal;
 
     var PanelTemplate = function(){
     };
@@ -122,7 +119,6 @@ Component.entryPoint = function(NS){
             if (nodeFooter){
                 this.set('footerContent', nodeFooter.getHTML());
             }
-
         }
     };
     NS.PanelTemplate = PanelTemplate;
@@ -142,20 +138,66 @@ Component.entryPoint = function(NS){
         Y.WidgetPositionAlign,
         Y.WidgetPositionConstrain,
         Y.WidgetStack,
-        NS.BootstrapPanel
+        NS.BootstrapModal
     ], {
         initializer: function(){
             Y.after(this._bindUIPanel, this, BINDUI);
         },
         _bindUIPanel: function(){
-            this.after('afterWidgetClick', this._afterWidgetClickPanel);
+            this.after('click', this._clickPanel);
         },
-        _afterWidgetClickPanel: function(e){
+        _clickPanel: function(e){
             if (e.dataClick === 'panel-close'){
                 e.halt();
                 this.hide();
             }
         }
 
+    }, {
+        ATTRS: {
+            centered: {
+                value: true
+            }
+        }
+    });
+
+    NS.Dialog = Y.Base.create('dialog', Y.Widget, [
+        NS.Language,
+        NS.Template,
+        NS.PanelTemplate,
+        NS.WidgetClick,
+
+        Y.WidgetPosition,
+        Y.WidgetStdMod,
+
+        Y.WidgetAutohide,
+        Y.WidgetButtons,
+        Y.WidgetModality,
+        Y.WidgetPositionAlign,
+        Y.WidgetPositionConstrain,
+        Y.WidgetStack,
+        NS.BootstrapModal
+    ], {
+        initializer: function(){
+            Y.after(this._bindUIPanel, this, BINDUI);
+        },
+        _bindUIPanel: function(){
+            this.after('click', this._clickPanel);
+        },
+        _clickPanel: function(e){
+            if (e.dataClick === 'panel-close'){
+                e.halt();
+                this.hide();
+            }
+        }
+    }, {
+        ATTRS: {
+            centered: {
+                value: true
+            },
+            modal: {
+                value: true
+            }
+        }
     });
 };
