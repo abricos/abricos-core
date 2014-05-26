@@ -14,6 +14,7 @@ Component.requires = {
 Component.entryPoint = function(NS){
 
     var Y = Brick.YUI,
+        L = Y.Lang,
         RENDERUI = 'renderUI',
         BINDUI = 'bindUI',
         SYNCUI = 'syncUI',
@@ -26,7 +27,7 @@ Component.entryPoint = function(NS){
     };
     WidgetClick.prototype = {
         initializer: function(){
-            Y.after(this._bindUIWidgetClick, this, 'bindUI');
+            Y.after(this._bindUIWidgetClick, this, BINDUI);
         },
         _bindUIWidgetClick: function(){
             var boundingBox = this.get(BOUNDING_BOX);
@@ -35,24 +36,34 @@ Component.entryPoint = function(NS){
             });
 
             this.publish({
-                widgetClick: this._defWidgetClick
+                beforeWidgetClick: this._defBeforeWidgetClick,
+                afterWidgetClick: this._defAfterWidgetClick
             });
         },
-        _defWidgetClick: function(){
+        _defBeforeWidgetClick: function(){
+        },
+        _defAfterWidgetClick: function(){
         },
         _onWidgetClick: function(e){
             if (!e || !e.target){
                 return;
             }
-            var clickData = e.target.getData('click');
-            if (!clickData){
+
+            e.dataClick = e.target.getData('click');
+
+            if (!this.fire('beforeWidgetClick', {dataClick: e.dataClick})){
+                e.halt();
                 return;
             }
 
-            var res = this.fire('clickForm', {
-                clickData: clickData
-            });
-            if (!res){
+            if (L.isFunction(this.onClick)
+                && this.onClick.apply(this, arguments)){
+
+                e.halt();
+                return;
+            }
+
+            if (!this.fire('afterWidgetClick', {dataClick: e.dataClick})){
                 e.halt();
             }
         }

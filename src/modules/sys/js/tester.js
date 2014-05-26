@@ -26,9 +26,12 @@ Component.entryPoint = function(NS){
         initializer: function(){
             // console.log(this);
         },
+        /*
         onClick: function(e){
-console.log('onClick');
+console.log('testPanel click');
+            console.log(e);
         }
+        /**/
     }, {
         ATTRS: {
             component: {

@@ -22,6 +22,7 @@ Component.entryPoint = function(NS){
         BOUNDING_BOX = 'boundingBox',
         CONTENT_BOX = 'contentBox',
 
+        BINDUI = 'bindUI',
         RENDERUI = "renderUI",
 
         getClassName = Y.ClassNameManager.getClassName;
@@ -34,7 +35,7 @@ Component.entryPoint = function(NS){
         footer: 'modal-footer'
     };
     BootstrapPanel.TEMPLATES = {
-        closeButton: '<button type="button" class="close" data-click="panelClose">&times;</button>',
+        closeButton: '<button type="button" class="close" data-click="panel-close">&times;</button>',
         header: '<div class="modal-header"></div>',
         body: '<div class="modal-body"></div>',
         footer: '<div class="modal-footer"></div>'
@@ -83,14 +84,6 @@ Component.entryPoint = function(NS){
                 if (node){
                     var btnNode = Y.Node.create(BootstrapPanel.TEMPLATES.closeButton);
                     node.appendChild(btnNode);
-
-console.log(btnNode);
-                    var __self = this;
-                    btnNode.once('click', function(e){
-console.log('click');
-                        __self.hide();
-                    });
-                    /**/
                 }
             }
         },
@@ -129,6 +122,7 @@ console.log('click');
             if (nodeFooter){
                 this.set('footerContent', nodeFooter.getHTML());
             }
+
         }
     };
     NS.PanelTemplate = PanelTemplate;
@@ -149,5 +143,19 @@ console.log('click');
         Y.WidgetPositionConstrain,
         Y.WidgetStack,
         NS.BootstrapPanel
-    ]);
+    ], {
+        initializer: function(){
+            Y.after(this._bindUIPanel, this, BINDUI);
+        },
+        _bindUIPanel: function(){
+            this.after('afterWidgetClick', this._afterWidgetClickPanel);
+        },
+        _afterWidgetClickPanel: function(e){
+            if (e.dataClick === 'panel-close'){
+                e.halt();
+                this.hide();
+            }
+        }
+
+    });
 };
