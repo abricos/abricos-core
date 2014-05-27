@@ -67,6 +67,11 @@ Component.entryPoint = function(NS){
             var tBlockNames = this.get('templateBlockName');
 
             this.template = new Abricos.TemplateManager(component.key, tBlockNames);
+        },
+
+        gel: function(elKey){
+            var el = this.template.gel(elKey);
+            return el ? Y.one(el) : null;
         }
     };
     NS.Template = Template;
