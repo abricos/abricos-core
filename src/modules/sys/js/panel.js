@@ -16,6 +16,7 @@ Component.requires = {
 Component.entryPoint = function(NS){
 
     var Y = Brick.YUI,
+        L = Y.Lang,
 
         SYS = Brick.mod.sys,
 
@@ -62,11 +63,11 @@ Component.entryPoint = function(NS){
             this.set('zIndex', 10000);
 
             /*
-            var modal = this.get('modal');
-            if (modal){
-                this.set('zIndex', 10000);
-            }
-            /**/
+             var modal = this.get('modal');
+             if (modal){
+             this.set('zIndex', 10000);
+             }
+             /**/
         },
         _getStdModTemplate: function(section){
             return Y.Node.create(BootstrapModal.TEMPLATES[section], this._stdModNode.get('ownerDocument'));
@@ -93,6 +94,11 @@ Component.entryPoint = function(NS){
     var PanelTemplate = function(){
     };
     PanelTemplate.NAME = 'template';
+    PanelTemplate.SECTION_CLASS_NAMES = {
+        header: 'hd',
+        body: 'bd',
+        footer: 'ft'
+    };
     PanelTemplate.prototype = {
         initializer: function(){
 
@@ -102,22 +108,51 @@ Component.entryPoint = function(NS){
             }
 
             var tName = this.template.cfg.defTName;
-
             var node = Y.Node.create(this.template.replace(tName));
 
-            var nodeHeader = node.one('.hd');
-            if (nodeHeader){
-                this.set('headerContent', nodeHeader.getHTML());
+            this._overClassesPanelTemplate = [];
+
+            for (var n in NS.PanelTemplate.SECTION_CLASS_NAMES){
+                this._setSectionPanelTemplate(node, n);
             }
 
-            var nodeBody = node.one('.bd');
-            if (nodeBody){
-                this.set('bodyContent', nodeBody.getHTML());
+            Y.after(this._renderUIPanelTemplate, this, RENDERUI);
+
+        },
+        _setSectionPanelTemplate: function(node, section){
+            if (!L.isValue(node)){
+                return null;
             }
 
-            var nodeFooter = node.one('.ft');
-            if (nodeFooter){
-                this.set('footerContent', nodeFooter.getHTML());
+            var className = NS.PanelTemplate.SECTION_CLASS_NAMES[section];
+
+            var nodeSection = node.one('.' + className);
+            if (!nodeSection){
+                return null;
+            }
+
+            var cla = this._overClassesPanelTemplate[section] = [];
+
+            var a = nodeSection.getAttribute('class').split(' '), na = [];
+            for (var i = 0; i < a.length; i++){
+                if (a[i] !== className){
+                    cla[cla.length] = a[i];
+                }
+            }
+
+            var html = nodeSection.getHTML();
+
+            this.set(section + 'Content', html);
+
+            return html;
+        },
+        _renderUIPanelTemplate: function(){
+            for (var section in NS.PanelTemplate.SECTION_CLASS_NAMES){
+                var cla = this._overClassesPanelTemplate[section];
+                var node = this[section + 'Node'];
+                if (node && cla.length > 0){
+                    node.addClass(cla.join(' '));
+                }
             }
         }
     };
@@ -156,6 +191,9 @@ Component.entryPoint = function(NS){
     }, {
         ATTRS: {
             centered: {
+                value: true
+            },
+            render: {
                 value: true
             }
         }
@@ -196,6 +234,9 @@ Component.entryPoint = function(NS){
                 value: true
             },
             modal: {
+                value: true
+            },
+            render: {
                 value: true
             }
         }

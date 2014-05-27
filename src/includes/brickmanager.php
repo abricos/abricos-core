@@ -443,7 +443,7 @@ class Ab_CoreBrickBuilder {
     }
 
     public function PrintBrick(Ab_CoreBrick $brick, $content) {
-        // Поиск в $content запросы на вставку данных из дочерних кирпичей $brick, 
+        // Поиск в $content запросы на вставку данных из дочерних кирпичей $brick,
         // результат будет занесен в $mathes, для последующей обработки. 
         $mathes = array();
         preg_match_all("#\[mod\](.+?)\[/mod\]#is", $content, $mathes, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
