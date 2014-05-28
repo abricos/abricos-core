@@ -39,6 +39,10 @@ Component.entryPoint = function(NS){
         }
     };
     Form.NAME = 'form';
+    Form.isCheckable = function(node){
+        var nodeType = node.get('type').toLowerCase();
+        return (nodeType === 'checkbox' || nodeType === 'radio')
+    };
     Form.prototype = {
         initializer: function(){
             Y.after(this._bindUIForm, this, 'bindUI');
@@ -68,14 +72,21 @@ Component.entryPoint = function(NS){
             var boundingBox = this.get(BOUNDING_BOX),
                 fields = this.get('fields');
 
-            boundingBox.all('.form-control').each(function(fieldNode){
-                var name = fieldNode.get('name'),
-                    value = fieldNode.get('value');
+            var setField = function(node){
+                var name = node.get('name'),
+                    value = node.get('value');
+
+                if (Form.isCheckable(node)){
+                    value = node.get('checked') ? 1 : 0;
+                }
 
                 if (fields.attrAdded(name)){
                     fields.set(name, value);
                 }
-            }, this);
+            };
+
+            boundingBox.all('.form-control').each(setField, this);
+            boundingBox.all('[data-form]').each(setField, this);
 
             this._filedsEventDisabled = false;
         },
