@@ -9,7 +9,7 @@
 var Component = new Brick.Component();
 Component.requires = {
 	mod:[
-	 	{name: 'sys', files: ['api.js','data.js','form.js','wait.js']}
+	 	{name: 'sys', files: ['api.js','data.js','old-form.js','wait.js']}
 	]
 };
 Component.entryPoint = function(){
