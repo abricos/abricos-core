@@ -771,10 +771,13 @@ Component.entryPoint = function(){
 			var tm = TM.get(el.id);
 			
 			if (!_buttonsAddedCss[this.name]){
-		    	Brick.util.CSS.update(tm.replace('css', {
-		    		name: this.name,
-		    		image: config.image
-		    	}));
+                var css = tm.replace('css', {
+                    name: this.name,
+                    image: config.image
+                });
+                Abricos.CSS.add(el.id, css);
+
+		    	Abricos.CSS.apply(el.id);
 		    	_buttonsAddedCss[this.name] = true;
 			}
 			
