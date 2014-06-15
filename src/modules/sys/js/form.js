@@ -48,10 +48,10 @@ Component.entryPoint = function(NS){
             Y.after(this._syncUIForm, this, 'syncUI');
         },
         _syncUIForm: function(){
-            this._syncUIFromFieldsForm();
-            this._bindFieldsUIForm();
+            this.updateUIFromFields();
+            // this._bindFieldsUIForm();
         },
-        _syncUIFromFieldsForm: function(){
+        updateUIFromFields: function(){
             var boundingBox = this.get(BOUNDING_BOX),
                 fields = this.get('fields');
 
@@ -63,7 +63,7 @@ Component.entryPoint = function(NS){
                 }
             }, this);
         },
-        _syncFieldsFromUIForm: function(){
+        updateFieldsFromUI: function(){
             this._filedsEventDisabled = true;
 
             var boundingBox = this.get(BOUNDING_BOX),
@@ -86,20 +86,6 @@ Component.entryPoint = function(NS){
             boundingBox.all('[data-form]').each(setField, this);
 
             this._filedsEventDisabled = false;
-        },
-        _bindFieldsUIForm: function(){
-            var instance = this,
-                fields = this.get('fields'),
-                attrs = fields.getAttrs();
-
-            Y.Object.each(attrs, function(v, n){
-                fields.after(n + 'Change', instance._afterFieldChange, instance);
-            }, instance);
-        },
-        _afterFieldChange: function(e){
-            if (!this._filedsEventDisabled){
-                this._syncUIFromFieldsForm();
-            }
         },
         getNodeByFieldName: function(name){
             var boundingBox = this.get(BOUNDING_BOX),
@@ -124,6 +110,7 @@ Component.entryPoint = function(NS){
         },
         _syncUIFormAction: function(){
             var boundingBox = this.get(BOUNDING_BOX);
+
             boundingBox.on({
                 reset: Y.bind(this._onResetFormAction, this),
                 submit: Y.bind(this._onSubmitFormAction, this)
@@ -140,11 +127,12 @@ Component.entryPoint = function(NS){
         _onSubmitFormAction: function(e){
             e.halt();
 
-            this._syncFieldsFromUIForm();
-            var res = this.fire('submitForm');
-            if (!res){
-                e.halt();
+            this.updateFieldsFromUI();
+
+            if (Y.Lang.isFunction(this.onSubmitFormAction)){
+                this.onSubmitFormAction();
             }
+            this.fire('submitForm');
         },
         _defResetFormAction: function(e){
         },
