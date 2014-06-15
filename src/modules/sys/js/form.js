@@ -45,28 +45,25 @@ Component.entryPoint = function(NS){
     };
     Form.prototype = {
         initializer: function(){
-            Y.after(this._bindUIForm, this, 'bindUI');
+            Y.after(this._syncUIForm, this, 'syncUI');
         },
-        _bindUIForm: function(){
+        _syncUIForm: function(){
             this._syncUIFromFieldsForm();
             this._bindFieldsUIForm();
         },
-        _bindFieldsUIForm: function(){
-            var instance = this,
-                fields = this.get('fields'),
-                attrs = fields.getAttrs();
+        _syncUIFromFieldsForm: function(){
+            var boundingBox = this.get(BOUNDING_BOX),
+                fields = this.get('fields');
 
-            Y.Object.each(attrs, function(v, n){
-                fields.after(n + 'Change', instance._afterFieldChange, instance);
-            }, instance);
-        },
-        _afterFieldChange: function(e){
-            if (!this._filedsEventDisabled){
-                this._syncUIFromFieldsForm();
-            }
+            boundingBox.all('.form-control').each(function(fieldNode){
+                var name = fieldNode.get('name');
+
+                if (fields.attrAdded(name)){
+                    fieldNode.set('value', fields.get(name));
+                }
+            }, this);
         },
         _syncFieldsFromUIForm: function(){
-
             this._filedsEventDisabled = true;
 
             var boundingBox = this.get(BOUNDING_BOX),
@@ -90,18 +87,19 @@ Component.entryPoint = function(NS){
 
             this._filedsEventDisabled = false;
         },
-        _syncUIFromFieldsForm: function(){
+        _bindFieldsUIForm: function(){
+            var instance = this,
+                fields = this.get('fields'),
+                attrs = fields.getAttrs();
 
-            var boundingBox = this.get(BOUNDING_BOX),
-                fields = this.get('fields');
-
-            boundingBox.all('.form-control').each(function(fieldNode){
-                var name = fieldNode.get('name');
-
-                if (fields.attrAdded(name)){
-                    fieldNode.set('value', fields.get(name));
-                }
-            }, this);
+            Y.Object.each(attrs, function(v, n){
+                fields.after(n + 'Change', instance._afterFieldChange, instance);
+            }, instance);
+        },
+        _afterFieldChange: function(e){
+            if (!this._filedsEventDisabled){
+                this._syncUIFromFieldsForm();
+            }
         },
         getNodeByFieldName: function(name){
             var boundingBox = this.get(BOUNDING_BOX),
@@ -122,9 +120,9 @@ Component.entryPoint = function(NS){
     };
     FormAction.prototype = {
         initializer: function(){
-            Y.after(this._bindUIFormAction, this, 'bindUI');
+            Y.after(this._syncUIFormAction, this, 'syncUI');
         },
-        _bindUIFormAction: function(){
+        _syncUIFormAction: function(){
             var boundingBox = this.get(BOUNDING_BOX);
             boundingBox.on({
                 reset: Y.bind(this._onResetFormAction, this),
