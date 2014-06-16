@@ -9,7 +9,9 @@ Component.requires = {
     yui: ['io', 'json']
 };
 Component.entryPoint = function(NS){
-    var Y = Brick.YUI;
+    var Y = Brick.YUI,
+        LNG = new Abricos.ComponentLanguage(this);
+
 
     var queryCounter = 0;
     var uniqueURL = function(){
@@ -27,9 +29,19 @@ Component.entryPoint = function(NS){
     AJAX.ATTRS = {
         moduleName: {
             value: ''
+        },
+        errorTemplate: {
+            value: '{v#title}: {v#msg}'
         }
     };
     AJAX.prototype = {
+        initializer: function(){
+            this.publish('AJAXError', {
+                defaultFn: this.onAJAXError
+            });
+        },
+        onAJAXError: function(){
+        },
         getAJAXURL: function(){
             var moduleName = this.get('moduleName') || 'undefined';
 
@@ -38,12 +50,15 @@ Component.entryPoint = function(NS){
         ajax: function(data, callback, options){
             options || (options = {})
 
+            options.arguments = options.arguments || {};
+
+            if (!options.arguments['action'] && data && data['do']){
+                options.arguments['action'] = data['do'];
+            }
+
             var url = this.getAJAXURL(),
                 headers = Y.merge(AJAX.HTTP_HEADERS, options.header),
-                timeout = options.timeout || AJAX.HTTP_TIMEOUT,
-                csrfToken = options.csrfToken || AJAX.CSRF_TOKEN,
-                context = options.context || this,
-                entity = 'data=' + Y.JSON.stringify(data);
+                csrfToken = options.csrfToken || AJAX.CSRF_TOKEN;
 
             if (csrfToken){
                 headers['X-CSRF-Token'] = csrfToken;
@@ -52,11 +67,11 @@ Component.entryPoint = function(NS){
             this._sendAJAXIORequest({
                 callback: callback,
                 arguments: options.arguments,
-                context: context,
-                entity: entity,
+                context: options.context || this,
+                entity: 'data=' + Y.JSON.stringify(data),
                 headers: headers,
                 method: 'POST',
-                timeout: timeout,
+                timeout: options.timeout || AJAX.HTTP_TIMEOUT,
                 url: url
             });
         },
@@ -84,11 +99,33 @@ Component.entryPoint = function(NS){
             });
         },
         _parseIOResponse: function(res){
-            var result = Y.JSON.parse(res.responseText);
-
-            return result;
+            return Y.JSON.parse(res.responseText);
         },
         _onAJAXIOEnd: function(txId, details){
+        },
+        _treatAJAXError: function(err, details){
+            if (!err){
+                return;
+            }
+
+            var msg = LNG.get('ajax.error.' + err.code);
+            if (msg === '' && this.language && details.action){
+                msg = this.language.get('ajax.' + details.action + 'error.' + err.code);
+            }
+            if (msg && msg !== ''){
+                if (this.language){
+                    var errTitle = this.language.get('ajax.' + details.action + '.error.title'),
+                        errTemplate = this.get('errorTemplate');
+
+                    if (errTitle !== ''){
+                        msg = errTemplate.replace("{v#msg}", msg);
+                        msg = msg.replace('{v#title}', errTitle);
+                    }
+                }
+                err.msg = msg;
+            }
+
+            this.fire('AJAXError', err, details);
         },
         _onAJAXIOFailure: function(txId, res, details){
             var callback = details.callback,
@@ -99,6 +136,7 @@ Component.entryPoint = function(NS){
                     request: res
                 };
 
+            this._treatAJAXError(err, details.arguments);
             if (callback){
                 callback.apply(context, [err, null, details.arguments]);
             }
@@ -110,8 +148,15 @@ Component.entryPoint = function(NS){
                     request: res
                 });
 
+            var err = null, data = request.data || {};
+            if (res && data && data.err > 0){
+                err = {code: data.err, msg: ''};
+            }
+
+            this._treatAJAXError(err, details.arguments);
+
             if (callback){
-                callback.apply(context, [null, request, details.arguments]);
+                callback.apply(context, [err, request, details.arguments]);
             }
         },
         _onAJAXIOStart: function(txId, details){

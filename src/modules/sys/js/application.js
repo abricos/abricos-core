@@ -20,11 +20,4 @@ Component.requires = {
 };
 Component.entryPoint = function(NS){
 
-    /*
-    var Application = Y.Base.create('application', Y.Base, [
-        NS.AJAX
-    ]);
-    NS.Application = Application;
-
-    /**/
 };
