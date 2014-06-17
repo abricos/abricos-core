@@ -32,11 +32,13 @@ Component.entryPoint = function(NS){
             value: Y.Model
         },
         fields: {
-            value: {},
+            value: null
+            /*,
             setter: function(val){
                 var fieldsClass = this.get('fieldsClass');
                 return new fieldsClass(val);
             }
+            /**/
         }
     };
     Form.NAME = 'form';
@@ -50,11 +52,15 @@ Component.entryPoint = function(NS){
         },
         _syncUIForm: function(){
             this.updateUIFromFields();
-            // this._bindFieldsUIForm();
         },
         updateUIFromFields: function(){
             var boundingBox = this.get(BOUNDING_BOX),
                 fields = this.get('fields');
+
+            if (!fields){
+                fields = new (this.get('fieldsClass'))();
+                this.set('fields', fields);
+            }
 
             boundingBox.all('.form-control').each(function(fieldNode){
                 var name = fieldNode.get('name');
