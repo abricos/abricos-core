@@ -6,6 +6,7 @@
 
 var Component = new Brick.Component();
 Component.requires = {
+    yui: ['model', 'model-list'],
     mod: [
         {name: 'sys', files: ['widget.js']}
     ]
@@ -28,7 +29,7 @@ Component.entryPoint = function(NS){
             setter: Y.one
         },
         fieldsClass: {
-            value: NS.Structure
+            value: Y.Model
         },
         fields: {
             value: {},
@@ -64,8 +65,6 @@ Component.entryPoint = function(NS){
             }, this);
         },
         updateFieldsFromUI: function(){
-            this._filedsEventDisabled = true;
-
             var boundingBox = this.get(BOUNDING_BOX),
                 fields = this.get('fields');
 
@@ -84,8 +83,6 @@ Component.entryPoint = function(NS){
 
             boundingBox.all('.form-control').each(setField, this);
             boundingBox.all('[data-form]').each(setField, this);
-
-            this._filedsEventDisabled = false;
         },
         getNodeByFieldName: function(name){
             var boundingBox = this.get(BOUNDING_BOX),
