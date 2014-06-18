@@ -39,11 +39,11 @@ Component.entryPoint = function(NS){
                     for (var n in attrs){
                         val.after(n + 'Change', function(e){
                             if (e.src !== 'UI'){
-                                this.updateUIFromFields();
+                                this.updateUIFromModel();
                             }
                         }, this);
                     }
-                    this._updateUIFromFields(val);
+                    this._updateUIFromModel(val);
                 }
 
                 return val;
@@ -60,15 +60,18 @@ Component.entryPoint = function(NS){
             Y.after(this._syncUIForm, this, 'syncUI');
         },
         _syncUIForm: function(){
-            this.updateUIFromFields();
+            this.updateUIFromModel();
         },
-        updateUIFromFields: function(){
+        updateUIFromModel: function(){
             var model = this.get('model');
             if (model){
-                this._updateUIFromFields(model);
+                this._updateUIFromModel(model);
             }
         },
-        _updateUIFromFields: function(model){
+        _updateUIFromModel: function(model){
+            if (this._disableAttrChangeEventBugFix){
+                return;
+            }
             var boundingBox = this.get(BOUNDING_BOX);
 
             boundingBox.all('.form-control').each(function(fieldNode){
@@ -79,7 +82,7 @@ Component.entryPoint = function(NS){
                 }
             }, this);
         },
-        updateFieldsFromUI: function(){
+        updateModelFromUI: function(){
             var model = this.get('model');
             if (!model){
                 return;
@@ -96,12 +99,15 @@ Component.entryPoint = function(NS){
                 }
 
                 if (model.attrAdded(name)){
-                    model.set(name, value);
+                    // TODO: silent not working
+                    model.set(name, value, {silent: true});
                 }
             };
 
+            this._disableAttrChangeEventBugFix = true;
             boundingBox.all('.form-control').each(setField, this);
             boundingBox.all('[data-form]').each(setField, this);
+            this._disableAttrChangeEventBugFix = false;
         },
         getNodeByFieldName: function(name){
             var boundingBox = this.get(BOUNDING_BOX),
@@ -131,10 +137,11 @@ Component.entryPoint = function(NS){
                 reset: Y.bind(this._onResetFormAction, this),
                 submit: Y.bind(this._onSubmitFormAction, this)
             });
-
-            this.publish({
-                resetForm: this._defResetFormAction,
-                submitForm: this._defSubmitFormAction
+            this.publish('resetForm', {
+                defaultFn: this._defResetFormAction
+            });
+            this.publish('submitForm', {
+                defaultFn: this._defSubmitFormAction
             });
         },
         _onResetFormAction: function(e){
@@ -143,7 +150,7 @@ Component.entryPoint = function(NS){
         _onSubmitFormAction: function(e){
             e.halt();
 
-            this.updateFieldsFromUI();
+            this.updateModelFromUI();
 
             if (Y.Lang.isFunction(this.onSubmitFormAction)){
                 this.onSubmitFormAction();
