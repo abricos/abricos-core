@@ -28,10 +28,10 @@ Component.entryPoint = function(NS){
         boundingBox: {
             setter: Y.one
         },
-        fieldsClass: {
+        modelClass: {
             value: Y.Model
         },
-        fields: {
+        model: {
             value: null,
             setter: function(val){
                 if (val && Y.Lang.isFunction(val.toJSON)){
@@ -63,25 +63,25 @@ Component.entryPoint = function(NS){
             this.updateUIFromFields();
         },
         updateUIFromFields: function(){
-            var fields = this.get('fields');
-            if (fields){
-                this._updateUIFromFields(fields);
+            var model = this.get('model');
+            if (model){
+                this._updateUIFromFields(model);
             }
         },
-        _updateUIFromFields: function(fields){
+        _updateUIFromFields: function(model){
             var boundingBox = this.get(BOUNDING_BOX);
 
             boundingBox.all('.form-control').each(function(fieldNode){
                 var name = fieldNode.get('name');
 
-                if (fields.attrAdded(name)){
-                    fieldNode.set('value', fields.get(name));
+                if (model.attrAdded(name)){
+                    fieldNode.set('value', model.get(name));
                 }
             }, this);
         },
         updateFieldsFromUI: function(){
-            var fields = this.get('fields');
-            if (!fields){
+            var model = this.get('model');
+            if (!model){
                 return;
             }
 
@@ -95,8 +95,8 @@ Component.entryPoint = function(NS){
                     value = node.get('checked') ? 1 : 0;
                 }
 
-                if (fields.attrAdded(name)){
-                    fields.set(name, value);
+                if (model.attrAdded(name)){
+                    model.set(name, value);
                 }
             };
 
