@@ -32,13 +32,22 @@ Component.entryPoint = function(NS){
             value: Y.Model
         },
         fields: {
-            value: null
-            /*,
+            value: null,
             setter: function(val){
-                var fieldsClass = this.get('fieldsClass');
-                return new fieldsClass(val);
+                if (val && Y.Lang.isFunction(val.toJSON)){
+                    var attrs = val.toJSON();
+                    for (var n in attrs){
+                        val.after(n + 'Change', function(e){
+                            if (e.src !== 'UI'){
+                                this.updateUIFromFields();
+                            }
+                        }, this);
+                    }
+                    this._updateUIFromFields(val);
+                }
+
+                return val;
             }
-            /**/
         }
     };
     Form.NAME = 'form';
@@ -54,13 +63,13 @@ Component.entryPoint = function(NS){
             this.updateUIFromFields();
         },
         updateUIFromFields: function(){
-            var boundingBox = this.get(BOUNDING_BOX),
-                fields = this.get('fields');
-
-            if (!fields){
-                fields = new (this.get('fieldsClass'))();
-                this.set('fields', fields);
+            var fields = this.get('fields');
+            if (fields){
+                this._updateUIFromFields(fields);
             }
+        },
+        _updateUIFromFields: function(fields){
+            var boundingBox = this.get(BOUNDING_BOX);
 
             boundingBox.all('.form-control').each(function(fieldNode){
                 var name = fieldNode.get('name');
@@ -71,8 +80,12 @@ Component.entryPoint = function(NS){
             }, this);
         },
         updateFieldsFromUI: function(){
-            var boundingBox = this.get(BOUNDING_BOX),
-                fields = this.get('fields');
+            var fields = this.get('fields');
+            if (!fields){
+                return;
+            }
+
+            var boundingBox = this.get(BOUNDING_BOX);
 
             var setField = function(node){
                 var name = node.get('name'),
@@ -143,6 +156,4 @@ Component.entryPoint = function(NS){
         }
     };
     NS.FormAction = FormAction;
-
-
 };
