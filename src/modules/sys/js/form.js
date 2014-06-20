@@ -81,6 +81,10 @@ Component.entryPoint = function(NS){
                     fieldNode.set('value', model.get(name));
                 }
             }, this);
+
+            this.onUpdateUIFromModel(model);
+        },
+        onUpdateUIFromModel: function(model){
         },
         updateModelFromUI: function(){
             var model = this.get('model');
@@ -107,7 +111,11 @@ Component.entryPoint = function(NS){
             this._disableAttrChangeEventBugFix = true;
             boundingBox.all('.form-control').each(setField, this);
             boundingBox.all('[data-form]').each(setField, this);
+
+            this.onUpdateModelFromUI(model);
             this._disableAttrChangeEventBugFix = false;
+        },
+        onUpdateModelFromUI: function(){
         },
         getNodeByFieldName: function(name){
             var boundingBox = this.get(BOUNDING_BOX),
