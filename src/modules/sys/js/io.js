@@ -110,8 +110,9 @@ Component.entryPoint = function(NS){
 
             var msg = LNG.get('ajax.error.' + err.code);
             if (msg === '' && this.language && details.action){
-                msg = this.language.get('ajax.' + details.action + 'error.' + err.code);
+                msg = this.language.get('ajax.' + details.action + '.error.' + err.code);
             }
+
             if (msg && msg !== ''){
                 if (this.language){
                     var errTitle = this.language.get('ajax.' + details.action + '.error.title'),
