@@ -1,5 +1,4 @@
 /*
-@version $Id$
 @copyright Copyright (C) 2008 Abricos. All rights reserved.
 @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
@@ -18,7 +17,9 @@ Component.entryPoint = function(){
 	this.buildTemplate({},''); // применить css
 	
 	Brick.namespace('widget');
-	
+
+    Brick.DEFAULT_ZINDEX = 10000;
+
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
