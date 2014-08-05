@@ -77,7 +77,8 @@ Component.entryPoint = function(NS){
             boundingBox.all('.form-control').each(function(fieldNode){
                 var name = fieldNode.get('name');
 
-                if (model.attrAdded(name)){
+                if (model.attrAdded(name)
+                    && fieldNode.get('type') !== 'hidden'){
                     fieldNode.set('value', model.get(name));
                 }
             }, this);
