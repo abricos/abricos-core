@@ -11,7 +11,6 @@ Component.requires = {
         {
             name: '{C#MODNAME}',
             files: [
-                'structure.js',
                 'component.js',
                 'io.js'
             ]
