@@ -17,18 +17,44 @@ Component.entryPoint = function(NS){
 
         COMPONENT = this;
 
-    var AppMenuNode = function(tree, config){
-        this._serializable = this._serializable.concat('label');
+    var MenuNode = function(){
+    };
+    MenuNode.prototype = {
+        initializer: function(){
+            this.nodeExtensions = this.nodeExtensions.concat(NS.AppMenuNode);
+        }
+    }
 
-        if ('label' in config) {
-            this.label = config.label;
+    var _apmiKey = new Abricos.Key('menu.items');
+
+    var AppMenuNode = function(tree, config){
+        this._serializable = this._serializable.concat('title');
+
+        var lng = tree.get('cmpLanguage');
+
+        this.title = 'title' in config ? config.title : '';
+
+        if (this.title === ''){
+            this.title = lng.get(_apmiKey.push(this.id, true));
         }
     };
+    AppMenuNode.prototype = {
+        title: ''
+    };
+    NS.AppMenuNode = AppMenuNode;
 
     NS.AppMenu = Y.Base.create('appMenu', Y.Tree, [
-    //    Y.Tree.Labelable
+        MenuNode
     ], {
+        initializer: function(){
+            var component = this.get('component'),
+                cmpLanguage = null;
 
+            if (component){
+                cmpLanguage = new Abricos.ComponentLanguage(component);
+            }
+            this.set('cmpLanguage', cmpLanguage);
+        }
     }, {
         ATTRS: {
             component: {
@@ -36,30 +62,6 @@ Component.entryPoint = function(NS){
             }
         }
     });
-
-    /*
-
-    NS.AppMenuItem = Y.Base.create('appMenuItem', Y.Model, [], {}, {
-        ATTRS: {
-            title: {
-                value: ''
-            },
-            url: {
-                value: ''
-            }
-        }
-    });
-
-    NS.AppMenu = Y.Base.create('appMenu', Y.ModelList, [], {
-        model: NS.AppMenuItem
-    }, {
-        ATTRS: {
-            component: {
-                value: null
-            }
-        }
-    });
-    /**/
 
     NS.AppMenuWidget = Y.Base.create('appMenuWidget', Y.Widget, [
         NS.Language,
@@ -77,10 +79,10 @@ Component.entryPoint = function(NS){
     }, {
         ATTRS: {
             /*
-            moduleName: {
-                value: ''
-            },
-            /**/
+             moduleName: {
+             value: ''
+             },
+             /**/
             component: {
                 value: COMPONENT
             },
