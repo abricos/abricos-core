@@ -7,7 +7,7 @@ var Component = new Brick.Component();
 Component.requires = {
     yui: ['tree', 'tree-labelable'],
     mod: [
-        {name: 'sys', files: ['widget.js']}
+        {name: 'sys', files: ['component.js']}
     ]
 
 };
@@ -15,7 +15,9 @@ Component.entryPoint = function(NS){
 
     var Y = Brick.YUI,
 
-        COMPONENT = this;
+        COMPONENT = this,
+
+        BOUNDING_BOX = 'boundingBox';
 
     var MenuNode = function(){
     };
@@ -29,17 +31,20 @@ Component.entryPoint = function(NS){
 
     var AppMenuNode = function(tree, config){
         this._serializable = this._serializable.concat('title');
+        this._serializable = this._serializable.concat('url');
 
         var lng = tree.get('cmpLanguage');
 
         this.title = 'title' in config ? config.title : '';
-
         if (this.title === ''){
             this.title = lng.get(_apmiKey.push(this.id, true));
         }
+
+        this.url = 'url' in config ? config.url : '#';
     };
     AppMenuNode.prototype = {
-        title: ''
+        title: '',
+        url: ''
     };
     NS.AppMenuNode = AppMenuNode;
 
@@ -68,26 +73,26 @@ Component.entryPoint = function(NS){
         NS.Template
     ], {
         initializer: function(){
-
             Y.after(this._syncUIAppMenuWidget, this, 'syncUI');
         },
         _syncUIAppMenuWidget: function(){
-            // var moduleName = this.get('moduleName') || 'undefined';
+            console.log(this);
+            var bBox = this.get(BOUNDING_BOX),
+                appMenu = this.get('appMenu');
 
+            var tp = this.template;
 
+            bBox.setHTML(tp.replace('menu'));
+
+            console.log(appMenu.nodes);
         }
     }, {
         ATTRS: {
-            /*
-             moduleName: {
-             value: ''
-             },
-             /**/
             component: {
                 value: COMPONENT
             },
             templateBlockName: {
-                value: 'widget,list,row'
+                value: 'menu'
             },
             appMenu: {
                 value: null
