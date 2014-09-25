@@ -444,7 +444,12 @@ class Ab_CoreBrickReader {
                 $ret->param->param[$name] = $key;
             }
         }
-
+        if (is_array($oData->param->var)) {
+            $oP = & $oData->param->var;
+            foreach ($oP as $name => $key) {
+                $ret->param->var[$name] = $key;
+            }
+        }
         return $ret;
     }
 
