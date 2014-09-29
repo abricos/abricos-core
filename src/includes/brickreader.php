@@ -309,8 +309,10 @@ class Ab_CoreBrickReader {
 
     public static function ReadBrickFromFile($file, $modname = '', $partPath = '') {
         $ret = new stdClass();
+        $ret->isError = false;
         if (!file_exists($file)) {
             $filebody = "File not found: ".$file;
+            $ret->isError = true;
         } else {
             $filebody = file_get_contents($file);
         }

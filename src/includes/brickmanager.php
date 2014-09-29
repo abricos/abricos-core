@@ -749,6 +749,7 @@ class Ab_CoreBrickManager {
                 $brickFF = Ab_CoreBrickReader::ReadBrick($owner, $brickName, $brickType);
             }
             $brick = new Ab_CoreBrick($owner, $brickName, $brickType, $brickFF->body, $brickFF->param, $parent);
+            $brick->isError = $brickFF->isError;
             $this->SyncParam($owner, $brickName, $brickType, $brick->param);
         } else {
             $param = new Ab_CoreBrickParam();
@@ -1006,6 +1007,12 @@ class Ab_CoreBrick {
      * @var Ab_CoreBrickParam
      */
     public $param = null;
+
+    /**
+     * Error. Brick file not found
+     * @var bool
+     */
+    public $isError = false;
 
     public function __construct($owner, $name, $type, $content, $param, $parent) {
         $this->owner = $owner;
