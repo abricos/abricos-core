@@ -2,7 +2,7 @@
     "name": "abricos",
     "version": "0.5.6",
     "dependencies": {
-        "alloyui": "https://github.com/abricos/alloy-ui/releases/download/3.0.0pr2.1/alloy-3.0.0pr2.zip",
+        "alloyui": "https://github.com/liferay/alloy-ui/releases/download/3.0.0/alloy-3.0.0.zip",
         "jevix": "https://github.com/abricos/Jevix.git",
         "yui2in3": "https://github.com/abricos/yui3-2in3.git",
         "jquery": "~2.1.1",
