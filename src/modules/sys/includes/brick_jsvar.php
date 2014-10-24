@@ -15,14 +15,15 @@ $param = $brick->param;
 $modSys = Abricos::GetModule('sys');
 
 $param->var['lang'] = Abricos::$LNG;
-$param->var['g'] = json_encode(Abricos::$user->info['group']);
+// TODO: remove
+// $param->var['g'] = json_encode(Abricos::$user->info['group']);
 $param->var['uid'] = intval(Abricos::$user->id);
-$param->var['unm'] = Abricos::$user->login;
-$param->var['fnm'] = Abricos::$user->info['firstname'];
-$param->var['lnm'] = Abricos::$user->info['lastname'];
+$param->var['unm'] = Abricos::$user->username;
+$param->var['fnm'] = Abricos::$user->firstname;
+$param->var['lnm'] = Abricos::$user->lastname;
 
 if (Abricos::$user->id > 0){
-	$param->var['agr'] = intval(Abricos::$user->info['agreement']);
+	$param->var['agr'] = intval(Abricos::$user->agreement);
 }
 $param->var['s'] = Abricos::$user->session->key;
 

@@ -197,14 +197,14 @@ abstract class Ab_ModuleManager {
      *
      * @var User
      */
-    public $user;
+    protected $user;
 
     /**
      * Идентификатор пользователя
      *
      * @var integer
      */
-    public $userid = 0;
+    protected $userid = 0;
 
     /**
      * Модуль

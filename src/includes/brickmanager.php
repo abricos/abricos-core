@@ -153,17 +153,14 @@ class Brick {
     /**
      * Сессия текущего пользователя
      * TODO: на удаление
-     *
-     * @var User
      */
-    public static $session = null;
+    private static $session = null;
 
     /**
      * Текущий пользователь
-     * 
-     * @var User
+     * TODO: на удаление
      */
-    public static $user = null;
+    private static $user = null;
 
 }
 

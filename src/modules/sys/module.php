@@ -158,9 +158,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 		Brick::$modules = $this->registry->modules;
 		Brick::$cms = $this->registry;
 		Brick::$builder = new Ab_CoreBrickBuilder($this->registry);
-		Brick::$user = $this->registry->user;
-		// TODO: необходимо удалить
-		Brick::$session = $this->registry->user; 
+		// Brick::$user = $this->registry->user;
 		Brick::$style = Brick::$builder->phrase->Get('sys', 'style', 'default');
 		
 		// возможно стиль предопределен в конфиге для этого урла

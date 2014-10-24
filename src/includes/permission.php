@@ -2,7 +2,6 @@
 /**
  * Управление ролями пользователя в модуле
  * 
- * @version $Id$
  * @package Abricos
  * @subpackage Core
  * @category UserPermission
@@ -64,37 +63,7 @@ abstract class Ab_UserPermission {
 	 * @param integer $action идентификатор действия в текущем модуле
 	 */
 	public function CheckAction($action){
-		if (is_null(Ab_UserPermission::$permission)){
-			$this->LoadRoles();
-		}
-		
-		// Суперадмину можно все
-		if (Abricos::$user->IsSuperAdmin()){ return 1; }
-		
-		$mname = $this->module->name;
-		if (isset(Ab_UserPermission::$permission[$mname][$action])){
-			return Ab_UserPermission::$permission[$mname][$action];
-		}
-		return -1;
-	}
-	
-	private function LoadRoles(){
-		$modUser = Abricos::GetModule('user');
-		$db = Abricos::$db;
-		
-		$perm = array();
-		// Если не бот, то загрузка ролей
-		if (empty($modUser->info['antibotdetect'])){
-			$rows = UserQuery::UserRole($db, $modUser->info);
-			while (($row = $db->fetch_array($rows))){
-				$mod = $row['md'];
-				if (!$perm[$mod]){
-					$perm[$mod] = array();
-				}
-				$perm[$mod][$row['act']] = $row['st'];
-			}
-		}
-		Ab_UserPermission::$permission = $perm;
+        return Abricos::$user->GetActionRole($this->module->name, $action);
 	}
 }
 

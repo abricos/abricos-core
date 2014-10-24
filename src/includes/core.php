@@ -29,9 +29,9 @@ final class Abricos {
 	public static $adress;
 	
 	/**
-	 * Текущий пользователь
+	 * Current User
 	 * 
-	 * @var User
+	 * @var UserItem
 	 */
 	public static $user;	
 	
@@ -217,11 +217,12 @@ class CMSRegistry {
 	 * Модуль пользователя
 	 * 
 	 * @var User
+     * @deprecated
 	 */
-	public $user;
-	
+	private $user;
+
 	private $json = null;
-	
+
 	/**
 	 * Конструктор
 	 *
@@ -274,12 +275,9 @@ class CMSRegistry {
 		}
 		$this->modules->RegisterByName('sys');
 		$this->modules->RegisterByName('user');
-		
-		$modUser = $this->modules->GetModule('user');
-		$modUser->SessionUpdate();
-		Abricos::$user = $modUser;
-		$this->user = $modUser;
-		
+
+        Abricos::$user = UserModule::$instance->GetManager()->GetSessionManager()->Update();
+
 		// проверка на наличие нового модуля в движке
 		$smoddir = CWD."/modules/";
 		$dir = dir($smoddir);
@@ -341,7 +339,7 @@ class CMSRegistry {
 		}
 		return $this->json;
 	}
-	
+
 	private function fetch_config()	{
 		
 		if (!file_exists(CWD. '/includes/config.php')) {
