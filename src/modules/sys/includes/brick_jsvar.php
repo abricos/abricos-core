@@ -23,9 +23,9 @@ $param->var['fnm'] = Abricos::$user->firstname;
 $param->var['lnm'] = Abricos::$user->lastname;
 
 if (Abricos::$user->id > 0){
-	$param->var['agr'] = intval(Abricos::$user->agreement);
+	$param->var['agr'] = Abricos::$user->agreement ? 1 : 0;
 }
-$param->var['s'] = Abricos::$user->session->key;
+$param->var['s'] = UserModule::$instance->GetManager()->GetSessionManager()->key;
 
 $template = Brick::$builder->phrase->Get('sys', 'style', 'default');
 $param->var['ttname'] = $template;
