@@ -11,8 +11,6 @@
  */
 abstract class Ab_UserPermission {
 	
-	private static $permission = null;
-	
 	/**
 	 * Модуль
 	 * 
@@ -38,7 +36,7 @@ abstract class Ab_UserPermission {
 	 */
 	public function Install(){
 		$this->GetUserManager();
-		UserQueryExt::PermissionInstall(Abricos::$db, $this);
+		UserQuery::PermissionInstall(Abricos::$db, $this);
 	}
 	
 	/**
@@ -46,8 +44,8 @@ abstract class Ab_UserPermission {
 	 */
 	public function Reinstall(){
 		$this->GetUserManager();
-		UserQueryExt::PermissionRemove(Abricos::$db, $this);
-		UserQueryExt::PermissionInstall(Abricos::$db, $this);
+		UserQuery::PermissionRemove(Abricos::$db, $this);
+		UserQuery::PermissionInstall(Abricos::$db, $this);
 	}
 	
 	/**
