@@ -48,6 +48,9 @@ Component.entryPoint = function(NS){
 
                 return val;
             }
+        },
+        updateUIFromModel: {
+            value: true
         }
     };
     Form.NAME = 'form';
@@ -69,9 +72,11 @@ Component.entryPoint = function(NS){
             }
         },
         _updateUIFromModel: function(model){
-            if (this._disableAttrChangeEventBugFix){
+            if (this._disableAttrChangeEventBugFix
+                || !this.get('updateUIFromModel')){
                 return;
             }
+
             var boundingBox = this.get(BOUNDING_BOX);
 
             boundingBox.all('.form-control').each(function(fieldNode){
