@@ -195,7 +195,7 @@ abstract class Ab_ModuleManager {
     /**
      * Пользователь
      *
-     * @var User
+     * @var UserItem
      */
     protected $user;
 
