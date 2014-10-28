@@ -774,6 +774,8 @@ class Ab_CoreBrickManager {
             }
         }
 
+        $brick->param->var['brickid'] = $brick->id;
+
         // обработка вложенных кирпичей
         if (!empty($p->template)) {
             if (!empty($this->registry->config["Template"]) && $p->template['owner'] != "_sys") {
