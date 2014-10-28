@@ -476,7 +476,10 @@ class Ab_CoreBrickBuilder {
 
             $printBrick = null;
             foreach ($brick->child as $cbrick) {
-                if ($cbrick->owner != $modName || $cbrick->name != $modBrickName || ($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)) {
+                if ($cbrick->owner != $modName
+                    || $cbrick->name != $modBrickName
+                    || ($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)
+                ) {
                     continue;
                 }
                 $printBrick = $cbrick;
@@ -544,6 +547,7 @@ class Ab_CoreBrickBuilder {
             foreach ($this->_jsfile as $value) {
                 $brick->param->var['js'] .= "<script src='".$value."' language='JavaScript' type='text/javascript' charset='utf-8'></script>";
             }
+            $this->_globalVar['js'] = $brick->param->var['js'];
 
             $this->FetchCSSModVars();
 
@@ -575,6 +579,7 @@ class Ab_CoreBrickBuilder {
             foreach ($this->_cssfile as $value) {
                 $brick->param->var['css'] .= "<link href='".$value."' type='text/css' rel='stylesheet' />\n";
             }
+            $this->_globalVar['css'] = $brick->param->var['css'];
         }
 
         foreach ($brick->child as $childbrick) {
