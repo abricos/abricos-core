@@ -269,7 +269,7 @@ class CMSRegistry {
 		
 		$modsinfo = $this->modules->modulesInfo;
 		
-		// временное решение в связи с переходом на платформу Abricos
+		// временное решение в связи с переходом на платформу Abricos с CMSBrick
 		if (!empty($modsinfo['sys']) && empty($modsinfo['sys']['installdate'])){
 			Ab_CoreQuery::UpdateToAbricosPackage($this->db);
 		}
