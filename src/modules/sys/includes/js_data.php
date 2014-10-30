@@ -75,8 +75,8 @@ if (Ab_CoreSystemManager::$instance->IsAdminRole()){
 					break;
 				case 'permission_mods':
 					$rows = array();
-					CMSRegistry::$instance->modules->RegisterAllModule();
-					$mods = CMSRegistry::$instance->modules->GetModules();
+                    Abricos::$modules->RegisterAllModule();
+					$mods = Abricos::$modules->GetModules();
 					foreach ($mods as $modname => $module){
 						if (is_null($module->permission)){
 							continue;

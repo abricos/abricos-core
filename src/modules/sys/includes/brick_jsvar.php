@@ -31,8 +31,8 @@ $template = Brick::$builder->phrase->Get('sys', 'style', 'default');
 $param->var['ttname'] = $template;
 $param->var['jsyui'] = Ab_CoreSystemModule::$YUIVersion;
 
-if (CMSRegistry::$instance->modules->customTakelink){
-	$modsinfo = CMSRegistry::$instance->modules->modulesInfo;
+if (Abricos::$modules->customTakelink){
+	$modsinfo = Abricos::$modules->modulesInfo;
 	$arr = array();
 	foreach ($modsinfo as $key => $value){
 		array_push($arr, "'".$key."'");
@@ -44,7 +44,7 @@ if ($param->param['fullcssforie'] == 'true' && is_browser('ie')){
 	$param->var['fullcssres'] = Brick::ReplaceVarByData($param->var['fullcsstpl'], $param->var);
 }
 
-$iscache = !CMSRegistry::$instance->config['Misc']['develop_mode'];
+$iscache = !Abricos::$config['Misc']['develop_mode'];
 $cacheFile = CWD."/cache/jsvar";
 if ($iscache && file_exists($cacheFile)){
 

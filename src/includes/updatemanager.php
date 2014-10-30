@@ -160,17 +160,3 @@ class Ab_UpdateManager {
 		return (int) $int;
 	}
 }
-
-
-/* * * * * * * * * * * Устаревшии версии классов * * * * * * * * * * * */
-
-/**
- * Устарел, оставлен для совместимости
- * 
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link AbricosAdress}
- * @ignore
- */
-class CMSUpdateManager  extends Ab_UpdateManager {
-}

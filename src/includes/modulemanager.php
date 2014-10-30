@@ -13,7 +13,6 @@
  * который должен находиться в корневой папке модуля. Когда ядро платформы просматривает
  * доступные модули, то она смотрит именно этот файл.
  *
- * @version $Id$
  * @package Abricos
  * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
@@ -300,7 +299,7 @@ class Ab_CoreModuleManager {
      */
     public $db = null;
 
-    public $currentMenuId = MENUID_ADMIN;
+    public $currentMenuId = 9999999;
 
     /**
      * Текущий модуль управления

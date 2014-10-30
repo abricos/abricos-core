@@ -105,7 +105,7 @@ class Brick {
 
     /**
      *
-     * @var CMSInputCleaner
+     * @var Ab_CoreInputCleaner
      */
     public static $input = null;
 
@@ -173,12 +173,6 @@ class Brick {
  */
 class Ab_CoreBrickBuilder {
 
-    /**
-     * Ядро
-     *
-     * @var CMSRegistry
-     */
-    public $registry = null;
 
     /**
      * Текущий кирпич.
@@ -256,13 +250,7 @@ class Ab_CoreBrickBuilder {
      */
     public $phrase = null;
 
-    /**
-     * Конструктор
-     *
-     * @param CMSRegistry $registry
-     */
-    public function __construct(CMSRegistry $registry) {
-        $this->registry = $registry;
+    public function __construct() {
         $this->phrase = Ab_CorePhrase::GetInstance();
     }
 
@@ -315,7 +303,7 @@ class Ab_CoreBrickBuilder {
 
         // установка версии
         if (isset($this->_globalVar['version'])) {
-            $modSys = $this->registry->modules->GetModule('sys');
+            $modSys = Abricos::GetModule('sys');
             $version = $modSys->version.(!empty($modSys->revision) ? "-r".$modSys->revision : "");
             $this->_globalVar['version'] = $version;
         }
@@ -337,12 +325,12 @@ class Ab_CoreBrickBuilder {
     /**
      * Динамическая загрузка кирпича
      *
-     * @param CMSModule $module
+     * @param Ab_Module $module
      * @param string $name
      */
     public function LoadBrick(Ab_Module $module, $name, Ab_CoreBrick $parent = null, $overparam = null) {
 
-        $bm = new Ab_CoreBrickManager($this->registry, false);
+        $bm = new Ab_CoreBrickManager(false);
         $brick = $bm->BuildOutput($module->name, $name, Brick::BRICKTYPE_BRICK, $parent);
 
         $this->SetUseModule($module->name);
@@ -377,7 +365,7 @@ class Ab_CoreBrickBuilder {
     }
 
     public function LoadBrickS($moduleName, $name, Ab_CoreBrick $parent = null, $overparam = null) {
-        $mod = $this->registry->modules->GetModule($moduleName);
+        $mod = Abricos::GetModule($moduleName);
         return $this->LoadBrick($mod, $name, $parent, $overparam);
     }
 
@@ -689,24 +677,16 @@ class Ab_CoreBrickBuilder {
 class Ab_CoreBrickManager {
 
     /**
-     * Ядро
-     *
-     * @var CMSRegistry
-     */
-    public $registry = null;
-
-    /**
      * Пользовательские версии кирпичей и параметров
      *
      * @var Ab_CoreCustomBrickManager
      */
     public $custom = null;
 
-    public function __construct(CMSRegistry $registry, $useCustom = true) {
-        $this->registry = $registry;
+    public function __construct($useCustom = true) {
         // пользовательские кирпичи и параметры
         if ($useCustom) {
-            $this->custom = new Ab_CoreCustomBrickManager($this->registry);
+            $this->custom = new Ab_CoreCustomBrickManager();
         }
     }
 
@@ -719,12 +699,12 @@ class Ab_CoreBrickManager {
      */
     public function BuildOutput($owner, $brickName, $brickType, $parent = null, $inparam = null, $isFile = false) {
         $cache = null;
-        $db = $this->registry->db;
+        $db = Abricos::$db;
         $recache = false;
 
         // Если это кирпичь модуля, то необходимо проверить наличие модуля в системе
         if ($brickType == Brick::BRICKTYPE_BRICK) {
-            $mod = $this->registry->modules->GetModule($owner);
+            $mod = Abricos::GetModule($owner);
             if (empty($mod)) {
                 return null;
             }
@@ -732,7 +712,7 @@ class Ab_CoreBrickManager {
 
         // кеш, применим только к шаблону
         if ($brickType == Brick::BRICKTYPE_TEMPLATE) {
-            if (CMSRegistry::$instance->config['Misc']['brick_cache']) {
+            if (Abricos::$config['Misc']['brick_cache']) {
                 $time = TIMENOW - 5 * 360;
                 $cache = Ab_CoreQuery::Cache($db, $owner, $brickName);
                 if (empty($cache) || $cache['ud'] < $time) {
@@ -778,9 +758,9 @@ class Ab_CoreBrickManager {
 
         // обработка вложенных кирпичей
         if (!empty($p->template)) {
-            if (!empty($this->registry->config["Template"]) && $p->template['owner'] != "_sys") {
-                $uri = $this->registry->adress->requestURI;
-                $cfg = &$this->registry->config["Template"];
+            if (!empty(Abricos::$config["Template"]) && $p->template['owner'] != "_sys") {
+                $uri = Abricos::$adress->requestURI;
+                $cfg = &Abricos::$config["Template"];
                 $find = false;
 
                 if (!empty($cfg["ignore"])) {
@@ -807,7 +787,7 @@ class Ab_CoreBrickManager {
             }
 
             // шаблон определенный администратором
-            $mod = $this->registry->modules->GetModule($owner);
+            $mod = Abricos::GetModule($owner);
             $ttpl = $mod->GetTemplate();
             if (!is_null($ttpl)) {
                 $p->template["owner"] = $ttpl["owner"];
@@ -1055,11 +1035,8 @@ class Ab_CoreCustomBrickManager {
     public $bricks = array();
     public $params = array();
 
-    /**
-     * Конструктор. Загружает из БД все custom кирпичи и их параметры
-     */
-    public function __construct(CMSRegistry $registry) {
-        $db = $registry->db;
+    public function __construct() {
+        $db = Abricos::$db;
         $rows = Ab_CoreQuery::BrickListCustom($db);
         while (($row = $db->fetch_array($rows))) {
             $key = $row['own'].$row['nm'].$row['tp'];

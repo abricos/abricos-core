@@ -16,16 +16,8 @@
  * @category Database
  * @abstract
  */
-abstract class Ab_Database extends CMSDatabase {
-	
-	/**
-	 * Ядро платформы Абрикос
-	 *
-	 * @var CMSRegistry
-	 * @ignore
-	 */
-	public $registry = null;
-	
+abstract class Ab_Database {
+
 	/**
 	 * Включить/выключить режим "только для чтения".
 	 * 
@@ -153,13 +145,9 @@ abstract class Ab_Database extends CMSDatabase {
 	
 	
 	/**
-	 * Конструктор  
-	 * 
-	 * @param CMSRegistry $registry Ядро
 	 * @param string $tablePrefix Префикс таблиц
 	 */
-	public function __construct(CMSRegistry $registry, $tablePrefix){
-		$this->registry = $registry;
+	public function __construct($tablePrefix){
 		$this->prefix = empty($tablePrefix) ? 'cms_' : $tablePrefix;
 	}
 

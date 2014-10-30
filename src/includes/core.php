@@ -56,6 +56,11 @@ final class Abricos {
 	 * @var array
 	 */
 	public static $config;
+
+    /**
+     * @var Ab_CoreModuleManager
+     */
+    public static $modules;
 	
 	/**
 	 * Идентификатор языка
@@ -110,7 +115,7 @@ final class Abricos {
 	 * @param Ab_Module $module Экземпляр класса модуля
 	 */
 	public static function ModuleRegister(Ab_Module $module){
-		CMSRegistry::$instance->modules->Register($module);
+        Abricos::$modules->Register($module);
 	}
 	
 	/**
@@ -121,7 +126,7 @@ final class Abricos {
 	 * @return Ab_Module зарегистрированный модуль в платформе 
 	 */
 	public static function GetModule($modname){
-		return CMSRegistry::$instance->modules->GetModule($modname);
+		return Abricos::$modules->GetModule($modname);
 	}
 	
 	/**
@@ -144,6 +149,20 @@ final class Abricos {
 		require_once ('usertext.php');
 		return new Ab_UserText($fullerase);
 	}
+
+
+    private static $_json;
+    /**
+     * @return Services_JSON
+     */
+    public static function GetJSONManager(){
+        if (empty(Abricos::$_json)){
+            require_once CWD.'/includes/json/json.php';
+            Abricos::$_json = new Services_JSON();
+        }
+        return Abricos::$_json;
+    }
+
 }
 
 /**
@@ -246,7 +265,7 @@ class CMSRegistry {
 		
 		Abricos::$DOMAIN = $this->config['Misc']['domain'];
 		
-		$db = new Ab_DatabaseMySql($this, $this->config['Database']['tableprefix']);
+		$db = new Ab_DatabaseMySql($this->config['Database']['tableprefix']);
 		$db->connect(
 			$this->config['Database']['dbname'],
 			$this->config['Server']['servername'],
@@ -264,6 +283,7 @@ class CMSRegistry {
 		Abricos::$config		= $this->config;
 		
 		$this->modules = new Ab_CoreModuleManager($this);
+        Abricos::$modules = $this->modules;
 		
 		$this->modules->FetchModulesInfo();
 		
@@ -305,7 +325,7 @@ class CMSRegistry {
 	 * @return mixed
 	 */
 	public static function CleanGPC($source, $varname, $vartype = TYPE_NOCLEAN){
-		return CMSRegistry::$instance->input->clean_gpc($source, $varname, $vartype);
+		return Abricos::$inputCleaner->clean_gpc($source, $varname, $vartype);
 	}
 	
 	/**
@@ -328,16 +348,6 @@ class CMSRegistry {
 			return;
 		}
 		$this->pageStatus = $status;
-	}
-	/**
-	 * @return Services_JSON
-	 */
-	public function GetJSON(){
-		if (empty($this->json)){
-			require_once CWD.'/includes/json/json.php';
-			$this->json = new Services_JSON();
-		}
-		return $this->json;
 	}
 
 	private function fetch_config()	{

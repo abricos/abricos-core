@@ -103,15 +103,4 @@ class Ab_DatabaseMySql extends Ab_Database {
 	}
 }
 
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_DatabaseMySql}
- * @ignore
- */
-class CMSMySqlDB extends Ab_DatabaseMySql {
-}
-
 ?>

@@ -96,7 +96,7 @@ class Ab_CoreInputCleaner {
 	 * 
 	 * @ignore
 	 */
-	function &clean_array(&$source, $variables) {
+	private function &clean_array(&$source, $variables) {
 		$return = array();
 
 		foreach ($variables AS $varname => $vartype) {
@@ -114,7 +114,7 @@ class Ab_CoreInputCleaner {
 	 * @return	array
 	 * @ignore
 	 */
-	function clean_array_gpc($source, $variables) {
+	private function clean_array_gpc($source, $variables) {
 		$sg =& $GLOBALS[$this->superglobal_lookup["$source"]];
 
 		foreach ($variables AS $varname => $vartype) {
@@ -153,7 +153,7 @@ class Ab_CoreInputCleaner {
 	 * 
 	 * @ignore
 	 */
-	function &clean(&$var, $vartype = TYPE_NOCLEAN, $exists = true)	{
+	private function &clean(&$var, $vartype = TYPE_NOCLEAN, $exists = true)	{
 		if ($exists) {
 			if ($vartype < TYPE_CONVERT_SINGLE){
 				$this->do_clean($var, $vartype);
@@ -199,7 +199,7 @@ class Ab_CoreInputCleaner {
 	 * 
 	 * @ignore
 	 */
-	function &do_clean(&$data, $type) {
+	private function &do_clean(&$data, $type) {
 		static $booltypes = array('1', 'yes', 'y', 'true');
 		switch ($type) {
 			case TYPE_INT:    $data = intval($data);                                   break;
@@ -251,7 +251,7 @@ class Ab_CoreInputCleaner {
 	 * 
 	 * @ignore
 	 */
-	function stripslashes_deep(&$value) {
+	private function stripslashes_deep(&$value) {
 	    static $recursive_counter = 0;
 	    if (++$recursive_counter > 1000) {
 	        die('possible deep recursion attack');
@@ -272,7 +272,7 @@ class Ab_CoreInputCleaner {
 	 * 
 	 * @ignore
 	 */
-	function convert_shortvars(&$array) {
+	private function convert_shortvars(&$array) {
 		// extract long variable names from short variable names
 		foreach ($this->shortvars AS $shortname => $longname) {
 			if (isset($array["$shortname"]) AND !isset($array["$longname"])) {
@@ -286,22 +286,11 @@ class Ab_CoreInputCleaner {
 	 * 
 	 * @ignore
 	 */
-	function strip_sessionhash(&$string) {
+	private function strip_sessionhash(&$string) {
 		$string = preg_replace('/(s|sessionhash)=[a-z0-9]{32}?&?/', '', $string);
 		return $string;
 	}
 
-}
-
-/**
- * Устарел, оставлен для совместимости
- * 
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreInputCleaner}
- * @ignore
- */
-class CMSInputCleaner extends Ab_CoreInputCleaner {
 }
 
 define('TYPE_BOOL',     1);

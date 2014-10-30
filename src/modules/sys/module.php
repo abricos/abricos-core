@@ -96,7 +96,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 		}else{
 			$flagDevelopPage = $adress->level >= 2 && 
 				$adress->dir[1] == 'develop' &&
-				CMSRegistry::$instance->config['Misc']['develop_mode'];
+				Abricos::$config['Misc']['develop_mode'];
 							
 			
 			foreach ($modules->modulesInfo as $key => $info){
@@ -271,7 +271,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 	
 	public function getBrickReader(){
 		if (is_null($this->brickReader)){
-			$this->brickReader = new CMSSysBrickReader($this->registry);
+			$this->brickReader = new Ab_CoreBrickReader();
 		}
 		return $this->brickReader;
 	}

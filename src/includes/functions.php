@@ -1,6 +1,5 @@
 <?php
 /**
- * @version $Id$
  * @package Abricos
  * @link http://abricos.org
  * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
@@ -25,18 +24,18 @@ function bkdouble($value){
 }
 
 function json_encode_ext($arr){
-	return CMSRegistry::$instance->GetJSON()->encode($arr);
+	return Abricos::GetJSONManager()->encode($arr);
 }
 
 if (!function_exists('json_decode')){
 	function json_decode($str){
-		return CMSRegistry::$instance->GetJSON()->decode($str);
+		return Abricos::GetJSONManager()->decode($str);
 	}
 }
 
 if ( ! function_exists('json_encode')){
 	function json_encode($arr){
-		return CMSRegistry::$instance->GetJSON()->encode($arr);
+		return Abricos::GetJSONManager()->encode($arr);
 	}
 }
 

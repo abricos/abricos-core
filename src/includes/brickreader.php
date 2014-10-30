@@ -11,12 +11,6 @@
  */
 class Ab_CoreBrickReader {
 
-    /**
-     * CMS Engine
-     *
-     * @var CMSRegistry
-     */
-    public $registry = null;
     public $isAdmin = false;
 
     /**
@@ -26,9 +20,8 @@ class Ab_CoreBrickReader {
      */
     public $db = null;
 
-    public function __construct(CMSRegistry $registry) {
-        $this->registry = $registry;
-        $this->db = $registry->db;
+    public function __construct() {
+        $this->db = Abricos::$db;
         Abricos::GetModule('sys')->GetManager();
         $this->isAdmin = Ab_CoreSystemManager::$instance->IsAdminRole();
     }
@@ -47,16 +40,17 @@ class Ab_CoreBrickReader {
         if (!$this->isAdmin) {
             return;
         }
-        $this->registry->modules->RegisterAllModule();
+        Abricos::$modules->RegisterAllModule();
 
         $brickdb = array();
+        $db = Abricos::$db;
 
-        $rows = Ab_CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_BRICK);
-        while (($row = $this->registry->db->fetch_array($rows))) {
+        $rows = Ab_CoreQuery::BrickListFromParser($db, Brick::BRICKTYPE_BRICK);
+        while (($row = $db->fetch_array($rows))) {
             $brickdb[$row['own'].".".$row['nm']] = $row;
         }
 
-        $mods = $this->registry->modules->GetModules();
+        $mods = Abricos::$modules->GetModules();
         foreach ($mods as $module) {
             $files = array();
             $files1 = globa(CWD."/modules/".$module->name."/brick/pub_*.html");
@@ -97,16 +91,17 @@ class Ab_CoreBrickReader {
         if (!$this->isAdmin) {
             return;
         }
-        $this->registry->modules->RegisterAllModule();
+        Abricos::$modules->RegisterAllModule();
 
         $brickdb = array();
+        $db = Abricos::$db;
 
-        $rows = Ab_CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_CONTENT);
-        while (($row = $this->registry->db->fetch_array($rows))) {
+        $rows = Ab_CoreQuery::BrickListFromParser($db, Brick::BRICKTYPE_CONTENT);
+        while (($row = $db->fetch_array($rows))) {
             $brickdb[$row['own'].".".$row['nm']] = $row;
         }
 
-        $mods = $this->registry->modules->GetModules();
+        $mods = Abricos::$modules->GetModules();
         foreach ($mods as $module) {
             $files = globa(CWD."/modules/".$module->name."/content/*.html");
             foreach ($files as $file) {
@@ -137,9 +132,10 @@ class Ab_CoreBrickReader {
         }
 
         $template = array();
+        $db = Abricos::$db;
 
-        $rows = Ab_CoreQuery::BrickListFromParser($this->registry->db, Brick::BRICKTYPE_TEMPLATE);
-        while (($row = $this->registry->db->fetch_array($rows))) {
+        $rows = Ab_CoreQuery::BrickListFromParser($db, Brick::BRICKTYPE_TEMPLATE);
+        while (($row = $db->fetch_array($rows))) {
             $template[$row['own'].".".$row['nm']] = $row;
         }
 
@@ -491,17 +487,6 @@ class Ab_CoreBrickReader {
         return $array;
     }
 
-}
-
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreBrickReader}
- * @ignore
- */
-final class CMSSysBrickReader extends Ab_CoreBrickReader {
 }
 
 ?>
