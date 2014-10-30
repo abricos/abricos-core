@@ -35,12 +35,6 @@ class Ab_CoreInputCleaner {
 		'f' => '_FILES'
 	);
 
-	/**
-	 * Конструктор
-	 * 
-	 * @param Abricos $registry
-	 * @ignore
-	 */
 	public function __construct() {
 		if (!is_array($GLOBALS)) {
 			die('<strong>Fatal Error:</strong> Invalid URL.');
@@ -71,7 +65,6 @@ class Ab_CoreInputCleaner {
 
 		if (@ini_get('register_globals') OR !@ini_get('gpc_order')){
 			foreach ($this->superglobal_lookup AS $arrayname){
-				// $registry->superglobal_size["$arrayname"] = sizeof($GLOBALS["$arrayname"]);
 
 				foreach (array_keys($GLOBALS["$arrayname"]) AS $varname){
 					if (!in_array($varname, $this->superglobal_lookup)){

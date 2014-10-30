@@ -16,7 +16,7 @@ class Ab_CoreBrickReader {
     /**
      * Database
      *
-     * @var CSMDatabase
+     * @var Ab_Database
      */
     public $db = null;
 
@@ -296,7 +296,7 @@ class Ab_CoreBrickReader {
             }
 
             if ($type == Brick::BRICKTYPE_CONTENT && !file_exists($path)) {
-                Abricos::$instance->pageStatus = PAGESTATUS_500;
+                Abricos::$pageStatus = PAGESTATUS_500;
             }
 
         }

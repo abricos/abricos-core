@@ -325,16 +325,4 @@ class Ab_UserText {
 	
 }
 
-/**
- * Устарел, оставлен для совместимости
- * 
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_UserText}
- * @ignore
- */
-final class CMSUserText extends Ab_UserText {
-}
-
-
 ?>

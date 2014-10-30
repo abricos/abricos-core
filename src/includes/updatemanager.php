@@ -74,7 +74,7 @@ class Ab_UpdateManager {
 	 * 
 	 * Например:
 	 * <code>
-	 * if ( Abricos::$instance->modules->updateManager->isInstall()){
+	 * if ( Abricos::$modules->updateManager->isInstall()){
 	 *  ...
 	 * }
 	 * </code>
@@ -100,7 +100,7 @@ class Ab_UpdateManager {
 	 *  
 	 * Например:
 	 * <code>
-	 * if (Abricos::$instance->modules->updateManager->isUpdate('0.2.7')){
+	 * if (Abricos::$modules->updateManager->isUpdate('0.2.7')){
 	 *  ...
 	 * }
 	 * </code>

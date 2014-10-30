@@ -276,15 +276,4 @@ class Ab_URI {
 	}
 }
 	
-
-/**
- * Устарел, оставлен для совместимости
- * 
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_URI}
- * @ignore
- */
-class CMSAdress extends Ab_URI {
-}
 ?>

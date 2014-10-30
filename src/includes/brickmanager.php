@@ -96,12 +96,6 @@ class Brick {
      */
     public static $modules = null;
 
-    /**
-     * Ядро платформы Abricos
-     *
-     * @var CMSRegistry
-     */
-    public static $cms = null;
 
     /**
      *
@@ -1071,52 +1065,5 @@ class Ab_CoreCustomBrickManager {
 
 }
 
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreBrickBuilder}
- * @ignore
- */
-final class CMSSysBrickBuilder extends Ab_CoreBrickBuilder {
-
-}
-
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreBrickManager}
- * @ignore
- */
-final class CMSSysBrickManager extends Ab_CoreBrickManager {
-
-}
-
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreBrickParam}
- * @ignore
- */
-final class CMSSysBrickParam extends Ab_CoreBrickParam {
-
-}
-
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CoreCustomBrickManager}
- * @ignore
- */
-final class CMSSysBrickCustomManager extends Ab_CoreCustomBrickManager {
-
-}
 
 ?>

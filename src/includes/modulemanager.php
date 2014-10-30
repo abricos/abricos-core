@@ -69,13 +69,6 @@ abstract class Ab_Module {
     public $takelink = "";
 
     /**
-     * Ядро
-     *
-     * @var Abricos
-     */
-    public $registry = null;
-
-    /**
      * Локализация - массив фраз
      *
      * @var mixed
@@ -117,7 +110,7 @@ abstract class Ab_Module {
      * @return string
      */
     public function GetContentName() {
-        return $this->registry->adress->contentName;
+        return Abricos::$adress->contentName;
     }
 
     /**
@@ -177,13 +170,6 @@ abstract class Ab_Module {
 abstract class Ab_ModuleManager {
 
     /**
-     * Ядро
-     *
-     * @var Abricos
-     */
-    public $core;
-
-    /**
      * База данных
      *
      * @var AbricosDatabase
@@ -214,7 +200,6 @@ abstract class Ab_ModuleManager {
 
     public function __construct(Ab_Module $module) {
         $this->module = $module;
-        $this->core = $module->registry;
         $this->db = Abricos::$db;
 
         $this->user = Abricos::$user;
@@ -260,11 +245,6 @@ abstract class Ab_ModuleManager {
 class Ab_CoreModuleManager {
 
     /**
-     * @var Ab_CoreModuleManager
-     */
-    public static $instance;
-
-    /**
      * Массив зарегистрированных модулей
      *
      * @var array
@@ -284,13 +264,6 @@ class Ab_CoreModuleManager {
      * @var array
      */
     public $modulesInfo = array();
-
-    /**
-     * Ядро движка
-     *
-     * @var Abricos
-     */
-    public $registry = null;
 
     /**
      * Менеджер БД
@@ -327,12 +300,9 @@ class Ab_CoreModuleManager {
      * Конструктор
      *
      * @ignore
-     * @param Abricos $registry ядро
      */
-    public function __construct($registry) {
-        Ab_CoreModuleManager::$instance = $this;
-        $this->registry = $registry;
-        $this->db = $registry->db;
+    public function __construct() {
+        $this->db = Abricos::$db;
     }
 
     /**
@@ -354,8 +324,8 @@ class Ab_CoreModuleManager {
         }
         $this->_firstError = true;
 
-        $cfg = $this->registry->config["Takelink"];
-        $adress = $this->registry->adress;
+        $cfg = Abricos::$config["Takelink"];
+        $adress = Abricos::$adress;
         $link = $adress->level === 0 ? "__super" : $adress->dir[0];
         $mainLink = null;
         if (!empty($cfg) && count($cfg) > 0 && !empty($link)) {
@@ -488,8 +458,6 @@ class Ab_CoreModuleManager {
             return;
         }
 
-        $module->registry = $this->registry;
-
         if (!$this->LoadLanguage($module, LNG)) { // загрузка фраз языка
             if (LNG != 'ru') { // загрузка не удалась, попытка загрузить русский язык по умолчанию
                 $this->LoadLanguage($module, 'ru');
@@ -572,42 +540,4 @@ class Ab_CoreModuleManager {
     }
 }
 
-
-/* * * * * * * * * * * Устаревшии версии классов * * * * * * * * * * * */
-
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link AbricosAdress}
- * @ignore
- */
-abstract class CMSModule extends Ab_Module {
-}
-
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link AbricosAdress}
- * @ignore
- */
-class CMSModuleManager extends Ab_CoreModuleManager {
-}
-
-/**
- * Устарел, оставлен для совместимости
- *
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_ModuleManager}
- * @ignore
- */
-abstract class ModuleManager extends Ab_ModuleManager {
-    public function ModuleManager(Ab_Module $module) {
-        parent::__construct($module);
-    }
-}
-
+?>

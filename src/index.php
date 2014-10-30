@@ -99,13 +99,10 @@ require_once('includes/brickmanager.php');
 require_once('includes/brickreader.php');
 require_once('includes/phrase.php');
 
-$core = new CMSRegistry();
+$core = new Abricos();
 
 // Основное управление сайтом ложится на системный модуль
-$modSys = $core->modules->GetModule('sys');
-
-$core->system = $modSys;
-
+$modSys = Abricos::GetModule('sys');
 $modSys->BuildOutput();
 
 if (Abricos::$db->IsError()) {
@@ -123,7 +120,7 @@ if (Abricos::$config['Misc']['showbuildinfo'] && Brick::$builder->template->owne
 	<!-- 
 	memory: ".($endMemory - $startMemory)."
 	time: ".(round(getmicrotime() - $startTime, 6))."
-	sql: ".($core->db->querycount)."
+	sql: ".(Abricos::$db->querycount)."
 	-->
 	");
 }

@@ -71,12 +71,6 @@ class Ab_CorePhrase {
 		return Ab_CorePhrase::$_instance;
 	}
 	
-	/**
-	 * Ядро
-	 *
-	 * @var Abricos
-	 */
-	public $registry = null;
 	
 	private $arr = array();
 	
@@ -84,7 +78,6 @@ class Ab_CorePhrase {
 	 * Конструктор
 	 */
 	public function __construct(){
-		$this->registry = Abricos::$instance;
 	}
 	
 	/**
@@ -109,7 +102,7 @@ class Ab_CorePhrase {
 	 * @param string $module имя модуля
 	 */
 	public function PreloadByModule($module){
-		$db = $this->registry->db;
+		$db = Abricos::$db;
 		$rows = Ab_CoreQuery::PhraseListByModule($db, $module);
 		$this->_preload($rows);
 		$this->Save();
@@ -122,7 +115,7 @@ class Ab_CorePhrase {
 	 * @param array $list список фраз
 	 */
 	public function Preload($list){
-		$db = $this->registry->db;
+		$db = Abricos::$db;
 		$rows = Ab_CoreQuery::PhraseList($db, $list);
 		$this->_preload($rows);
 		foreach ($list as $key=>$value){
@@ -134,7 +127,7 @@ class Ab_CorePhrase {
 	}
 	
 	private function _preload($rows){
-		$db = $this->registry->db;
+		$db = Abricos::$db;
 		while (($row = $db->fetch_array($rows))){
 			$key = $row['mnm'].":".$row['nm'];
 			$phrase = new Ab_CorePhraseItem($row['mnm'], $row['nm'], $row['ph']);
@@ -176,7 +169,7 @@ class Ab_CorePhrase {
 			$phrase = null;
 			// возможно эта фраза не была выбрана из БД, проверочный запрос
 			if ($checkindb)
-				$phrase = Ab_CoreQuery::Phrase($this->registry->db, $modname, $name);
+				$phrase = Ab_CoreQuery::Phrase(Abricos::$db, $modname, $name);
 			if (empty($phrase)){
 				$item = new Ab_CorePhraseItem($modname, $name, $value);
 				$item->isnew = true;
@@ -215,34 +208,13 @@ class Ab_CorePhrase {
 			$phrase->isupdate = false;
 		}
 		if (!empty($arrnew)){
-			Ab_CoreQuery::PhraseListAppend($this->registry->db, $arrnew);
+			Ab_CoreQuery::PhraseListAppend(Abricos::$db, $arrnew);
 		}
 		if (!empty($arrupdate)){
-			Ab_CoreQuery::PhraseListUpdate($this->registry->db, $arrupdate);
+			Ab_CoreQuery::PhraseListUpdate(Abricos::$db, $arrupdate);
 		}
 	}
 }
 
-/**
- * Устарел, оставлен для совместимости
- * 
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CorePhraseItem}
- * @ignore
- */
-final class CMSSysPhraseItem extends Ab_CorePhraseItem {
-}
-
-/**
- * Устарел, оставлен для совместимости
- * 
- * @package Abricos
- * @subpackage Deprecated
- * @deprecated устарел начиная с версии 0.5.5, необходимо использовать {@link Ab_CorePhrase}
- * @ignore
- */
-final class CMSSysPhrase extends Ab_CorePhrase {
-}
 
 ?>

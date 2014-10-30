@@ -13,13 +13,6 @@
 class Ab_CoreSystemManager extends Ab_ModuleManager {
 	
 	/**
-	 * Ядро
-	 *
-	 * @var CMSRegistry
-	 */
-	public $registry;
-	
-	/**
 	 * Модуль
 	 * 
 	 * @var Ab_CoreSystemModule
@@ -36,8 +29,7 @@ class Ab_CoreSystemManager extends Ab_ModuleManager {
 	public function __construct(Ab_CoreSystemModule $module){
 		parent::__construct($module);
 		$this->module = $module;
-		$this->registry = $module->registry;
-		
+
 		Ab_CoreSystemManager::$instance = $this;
 	}
 	
@@ -121,9 +113,9 @@ class Ab_CoreSystemManager extends Ab_ModuleManager {
 	 */
 	public function ModuleList(){
 		if (!$this->IsAdminRole()){ return null; }
-		
-		$this->registry->modules->RegisterAllModule();
-		$modules = $this->registry->modules->GetModules();
+
+        Abricos::$modules->RegisterAllModule();
+		$modules = Abricos::$modules->GetModules();
 		$ret = array();
 		foreach ($modules as $name => $mod){
 			if ($name == 'user' || $name == 'ajax'){ continue; }
