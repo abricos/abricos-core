@@ -10,7 +10,6 @@
  * Это делает удобным процесс сопровождение новых версий модуля.
  * 
  * @example modules/example/includes/shema.php
- * @version $Id$
  * @package Abricos
  * @subpackage Core
  * @link http://abricos.org

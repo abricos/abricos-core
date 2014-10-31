@@ -57,12 +57,14 @@ final class Abricos {
 
     /**
      * Идентификатор языка
+     *
      * @var string
      */
     public static $LNG = 'ru';
 
     /**
      * Идентификатор домена (мультидоменная система)
+     *
      * @var string
      */
     public static $DOMAIN = '';
@@ -138,7 +140,7 @@ final class Abricos {
 
     /**
      * Запрашивается ли супер-контент
-     * Супер-контент должен распологаться по адресу /content/[lang]/...
+     * Супер-контент должен располагаться по адресу /content/[lang]/...
      */
     public function IsSuperContent() {
         $adr = Abricos::$adress;
@@ -244,7 +246,7 @@ final class Abricos {
         }
         if (Abricos::$pageStatus != PAGESTATUS_OK) {
             Brick::$modman = $modman = $modSys;
-            $contentName = $this->GetContentName();
+            $contentName = $modman->GetContentName();
             header("HTTP/1.1 404 Not Found");
         }
 
@@ -433,6 +435,7 @@ final class Abricos {
 
     /**
      * Парсер текста поступившего от пользователя (комментарии и т.п.)
+     *
      * @return Ab_UserText
      */
     public static function TextParser($fullerase = false) {

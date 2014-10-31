@@ -283,17 +283,6 @@ class Ab_CoreModuleManager {
 
     public $checkManagesModule = false;
 
-    /**
-     * Модуль в котором в данный момент идет обновление схемы БД
-     *
-     * Оставлен для совместимости, необходимо использовать Ab_UpdateManager::$current
-     *
-     * @var Ab_UpdateManager
-     * @deprecated
-     * @ignore
-     */
-    public $updateManager = null;
-
     private $_firstError = false;
 
     /**
@@ -493,9 +482,6 @@ class Ab_CoreModuleManager {
 
         Ab_UpdateManager::$current = new Ab_UpdateManager($module, $info);
 
-        // TODO: удалить, оставлен для совместимости
-        $this->updateManager = Ab_UpdateManager::$current;
-
         $shema = CWD."/modules/".$modName."/includes/shema.php";
         if (file_exists($shema)) {
             require_once($shema);
@@ -506,7 +492,7 @@ class Ab_CoreModuleManager {
         Ab_UpdateManager::$current = null;
         $this->updateManager = null;
         // Удалить временные файлы
-        $chFiles = globa(CWD."/temp/*.gz");
+        $chFiles = globa(CWD."/cache/*.gz");
         foreach ($chFiles as $rfile) {
             @unlink($rfile);
         }
