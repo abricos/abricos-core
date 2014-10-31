@@ -101,10 +101,6 @@ require_once('includes/phrase.php');
 
 $core = new Abricos();
 
-// Основное управление сайтом ложится на системный модуль
-$modSys = Abricos::GetModule('sys');
-$modSys->BuildOutput();
-
 if (Abricos::$db->IsError()) {
     echo(Abricos::$db->errorText);
 }

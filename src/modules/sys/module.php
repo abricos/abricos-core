@@ -42,211 +42,6 @@ class Ab_CoreSystemModule extends Ab_Module {
         return $this->_manager;
     }
 
-    private $_superContentFile;
-
-    /**
-     * Запрашивается ли супер-контент
-     * Супер-контент должен распологаться по адресу /content/[lang]/...
-     */
-    public function IsSuperContent() {
-        $adr = Abricos::$adress;
-
-        $path = $adr->uri;
-
-        $path = str_replace("\\", "/", $path);
-        $path = str_replace("..", "", $path);
-        $path = preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $path);
-
-        if (!empty(Abricos::$config['supercontent']['path'])) {
-            $path = Abricos::$config['supercontent']['path']."/".Abricos::$LNG.$path;
-        } else {
-            $path = CWD."/content/".Abricos::$LNG.$path;
-        }
-
-        if (!file_exists($path)) {
-            return false;
-        }
-
-        $this->_superContentFile = $path;
-
-        return true;
-    }
-
-    /**
-     * Сборка вывода клиенту
-     */
-    public function BuildOutput() {
-
-        // Определить модуль управления выводом
-        $adress = Abricos::$adress;
-        $modules = Abricos::$modules;
-        $modman = null;
-
-        $isSuperContent = false;
-
-        if ($this->IsSuperContent()) {
-            $modman = $this;
-            $contentName = $this->_superContentFile;
-            $isSuperContent = true;
-        } else if ($adress->level >= 2 && $adress->dir[0] == 'ajax') {
-            $modman = $this;
-            $contentName = 'ajax';
-        } else if ($adress->level >= 2 && $adress->dir[0] == 'tajax') {
-            $modman = $this;
-            $contentName = 'tajax';
-        } else {
-            $flagDevelopPage = $adress->level >= 2 && $adress->dir[1] == 'develop' && Abricos::$config['Misc']['develop_mode'];
-
-
-            foreach ($modules->modulesInfo as $key => $info) {
-                // разрешить страницу для разработчика модуля
-                if ($flagDevelopPage) {
-                    if ($adress->dir[0] != $key) {
-                        continue;
-                    }
-                } else {
-                    if ($adress->dir[0] != $info['takelink'] || empty($info['takelink'])) {
-                        continue;
-                    }
-                }
-                $modman = $modules->RegisterByName($key);
-                if (empty($modman)) {
-                    Abricos::SetPageStatus(PAGESTATUS_500);
-                }
-                break;
-            }
-
-            // сначало проверить в настройках
-            if (is_null($modman)) {
-                $superModule = Abricos::$config['Takelink']['__super']['module'];
-                if (!empty($superModule)) {
-                    $modman = $modules->RegisterByName($superModule);
-                }
-            }
-            if (is_null($modman)) {
-                foreach ($modules->modulesInfo as $key => $info) {
-                    if ($info['takelink'] == '__super') {
-                        $modman = $modules->RegisterByName($key);
-                        break;
-                    }
-                }
-            }
-            if (is_null($modman)) {
-                $modman = $this;
-            }
-
-            // имя кирпича
-            if ($flagDevelopPage) {
-                $contentName = 'develop';
-            } else {
-                $contentName = $modman->GetContentName();
-            }
-        }
-
-        Brick::$modman = $modman;
-
-        if (empty($contentName)) {
-            Abricos::$pageStatus = PAGESTATUS_404;
-        }
-        if (Abricos::$pageStatus != PAGESTATUS_OK) {
-            Brick::$modman = $modman = $this;
-            $contentName = $this->GetContentName();
-            header("HTTP/1.1 404 Not Found");
-        }
-
-        $bm = new Ab_CoreBrickManager();
-
-        Brick::$db = Abricos::$db;
-        Brick::$input = Abricos::$inputCleaner;
-        Brick::$modules = Abricos::$modules;
-        Brick::$builder = new Ab_CoreBrickBuilder();
-        Brick::$style = Brick::$builder->phrase->Get('sys', 'style', 'default');
-
-        // возможно стиль предопределен в конфиге для этого урла
-
-        if (!empty(Abricos::$config["Template"])) {
-            $uri = Abricos::$adress->requestURI;
-            $cfg = &Abricos::$config["Template"];
-            $find = false;
-
-            if (!empty($cfg["ignore"])) {
-                foreach ($cfg["ignore"] as &$exp) {
-                    $find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
-                    if ($find) {
-                        break;
-                    }
-                }
-            }
-            if (!$find && !empty($cfg["exp"])) {
-                foreach ($cfg["exp"] as &$exp) {
-                    $find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
-                    if ($find) {
-                        Brick::$style = $exp["owner"];
-                        break;
-                    }
-                }
-            }
-            if (!$find && !empty($cfg["default"])) {
-                Brick::$style = $cfg["default"]['owner'];
-            }
-        }
-
-
-        if (is_array($contentName)) {
-            // поиск для перегруженных кирпичей
-            $find = false;
-            foreach ($contentName as $cname) {
-                if (file_exists(CWD."/tt/".Brick::$style."/override/".$modman->name."/content/".$cname.".html")) {
-                    $contentName = $cname;
-                    $find = true;
-                    break;
-                }
-            }
-            if (!$find) {
-                foreach ($contentName as $cname) {
-                    if (file_exists(CWD."/modules/".$modman->name."/content/".$cname.".html")) {
-                        $contentName = $cname;
-                        $find = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        $brick = $bm->BuildOutput($modman->name, $contentName, Brick::BRICKTYPE_CONTENT, null, null, $isSuperContent);
-
-        if (Abricos::$pageStatus == PAGESTATUS_500) {
-            header("HTTP/1.1 500 Internal Server Error");
-            exit;
-        }
-
-        // Любая сборка страницы начинается с кирпича BRICKTYPE_CONTENT
-        // и обязательно содержит в себе шаблон, в который он будет входить.
-        // Необходимо для дальнейшей компиляции страницы подчинить кирпич-контент
-        // в кирпич-шаблон и определить его как последний собираемый кирпич
-        $newChildren = array();
-        $template = null;
-        foreach ($brick->child as $childbrick) {
-            if ($childbrick->type == Brick::BRICKTYPE_TEMPLATE) {
-                $template = $childbrick;
-            } else {
-                array_push($newChildren, $childbrick);
-            }
-        }
-
-        if (is_null($template)) {
-            header("HTTP/1.1 500 Internal Server Error");
-            print("Template not found. Add the started brick: [tt=main][/tt]");
-            exit;
-        }
-
-
-        Brick::$builder->template = $template;
-        $brick->child = $newChildren;
-        array_push($template->child, $brick);
-
-        Brick::$builder->Compile($template);
-    }
 
     public function GetContentName() {
         $adress = Abricos::$adress;
@@ -269,6 +64,7 @@ class Ab_CoreSystemModule extends Ab_Module {
 
     private $brickReader = null;
 
+    // TODO: remove
     public function getBrickReader() {
         if (is_null($this->brickReader)) {
             $this->brickReader = new Ab_CoreBrickReader();
@@ -277,7 +73,7 @@ class Ab_CoreSystemModule extends Ab_Module {
     }
 
     public $ds = null;
-
+    // TODO: remove
     public function getDataSet() {
         if (is_null($this->ds)) {
             $json = Abricos::CleanGPC('p', 'json', TYPE_STR);

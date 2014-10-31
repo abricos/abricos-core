@@ -2,7 +2,6 @@
 /**
  * Менеджер системного модуля
  * 
- * @version $Id$
  * @package Abricos
  * @subpackage Core
  * @link http://abricos.org
@@ -11,7 +10,7 @@
  * @author Alexander Kuzmin <roosit@abricos.org>
  */
 class Ab_CoreSystemManager extends Ab_ModuleManager {
-	
+
 	/**
 	 * Модуль
 	 * 
