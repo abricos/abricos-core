@@ -11,12 +11,8 @@
  */
 class Ab_CoreSystemModule extends Ab_Module {
 
-    /**
-     * Адрес, на основе которого собрано меню.
-     *
-     * @var Ab_URI
-     */
-    public $adress = null;
+    // TODO: remove
+    private $adress = null;
 
     public static $YUIVersion = "3.14.0";
 
@@ -42,29 +38,26 @@ class Ab_CoreSystemModule extends Ab_Module {
         return $this->_manager;
     }
 
-
     public function GetContentName() {
-        $adress = Abricos::$adress;
-
-        // разрешить страницу для разработчика модуля
-        if ($adress->level >= 1 && $adress->dir[0] == 'develop' && Abricos::$config['Misc']['develop_mode']) {
-            return 'develop';
-        }
-
         switch (Abricos::$pageStatus) {
             case PAGESTATUS_404:
                 return '404';
             case PAGESTATUS_500:
                 return '500';
         }
-        // return 'index';
         // системный модуль не отдает контент
         return '404';
     }
 
+    public function Bos_IsMenu(){
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    // TODO: remove
+    ////////////////////////////////////////////////////////////////////
     private $brickReader = null;
 
-    // TODO: remove
     public function getBrickReader() {
         if (is_null($this->brickReader)) {
             $this->brickReader = new Ab_CoreBrickReader();

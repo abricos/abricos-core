@@ -92,7 +92,7 @@ class Brick {
     /**
      * Менеджер модулей
      *
-     * @var AbricosCoreModuleManager
+     * @var Ab_CoreModuleManager
      */
     public static $modules = null;
 

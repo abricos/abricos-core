@@ -1,0 +1,43 @@
+<!--{widget}-->
+<form id="{i#id}" class="coreconfig">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-md-7">
+                    <h3 class="panel-title">Настройки сайта</h3>
+                </div>
+                <div class="col-md-5">
+                    <div class="btn-toolbar text-right">
+                        <span data-wait="show"><img src="/images/loading.gif"/> Загрузка...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h3>Общие настройки</h3>
+            <div class="form-group">
+                <label>Название сайта</label>
+                <input name="site_name" type="text" class="form-control" data-wait="disable">
+            </div>
+            <div class="form-group">
+                <label>Краткое описание сайта</label>
+                <textarea name="site_title" type="text" class="form-control" data-wait="disable">
+                </textarea>
+            </div>
+            <div class="form-group">
+                <label>EMail администратора</label>
+                <input name="admin_mail" type="text" class="form-control" data-wait="disable">
+            </div>
+            <h3>Стиль сайта</h3>
+
+            <div class="btn-toolbar text-right">
+                <span data-wait="show">
+                    <img src="/images/loading.gif"/> Загрузка...
+                </span>
+                <button type="submit" class="btn btn-default edit-isedit" data-wait="disable">
+                    Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
