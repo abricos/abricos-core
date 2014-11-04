@@ -28,9 +28,27 @@ Component.entryPoint = function(NS){
             this.get('appInstance').coreConfig(function(err, result){
                 this.set('waiting', false);
                 if (!err){
-                    this.set('model', result.coreConfig);
+                    this.renderCoreConfig(result.coreConfig);
                 }
             }, this);
+        },
+        renderCoreConfig: function(model){
+            if (!model){
+                return;
+            }
+
+            var tp = this.template, lst = "",
+                styles = model.get('styles');
+
+            for (var i = 0; i < styles.length; i++){
+                var style = styles[i];
+                lst += tp.replace('option', {id: style, v: style});
+            }
+            Y.Node.one(tp.gel('styles')).setHTML(tp.replace('select', {
+                'name': 'style',
+                'rows': lst
+            }));
+            this.set('model', model);
         },
         onSubmitFormAction: function(){
             this.set('waiting', true);
@@ -47,7 +65,7 @@ Component.entryPoint = function(NS){
                 value: COMPONENT
             },
             templateBlockName: {
-                value: 'widget'
+                value: 'widget,select,option'
             }
         }
     });

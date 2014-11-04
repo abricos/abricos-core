@@ -9,7 +9,12 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin <roosit@abricos.org>
  */
-class Ab_CoreSystemModule extends Ab_Module {
+class SystemModule extends Ab_Module {
+
+    /**
+     * @var SystemModule
+     */
+    public static $instance;
 
     // TODO: remove
     private $adress = null;
@@ -19,6 +24,7 @@ class Ab_CoreSystemModule extends Ab_Module {
     private $_manager = null;
 
     public function __construct() {
+        SystemModule::$instance = $this;
         $this->version = "0.5.6";
         $this->name = "sys";
 
@@ -28,12 +34,12 @@ class Ab_CoreSystemModule extends Ab_Module {
     /**
      * Получить менеджер
      *
-     * @return Ab_CoreSystemManager
+     * @return SystemManager
      */
     public function GetManager() {
         if (is_null($this->_manager)) {
             require_once 'includes/manager.php';
-            $this->_manager = new Ab_CoreSystemManager($this);
+            $this->_manager = new SystemManager($this);
         }
         return $this->_manager;
     }
@@ -130,7 +136,7 @@ class Ab_CoreSystemAction {
  */
 class Ab_CoreSystemPermission extends Ab_UserPermission {
 
-    public function __construct(Ab_CoreSystemModule $module) {
+    public function __construct(SystemModule $module) {
         $defRoles = array(new Ab_UserRole(Ab_CoreSystemAction::ADMIN, Ab_UserGroup::ADMIN));
         parent::__construct($module, $defRoles);
     }
@@ -143,6 +149,6 @@ class Ab_CoreSystemPermission extends Ab_UserPermission {
     }
 }
 
-Abricos::ModuleRegister(new Ab_CoreSystemModule())
+Abricos::ModuleRegister(new SystemModule())
 
 ?>

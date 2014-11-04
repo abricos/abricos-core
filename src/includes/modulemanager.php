@@ -153,6 +153,13 @@ abstract class Ab_Module {
     public function GetManager() {
         return null;
     }
+
+    /**
+     * @return Ab_CorePhraseList
+     */
+    public function GetPhrases(){
+        return Abricos::$phrases->GetList($this->name);
+    }
 }
 
 /**
@@ -210,6 +217,20 @@ abstract class Ab_ModuleManager {
         return "";
     }
 
+    private $_isRolesDisable = false;
+
+    public function IsRolesDisable() {
+        return $this->_isRolesDisable;
+    }
+
+    public function RolesDisable() {
+        $this->_isRolesDisable = true;
+    }
+
+    public function RolesEnable() {
+        $this->_isRolesDisable = false;
+    }
+
     /**
      * Получить значение роли текущего пользователя в политики безопасиности модуля
      *
@@ -231,6 +252,9 @@ abstract class Ab_ModuleManager {
      * @return boolean true действие разрешено
      */
     public function IsRoleEnable($action) {
+        if ($this->IsRolesDisable()) {
+            return true;
+        }
         return $this->GetRoleValue($action) > 0;
     }
 }
@@ -271,8 +295,6 @@ class Ab_CoreModuleManager {
      * @var AbricosDatabase
      */
     public $db = null;
-
-    public $currentMenuId = 9999999;
 
     /**
      * Текущий модуль управления
@@ -327,8 +349,7 @@ class Ab_CoreModuleManager {
                     $row["takelink"] = $link;
                     $mainLink = $row;
                 }
-                if ($name != "sys" && $name != "ajax" && $name != "user"
-                    && count($enmod) > 0 && $modname != $name
+                if ($name != "sys" && $name != "ajax" && $name != "user" && count($enmod) > 0 && $modname != $name
                 ) {
                     $find = false;
                     foreach ($enmod as $key) {
@@ -474,7 +495,7 @@ class Ab_CoreModuleManager {
             return;
         } // downgrade модуля запрещен
 
-        $this->table[$modName] = & $module;
+        $this->table[$modName] = &$module;
 
         if ($cmp == 0) {
             return;

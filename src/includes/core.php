@@ -56,6 +56,11 @@ final class Abricos {
     public static $modules;
 
     /**
+     * @var Ab_CorePhraseManager
+     */
+    public static $phrases;
+
+    /**
      * Идентификатор языка
      *
      * @var string
@@ -73,6 +78,7 @@ final class Abricos {
     public function __construct() {
         Abricos::$adress = new Ab_URI(Ab_URI::fetch_uri());
         Abricos::$inputCleaner = new Ab_CoreInputCleaner();
+        Abricos::$phrases = new Ab_CorePhraseManager();
 
         if (!file_exists(CWD.'/includes/config.php')) {
             die('<strong>Configuration</strong>: includes/config.php does not exist. Please fill out the data in config.new.php and rename it to config.php');
@@ -256,7 +262,7 @@ final class Abricos {
         Brick::$input = Abricos::$inputCleaner;
         Brick::$modules = Abricos::$modules;
         Brick::$builder = new Ab_CoreBrickBuilder();
-        Brick::$style = Brick::$builder->phrase->Get('sys', 'style', 'default');
+        Brick::$style = $modSys->GetPhrases()->Get('style', 'default');
 
         // возможно стиль предопределен в конфиге для этого урла
 

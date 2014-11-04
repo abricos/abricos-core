@@ -21,7 +21,7 @@ $manager = $mod->GetManager();
 $ret = new stdClass();
 $ret->_ds = array();
 
-if (Ab_CoreSystemManager::$instance->IsAdminRole()){ 
+if (SystemManager::$instance->IsAdminRole()){
 	
 	// Первым шагом необходимо выполнить все комманды по добавлению/обновлению таблиц
 	foreach ($ds->ts as $ts){
@@ -31,6 +31,7 @@ if (Ab_CoreSystemManager::$instance->IsAdminRole()){
 			}
 			switch ($ts->nm){
 				case 'config':
+                    /*
 					Brick::$builder->phrase->PreloadByModule($tsrs->p->mod);
 					foreach ($tsrs->r as $r){
 						if ($r->f == 'u' || $r->f == 'a'){
@@ -38,6 +39,7 @@ if (Ab_CoreSystemManager::$instance->IsAdminRole()){
 						}
 					}
 					Brick::$builder->phrase->Save();
+                    /**/
 					break;
 			}
 		}
@@ -59,19 +61,10 @@ if (Ab_CoreSystemManager::$instance->IsAdminRole()){
 			$rows = null;
 			switch ($ts->nm){
 				case 'styles':
-					$rows = array();
-					$dir = dir(CWD."/tt");
-					while (false !== ($entry = $dir->read())) {
-						if ($entry == "." || $entry == ".." || empty($entry) || $entry == "_sys" || $entry == "_my"){ continue; }
-						if (!file_exists(CWD."/tt/".$entry."/main.html")){ continue ;}
-						$row = array();
-						$row['nm'] = $entry;
-						array_push($rows, $row);
-					}
 					break;
 				case 'config':
-					Brick::$builder->phrase->PreloadByModule($tsrs->p->mod);
-					$rows = Brick::$builder->phrase->GetArray($tsrs->p->mod);
+					// Brick::$builder->phrase->PreloadByModule($tsrs->p->mod);
+					// $rows = Brick::$builder->phrase->GetArray($tsrs->p->mod);
 					break;
 				case 'permission_mods':
 					$rows = array();

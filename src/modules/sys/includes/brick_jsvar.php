@@ -27,9 +27,9 @@ if (Abricos::$user->id > 0){
 }
 $param->var['s'] = UserModule::$instance->GetManager()->GetSessionManager()->key;
 
-$template = Brick::$builder->phrase->Get('sys', 'style', 'default');
+$template = SystemModule::$instance->GetPhrases()->Get('style', 'default');
 $param->var['ttname'] = $template;
-$param->var['jsyui'] = Ab_CoreSystemModule::$YUIVersion;
+$param->var['jsyui'] = SystemModule::$YUIVersion;
 
 if (Abricos::$modules->customTakelink){
 	$modsinfo = Abricos::$modules->modulesInfo;

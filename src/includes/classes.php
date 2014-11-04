@@ -11,7 +11,7 @@ class AbricosItem {
     public $id;
 
     public function __construct($d) {
-        $this->id = intval($d['id']);
+        $this->id = $d['id'];
     }
 
     public function ToAJAX() {
@@ -84,7 +84,7 @@ class AbricosList {
     }
 
     /**
-     * @param integer $id
+     * @param mixed $id
      * @return AbricosItem
      */
     public function Get($id) {

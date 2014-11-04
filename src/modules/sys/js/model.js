@@ -9,7 +9,6 @@ Component.requires = {
     yui: ['model', 'model-list']
 };
 Component.entryPoint = function(NS){
-
     var Y = Brick.YUI;
 
     NS.CoreConfig = Y.Base.create('coreConfig', Y.Model, [], {}, {
@@ -23,8 +22,5 @@ Component.entryPoint = function(NS){
             meta_keys: {value: ''},
             meta_desc: {value: ''}
         }
-
     });
-
-
 };

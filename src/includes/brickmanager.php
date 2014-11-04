@@ -167,7 +167,6 @@ class Brick {
  */
 class Ab_CoreBrickBuilder {
 
-
     /**
      * Текущий кирпич.
      *
@@ -238,15 +237,9 @@ class Ab_CoreBrickBuilder {
     private $_usemod = array();
 
     /**
-     * Менеджер фраз
-     *
-     * @var Ab_CorePhrase
+     * @deprecated
      */
-    public $phrase = null;
-
-    public function __construct() {
-        $this->phrase = Ab_CorePhrase::GetInstance();
-    }
+    private $phrase = null;
 
     /**
      * Заносит модуль в {@link $_usemod}
@@ -268,31 +261,31 @@ class Ab_CoreBrickBuilder {
         // загрузить все глобальные параметры кирпичей 
         $this->TakeGlobalParam($brick);
 
-        $this->phrase->Preload($this->_phrase);
+        $sysPhrases = Abricos::GetModule('sys')->GetPhrases();
 
         $this->ExecuteBrick($brick);
         $pbprm = &$brick->parent->param->param;
 
         // Установка метатегов страницы по умолчанию, если они не установлены в процессе компиляции кирпичей
         if (isset($this->_phrase['sys:meta_title'])) {
-            if (isset($pbprm['meta_title']) && !empty($pbprm['meta_title'])) {
+            if (!empty($pbprm['meta_title'])) {
                 $this->_globalVar['meta_title'] = $pbprm['meta_title'];
             } else if (isset($this->_globalVar['meta_title']) && empty($this->_globalVar['meta_title'])) {
-                $this->_globalVar['meta_title'] = $this->phrase->Get('sys', 'meta_title');
+                $this->_globalVar['meta_title'] = $sysPhrases->Get('meta_title');
             }
-            if (isset($pbprm['meta_keys']) && !empty($pbprm['meta_keys'])) {
+            if (!empty($pbprm['meta_keys'])) {
                 $this->_globalVar['meta_keys'] = $pbprm['meta_keys'];
             } else if (isset($this->_globalVar['meta_keys']) && empty($this->_globalVar['meta_keys'])) {
-                $this->_globalVar['meta_keys'] = $this->phrase->Get('sys', 'meta_keys');
+                $this->_globalVar['meta_keys'] = $sysPhrases->Get('meta_keys');
             }
-            if (isset($pbprm['meta_desc']) && !empty($pbprm['meta_desc'])) {
+            if (!empty($pbprm['meta_desc'])) {
                 $this->_globalVar['meta_desc'] = $pbprm['meta_desc'];
             } else if (isset($this->_globalVar['meta_desc']) && empty($this->_globalVar['meta_desc'])) {
-                $this->_globalVar['meta_desc'] = $this->phrase->Get('sys', 'meta_desc');
+                $this->_globalVar['meta_desc'] = $sysPhrases->Get('meta_desc');
             }
         }
         if (isset($this->_globalVar['jsyui'])) {
-            $this->_globalVar['jsyui'] = Ab_CoreSystemModule::$YUIVersion;
+            $this->_globalVar['jsyui'] = SystemModule::$YUIVersion;
         }
 
         // установка версии
@@ -309,7 +302,7 @@ class Ab_CoreBrickBuilder {
 
         $this->PagePrint($brick);
 
-        $this->phrase->Save();
+        Abricos::$phrases->Save();
     }
 
     public function SetGlobalVar($name, $value) {
@@ -339,7 +332,6 @@ class Ab_CoreBrickBuilder {
             array_push($parent->param->module[$brick->owner], $bmod);
         }
         $this->TakeGlobalParam($brick);
-        $this->phrase->Preload($this->_phrase);
 
         if (!is_null($overparam)) {
             if (!empty($overparam['bkvar'])) {
@@ -580,7 +572,7 @@ class Ab_CoreBrickBuilder {
         foreach ($p->phrase as $key => $value) {
             $sa = explode(":", $key);
             if (count($sa) == 2) {
-                $newval = $this->phrase->Get($sa[0], $sa[1], $value);
+                $newval = Abricos::$phrases->GetList($sa[0])->Get($sa[1], $value);
                 $this->SetVar($brick, "[ph]".$key."[/ph]", $newval);
             }
         }
@@ -787,11 +779,14 @@ class Ab_CoreBrickManager {
                 $p->template["owner"] = $ttpl["owner"];
                 $p->template["name"] = $ttpl["name"];
             }
+
+            $sysPhrases = Abricos::GetModule('sys')->GetPhrases();
+
             if (empty($p->template["owner"])) {
-                $towner = Brick::$builder->phrase->Get('sys', 'style', 'default');
+                $towner = $sysPhrases->Get('style', 'default');
                 if (!file_exists(CWD."/tt/".$towner."/main.html")) {
                     $p->template["owner"] = "default";
-                    Brick::$builder->phrase->Set('sys', 'style', 'default');
+                    $sysPhrases->Set('style', 'default');
                 } else {
                     $p->template["owner"] = $towner;
                 }

@@ -23,7 +23,7 @@ class Ab_CoreBrickReader {
     public function __construct() {
         $this->db = Abricos::$db;
         Abricos::GetModule('sys')->GetManager();
-        $this->isAdmin = Ab_CoreSystemManager::$instance->IsAdminRole();
+        $this->isAdmin = SystemManager::$instance->IsAdminRole();
     }
 
     /**

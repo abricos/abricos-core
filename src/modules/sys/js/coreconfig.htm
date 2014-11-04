@@ -14,7 +14,6 @@
             </div>
         </div>
         <div class="panel-body">
-            <h3>Общие настройки</h3>
             <div class="form-group">
                 <label>Название сайта</label>
                 <input name="site_name" type="text" class="form-control" data-wait="disable">
@@ -28,16 +27,44 @@
                 <label>EMail администратора</label>
                 <input name="admin_mail" type="text" class="form-control" data-wait="disable">
             </div>
+
             <h3>Стиль сайта</h3>
 
+            <div class="form-group">
+                <div id="{i#styles}"></div>
+            </div>
+
+            <h3>SEO заголовки по умолчанию</h3>
+
+            <div class="form-group">
+                <label>META Title</label>
+                <input name="meta_title" type="text" class="form-control" data-wait="disable">
+            </div>
+            <div class="form-group">
+                <label>META Keywords</label>
+                <input name="meta_keys" type="text" class="form-control" data-wait="disable">
+            </div>
+            <div class="form-group">
+                <label>META Description</label>
+                <textarea name="meta_desc" type="text" class="form-control" data-wait="disable">
+                </textarea>
+            </div>
+
+            <hr/>
             <div class="btn-toolbar text-right">
                 <span data-wait="show">
                     <img src="/images/loading.gif"/> Загрузка...
                 </span>
-                <button type="submit" class="btn btn-default edit-isedit" data-wait="disable">
+                <button type="submit" class="btn btn-primary edit-isedit" data-wait="disable">
                     Сохранить
                 </button>
             </div>
         </div>
     </div>
 </form>
+
+<!--{select}-->
+<select id="{i#id}" name="{v#name}" class="form-control">{v#rows}</select>
+
+<!--{option}-->
+<option value="{v#id}">{v#v}</option>

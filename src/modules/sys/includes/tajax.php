@@ -2,7 +2,6 @@
 /**
  * Скрипт обработки Ajax запросов новая версия.
  * 
- * @version $Id$
  * @package Abricos
  * @link http://abricos.org
  * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.

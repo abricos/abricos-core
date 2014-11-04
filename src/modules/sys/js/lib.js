@@ -107,7 +107,7 @@ Component.entryPoint = function(NS){
         initializer: function(){
             this.get('initCallback')(null, this);
 
-            this._cacheGroupList = null;
+            this._cacheCoreConfig = null;
         },
         onAJAXError: function(err){
             Brick.mod.widget.notice.show(err.msg);
@@ -116,60 +116,40 @@ Component.entryPoint = function(NS){
             data = data || {};
             var ret = {};
 
-            /*
-            if (data.termsofuse){
-                ret.termsofuse = data.termsofuse;
+            if (data.coreConfig){
+                var coreConfig = new NS.CoreConfig(data.coreConfig);
+                this._cacheCoreConfig = coreConfig;
+                ret.coreConfig = coreConfig;
             }
-            if (data.register){
-                ret.register = data.register;
-            }
-            if (data.users){
-                var d = data.users;
-                var userList = new NS.Admin.UserList({
-                    listConfig: new NS.UserListConfig(d.config),
-                    items: d.list
-                });
-                ret.userList = userList;
-            }
-            if (data.groups){
-                var d = data.groups;
-                var groupList = new NS.Admin.GroupList({
-                    items: d.list
-                });
-                this._cacheGroupList = groupList;
-                ret.groupList = groupList;
-            }
-            /**/
 
             return ret;
         },
         _defaultAJAXCallback: function(err, res, details){
-            var tRes = this._treatAJAXResult(res.data);
+            var tRes = this._treatAJAXResult(res ? res.data : null);
 
             details.callback.apply(details.context, [err, tRes]);
-        }
-        /*,
-        groupList: function(callback, context){
-            if (this._cacheGroupList){
+        },
+        coreConfig: function(callback, context){
+            if (this._cacheCoreConfig){
                 return callback.apply(context, [null, {
-                    groupList: this._cacheGroupList
+                    coreConfig: this._cacheCoreConfig
                 }]);
             }
             this.ajax({
-                'do': 'grouplist'
+                'do': 'coreConfig'
             }, this._defaultAJAXCallback, {
                 arguments: {callback: callback, context: context}
             });
         },
-        groupSave: function(model, callback, context){
+        coreConfigSave: function(model, callback, context){
             this.ajax({
-                'do': 'groupsave',
-                'groupdata': model.toJSON()
+                'do': 'coreConfigSave',
+                'coreConfig': model.toJSON()
             }, this._defaultAJAXCallback, {
                 arguments: {callback: callback, context: context}
             });
         }
-        /**/
+
     };
     NS.AppBase = AppBase;
 

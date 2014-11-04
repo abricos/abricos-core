@@ -1,219 +1,164 @@
 <?php
+
 /**
  * Фраза
- * 
- * @version $Id$
+ *
  * @package Abricos
  * @subpackage Core
  * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
  * @author Alexander Kuzmin <roosit@abricos.org>
  */
-class Ab_CorePhraseItem {
-	public $module = "";
-	public $name = "";
-	public $value = "";
-	
-	/**
-	 * Идентификатор фразы в таблице БД
-	 * @var integer
-	 */
-	public $id = "";
-	
-	/**
-	 * Флаг определяющий является ли фраза новой
-	 * @var bool
-	 */
-	public $isnew = false;
-	
-	/**
-	 * Флаг определяющий была ли изменена фраза
-	 * @var bool
-	 */
-	public $isupdate = false;
-	
-	public function Ab_CorePhraseItem($moduleName, $name, $value){
-		$this->module = $moduleName;
-		$this->name = $name;
-		$this->value = $value;
-	}
-	
-	public function &GetArray(){
-		$ret = array();
-		$ret['id'] = $this->id;
-		$ret['mnm'] = $this->module;
-		$ret['nm'] = $this->name;
-		$ret['ph'] = $this->value;
-		return $ret;
-	}
+class Ab_CorePhraseItem extends AbricosItem {
+
+    public $value = "";
+
+    /**
+     * Является ли фраза новой
+     * @var bool
+     */
+    public $isNew = false;
+
+    /**
+     * Была ли фраза изменена
+     * @var bool
+     */
+    public $isUpdate = false;
+
+    public function __construct($d) {
+        parent::__construct($d);
+        $this->value = trim(strval($d['value']));
+    }
+
+    public function ToAJAX() {
+        $ret = parent::ToAJAX();
+        $ret->value = $this->value;
+        return $ret;
+    }
+
+    public function __toString() {
+        return $this->value;
+    }
+}
+
+class Ab_CorePhraseList extends AbricosList {
+
+    public $modName;
+
+    public $isNew = false;
+    public $isUpdate = false;
+
+    public function __construct($modName) {
+        parent::__construct();
+
+        $this->modName = $modName;
+    }
+
+    /**
+     * @param mixed $name
+     * @return Ab_CorePhraseItem
+     */
+    public function Get($name, $defValue = '') {
+        $item = parent::Get($name);
+
+        if (!empty($item)) {
+            return $item;
+        }
+
+        $readOnly = false;
+        $cfg = Abricos::$config['phrase'];
+        if (!empty($cfg) && !empty($cfg[$this->modName]) && isset($cfg[$this->modName][$name])) {
+
+            $defValue = $cfg[$this->modName][$name];
+            $readOnly = true;
+        }
+
+        $item = new Ab_CorePhraseItem(array(
+            "id" => $name,
+            "value" => $defValue
+        ));
+        if (!$readOnly) {
+            $this->isNew = $item->isNew = true;
+        }
+
+        $this->Add($item);
+
+        return $item;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     * @return Ab_CorePhraseItem
+     */
+    public function Set($name, $value) {
+        $item = $this->Get($name);
+        $value = trim(strval($value));
+        if ($item->value !== $value){
+            $this->isUpdate = $item->isUpdate = $item->value !== $value;
+
+            $item->value = $value;
+        }
+
+        return $item;
+    }
+
 }
 
 /**
  * Менеджер управления фразами
- * 
+ *
  * Загружает запрашиваемые фразы из базы. Если фраза в базе не найден, создает ее
  * из значения по умолчанию.
- *  
+ *
  * @package Abricos
  * @subpackage Core
  */
-class Ab_CorePhrase {
-	
-	private static $_instance = null;
-	
-	/**
-	 * @return Ab_CorePhrase
-	 */
-	public static function GetInstance(){
-		if (is_null(Ab_CorePhrase::$_instance)){
-			Ab_CorePhrase::$_instance = new Ab_CorePhrase();
-		}
-		return Ab_CorePhrase::$_instance;
-	}
-	
-	
-	private $arr = array();
-	
-	/**
-	 * Конструктор
-	 */
-	public function __construct(){
-	}
-	
-	/**
-	 * Возвращает массив загруженных фраз модуля
-	 *
-	 * @param string $module название модуля
-	 */
-	public function &GetArray($module){
-		$ret = array();
-		foreach ($this->arr as $phrase){
-			if ($phrase->module != $module){
-				continue;
-			}
-			array_push($ret, $phrase->GetArray());
-		}
-		return $ret;
-	}
-	
-	/**
-	 * Пакетная загрузка фраз по имени модуля
-	 *
-	 * @param string $module имя модуля
-	 */
-	public function PreloadByModule($module){
-		$db = Abricos::$db;
-		$rows = Ab_CoreQuery::PhraseListByModule($db, $module);
-		$this->_preload($rows);
-		$this->Save();
-	}
-	
-	/**
-	 * Пакетная загрузка фраз. Если фразы не нейдены в базе, то создание их со значениями
-	 * по умолчанию и сохранение
-	 *
-	 * @param array $list список фраз
-	 */
-	public function Preload($list){
-		$db = Abricos::$db;
-		$rows = Ab_CoreQuery::PhraseList($db, $list);
-		$this->_preload($rows);
-		foreach ($list as $key=>$value){
-			$sa = explode(":", $key);
-			if (count($sa) != 2){ continue; }
-			$this->Get($sa[0], $sa[1], $value, false);
-		}
-		$this->Save();
-	}
-	
-	private function _preload($rows){
-		$db = Abricos::$db;
-		while (($row = $db->fetch_array($rows))){
-			$key = $row['mnm'].":".$row['nm'];
-			$phrase = new Ab_CorePhraseItem($row['mnm'], $row['nm'], $row['ph']);
-			$phrase->id = $row['id'];
-			$this->arr[$key] = $phrase;
-		}
-	}
+class Ab_CorePhraseManager {
 
-	/**
-	 * Получить фразу.
-	 * Если фразы в базе нет, то она будет создана со значением $value
-	 *
-	 * @param string $modname
-	 * @param string $name
-	 * @param string $value 
-	 */
-	public function Get($modname, $name, $value = "", $checkindb = true){
-		
-		$cfg = Abricos::$config['phrase'];
-		if (!empty($cfg) && !empty($cfg[$modname]) && isset($cfg[$modname][$name])){
-			return $cfg[$modname][$name];
-		}
-		
-		$phrase = $this->GetPhraseItem($modname, $name, $value, $checkindb);
-		return $phrase->value;
-	}
-	
-	/**
-	 * Получить фразу
-	 * 
-	 * @var string $modname имя модуля
-	 * @var string $name имя фразы
-	 * @var string $value значение по умолчанию 
-	 * @var string $checkindb если true, то загружать фразу из БД
-	 */
-	private function GetPhraseItem($modname, $name, $value = "", $checkindb = true){
-		$key = $modname.":".$name;
-		if (empty($this->arr[$key])){
-			$phrase = null;
-			// возможно эта фраза не была выбрана из БД, проверочный запрос
-			if ($checkindb)
-				$phrase = Ab_CoreQuery::Phrase(Abricos::$db, $modname, $name);
-			if (empty($phrase)){
-				$item = new Ab_CorePhraseItem($modname, $name, $value);
-				$item->isnew = true;
-				$this->arr[$key] = $item;
-			}else{
-				$item = new Ab_CorePhraseItem($modname, $name, $phrase['ph']);
-				$item->id = $phrase['id'];
-				$this->arr[$key] = $item;
-			}
-		}
-		return $this->arr[$key];
-	}
-	
-	public function Set($modname, $name, $value){
-		$phrase = $this->GetPhraseItem($modname, $name, $value);
-		if ($phrase->value != $value){
-			$phrase->value = $value;
-			$phrase->isupdate = true;
-		}
-	}
-	
-	/**
-	 * Сохранение фраз в базу
-	 *
-	 */
-	public function Save(){
-		$arrnew = array();
-		$arrupdate = array();
-		foreach ($this->arr as $phrase){
-			if ($phrase->isnew){
-				array_push($arrnew, $phrase);
-			}else if ($phrase->isupdate){
-				array_push($arrupdate, $phrase);
-			}
-			$phrase->isnew = false;
-			$phrase->isupdate = false;
-		}
-		if (!empty($arrnew)){
-			Ab_CoreQuery::PhraseListAppend(Abricos::$db, $arrnew);
-		}
-		if (!empty($arrupdate)){
-			Ab_CoreQuery::PhraseListUpdate(Abricos::$db, $arrupdate);
-		}
-	}
+    private $_lists = array();
+
+    /**
+     * @param $modName
+     * @return Ab_CorePhraseList
+     */
+    public function GetList($modName) {
+        if (!empty($this->_lists[$modName])) {
+            return $this->_lists[$modName];
+        }
+        $db = Abricos::$db;
+
+        $list = new Ab_CorePhraseList($modName);
+
+        $rows = Ab_CoreQuery::PhraseList($db, $modName);
+        while (($row = $db->fetch_array($rows))) {
+            $list->Add(new Ab_CorePhraseItem($row));
+        }
+
+        return $this->_lists[$modName] = $list;
+    }
+
+    /**
+     * Сохранение фраз в базу
+     */
+    public function Save() {
+        foreach ($this->_lists as $key => $list) {
+            if (!$list->isNew && !$list->isUpdate) {
+                continue;
+            }
+            for ($i = 0; $i < $list->Count(); $i++) {
+                $item = $list->GetByIndex($i);
+                if ($item->isNew) {
+                    Ab_CoreQuery::PhraseAppend(Abricos::$db, $list->modName, $item->id, $item->value);
+                } else if ($item->isUpdate) {
+                    Ab_CoreQuery::PhraseUpdate(Abricos::$db, $list->modName, $item->id, $item->value);
+                }
+                $item->isNew = $item->isUpdate = false;
+            }
+            $list->isNew = $list->isUpdate = false;
+        }
+
+    }
 }
 
 
