@@ -40,14 +40,7 @@ abstract class Ab_Module {
      *
      * @var string
      */
-    public $version = "0.0";
-
-    /**
-     * Ревизия модуля
-     *
-     * @var string
-     */
-    public $revision = "";
+    public $version = "0.0.0";
 
     /**
      * Наименование модуля латинскими буквами и цифрами
@@ -157,7 +150,7 @@ abstract class Ab_Module {
     /**
      * @return Ab_CorePhraseList
      */
-    public function GetPhrases(){
+    public function GetPhrases() {
         return Abricos::$phrases->GetList($this->name);
     }
 }
@@ -269,11 +262,14 @@ abstract class Ab_ModuleManager {
 class Ab_CoreModuleManager {
 
     /**
-     * Массив зарегистрированных модулей
-     *
-     * @var array
+     * @deprecated
      */
-    public $table = array();
+    private $table = array();
+
+    /**
+     * @deprecated
+     */
+    private $modulesInfo = array();
 
     /**
      * Пользовательская настройка работы модулей (из config.php)
@@ -281,20 +277,6 @@ class Ab_CoreModuleManager {
      * @var boolean
      */
     public $customTakelink = false;
-
-    /**
-     * Модули зарегистрированные в БД
-     *
-     * @var array
-     */
-    public $modulesInfo = array();
-
-    /**
-     * Менеджер БД
-     *
-     * @var AbricosDatabase
-     */
-    public $db = null;
 
     /**
      * Текущий модуль управления
@@ -308,20 +290,42 @@ class Ab_CoreModuleManager {
     private $_firstError = false;
 
     /**
+     * @var Ab_ModuleInfoList
+     */
+    public $list;
+
+    /**
      * Конструктор
      *
      * @ignore
      */
     public function __construct() {
-        $this->db = Abricos::$db;
+        $this->list = new Ab_ModuleInfoList();
+
+        $this->FetchModulesInfo();
     }
 
-    /**
-     * Прочитать информации из БД по зарегистрированным модулям
-     */
-    public function FetchModulesInfo() {
-        $db = $this->db;
-        $this->modulesInfo = array();
+    private function AddModuleInfo($d) {
+        $name = $d['name'];
+
+        $file = $this->GetModuleFileName($name);
+        if (!file_exists($file)) {
+            return;
+        }
+
+        $item = $this->list->Get($name);
+        if (empty($item)) {
+            $item = new Ab_ModuleInfo($d);
+            $this->list->Add($item);
+        } else {
+            $item->Update($d);
+        }
+        return $item;
+    }
+
+    private function FetchModulesInfo() {
+        $db = Abricos::$db;
+
         $rows = Ab_CoreQuery::ModuleList($db);
         if ($db->IsError() && !$this->_firstError) { // возникла ошибка, вероятнее всего идет первый запуск движка
             $db->ClearError();
@@ -340,17 +344,17 @@ class Ab_CoreModuleManager {
         $link = $adress->level === 0 ? "__super" : $adress->dir[0];
         $mainLink = null;
         if (!empty($cfg) && count($cfg) > 0 && !empty($link)) {
-            $cfglink = $cfg[$link];
-            $modname = $cfglink["module"];
-            $enmod = is_array($cfglink["enmod"]) > 0 ? $cfglink["enmod"] : array();
-            while (($row = $this->db->fetch_array($rows))) {
+            $cfgLink = $cfg[$link];
+            $modName = $cfgLink["module"];
+            $enmod = is_array($cfgLink["enmod"]) > 0 ? $cfgLink["enmod"] : array();
+            while (($row = $db->fetch_array($rows))) {
                 $name = $row['name'];
-                if ($name == $modname) {
+                if ($name == $modName) {
                     $row["takelink"] = $link;
                     $mainLink = $row;
                 }
-                if ($name != "sys" && $name != "ajax" && $name != "user" && count($enmod) > 0 && $modname != $name
-                ) {
+                if ($name != "sys" && $name != "ajax" && $name != "user" && count($enmod) > 0 && $modName != $name) {
+
                     $find = false;
                     foreach ($enmod as $key) {
                         if ($key == $name) {
@@ -362,32 +366,27 @@ class Ab_CoreModuleManager {
                         continue;
                     }
                 }
-                $file = $this->GetModuleFileName($name);
-                if (file_exists($file)) {
-                    $this->modulesInfo[$name] = $row;
-                }
+                $this->AddModuleInfo($row);
             }
             $this->customTakelink = true;
             if (!is_null($mainLink)) {
-                foreach ($this->modulesInfo as &$row) {
-                    if ($mainLink['name'] != $row['name'] && $mainLink['takelink'] == $row['takelink']) {
-                        $row['takelink'] = '';
+                for ($i = 0; $i < $this->list->Count(); $i++) {
+                    $item = $this->list->GetByIndex($i);
+                    if ($mainLink['name'] != $item->name && $mainLink['takelink'] == $item->takelink) {
+                        $item->takelink = '';
                     }
                 }
             }
         } else {
-            while (($row = $this->db->fetch_array($rows))) {
-                $name = $row['name'];
-                $file = $this->GetModuleFileName($name);
-                if (file_exists($file)) {
-                    $this->modulesInfo[$name] = $row;
-                }
+            while (($row = $db->fetch_array($rows))) {
+                $this->AddModuleInfo($row);
             }
         }
     }
 
     /**
-     * Зарегистрировать в ядре все модули
+     * Зарегистрировать все модули
+     * @return array
      */
     public function RegisterAllModule() {
         // первым регистрируется системный модуль
@@ -405,43 +404,13 @@ class Ab_CoreModuleManager {
             }
             $this->RegisterByName($entry);
         }
+
+        return $this->GetModules();
     }
 
     function GetModuleFileName($name) {
         $name = preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $name);
         return CWD."/modules/".$name."/module.php";
-    }
-
-    /**
-     * Регистрация модуля по имени
-     *
-     * @param string $moduleName
-     * @return Ab_Module
-     */
-    public function RegisterByName($name) {
-        $mod = $this->table[$name];
-
-        if (empty($mod)) {
-            $file = $this->GetModuleFileName($name);
-            if (!file_exists($file)) {
-                return null;
-            }
-            require_once($file);
-            $mod = $this->table[$name];
-            if (!empty($mod)) {
-                // добавить ревизию если есть
-                if ($name == 'sys') {
-                    $revision = CWD."/revision";
-                } else {
-                    $revision = CWD."/modules/".$name."/revision";
-                }
-                if (file_exists($revision)) {
-                    $rev = file_get_contents($revision);
-                    $mod->revision = intval($rev);
-                }
-            }
-        }
-        return $mod;
     }
 
     private function LoadLanguage(Ab_Module $module, $languageid) {
@@ -455,6 +424,28 @@ class Ab_CoreModuleManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Регистрация модуля по имени
+     *
+     * @param string $moduleName
+     * @return Ab_Module
+     */
+    public function RegisterByName($name) {
+        $info = $this->list->Get($name);
+
+        if (!empty($info) && !empty($info->instance)) {
+            return $info->instance;
+        }
+
+        $file = $this->GetModuleFileName($name);
+        if (!file_exists($file)) {
+            return null;
+        }
+        require_once($file);
+        $info = $this->list->Get($name);
+        return $info->instance;
     }
 
     /**
@@ -474,28 +465,25 @@ class Ab_CoreModuleManager {
             }
         }
 
-        /* зарегистрирован ли этот модуль в БД */
-        $info = $this->modulesInfo[$modName];
-
+        $info = $this->list->Get($modName);
         if (empty($info)) {
-            Ab_CoreQuery::ModuleAppend($this->db, $module);
+            Ab_CoreQuery::ModuleAppend(Abricos::$db, $module);
             $this->FetchModulesInfo();
         }
 
-        $info = $this->modulesInfo[$modName];
+        $info = $this->list->Get($modName);
 
-        $serverVersion = $info['version'];
+        $serverVersion = $info->verison;
         $newVersion = $module->version;
 
         require_once 'updatemanager.php';
         $cmp = Ab_UpdateManager::CompareVersion($serverVersion, $newVersion);
 
-
         if ($cmp == -1) {
             return;
         } // downgrade модуля запрещен
 
-        $this->table[$modName] = &$module;
+        $info->instance = $module;
 
         if ($cmp == 0) {
             return;
@@ -507,7 +495,7 @@ class Ab_CoreModuleManager {
         if (file_exists($shema)) {
             require_once($shema);
         }
-        Ab_CoreQuery::ModuleUpdateVersion($this->db, $module);
+        Ab_CoreQuery::ModuleUpdateVersion(Abricos::$db, $module);
         $this->FetchModulesInfo();
 
         Ab_UpdateManager::$current = null;
@@ -529,22 +517,35 @@ class Ab_CoreModuleManager {
         if (empty($name)) {
             return null;
         }
-        $module = $this->table[$name];
-        if (!empty($module)) {
-            return $module;
+        $info = $this->list->Get($name);
+
+        if (!empty($info) && !empty($info->instance)) {
+            return $info->instance;
         }
         /* попытка зарегистрировать модуль */
         $this->RegisterByName($name);
-        $module = $this->table[$name];
-        return $module;
+
+        $info = $this->list->Get($name);
+        if (!empty($info) && !empty($info->instance)) {
+            return $info->instance;
+        }
+        return null;
     }
 
-    /**
-     * Получить список зарегистрированных модулей в ядре
-     */
-    public function &GetModules() {
-        return $this->table;
+    public function GetModules() {
+        $ret = array();
+
+        for ($i = 0; $i < $this->list->Count(); $i++) {
+            $info = $this->list->GetByIndex($i);
+            if (empty($info->instance)) {
+                continue;
+            }
+            $ret[$info->name] = $info->instance;
+        }
+        return $ret;
+
     }
+
 }
 
 ?>

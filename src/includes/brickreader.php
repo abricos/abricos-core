@@ -23,7 +23,7 @@ class Ab_CoreBrickReader {
     public function __construct() {
         $this->db = Abricos::$db;
         Abricos::GetModule('sys')->GetManager();
-        $this->isAdmin = SystemManager::$instance->IsAdminRole();
+        $this->isAdmin = Ab_CoreSystemManager::$instance->IsAdminRole();
     }
 
     /**
@@ -40,7 +40,6 @@ class Ab_CoreBrickReader {
         if (!$this->isAdmin) {
             return;
         }
-        Abricos::$modules->RegisterAllModule();
 
         $brickdb = array();
         $db = Abricos::$db;
@@ -50,7 +49,7 @@ class Ab_CoreBrickReader {
             $brickdb[$row['own'].".".$row['nm']] = $row;
         }
 
-        $mods = Abricos::$modules->GetModules();
+        $mods = Abricos::$modules->RegisterAllModule();
         foreach ($mods as $module) {
             $files = array();
             $files1 = globa(CWD."/modules/".$module->name."/brick/pub_*.html");
@@ -91,7 +90,6 @@ class Ab_CoreBrickReader {
         if (!$this->isAdmin) {
             return;
         }
-        Abricos::$modules->RegisterAllModule();
 
         $brickdb = array();
         $db = Abricos::$db;
@@ -101,7 +99,7 @@ class Ab_CoreBrickReader {
             $brickdb[$row['own'].".".$row['nm']] = $row;
         }
 
-        $mods = Abricos::$modules->GetModules();
+        $mods = Abricos::$modules->RegisterAllModule();
         foreach ($mods as $module) {
             $files = globa(CWD."/modules/".$module->name."/content/*.html");
             foreach ($files as $file) {

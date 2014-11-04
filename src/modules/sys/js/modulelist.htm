@@ -1,0 +1,49 @@
+<!--{widget}-->
+<div id="{i#id}" class="manager">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-md-7">
+                    <h3 class="panel-title">Список групп</h3>
+                </div>
+                <div class="col-md-5">
+                    <div class="btn-toolbar text-right">
+                        <span data-wait="show">
+                            <img src="/images/loading.gif"/> Загрузка...
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="{i#list}"></div>
+        </div>
+    </div>
+</div>
+
+<!--{list}-->
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Название</th>
+        <th>Системное имя</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {v#rows}
+    </tbody>
+</table>
+
+<!--{row}-->
+<tr>
+    <td>{v#id}</td>
+    <td>{v#title}</td>
+    <td>{v#sysname}</td>
+    <td>
+        <button type="button" class="btn btn-default btn-xs" data-click="group-edit" data-id="{v#id}">
+            Править
+        </button>
+    </td>
+</tr>

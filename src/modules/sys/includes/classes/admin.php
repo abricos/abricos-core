@@ -40,7 +40,10 @@ class SystemManager_Admin {
             return null;
         }
 
-        Abricos::$modules->RegisterAllModule();
+        $list = Abricos::$modules->RegisterAllModule();
+        return $list;
+
+        /*
         $modules = Abricos::$modules->GetModules();
         $ret = array();
         foreach ($modules as $name => $mod) {
@@ -50,11 +53,11 @@ class SystemManager_Admin {
             array_push($ret, array(
                 "id" => $name,
                 "nm" => $name,
-                "vs" => $mod->version,
-                "rv" => $mod->revision
+                "vs" => $mod->version
             ));
         }
         return $ret;
+        /**/
     }
 
 

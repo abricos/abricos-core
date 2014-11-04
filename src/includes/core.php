@@ -112,12 +112,10 @@ final class Abricos {
         $modules = new Ab_CoreModuleManager();
         Abricos::$modules = $modules;
 
-        $modules->FetchModulesInfo();
+        $modSysInfo = $modules->list->Get('sys');
 
-        $modsinfo = $modules->modulesInfo;
-
-        // временное решение в связи с переходом на платформу Abricos с CMSBrick
-        if (!empty($modsinfo['sys']) && empty($modsinfo['sys']['installdate'])) {
+        // TODO: временное решение в связи с переходом с CMSBrick на Abricos
+        if (empty($modSysInfo->installDate)) {
             Ab_CoreQuery::UpdateToAbricosPackage($db);
         }
         $modules->RegisterByName('sys');
@@ -130,7 +128,8 @@ final class Abricos {
         $dir = dir($smoddir);
         while (($sDir = $dir->read()) !== false) {
             if ($sDir != '.' && $sDir != '..' && is_dir($smoddir.$sDir)) {
-                if (!$modsinfo[$sDir]) { // модуль явно не зарегистрирован
+                $modInfo = $modules->list->Get($sDir);
+                if (empty($modInfo)) { // модуль явно не зарегистрирован
                     // а модуль ли это?
                     if (file_exists($smoddir.$sDir."/module.php")) { // чтото похожее на него
                         // регистрируем его в системе
@@ -197,21 +196,22 @@ final class Abricos {
             $modman = $modSys;
             $contentName = 'tajax';
         } else {
-            $flagDevelopPage = $adress->level >= 2 && $adress->dir[1] == 'develop'
-                && Abricos::$config['Misc']['develop_mode'];
+            $flagDevelopPage = $adress->level >= 2 && $adress->dir[1] == 'develop' && Abricos::$config['Misc']['develop_mode'];
 
-            foreach ($modules->modulesInfo as $key => $info) {
+            for ($i = 0; $i < $modules->list->Count(); $i++) {
+                $info = $modules->list->GetByIndex($i);
+
                 // разрешить страницу для разработчика модуля
                 if ($flagDevelopPage) {
-                    if ($adress->dir[0] != $key) {
+                    if ($adress->dir[0] != $info->name) {
                         continue;
                     }
                 } else {
-                    if ($adress->dir[0] != $info['takelink'] || empty($info['takelink'])) {
+                    if ($adress->dir[0] != $info->takelink || empty($info->takelink)) {
                         continue;
                     }
                 }
-                $modman = $modules->RegisterByName($key);
+                $modman = $modules->RegisterByName($info->name);
                 if (empty($modman)) {
                     Abricos::SetPageStatus(PAGESTATUS_500);
                 }

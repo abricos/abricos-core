@@ -291,8 +291,7 @@ class Ab_CoreBrickBuilder {
         // установка версии
         if (isset($this->_globalVar['version'])) {
             $modSys = Abricos::GetModule('sys');
-            $version = $modSys->version.(!empty($modSys->revision) ? "-r".$modSys->revision : "");
-            $this->_globalVar['version'] = $version;
+            $this->_globalVar['version'] = $modSys->version;
         }
         if (isset($this->_globalVar['host'])) {
             $this->_globalVar['host'] = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];
