@@ -325,7 +325,7 @@ class Ab_CoreBrickReader {
 
                     $arr = explode(".", $key);
 
-                    $lang = & $mod->lang;
+                    $lang = & $mod->GetI18n();
                     $ph = null;
                     foreach ($arr as $s) {
 

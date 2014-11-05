@@ -29,7 +29,7 @@ class Ab_ModuleInfo extends AbricosItem {
         $ret = parent::ToAJAX();
         $ret->name = $this->name;
         $ret->takelink = $this->takelink;
-        $ret->version = $this->verison;
+        $ret->version = $this->version;
         $ret->installdate = $this->installDate;
         $ret->updatedate = $this->updateDate;
         return $ret;

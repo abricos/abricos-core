@@ -62,13 +62,6 @@ abstract class Ab_Module {
     public $takelink = "";
 
     /**
-     * Локализация - массив фраз
-     *
-     * @var mixed
-     */
-    public $lang = array();
-
-    /**
      * CSS по умолчанию (имя файла в папке css модуля).
      */
     public $defaultCSS = "";
@@ -87,6 +80,36 @@ abstract class Ab_Module {
      * @var array
      */
     public $depends = array();
+
+    /**
+     * TODO: remove
+     * @deprecated
+     */
+    private $lang;
+
+    private $_i18n = null;
+
+    public function GetI18n() {
+        if (is_array($this->_i18n)) {
+            return $this->_i18n;
+        }
+        $this->_i18n = array();
+
+        $file = CWD."/modules/".$this->name."/i18n/".Abricos::$LNG.".php";
+        if (!file_exists($file)) {
+            // TODO: remove
+            $file = CWD."/modules/".$this->name."/language/".Abricos::$LNG.".php";
+        }
+
+        if (file_exists($file)) {
+            $arr = include($file);
+            if (is_array($arr)) {
+                $this->_i18n = $arr;
+            }
+        }
+
+        return $this->_i18n;
+    }
 
     /**
      * Когда управление по формированию ответа сервера переходит модулю,
@@ -262,11 +285,15 @@ abstract class Ab_ModuleManager {
 class Ab_CoreModuleManager {
 
     /**
+     * TODO: remove
+     *
      * @deprecated
      */
     private $table = array();
 
     /**
+     * TODO: remove
+     *
      * @deprecated
      */
     private $modulesInfo = array();
@@ -386,6 +413,7 @@ class Ab_CoreModuleManager {
 
     /**
      * Зарегистрировать все модули
+     *
      * @return array
      */
     public function RegisterAllModule() {
@@ -413,23 +441,10 @@ class Ab_CoreModuleManager {
         return CWD."/modules/".$name."/module.php";
     }
 
-    private function LoadLanguage(Ab_Module $module, $languageid) {
-        // загрузка языка
-        $langfile = CWD."/modules/".$module->name."/language/".$languageid.".php";
-        if (file_exists($langfile)) {
-            $arr = include($langfile);
-            if (is_array($arr)) {
-                $module->lang = $arr;
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Регистрация модуля по имени
      *
-     * @param string $moduleName
+     * @param string $name
      * @return Ab_Module
      */
     public function RegisterByName($name) {
@@ -454,16 +469,19 @@ class Ab_CoreModuleManager {
      * @param Ab_Module $module
      */
     public function Register(Ab_Module $module) {
-        $modName = $module->name;
         if (empty($module)) {
             return;
         }
 
+        $modName = $module->name;
+
+        /*
         if (!$this->LoadLanguage($module, LNG)) { // загрузка фраз языка
             if (LNG != 'ru') { // загрузка не удалась, попытка загрузить русский язык по умолчанию
                 $this->LoadLanguage($module, 'ru');
             }
         }
+        /**/
 
         $info = $this->list->Get($modName);
         if (empty($info)) {
@@ -473,7 +491,7 @@ class Ab_CoreModuleManager {
 
         $info = $this->list->Get($modName);
 
-        $serverVersion = $info->verison;
+        $serverVersion = $info->version;
         $newVersion = $module->version;
 
         require_once 'updatemanager.php';
@@ -532,6 +550,19 @@ class Ab_CoreModuleManager {
         return null;
     }
 
+    /**
+     * @return Ab_Module|null
+     */
+    public function GetSuperModule() {
+        for ($i = 0; $i < $this->list->Count(); $i++) {
+            $info = $this->list->GetByIndex($i);
+            if ($info->takelink === '__super') {
+                return $this->RegisterByName($info->name);
+            }
+        }
+        return null;
+    }
+
     public function GetModules() {
         $ret = array();
 
@@ -543,9 +574,7 @@ class Ab_CoreModuleManager {
             $ret[$info->name] = $info->instance;
         }
         return $ret;
-
     }
-
 }
 
 ?>

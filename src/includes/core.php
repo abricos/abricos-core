@@ -226,12 +226,7 @@ final class Abricos {
                 }
             }
             if (is_null($modman)) {
-                foreach ($modules->modulesInfo as $key => $info) {
-                    if ($info['takelink'] == '__super') {
-                        $modman = $modules->RegisterByName($key);
-                        break;
-                    }
-                }
+                $modman = $modules->GetSuperModule();
             }
             if (is_null($modman)) {
                 $modman = $modSys;

@@ -55,18 +55,10 @@ class Ab_UpdateManager {
 
     private $_isInstall = null;
 
-    /**
-     * Конструктор
-     *
-     * @param Ab_Module $module
-     * @param Array $info
-     * @ignore
-     */
-
     public function __construct($module, Ab_ModuleInfo $info) {
         $this->module = $module;
         $this->modinfo = $info;
-        $this->serverVersion = $info->verison;
+        $this->serverVersion = $info->version;
     }
 
     /**
