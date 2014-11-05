@@ -121,11 +121,11 @@ class AbricosListConfig {
         $this->limit = intval($d['limit']);
     }
 
-    public function SetTotal($total){
+    public function SetTotal($total) {
         $this->_total = intval($total);
     }
 
-    public function GetTotal(){
+    public function GetTotal() {
         return $this->_total;
     }
 

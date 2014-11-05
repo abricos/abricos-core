@@ -318,6 +318,7 @@ class Ab_CoreBrickReader {
         if (is_array($lngs) && is_array($lngs[0]) && count($lngs[0]) > 0) {
             $mod = Abricos::GetModule($modname);
             if (!empty($mod)) {
+                $lang = $mod->GetI18n();
 
                 foreach ($lngs[0] as $value) {
                     $key = str_replace("{#", "", $value);
@@ -325,7 +326,6 @@ class Ab_CoreBrickReader {
 
                     $arr = explode(".", $key);
 
-                    $lang = & $mod->GetI18n();
                     $ph = null;
                     foreach ($arr as $s) {
 
