@@ -122,6 +122,14 @@ Component.entryPoint = function(NS){
                 ret.coreConfig = coreConfig;
             }
 
+            if (data.moduleList){
+                var moduleList = new NS.ModuleList({
+                    items: data.moduleList.list
+                });
+                this._cacheModuleList = moduleList;
+                ret.moduleList = moduleList;
+            }
+
             return ret;
         },
         _defaultAJAXCallback: function(err, res, details){
@@ -148,8 +156,19 @@ Component.entryPoint = function(NS){
             }, this._defaultAJAXCallback, {
                 arguments: {callback: callback, context: context}
             });
+        },
+        moduleList: function(callback, context){
+            if (this._cacheModuleList){
+                return callback.apply(context, [null, {
+                    moduleList: this._cacheModuleList
+                }]);
+            }
+            this.ajax({
+                'do': 'moduleList'
+            }, this._defaultAJAXCallback, {
+                arguments: {callback: callback, context: context}
+            });
         }
-
     };
     NS.AppBase = AppBase;
 

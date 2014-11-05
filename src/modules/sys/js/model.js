@@ -23,4 +23,19 @@ Component.entryPoint = function(NS){
             meta_desc: {value: ''}
         }
     });
+
+    NS.Module = Y.Base.create('module', Y.Model, [], {}, {
+        ATTRS: {
+            name: {value: ''},
+            takelink: {value: ''},
+            version: {value: ''},
+            installdate: {value: 0},
+            updatedate: {value: 0}
+        }
+    });
+
+    NS.ModuleList = Y.Base.create('moduleList', Y.ModelList, [], {
+        model: NS.Module
+    });
+
 };

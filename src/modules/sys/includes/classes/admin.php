@@ -30,34 +30,21 @@ class SystemManager_Admin {
                 return $this->CoreConfigToAJAX();
             case "coreConfigSave":
                 return $this->CoreConfigSaveToAJAX($d->coreConfig);
+            case "moduleList":
+                return $this->ModuleListToAJAX();
         }
         return null;
     }
 
 
-    public function ModuleList() {
+    public function ModuleListToAJAX() {
         if (!$this->IsAdminRole()) {
-            return null;
+            return 403;
         }
-
-        $list = Abricos::$modules->RegisterAllModule();
-        return $list;
-
-        /*
-        $modules = Abricos::$modules->GetModules();
-        $ret = array();
-        foreach ($modules as $name => $mod) {
-            if ($name == 'user' || $name == 'ajax') {
-                continue;
-            }
-            array_push($ret, array(
-                "id" => $name,
-                "nm" => $name,
-                "vs" => $mod->version
-            ));
-        }
+        Abricos::$modules->RegisterAllModule();
+        $ret = new stdClass();
+        $ret->moduleList = Abricos::$modules->list->ToAJAX();
         return $ret;
-        /**/
     }
 
 
@@ -111,7 +98,7 @@ class SystemManager_Admin {
         return $ret;
     }
 
-    public function CoreConfigSaveToAJAX($d){
+    public function CoreConfigSaveToAJAX($d) {
         if (!$this->IsAdminRole()) {
             return null;
         }

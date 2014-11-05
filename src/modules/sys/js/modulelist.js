@@ -39,6 +39,10 @@ Component.entryPoint = function(NS){
                 var attrs = group.toJSON();
 
                 lst += tp.replace('row', [
+                    {
+                        installdate: Brick.dateExt.convert(attrs.installdate),
+                        updatedate: Brick.dateExt.convert(attrs.updatedate)
+                    },
                     attrs
                 ]);
             });
