@@ -1,6 +1,9 @@
 <?php
 return array(
     "title" => "Ядро платформы",
+    'roles' => array(
+        '50' => 'Администратор'
+    ),
     "bosmenu" => array(
         "config" => "Настройки сайта"
     ),
