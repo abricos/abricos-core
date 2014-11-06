@@ -1,5 +1,6 @@
 <?php
 return array(
+    "title" => "Ядро платформы",
     "bosmenu" => array(
         "config" => "Настройки сайта"
     ),

@@ -26,6 +26,7 @@ Component.entryPoint = function(NS){
 
     NS.Module = Y.Base.create('module', Y.Model, [], {}, {
         ATTRS: {
+            title: {value: ''},
             name: {value: ''},
             takelink: {value: ''},
             version: {value: ''},
