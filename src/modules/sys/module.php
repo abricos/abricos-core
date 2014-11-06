@@ -55,7 +55,7 @@ class SystemModule extends Ab_Module {
         return '404';
     }
 
-    public function Bos_IsMenu(){
+    public function Bos_IsMenu() {
         return true;
     }
 
@@ -72,6 +72,7 @@ class SystemModule extends Ab_Module {
     }
 
     public $ds = null;
+
     // TODO: remove
     public function getDataSet() {
         if (is_null($this->ds)) {
@@ -137,7 +138,9 @@ class Ab_CoreSystemAction {
 class Ab_CoreSystemPermission extends Ab_UserPermission {
 
     public function __construct(SystemModule $module) {
-        $defRoles = array(new Ab_UserRole(Ab_CoreSystemAction::ADMIN, Ab_UserGroup::ADMIN));
+        $defRoles = array(
+            new Ab_UserRole(Ab_CoreSystemAction::ADMIN, Ab_UserGroup::ADMIN)
+        );
         parent::__construct($module, $defRoles);
     }
 
@@ -145,7 +148,9 @@ class Ab_CoreSystemPermission extends Ab_UserPermission {
      * Получить роли
      */
     public function GetRoles() {
-        return array(Ab_CoreSystemAction::ADMIN => $this->CheckAction(Ab_CoreSystemAction::ADMIN));
+        return array(
+            Ab_CoreSystemAction::ADMIN => $this->CheckAction(Ab_CoreSystemAction::ADMIN)
+        );
     }
 }
 

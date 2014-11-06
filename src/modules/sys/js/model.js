@@ -31,7 +31,8 @@ Component.entryPoint = function(NS){
             takelink: {value: ''},
             version: {value: ''},
             installdate: {value: 0},
-            updatedate: {value: 0}
+            updatedate: {value: 0},
+            roles: {value: []}
         }
     });
 

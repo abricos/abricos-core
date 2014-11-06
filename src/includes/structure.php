@@ -25,6 +25,16 @@ class Ab_ModuleInfo extends AbricosItem {
         $this->updateDate = intval($d['updatedate']);
     }
 
+    /**
+     * @return Ab_Module
+     */
+    public function GetInstance() {
+        if (empty($this->instance)) {
+            Abricos::GetModule($this->name);
+        }
+        return $this->instance;
+    }
+
     private $_title = null;
 
     public function GetTitle() {
@@ -33,14 +43,38 @@ class Ab_ModuleInfo extends AbricosItem {
         }
         $this->_title = $this->name;
 
-        if (empty($this->instance)) {
-            Abricos::GetModule($this->name);
-        }
-        $i18n = $this->instance->GetI18n();
+        $instance = $this->GetInstance();
+        $i18n = $instance->GetI18n();
         if (!empty($i18n['title'])) {
             $this->_title = $i18n['title'];
         }
         return $this->_title;
+    }
+
+    private $_roles = null;
+
+    public function GetRoles() {
+        if (!empty($this->_roles)) {
+            return $this->_roles;
+        }
+        $this->_roles = array();
+        $instance = $this->GetInstance();
+        if (empty($instance->permission)){
+            return $this->_roles;
+        }
+        $roles = $instance->permission->GetRoles();
+
+        $i18n = $instance->GetI18n();
+        if (is_array($roles)){
+            foreach ($roles as $action => $role){
+                $this->_roles[$action] = $action;
+                if (!empty($i18n['roles']) && !empty($i18n['roles'][$action])){
+                    $this->_roles[$action] = $i18n['roles'][$action];
+                }
+            }
+        }
+
+        return $this->_roles;
     }
 
     public function ToAJAX() {
@@ -51,6 +85,8 @@ class Ab_ModuleInfo extends AbricosItem {
         $ret->version = $this->version;
         $ret->installdate = $this->installDate;
         $ret->updatedate = $this->updateDate;
+        $ret->roles = $this->GetRoles();
+
         return $ret;
     }
 
