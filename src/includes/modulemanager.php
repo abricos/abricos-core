@@ -475,14 +475,6 @@ class Ab_CoreModuleManager {
 
         $modName = $module->name;
 
-        /*
-        if (!$this->LoadLanguage($module, LNG)) { // загрузка фраз языка
-            if (LNG != 'ru') { // загрузка не удалась, попытка загрузить русский язык по умолчанию
-                $this->LoadLanguage($module, 'ru');
-            }
-        }
-        /**/
-
         $info = $this->list->Get($modName);
         if (empty($info)) {
             Ab_CoreQuery::ModuleAppend(Abricos::$db, $module);

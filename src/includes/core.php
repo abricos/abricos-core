@@ -115,7 +115,7 @@ final class Abricos {
         $modSysInfo = $modules->list->Get('sys');
 
         // TODO: временное решение в связи с переходом с CMSBrick на Abricos
-        if (empty($modSysInfo->installDate)) {
+        if (!empty($modSysInfo) && empty($modSysInfo->installDate)) {
             Ab_CoreQuery::UpdateToAbricosPackage($db);
         }
         $modules->RegisterByName('sys');
