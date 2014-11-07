@@ -3,7 +3,7 @@
 */
 
 /**
- * Ядро Abricos! User Interface Library
+ * Ядро Abricos
  * @module Sys
  * @namespace
  * @title Brick Global
@@ -160,14 +160,6 @@ Brick.namespace = function() {
 	return o;
 };
 
-Brick.console = function(obj){
-	var console = window.console;
-	if (!console){ return; }
-	if (typeof console['log'] != 'function'){ return; }
-	console.log(obj);
-};
-
-
 /**
  * Вернуть True, если объект определен, иначе False
  * <p><strong>Usage:</strong><br>
@@ -230,33 +222,6 @@ Brick.cleanScript = function(el){
 	return s;
 };
 
-/**
- * Удалить все дочернии элементы Dom элемента
- * @method elClear
- * @static
- * @param {Object} el Dom элемент
- */
-Brick.elClear = function(el){
-	while(el.childNodes.length){
-		el.removeChild(el.childNodes[0]);
-	}
-};
-
-/**
- * Вернуть новый Dom элемент, если в параметрах указан элемент контейнер,
- * то поместить этот элемент в него.
- * @method elCreate
- * @static
- * @param {String} tag Имя типа элемента, например 'DIV'
- * @param {Object} parent (optional) Элемент контейнер
- */
-Brick.elCreate = function(tag, parent){
-	var el = document.createElement(tag);
-	if (typeof parent != 'undefined'){
-		parent.appendChild(el);
-	}
-	return el;
-};
 
 /**
  * Выполнить JavaScript text
@@ -1463,24 +1428,6 @@ Brick.namespace('util');
 	};
 
 })();
-
-
-Brick.byteToString = function(byte){
-	var ret = byte;
-	var px = "";
-	if (byte < 1024){
-		ret = byte;
-		px = "б";
-	}else if (byte < 1024*1024){
-		ret = Math.round((byte/1024)*100)/100;
-		px = 'кб';
-	}else{
-		ret = Math.round((byte/1024/1024)*100)/100;
-		px = 'мб';
-	}
-	return ret+' '+px;
-};
-
 
 Brick.dateExt = function(){
 	var z = function(num){
