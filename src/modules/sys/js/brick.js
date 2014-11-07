@@ -172,7 +172,7 @@ Brick.namespace = function() {
  */
 Brick.objectExists = function(namespace){
 	var obj = Brick.convertToObject(namespace);
-	return !YAHOO.lang.isNull(obj);
+	return !Y.Lang.isNull(obj);
 };
 
 /**
@@ -764,21 +764,85 @@ Brick.namespace('util');
 		},
 		fire: function(){
 			delete fireElements[this.id];
-			if (YAHOO.lang.isString(this.method)){
+			if (Y.Lang.isString(this.method)){
 				var ffn = Brick.mod[this.moduleName]['API'][this.method];
-				if (!YAHOO.lang.isFunction(ffn)){ return; }
+				if (!Y.Lang.isFunction(ffn)){ return; }
 				ffn(this.param);
-			}else if (YAHOO.lang.isFunction(this.method)){
+			}else if (Y.Lang.isFunction(this.method)){
 				this.method(this.param);
 			}
-			if (YAHOO.lang.isFunction(this.func)){
+			if (Y.Lang.isFunction(this.func)){
 				this.func();
 			}
 		}
 	};
 
+    /**
+     * @deprecated
+     */
 	Brick.f = Brick.Component.API.fire;
+    /**
+     * @deprecated
+     */
 	Brick.ff = Brick.Component.API.fireFunction;
+
+    Brick.use = function(mName, cName, callback, context){
+        callback = callback || function(){};
+        if (!Brick.componentExists(mName, cName)){
+            var err = {
+                code: 404,
+                msg: 'Component of Module not found'
+            };
+            return callback.apply(context, [err, null]);
+        }
+        Brick.ff(mName, cName, function(){
+            var ns = Brick.mod[mName];
+            return callback.apply(context, [null, ns]);
+        });
+    };
+
+    Brick.app = function(mName, callback, context){
+        callback = callback || function(){};
+        Brick.use(mName, 'lib', function(err, NS){
+            if (err){
+                return callback.apply(context, [err, null]);
+            }
+            if (!Y.Lang.isFunction(NS.initApp)){
+                err = {
+                    code: 500,
+                    msg: 'App of Module not found'
+                };
+                return callback.apply(context, [err, null]);
+            }
+            NS.initApp(function(err, appInstance){
+                if (err){
+                    return callback.apply(context, [err, null]);
+                }
+                return callback.apply(context, [null, appInstance]);
+            });
+        });
+    };
+
+    Brick.appFunc = function(mName, funcName){
+        var args = Array.prototype.slice.call(arguments),
+            nargs = [];
+        for (var i=2;i<args.length;i++){
+            nargs[nargs.length] = args[i];
+        }
+        Brick.app(mName, function(err, appInstance){
+            if (err){
+                throw err;
+            }
+            var func = appInstance[funcName];
+            if (!Y.Lang.isFunction(func)){
+                throw {
+                    code: 510,
+                    msg: 'Function in App of Module not found'
+                };
+            }
+            func.apply(appInstance, nargs);
+        });
+    };
 
 	/**
 	 * Шаблон компонента.
@@ -1357,48 +1421,6 @@ Brick.namespace('util');
 //типизированный AJAX
 (function(){
 
-	var querycount = 0;
-	var uniqurl = function(){
-		querycount++;
-		return (querycount++) + (new Date().getTime());
-	};
-
-	var complete = function(module, cfg, o, failure){
-		if (!YAHOO.lang.isFunction(cfg['event'])){
-			return;
-		}
-		cfg['type'] = cfg['type'] || 'json';
-		failure = failure || false;
-
-		var data;
-		try{
-			if (cfg['type'] == 'json'){
-				var json = YAHOO.lang.JSON.parse(o.responseText);
-				data = json.data || null;
-			}else{
-				o.jsonParseError = true;
-			}
-		}catch(e){
-			data = null;
-			o.jsonParseError = true;
-		}
-		o.responseJSON = o.data = data;
-		cfg['event'](o);
-	};
-
-	var sendPost = function(module, cfg){
-		cfg = cfg || {};
-
-		var post = "data="+encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['data'] || {}));
-		YAHOO.util.Connect.asyncRequest("POST",
-			'/tajax/' + module + '/' + uniqurl()+'/', {
-				success: function(o){complete(module, cfg, o, false);},
-				failure: function(o){complete(module, cfg, o, true);}
-			},
-			post
-		);
-	};
-
 	/**
 	 * Отправить типизированный запрос серверу.
 	 * Принцип работы: клиент формирует запрос с параметрами определенному модулю,
@@ -1414,17 +1436,27 @@ Brick.namespace('util');
 	 * @static
 	 * @param {String} module Имя модуля
 	 * @param {Object} cfg Параметры запроса
+     * @deprecated
 	 */
 	Brick.ajax = function(module, cfg){
-		if (typeof YAHOO.util.Connect == 'undefined' || typeof YAHOO.lang.JSON == 'undefined'){
-			Brick.Loader.add({
-			    yahoo: ['connection', 'json'],
-			    onSuccess: function() {sendPost(module, cfg);},
-				onFailure: function(o){complete(module, cfg, o, true);}
-			});
-		}else{
-			sendPost(module, cfg);
-		}
+        cfg = cfg || {};
+        Brick.use('sys', 'lib', function(err, NS){
+
+            var App = Y.Base.create('app', Y.Base, [
+                NS.AJAX
+            ], {}, {
+                ATTRS: {
+                    moduleName: {
+                        value: module
+                    }
+                }
+            });
+
+            new App({moduleName: module}).ajax(cfg['data'] || {}, function(err, res){
+                var callback = cfg['event'] || function(){};
+                callback(res);
+            });
+        });
 	};
 
 })();
