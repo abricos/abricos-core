@@ -844,6 +844,22 @@ Brick.namespace('util');
         });
     };
 
+    Brick.AppRoles = function(mName, mRoles){
+        this.load = function(callback, context){
+            Brick.appFunc('user', 'userCurrent', function(err, res){
+                var user = res.userCurrent;
+
+                for (var nRole in mRoles){
+                    this[nRole] = user.isRoleEnable(mName, mRoles[nRole]);
+                }
+
+                if (Y.Lang.isFunction(callback)){
+                    callback.call(context, this);
+                }
+            }, this);
+        }
+    };
+
 	/**
 	 * Шаблон компонента.
 	 *
