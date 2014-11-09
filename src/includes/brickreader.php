@@ -107,8 +107,7 @@ class Ab_CoreBrickReader {
                 $key = $module->name.".".$bname;
                 if (empty($brickdb[$key])) {
                     $brick = Ab_CoreBrickReader::ReadBrickFromFile($file, $module->name);
-                    $brickid = Ab_CoreQuery::BrickAppendFromParser($this->db, $module->name, $bname, $brick->body,
-                        Brick::BRICKTYPE_CONTENT, $brick->hash);
+                    $brickid = Ab_CoreQuery::BrickAppendFromParser($this->db, $module->name, $bname, $brick->body, Brick::BRICKTYPE_CONTENT, $brick->hash);
                     Ab_CoreQuery::BrickParamAppendFromParser($this->db, $brickid, $brick->param);
                 } else {
                     $bk = $brickdb[$key];
@@ -318,11 +317,11 @@ class Ab_CoreBrickReader {
         if (is_array($lngs) && is_array($lngs[0]) && count($lngs[0]) > 0) {
             $mod = Abricos::GetModule($modname);
             if (!empty($mod)) {
-                $lang = $mod->GetI18n();
-
                 foreach ($lngs[0] as $value) {
                     $key = str_replace("{#", "", $value);
                     $key = str_replace("}", "", $key);
+
+                    $lang = $mod->GetI18n();
 
                     $arr = explode(".", $key);
 
@@ -330,7 +329,7 @@ class Ab_CoreBrickReader {
                     foreach ($arr as $s) {
 
                         if (is_array($lang[$s])) {
-                            $lang = & $lang[$s];
+                            $lang = &$lang[$s];
                         } else if (is_string($lang[$s])) {
                             $ph = $lang[$s];
                             break;
@@ -435,13 +434,13 @@ class Ab_CoreBrickReader {
         $oData = Ab_CoreBrickReader::ReadBrickFromFile($partPath, $modname);
 
         if (is_array($oData->param->param)) {
-            $oP = & $oData->param->param;
+            $oP = &$oData->param->param;
             foreach ($oP as $name => $key) {
                 $ret->param->param[$name] = $key;
             }
         }
         if (is_array($oData->param->var)) {
-            $oP = & $oData->param->var;
+            $oP = &$oData->param->var;
             foreach ($oP as $name => $key) {
                 $ret->param->var[$name] = $key;
             }
@@ -456,8 +455,7 @@ class Ab_CoreBrickReader {
         $pattern = "#\[".$name."\](.+?)\[/".$name."\]#is";
         while (true) {
             $mathes = array();
-            if (preg_match($pattern, $text, $mathes) == 0)
-                break;
+            if (preg_match($pattern, $text, $mathes) == 0) break;
 
             $array[$mathes[1]] = trim($mathes[1]);
 
@@ -475,8 +473,7 @@ class Ab_CoreBrickReader {
         while (true) {
             $mathes = array();
 
-            if (preg_match($pattern, $text, $mathes) == 0)
-                break;
+            if (preg_match($pattern, $text, $mathes) == 0) break;
 
             $array[$mathes[1]] = trim($mathes[2]);
 

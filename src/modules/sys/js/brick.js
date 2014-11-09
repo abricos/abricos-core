@@ -845,19 +845,44 @@ Brick.namespace('util');
     };
 
     Brick.AppRoles = function(mName, mRoles){
+
+        Brick.AppRoles.instances[mName] = this;
+
+        this._isLoadRoles = false;
+
+        this._setRoles = function(user){
+            for (var nRole in mRoles){
+                this[nRole] = user ? user.isRoleEnable(mName, mRoles[nRole]) : false;
+            }
+        };
+
         this.load = function(callback, context){
             Brick.appFunc('user', 'userCurrent', function(err, res){
-                var user = res.userCurrent;
+                this._isLoadRoles = true;
 
-                for (var nRole in mRoles){
-                    this[nRole] = user.isRoleEnable(mName, mRoles[nRole]);
-                }
+                this._setRoles(res.userCurrent);
 
                 if (Y.Lang.isFunction(callback)){
                     callback.call(context, this);
                 }
             }, this);
         }
+    };
+
+    Brick.AppRoles.instances = {};
+
+    /**
+     * @deprecated
+     * @param modName
+     * @param action
+     * @returns {boolean}
+     */
+    Brick.AppRoles.check = function(mName, action){
+        var NSUser = Brick.mod.user;
+        if (!NSUser || !NSUser.appInstance || !NSUser.appInstance._cacheUserCurrent){
+            return false;
+        }
+        return NSUser.appInstance._cacheUserCurrent.isRoleEnable(mName, action);
     };
 
 	/**
