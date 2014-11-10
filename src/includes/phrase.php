@@ -15,15 +15,24 @@ class Ab_CorePhraseItem extends AbricosItem {
 
     /**
      * Является ли фраза новой
+     *
      * @var bool
      */
     public $isNew = false;
 
     /**
      * Была ли фраза изменена
+     *
      * @var bool
      */
     public $isUpdate = false;
+
+    /**
+     * Производилась ли проверка на перегрузку фразу глобальный конфигом (includes/config.php)
+     *
+     * @var bool
+     */
+    public $isCheckOver = false;
 
     public function __construct($d) {
         parent::__construct($d);
@@ -61,27 +70,34 @@ class Ab_CorePhraseList extends AbricosList {
     public function Get($name, $defValue = '') {
         $item = parent::Get($name);
 
-        if (!empty($item)) {
+        if (!empty($item) && $item->isCheckOver) {
             return $item;
         }
+        $mName = $this->modName;
 
         $readOnly = false;
         $cfg = Abricos::$config['phrase'];
-        if (!empty($cfg) && !empty($cfg[$this->modName]) && isset($cfg[$this->modName][$name])) {
 
-            $defValue = $cfg[$this->modName][$name];
+        if (!empty($cfg) && !empty($cfg[$mName]) && isset($cfg[$mName][$name])) {
+            $defValue = $cfg[$mName][$name];
             $readOnly = true;
+            if (!empty($item)){
+                $item->value = $defValue;
+            }
         }
 
-        $item = new Ab_CorePhraseItem(array(
-            "id" => $name,
-            "value" => $defValue
-        ));
-        if (!$readOnly) {
-            $this->isNew = $item->isNew = true;
+        if (empty($item)) {
+            $item = new Ab_CorePhraseItem(array(
+                "id" => $name,
+                "value" => $defValue
+            ));
+            if (!$readOnly) {
+                $this->isNew = $item->isNew = true;
+            }
+            $this->Add($item);
         }
 
-        $this->Add($item);
+        $item->isCheckOver = true;
 
         return $item;
     }
@@ -94,7 +110,7 @@ class Ab_CorePhraseList extends AbricosList {
     public function Set($name, $value) {
         $item = $this->Get($name);
         $value = trim(strval($value));
-        if ($item->value !== $value){
+        if ($item->value !== $value) {
             $this->isUpdate = $item->isUpdate = $item->value !== $value;
 
             $item->value = $value;

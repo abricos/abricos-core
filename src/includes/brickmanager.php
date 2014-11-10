@@ -271,17 +271,17 @@ class Ab_CoreBrickBuilder {
             if (!empty($pbprm['meta_title'])) {
                 $this->_globalVar['meta_title'] = $pbprm['meta_title'];
             } else if (isset($this->_globalVar['meta_title']) && empty($this->_globalVar['meta_title'])) {
-                $this->_globalVar['meta_title'] = $sysPhrases->Get('meta_title');
+                $this->_globalVar['meta_title'] = $sysPhrases->Get('meta_title')->value;
             }
             if (!empty($pbprm['meta_keys'])) {
                 $this->_globalVar['meta_keys'] = $pbprm['meta_keys'];
             } else if (isset($this->_globalVar['meta_keys']) && empty($this->_globalVar['meta_keys'])) {
-                $this->_globalVar['meta_keys'] = $sysPhrases->Get('meta_keys');
+                $this->_globalVar['meta_keys'] = $sysPhrases->Get('meta_keys')->value;
             }
             if (!empty($pbprm['meta_desc'])) {
                 $this->_globalVar['meta_desc'] = $pbprm['meta_desc'];
             } else if (isset($this->_globalVar['meta_desc']) && empty($this->_globalVar['meta_desc'])) {
-                $this->_globalVar['meta_desc'] = $sysPhrases->Get('meta_desc');
+                $this->_globalVar['meta_desc'] = $sysPhrases->Get('meta_desc')->value;
             }
         }
         if (isset($this->_globalVar['jsyui'])) {
@@ -571,7 +571,7 @@ class Ab_CoreBrickBuilder {
         foreach ($p->phrase as $key => $value) {
             $sa = explode(":", $key);
             if (count($sa) == 2) {
-                $newval = Abricos::$phrases->GetList($sa[0])->Get($sa[1], $value);
+                $newval = Abricos::$phrases->GetList($sa[0])->Get($sa[1], $value)->value;
                 $this->SetVar($brick, "[ph]".$key."[/ph]", $newval);
             }
         }
