@@ -482,6 +482,9 @@ class Ab_CoreModuleManager {
         }
 
         $info = $this->list->Get($modName);
+        if (Abricos::$db->error > 0){
+            die(Abricos::$db->errorText);
+        }
 
         $serverVersion = $info->version;
         $newVersion = $module->version;
