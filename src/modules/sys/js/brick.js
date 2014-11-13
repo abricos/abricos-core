@@ -64,8 +64,8 @@ Brick.env.lib = {
 	 * @property yui
 	 * @type String
 	 */
-	yui: '3.17.0',
-    aui: '3.0.0pr2'
+	yui: '3.18.0',
+    aui: '3.0.0'
 };
 
 /**
