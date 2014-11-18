@@ -32,12 +32,15 @@ $param->var['ttname'] = $template;
 $param->var['jsyui'] = SystemModule::$YUIVersion;
 
 if (Abricos::$modules->customTakelink){
+    // TODO: remove
+    /*
 	$modsinfo = Abricos::$modules->modulesInfo;
 	$arr = array();
 	foreach ($modsinfo as $key => $value){
 		array_push($arr, "'".$key."'");
 	}
 	$param->var['enmod'] = implode($arr, ',');
+    /**/
 }
 
 if ($param->param['fullcssforie'] == 'true' && is_browser('ie')){
