@@ -13,13 +13,13 @@
 $adress = Abricos::$adress;
 $p_module = $adress->dir[1];
 $mod = Abricos::GetModule($p_module);
-$sdata = Abricos::CleanGPC('p', 'data', TYPE_STR);
+$pData = Abricos::CleanGPC('p', 'data', TYPE_STR);
 
 $brick = Brick::$builder->brick;
-if (empty($sdata)){
+if (empty($pData)){
 	$data = new stdClass(); 
 }else{
-	$data = json_decode($sdata);
+	$data = json_decode($pData);
 }
 $result = new stdClass();
 if (empty($mod)){
