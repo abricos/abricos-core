@@ -57,12 +57,12 @@ class Ab_CoreBrickReader {
 
             if (!empty($files1)) {
                 foreach ($files1 as $file) {
-                    array_push($files, $file);
+                    $files[] = $file;
                 }
             }
             if (!empty($files2)) {
                 foreach ($files2 as $file) {
-                    array_push($files, $file);
+                    $files[] = $file;
                 }
             }
             foreach ($files as $file) {
@@ -214,7 +214,7 @@ class Ab_CoreBrickReader {
                     if (count($inparam) > 0) {
                         $bmod->param = $inparam;
                     }
-                    array_push($param->module[$p['nm']], $bmod);
+                    $param->module[$p['nm']][] = $bmod;
                     break;
                 case Brick::BRICKPRM_PARAM:
                     if (!is_array($param->param[$p['nm']])) {
@@ -247,7 +247,7 @@ class Ab_CoreBrickReader {
             }
         }
         if (!$find) {
-            array_push($arr, $val);
+            $arr[] = $val;
         }
     }
 
@@ -345,7 +345,7 @@ class Ab_CoreBrickReader {
         $pattern = "#<!--\[\*\](.+?)\[\*\]-->#is";
         $mathes = array();
         preg_match($pattern, $filebody, $mathes);
-        $param = $mathes[1];
+        $param = isset($mathes[1]) ? $mathes[1] : '';
 
         $ret->hash = "";
         if (file_exists($file)) {
@@ -370,7 +370,7 @@ class Ab_CoreBrickReader {
         // например: [mod=mymod]mybrick1|p1=mystr|p2=10,mybrick2[/mod]
         $arr = Ab_CoreBrickReader::BrickParseVar($param, "mod");
         foreach ($arr as $key => $value) {
-            if (!is_array($p->module[$key])) {
+            if (!array_key_exists($key, $p->module)){
                 $p->module[$key] = array();
             }
 
@@ -392,7 +392,7 @@ class Ab_CoreBrickReader {
                 if (count($inparam) > 0) {
                     $bmod->param = $inparam;
                 }
-                array_push($p->module[$key], $bmod);
+                $p->module[$key][] = $bmod;
             }
         }
 

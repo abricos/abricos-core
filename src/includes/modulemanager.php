@@ -83,6 +83,7 @@ abstract class Ab_Module {
 
     /**
      * TODO: remove
+     *
      * @deprecated
      */
     private $lang;
@@ -225,8 +226,10 @@ abstract class Ab_ModuleManager {
         $this->module = $module;
         $this->db = Abricos::$db;
 
-        $this->user = Abricos::$user;
-        $this->userid = Abricos::$user->id;
+        if ($module->name !== 'user') {
+            $this->user = Abricos::$user;
+            $this->userid = Abricos::$user->id;
+        }
     }
 
     public function AJAX($data) {
@@ -366,7 +369,7 @@ class Ab_CoreModuleManager {
         }
         $this->_firstError = true;
 
-        $cfg = Abricos::$config["Takelink"];
+        $cfg = isset(Abricos::$config["Takelink"]) ? Abricos::$config["Takelink"] : '';
         $adress = Abricos::$adress;
         $link = $adress->level === 0 ? "__super" : $adress->dir[0];
         $mainLink = null;
@@ -482,7 +485,7 @@ class Ab_CoreModuleManager {
         }
 
         $info = $this->list->Get($modName);
-        if (Abricos::$db->error > 0){
+        if (Abricos::$db->error > 0) {
             die(Abricos::$db->errorText);
         }
 

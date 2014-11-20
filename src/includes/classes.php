@@ -21,92 +21,6 @@ class AbricosItem {
     }
 }
 
-class AbricosList {
-
-    /**
-     * @var AbricosListConfig
-     */
-    public $config;
-
-    public $classConfig = AbricosListConfig;
-
-    protected $_list = array();
-    protected $_map = array();
-    protected $_ids = array();
-
-    protected $isCheckDouble = false;
-
-    public function __construct($config = null) {
-        $this->_list = array();
-        $this->_map = array();
-        if (empty($config)) {
-            $config = new $this->classConfig();
-        }
-        $this->config = $config;
-    }
-
-    public function Add($item) {
-        if (empty($item)) {
-            return;
-        }
-
-        if ($this->isCheckDouble) {
-            $checkItem = $this->Get($item->id);
-            if (!empty($checkItem)) {
-                return;
-            }
-        }
-
-        $index = count($this->_list);
-        $this->_list[$index] = $item;
-        $this->_map[$item->id] = $index;
-
-        array_push($this->_ids, $item->id);
-    }
-
-    /**
-     * Массив идентификаторов
-     */
-    public function Ids() {
-        return $this->_ids;
-    }
-
-    public function Count() {
-        return count($this->_list);
-    }
-
-    /**
-     * @param integer $index
-     * @return AbricosItem
-     */
-    public function GetByIndex($index) {
-        return $this->_list[$index];
-    }
-
-    /**
-     * @param mixed $id
-     * @return AbricosItem
-     */
-    public function Get($id) {
-        $index = $this->_map[$id];
-        return $this->_list[$index];
-    }
-
-    public function ToAJAX() {
-        $list = array();
-        $count = $this->Count();
-        for ($i = 0; $i < $count; $i++) {
-            array_push($list, $this->GetByIndex($i)->ToAJAX());
-        }
-
-        $ret = new stdClass();
-        $ret->list = $list;
-        $ret->config = $this->config->ToAJAX();
-
-        return $ret;
-    }
-}
-
 class AbricosListConfig {
     public $page = 1;
     public $limit = 0;
@@ -139,6 +53,95 @@ class AbricosListConfig {
 
     public function GetFrom() {
         return ($this->page - 1) * $this->limit;
+    }
+}
+
+class AbricosList {
+
+    /**
+     * @var AbricosListConfig
+     */
+    public $config;
+
+    public $classConfig = 'AbricosListConfig';
+
+    protected $_list = array();
+    protected $_map = array();
+    protected $_ids = array();
+
+    protected $isCheckDouble = false;
+
+    public function __construct($config = null) {
+        $this->_list = array();
+        $this->_map = array();
+        if (empty($config)) {
+            $config = new $this->classConfig();
+        }
+        $this->config = $config;
+    }
+
+    public function Add($item) {
+        if (empty($item)) {
+            return;
+        }
+
+        if ($this->isCheckDouble) {
+            $checkItem = $this->Get($item->id);
+            if (!empty($checkItem)) {
+                return;
+            }
+        }
+
+        $index = count($this->_list);
+        $this->_list[$index] = $item;
+        $this->_map[$item->id] = $index;
+
+        $this->_ids[] = $item->id;
+    }
+
+    /**
+     * Массив идентификаторов
+     */
+    public function Ids() {
+        return $this->_ids;
+    }
+
+    public function Count() {
+        return count($this->_list);
+    }
+
+    /**
+     * @param integer $index
+     * @return AbricosItem
+     */
+    public function GetByIndex($index) {
+        return $this->_list[$index];
+    }
+
+    /**
+     * @param mixed $id
+     * @return AbricosItem || null
+     */
+    public function Get($id) {
+        if (!array_key_exists($id, $this->_map)) {
+            return null;
+        }
+        $index = $this->_map[$id];
+        return $this->_list[$index];
+    }
+
+    public function ToAJAX() {
+        $list = array();
+        $count = $this->Count();
+        for ($i = 0; $i < $count; $i++) {
+            $list[] = $this->GetByIndex($i)->ToAJAX();
+        }
+
+        $ret = new stdClass();
+        $ret->list = $list;
+        $ret->config = $this->config->ToAJAX();
+
+        return $ret;
     }
 }
 

@@ -62,7 +62,7 @@ class SystemManager_Admin {
             if (!file_exists(CWD."/tt/".$entry."/main.html")) {
                 continue;
             }
-            array_push($rows, $entry);
+            $rows[] = $entry;
         }
 
         return $rows;

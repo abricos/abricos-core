@@ -133,11 +133,11 @@ class Ab_UpdateManager {
         $arr = explode(".", $version);
         $retarr = array();
         foreach ($arr as $s) {
-            array_push($retarr, Ab_UpdateManager::str2int($s));
+            $retarr[] = Ab_UpdateManager::str2int($s);
         }
         $count = count($retarr);
         for ($i = $count; $i < 7; $i++) {
-            array_push($retarr, 0);
+            $retarr[] = 0;
         }
         return $retarr;
     }

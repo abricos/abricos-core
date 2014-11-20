@@ -54,9 +54,9 @@ if ($libType == 'sys') {
     $newFiles = array();
     foreach ($files as $file) {
         if ($module == "_template") {
-            array_push($newFiles, '/tt/'.$templateName.'/jsmod/'.$file);
+            $newFiles[] = '/tt/'.$templateName.'/jsmod/'.$file;
         } else {
-            array_push($newFiles, '/modules/'.$module.'/js/'.$file);
+            $newFiles[] = '/modules/'.$module.'/js/'.$file;
         }
     }
     $files = $newFiles;

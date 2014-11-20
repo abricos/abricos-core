@@ -106,7 +106,7 @@ class Ab_CoreJSCFile {
     public function readLangs() {
         $ret = array();
         foreach ($this->fileLangs as $fileLang) {
-            array_push($ret, $this->read($fileLang));
+            $ret[] = $this->read($fileLang);
         }
         return $ret;
     }

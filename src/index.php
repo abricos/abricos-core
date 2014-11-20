@@ -51,8 +51,26 @@ if (!file_exists(PATH_CONFIGURATION.DS.'config.php') || filesize(PATH_CONFIGURAT
     exit;
 }
 
-error_reporting(E_ALL);
-// ini_set('display_errors', 1);
+if (!file_exists(PATH_CONFIGURATION.DS.'config.php')) {
+    die('<strong>Configuration</strong>: includes/config.php does not exist. Please fill out the data in config.new.php and rename it to config.php');
+}
+$config = array();
+include(PATH_CONFIGURATION.DS.'config.php');
+
+if (!array_key_exists('Misc', $config)) {
+    $config['Misc'] = array();
+}
+if (!array_key_exists('develop_mode', $config['Misc'])) {
+    $config['Misc']['develop_mode'] = false;
+}
+if ($config['Misc']['develop_mode']) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    error_reporting(E_ALL & ~E_NOTICE);
+    ini_set('display_errors', 0);
+}
+
 
 define("DEBUG", true);
 define('THIS_SCRIPT', 'index');
@@ -99,7 +117,7 @@ require_once('includes/brickmanager.php');
 require_once('includes/brickreader.php');
 require_once('includes/phrase.php');
 
-$core = new Abricos();
+$core = new Abricos($config);
 
 if (Abricos::$db->IsError()) {
     echo(Abricos::$db->errorText);

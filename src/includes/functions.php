@@ -52,6 +52,7 @@ function verify_link(&$link) {
 }
 
 function is_browser($browser, $version = 0){
+    // TODO: update
 	static $is;
 	if (!is_array($is))	{
 		$useragent = strtolower($_SERVER['HTTP_USER_AGENT']);
@@ -125,7 +126,7 @@ function is_browser($browser, $version = 0){
 			# Mozilla/5.0 (X11; U; Linux 2.4.3-20mdk i586; en-US; rv:0.9.1) Gecko/20010611
 		if (strpos($useragent, 'gecko') !== false AND !$is['safari'] AND !$is['konqueror']) {
 			preg_match('#gecko/(\d+)#', $useragent, $regs);
-			$is['mozilla'] = $regs[1];
+			$is['mozilla'] = isset($regs[1]) ? $regs[1] : false;
 
 			// detect firebird / firefox
 				# Mozilla/5.0 (Windows; U; WinNT4.0; en-US; rv:1.3a) Gecko/20021207 Phoenix/0.5

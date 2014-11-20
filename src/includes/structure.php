@@ -19,6 +19,12 @@ class Ab_ModuleInfo extends AbricosItem {
     }
 
     public function Update($d) {
+        $d = array_merge(array(
+            'takelink' => '',
+            'version' => '',
+            'installdate' => 0,
+            'updatedate' => 0
+        ), $d);
         $this->takelink = strval($d['takelink']);
         $this->version = strval($d['version']);
         $this->installDate = intval($d['installdate']);
@@ -59,16 +65,16 @@ class Ab_ModuleInfo extends AbricosItem {
         }
         $this->_roles = array();
         $instance = $this->GetInstance();
-        if (empty($instance->permission)){
+        if (empty($instance->permission)) {
             return $this->_roles;
         }
         $roles = $instance->permission->GetRoles();
 
         $i18n = $instance->GetI18n();
-        if (is_array($roles)){
-            foreach ($roles as $action => $role){
+        if (is_array($roles)) {
+            foreach ($roles as $action => $role) {
                 $this->_roles[$action] = $action;
-                if (!empty($i18n['roles']) && !empty($i18n['roles'][$action])){
+                if (!empty($i18n['roles']) && !empty($i18n['roles'][$action])) {
                     $this->_roles[$action] = $i18n['roles'][$action];
                 }
             }

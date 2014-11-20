@@ -26,6 +26,9 @@ if (empty($mod)){
 	// TODO: Отправить в header код ошибки 500
 	// $result->error = 500;
 }else{
+    if (!property_exists($data, 'do')){
+        $data->do = '';
+    }
 	$result->data = $mod->GetManager()->AJAX($data);
 }
 $brick->content = json_encode($result);

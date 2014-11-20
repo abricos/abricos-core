@@ -227,41 +227,41 @@ class Ab_CoreQuery {
 
         $insert = array();
         foreach ($param->var as $key => $value) {
-            array_push($insert, "(".Brick::BRICKPRM_VAR.", '".bkstr($key)."', '".bkstr($value)."', ".$brickid.")");
+            $insert[] = "(".Brick::BRICKPRM_VAR.", '".bkstr($key)."', '".bkstr($value)."', ".$brickid.")";
         }
         foreach ($param->gvar as $key => $value) {
-            array_push($insert, "(".Brick::BRICKPRM_GLOBALVAR.", '".bkstr($key)."', '".bkstr($value)."', ".$brickid.")");
+            $insert[] = "(".Brick::BRICKPRM_GLOBALVAR.", '".bkstr($key)."', '".bkstr($value)."', ".$brickid.")";
         }
         foreach ($param->module as $key => $value) {
             foreach ($value as $obj) {
                 $arr = array($obj->name);
                 if (is_array($obj->param)) {
                     foreach ($obj->param as $pname => $pvalue) {
-                        array_push($arr, $pname.'='.$pvalue);
+                        $arr[] = $pname.'='.$pvalue;
                     }
                 }
-                array_push($insert, "(".Brick::BRICKPRM_MODULE.", '".bkstr($key)."', '".bkstr(implode("|", $arr))."', ".$brickid.")");
+                $insert[] = "(".Brick::BRICKPRM_MODULE.", '".bkstr($key)."', '".bkstr(implode("|", $arr))."', ".$brickid.")";
             }
         }
         if (!empty($param->template)) {
-            array_push($insert, "(".Brick::BRICKPRM_TEMPLATE.", '".bkstr($param->template['name'])."', '".bkstr($param->template['owner'])."', ".$brickid.")");
+            $insert[] = "(".Brick::BRICKPRM_TEMPLATE.", '".bkstr($param->template['name'])."', '".bkstr($param->template['owner'])."', ".$brickid.")";
         }
         foreach ($param->phrase as $key => $value) {        // фразы
-            array_push($insert, "(".Brick::BRICKPRM_PHRASE.", '".bkstr($key)."', '".bkstr($value)."', ".$brickid.")");
+            $insert[] = "(".Brick::BRICKPRM_PHRASE.", '".bkstr($key)."', '".bkstr($value)."', ".$brickid.")";
         }
         foreach ($param->script as $value) {    // скрипты
-            array_push($insert, "(".Brick::BRICKPRM_SCRIPT.", '', '".bkstr($value)."', ".$brickid.")");
+            $insert[] = "(".Brick::BRICKPRM_SCRIPT.", '', '".bkstr($value)."', ".$brickid.")";
         }
         foreach ($param->jsmod as $key => $value) { // JavaScript модули
             foreach ($value as $brick) {
-                array_push($insert, "(".Brick::BRICKPRM_JSMOD.",'".bkstr($key)."','".bkstr($brick)."',".$brickid.")");
+                $insert[] = "(".Brick::BRICKPRM_JSMOD.",'".bkstr($key)."','".bkstr($brick)."',".$brickid.")";
             }
         }
         foreach ($param->jsfile as $value) {    // JavaScript файлы
-            array_push($insert, "(".Brick::BRICKPRM_JSFILE.", '', '".bkstr($value)."', ".$brickid.")");
+            $insert[] = "(".Brick::BRICKPRM_JSFILE.", '', '".bkstr($value)."', ".$brickid.")";
         }
         foreach ($param->css as $value) {    // CSS файлы
-            array_push($insert, "(".Brick::BRICKPRM_CSS.", '', '".bkstr($value)."', ".$brickid.")");
+            $insert[] = "(".Brick::BRICKPRM_CSS.", '', '".bkstr($value)."', ".$brickid.")";
         }
 
         if (empty($insert)) {

@@ -322,13 +322,13 @@ class Ab_CoreBrickBuilder {
         $this->SetUseModule($module->name);
 
         if (!empty($parent)) {
-            array_push($parent->child, $brick);
-            if (!is_array($parent->param->module[$brick->owner])) {
+            $parent->child[] = $brick;
+            if (!isset($parent->param->module[$brick->owner])) {
                 $parent->param->module[$brick->owner] = array();
             }
             $bmod = new stdClass();
             $bmod->name = $name;
-            array_push($parent->param->module[$brick->owner], $bmod);
+            $parent->param->module[$brick->owner][] = $bmod;
         }
         $this->TakeGlobalParam($brick);
 
@@ -361,6 +361,9 @@ class Ab_CoreBrickBuilder {
      * @param string $file имя файла
      */
     public function AddJSModule($moduleName, $file) {
+        if (!isset($this->_jsmod[$moduleName])){
+            $this->_jsmod[$moduleName] = array();
+        }
         $this->_jsmod[$moduleName][$file] = true;
     }
 
@@ -451,7 +454,7 @@ class Ab_CoreBrickBuilder {
             foreach ($brick->child as $cbrick) {
                 if ($cbrick->owner != $modName
                     || $cbrick->name != $modBrickName
-                    || ($cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)
+                    || (isset($cbrick->param->param['id']) && $cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)
                 ) {
                     continue;
                 }
@@ -508,9 +511,9 @@ class Ab_CoreBrickBuilder {
             foreach ($this->_jsmod as $key => $mod) {
                 $files = array();
                 foreach ($mod as $file => $value) {
-                    array_push($files, "'".$file."'");
+                    $files[] = "'".$file."'";
                 }
-                array_push($list, "{name:'".$key."',files:[".implode(',', $files)."]}");
+                $list[] = "{name:'".$key."',files:[".implode(',', $files)."]}";
             }
             $brick->param->var['js'] = "<script language='JavaScript' type='text/javascript' charset='utf-8'>Brick.Loader.add({mod:[".implode(',', $list)."]})</script>";
             $brick->param->var['ttowner'] = $brick->owner;
@@ -699,7 +702,7 @@ class Ab_CoreBrickManager {
 
         // кеш, применим только к шаблону
         if ($brickType == Brick::BRICKTYPE_TEMPLATE) {
-            if (Abricos::$config['Misc']['brick_cache']) {
+            if (array_key_exists('brick_cache', Abricos::$config['Misc']) && Abricos::$config['Misc']['brick_cache']) {
                 $time = TIMENOW - 5 * 360;
                 $cache = Ab_CoreQuery::Cache($db, $owner, $brickName);
                 if (empty($cache) || $cache['ud'] < $time) {
@@ -793,16 +796,19 @@ class Ab_CoreBrickManager {
                 }
             }
             $childBrick = $this->BuildOutput($p->template["owner"], $p->template['name'], Brick::BRICKTYPE_TEMPLATE, $brick);
-            array_push($brick->child, $childBrick);
+            $brick->child[] = $childBrick;
         }
         if (!empty($p->module)) {
             foreach ($p->module as $key => $value) {
                 foreach ($value as $obj) {
+                    if (!property_exists($obj, 'param')){
+                        $obj->param = false;
+                    }
                     $childBrick = $this->BuildOutput($key, $obj->name, Brick::BRICKTYPE_BRICK, $brick, $obj->param);
                     if (is_null($childBrick)) {
                         continue;
                     }
-                    array_push($brick->child, $childBrick);
+                    $brick->child[] = $childBrick;
                 }
             }
         }
@@ -1039,12 +1045,17 @@ class Ab_CoreCustomBrickManager {
             if (!is_array($this->params[$k1])) {
                 $this->params[$k1] = array();
             }
-            array_push($this->params[$k1], $row);
+            $this->params[$k1][] = $row;
         }
     }
 
     public function GetBrick($owner, $name, $type) {
-        return $this->bricks[$owner.$name.$type];
+        $key = $owner.$name.$type;
+        if (!array_key_exists($key, $this->bricks)){
+            return null;
+        }
+
+        return $this->bricks[$key];
     }
 
     public function GetParam($brickType, $brickOwner, $brickName) {

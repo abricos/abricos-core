@@ -94,7 +94,7 @@ class SystemModule extends Ab_Module {
         $db = Abricos::$db;
         $count = $db->num_fields($result);
         for ($i = 0; $i < $count; $i++) {
-            array_push($arr, $db->field_name($result, $i));
+            $arr[] = $db->field_name($result, $i);
         }
         return $arr;
     }
@@ -108,7 +108,7 @@ class SystemModule extends Ab_Module {
     public function &rowsToObj($rows) {
         $arr = array();
         while (($row = Abricos::$db->fetch_array($rows))) {
-            array_push($arr, $this->rowToObj($row));
+            $arr[] = $this->rowToObj($row);
         }
         return $arr;
     }

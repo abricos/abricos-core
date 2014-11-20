@@ -75,16 +75,14 @@ final class Abricos {
     public static $DOMAIN = '';
 
 
-    public function __construct() {
+    public function __construct(&$config) {
         Abricos::$adress = new Ab_URI(Ab_URI::fetch_uri());
         Abricos::$inputCleaner = new Ab_CoreInputCleaner();
         Abricos::$phrases = new Ab_CorePhraseManager();
 
-        if (!file_exists(CWD.'/includes/config.php')) {
-            die('<strong>Configuration</strong>: includes/config.php does not exist. Please fill out the data in config.new.php and rename it to config.php');
+        if (!isset($config['module'])){
+            $config['module'] = array();
         }
-        $config = array();
-        include(CWD.'/includes/config.php');
 
         if (!isset($config['JsonDB']['use']) || !$config['JsonDB']['use']) {
             $config['JsonDB']['password'] = TIMENOW;
@@ -100,7 +98,7 @@ final class Abricos {
         define('LNG', $config['Misc']['language']);
         Abricos::$LNG = $config['Misc']['language'];
 
-        Abricos::$DOMAIN = $config['Misc']['domain'];
+        Abricos::$DOMAIN = isset($config['Misc']['domain']) ? $config['Misc']['domain'] : '';
 
         $db = new Ab_DatabaseMySql($config['Database']['tableprefix']);
         $db->connect($config['Database']['dbname'], $config['Server']['servername'], $config['Server']['port'], $config['Server']['username'], $config['Server']['password']);
@@ -327,7 +325,7 @@ final class Abricos {
             if ($childbrick->type == Brick::BRICKTYPE_TEMPLATE) {
                 $template = $childbrick;
             } else {
-                array_push($newChildren, $childbrick);
+                $newChildren[] = $childbrick;
             }
         }
 
@@ -337,10 +335,9 @@ final class Abricos {
             exit;
         }
 
-
         Brick::$builder->template = $template;
         $brick->child = $newChildren;
-        array_push($template->child, $brick);
+        $template->child[] = $brick;
 
         Brick::$builder->Compile($template);
     }
