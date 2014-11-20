@@ -247,7 +247,7 @@ class Ab_CoreBrickBuilder {
      * @param string $modname имя модуля
      */
     private function SetUseModule($modname) {
-        if ($this->_usemod[$modname]) {
+        if (array_key_exists($modname, $this->_usemod) && $this->_usemod[$modname]) {
             return;
         }
         $this->_usemod[$modname] = true;
@@ -471,7 +471,7 @@ class Ab_CoreBrickBuilder {
                 // TODO: необходимо добавить настройку, не выводить пустое значение, если нет кирпича модуля, но он заявлен в кирпиче родителя
             }
         }
-        print substr($content, $position, strlen($content) - $posiiton);
+        print substr($content, $position, strlen($content) - $position);
     }
 
     private function FetchCSSModVars() {
@@ -549,10 +549,11 @@ class Ab_CoreBrickBuilder {
             }
 
             // добавление css файлов
+            $sCSS = "";
             foreach ($this->_cssfile as $value) {
-                $brick->param->var['css'] .= "<link href='".$value."' type='text/css' rel='stylesheet' />\n";
+                $sCSS .= "<link href='".$value."' type='text/css' rel='stylesheet' />\n";
             }
-            $this->_globalVar['css'] = $brick->param->var['css'];
+            $this->_globalVar['css'] = $brick->param->var['css'] = $sCSS;
         }
 
         foreach ($brick->child as $childbrick) {
@@ -686,6 +687,7 @@ class Ab_CoreBrickManager {
         $cache = null;
         $db = Abricos::$db;
         $recache = false;
+        $brick = null;
 
         // Если это кирпичь модуля, то необходимо проверить наличие модуля в системе
         if ($brickType == Brick::BRICKTYPE_BRICK) {
@@ -1046,15 +1048,13 @@ class Ab_CoreCustomBrickManager {
     }
 
     public function GetParam($brickType, $brickOwner, $brickName) {
-        $brick = $this->GetParams($brickOwner, $brickName, $brickType);
-        if (empty($brick)) {
-            return null;
-        }
-        return $brick;
+        return $this->GetParams($brickOwner, $brickName, $brickType);
     }
 
     public function GetParams($brickType, $brickOwner, $brickName) {
-        return $this->params[$brickOwner.$brickName.$brickType];
+        $key = $brickOwner.$brickName.$brickType;
+
+        return array_key_exists($key, $this->params) ? $this->params[$key] : null;
     }
 
 }

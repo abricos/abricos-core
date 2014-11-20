@@ -51,9 +51,8 @@ if (!file_exists(PATH_CONFIGURATION.DS.'config.php') || filesize(PATH_CONFIGURAT
     exit;
 }
 
-
-// error_reporting(E_ALL);
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(E_ALL);
+// ini_set('display_errors', 1);
 
 define("DEBUG", true);
 define('THIS_SCRIPT', 'index');

@@ -76,7 +76,10 @@ class Ab_CorePhraseList extends AbricosList {
         $mName = $this->modName;
 
         $readOnly = false;
-        $cfg = Abricos::$config['phrase'];
+        $cfg = null;
+        if (!empty(Abricos::$config['phrase'])){
+            $cfg = Abricos::$config['phrase'];
+        }
 
         if (!empty($cfg) && !empty($cfg[$mName]) && isset($cfg[$mName][$name])) {
             $defValue = $cfg[$mName][$name];
