@@ -80,7 +80,7 @@ final class Abricos {
         Abricos::$inputCleaner = new Ab_CoreInputCleaner();
         Abricos::$phrases = new Ab_CorePhraseManager();
 
-        if (!isset($config['module'])){
+        if (!isset($config['module'])) {
             $config['module'] = array();
         }
 
@@ -196,18 +196,13 @@ final class Abricos {
         } else {
             $flagDevelopPage = $adress->level >= 2 && $adress->dir[1] == 'develop' && Abricos::$config['Misc']['develop_mode'];
 
+            $aDir0 = isset($adress->dir[0]) ? $adress->dir[0] : "";
+
             for ($i = 0; $i < $modules->list->Count(); $i++) {
                 $info = $modules->list->GetByIndex($i);
 
-                // разрешить страницу для разработчика модуля
-                if ($flagDevelopPage) {
-                    if ($adress->dir[0] != $info->name) {
-                        continue;
-                    }
-                } else {
-                    if ($adress->dir[0] != $info->takelink || empty($info->takelink)) {
-                        continue;
-                    }
+                if ($aDir0 != $info->takelink || empty($info->takelink)) {
+                    continue;
                 }
                 $modman = $modules->RegisterByName($info->name);
                 if (empty($modman)) {
@@ -218,7 +213,10 @@ final class Abricos {
 
             // сначало проверить в настройках
             if (is_null($modman)) {
-                $superModule = Abricos::$config['Takelink']['__super']['module'];
+                $superModule = "";
+                if (isset(Abricos::$config['Takelink']['__super']['module'])){
+                    $superModule = Abricos::$config['Takelink']['__super']['module'];
+                }
                 if (!empty($superModule)) {
                     $modman = $modules->RegisterByName($superModule);
                 }
