@@ -64,11 +64,14 @@ Component.entryPoint = function(NS){
                 headers['X-CSRF-Token'] = csrfToken;
             }
 
+            var entity = Y.JSON.stringify(data);
+            entity = encodeURIComponent(entity);
+
             this._sendAJAXIORequest({
                 callback: callback,
                 arguments: options.arguments,
                 context: options.context || this,
-                entity: 'data=' + Y.JSON.stringify(data),
+                entity: 'data=' + entity,
                 headers: headers,
                 method: 'POST',
                 timeout: options.timeout || AJAX.HTTP_TIMEOUT,
