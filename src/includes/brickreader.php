@@ -327,7 +327,9 @@ class Ab_CoreBrickReader {
 
                     $ph = null;
                     foreach ($arr as $s) {
-
+                        if (!isset($lang) || !isset($lang[$s]) ){
+                            break;
+                        }
                         if (is_array($lang[$s])) {
                             $lang = &$lang[$s];
                         } else if (is_string($lang[$s])) {
