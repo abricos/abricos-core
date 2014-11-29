@@ -187,7 +187,6 @@ Component.entryPoint = function(NS){
     };
     AppWorkspace.prototype = {
         initializer: function(){
-            var instance = this;
             this.on('initAppWidget', function(e, err, appInstance){
                 this.showWorkspacePage(this.get('workspacePage'));
             });
@@ -233,9 +232,6 @@ Component.entryPoint = function(NS){
 
                 this.set('workspaceWidget', currentWidget)
             }, this);
-        },
-        _workspaceURLUpdate: function(){
-
         }
     };
     AppWorkspace.list = {};
@@ -254,7 +250,7 @@ Component.entryPoint = function(NS){
             }
             var w = cache[wsName];
             if (w){
-                w.set('workspacePage', config.workspacePage);
+                w.showWorkspacePage(config.workspacePage);
                 // TODO: событие на установку страницы
                 callback(null, w);
             } else {
@@ -305,9 +301,43 @@ Component.entryPoint = function(NS){
                 }
             });
         },
+
+        _appURLUpdate: function(){
+            var appInstance = this.get('appInstance');
+            if (!appInstance){
+                return;
+            }
+
+            var URL = Brick.mod[appInstance.get('moduleName')]['URL'];
+            if (!URL){
+                return;
+            }
+
+            this.get('boundingBox').all('[data-url]').each(function(node){
+                var sURL = node.getData('url');
+                if (!sURL){
+                    return;
+                }
+                var arr = sURL.split('.'), s = URL;
+                for (var i = 0; i < arr.length; i++){
+                    if (!(s = s[arr[i]])){
+                        return;
+                    }
+                }
+                s = L.isFunction(s) ? s() : s;
+                if (!L.isString(s)){
+                    return;
+                }
+                node.set('href', s);
+            }, this);
+        },
+
         _initAppWidget: function(err, appInstance){
             this.set('appInstance', appInstance);
             this.set(WAITING, false);
+
+            this._appURLUpdate();
+
             var args = this._appWidgetArguments
             this.onInitAppWidget.apply(this, [err, appInstance, {
                 arguments: args
