@@ -15,6 +15,7 @@ Component.requires = {
 Component.entryPoint = function(NS){
 
     var Y = Brick.YUI,
+        L = Y.Lang,
 
         WAITING = 'waiting',
         BOUNDING_BOX = 'boundingBox',
@@ -172,6 +173,45 @@ Component.entryPoint = function(NS){
             new ns.App(options);
         };
     };
+
+    var AppWorkspace = function(){
+
+    };
+    AppWorkspace.prototype = {
+
+        showWorkspacePage: function(){
+
+        },
+        _workspaceURLUpdate: function(){
+
+        }
+    };
+    AppWorkspace.list = {};
+    AppWorkspace.build = function(moduleName, wsWidget){
+
+        var cache = AppWorkspace.list[moduleName] = AppWorkspace.list[moduleName] || [],
+            wsName = wsWidget.NAME;
+
+        return function(config, callback){
+            if (!L.isFunction(callback)){
+                callback = function(){
+                };
+            }
+            var w = cache[wsName];
+            if (w){
+                w.set('workspacePage', config.workspacePage);
+                // TODO: событие на установку страницы
+                callback(null, w);
+            } else {
+                if (!config.boundingBox){
+                    config.boundingBox = config.getBoundingBox();
+                }
+                cache[wsName] = w = new wsWidget(config);
+                callback(null, w);
+            }
+        };
+    };
+    NS.AppWorkspace = AppWorkspace;
 
     NS.AppWidget = Y.Base.create('appWidget', Y.Widget, [
         NS.Language,
