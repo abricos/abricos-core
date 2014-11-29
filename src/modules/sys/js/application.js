@@ -175,19 +175,74 @@ Component.entryPoint = function(NS){
     };
 
     var AppWorkspace = function(){
-
+    };
+    AppWorkspace.NAME = 'appWorkspace';
+    AppWorkspace.ATTRS = {
+        workspacePage: {
+            value: null
+        },
+        workspaceWidget: {
+            value: null
+        }
     };
     AppWorkspace.prototype = {
+        initializer: function(){
+            var instance = this;
+            this.on('initAppWidget', function(e, err, appInstance){
+                this.showWorkspacePage(this.get('workspacePage'));
+            });
+        },
 
-        showWorkspacePage: function(){
+        showWorkspacePage: function(page){
+            if (!page || !page.component || !page.widget){
+                return;
+            }
+            this.set('workspacePage', page);
+            this.set(WAITING, true);
 
+            Brick.use(this.get('component').moduleName, page.component, function(err, ns){
+                this.set(WAITING, false);
+
+                var wName = page.widget,
+                    widgetClass = ns[wName];
+
+                if (!widgetClass){
+                    return;
+                }
+
+                var elBoard = Y.one('.app-workspace-page');
+                if (!elBoard){
+                    return;
+                }
+
+                var currentWidget = this.get('workspaceWidget');
+                if (currentWidget){
+                    currentWidget.destroy();
+                }
+                var elDiv = Y.Node.create('<div></div>');
+                elBoard.appendChild(elDiv);
+
+                var args = {};
+                if (L.isFunction(ns[wName].parseURLParam)){
+                    args = ns[wName].parseURLParam(page.args);
+                }
+
+                currentWidget = new widgetClass(
+                    Y.mix({'boundingBox': elDiv}, args)
+                );
+
+                this.set('workspaceWidget', currentWidget)
+            }, this);
         },
         _workspaceURLUpdate: function(){
 
         }
     };
     AppWorkspace.list = {};
-    AppWorkspace.build = function(moduleName, wsWidget){
+    AppWorkspace.build = function(moduleName, wsWidget, wsConfig){
+        wsConfig = Y.merge({
+            workspacePage: {}
+        }, wsConfig || {});
 
         var cache = AppWorkspace.list[moduleName] = AppWorkspace.list[moduleName] || [],
             wsName = wsWidget.NAME;
@@ -206,6 +261,7 @@ Component.entryPoint = function(NS){
                 if (!config.boundingBox){
                     config.boundingBox = config.getBoundingBox();
                 }
+                config.workspacePage = Y.merge(wsConfig.workspacePage, config.workspacePage || {});
                 cache[wsName] = w = new wsWidget(config);
                 callback(null, w);
             }
@@ -220,6 +276,8 @@ Component.entryPoint = function(NS){
         NS.WidgetWaiting
     ], {
         initializer: function(){
+            this.publish('initAppWidget');
+
             this._appWidgetArguments = Y.Array(arguments);
 
             Y.after(this._syncUIAppWidget, this, 'syncUI');
@@ -254,6 +312,9 @@ Component.entryPoint = function(NS){
             this.onInitAppWidget.apply(this, [err, appInstance, {
                 arguments: args
             }]);
+            this.fire('initAppWidget', err, appInstance, {
+                arguments: args
+            });
         },
         onInitAppWidget: function(){
         }
@@ -266,7 +327,7 @@ Component.entryPoint = function(NS){
                 value: true
             },
             appInstance: {
-                values: null
+                value: null
             },
             useExistingWidget: {
                 value: false
