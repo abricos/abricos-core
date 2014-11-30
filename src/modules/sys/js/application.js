@@ -82,8 +82,9 @@ Component.entryPoint = function(NS){
         }
     });
 
-    NS.Application.build = function(component, ajaxes, px, extensions){
+    NS.Application.build = function(component, ajaxes, px, extensions, sx){
         extensions = extensions || [];
+        sx = sx || {};
 
         var moduleName = component.moduleName;
         var ns = Brick.mod[moduleName];
@@ -142,18 +143,17 @@ Component.entryPoint = function(NS){
             })();
         }
 
-
-        var appName = moduleName + 'App';
-        ns.App = Y.Base.create(appName, NS.Application, extensions, px, {
-            ATTRS: {
-                component: {
-                    value: component
-                },
-                moduleName: {
-                    value: moduleName
-                }
+        sx.ATTRS = Y.merge(sx.ATTRS || {}, {
+            component: {
+                value: component
+            },
+            moduleName: {
+                value: moduleName
             }
         });
+
+        var appName = moduleName + 'App';
+        ns.App = Y.Base.create(appName, NS.Application, extensions, px, sx);
 
         ns.appInstance = null;
         ns.initApp = function(options){
