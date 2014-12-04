@@ -82,6 +82,7 @@ Component.entryPoint = function(NS){
         }
     });
 
+
     NS.Application.build = function(component, ajaxes, px, extensions, sx){
         extensions = extensions || [];
         sx = sx || {};
@@ -157,6 +158,7 @@ Component.entryPoint = function(NS){
 
         ns.appInstance = null;
         ns.initApp = function(options){
+
             if (Y.Lang.isFunction(options)){
                 options = {
                     initCallback: options
@@ -166,7 +168,6 @@ Component.entryPoint = function(NS){
                 initCallback: function(){
                 }
             }, options || {});
-
             if (ns.appInstance){
                 return options.initCallback(null, ns.appInstance);
             }
@@ -243,7 +244,7 @@ Component.entryPoint = function(NS){
         var cache = AppWorkspace.list[moduleName] = AppWorkspace.list[moduleName] || [],
             wsName = wsWidget.NAME;
 
-        return function(config, callback){
+        var initAppFunc = function(config, callback){
             if (!L.isFunction(callback)){
                 callback = function(){
                 };
@@ -258,10 +259,12 @@ Component.entryPoint = function(NS){
                     config.boundingBox = config.getBoundingBox();
                 }
                 config.workspacePage = Y.merge(wsConfig.workspacePage, config.workspacePage || {});
+
                 cache[wsName] = w = new wsWidget(config);
                 callback(null, w);
             }
         };
+        return initAppFunc;
     };
     NS.AppWorkspace = AppWorkspace;
 
