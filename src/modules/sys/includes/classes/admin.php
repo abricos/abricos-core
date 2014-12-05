@@ -99,22 +99,46 @@ class SystemManager_Admin {
     }
 
     public function CoreConfigSaveToAJAX($d) {
-        if (!$this->IsAdminRole()) {
-            return null;
+        if (!$this->CoreConfigSave($d)) {
+            return 403;
         }
+        return $this->CoreConfigToAJAX();
+    }
+
+    public function CoreConfigSave($d) {
+        if (!$this->IsAdminRole()) {
+            return false;
+        }
+        $d = array_to_object($d);
+
         $phs = SystemModule::$instance->GetPhrases();
-        $phs->Set('site_name', $d->site_name);
-        $phs->Set('site_title', $d->site_title);
-        $phs->Set('admin_mail', $d->admin_mail);
-        $phs->Set('meta_title', $d->meta_title);
-        $phs->Set('meta_keys', $d->meta_keys);
-        $phs->Set('meta_desc', $d->meta_desc);
-        $phs->Set('style', $d->style);
+        if (isset($d->site_name)) {
+            $phs->Set('site_name', $d->site_name);
+        }
+        if (isset($d->site_title)) {
+            $phs->Set('site_title', $d->site_title);
+        }
+        if (isset($d->admin_mail)) {
+            $phs->Set('admin_mail', $d->admin_mail);
+        }
+        if (isset($d->meta_title)) {
+            $phs->Set('meta_title', $d->meta_title);
+        }
+        if (isset($d->meta_keys)) {
+            $phs->Set('meta_keys', $d->meta_keys);
+        }
+        if (isset($d->meta_desc)) {
+            $phs->Set('meta_desc', $d->meta_desc);
+        }
+        if (isset($d->style)) {
+            $phs->Set('style', $d->style);
+        }
 
         Abricos::$phrases->Save();
 
-        return $this->CoreConfigToAJAX();
+        return true;
     }
+
 
 }
 
