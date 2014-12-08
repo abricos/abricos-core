@@ -210,7 +210,9 @@ Component.entryPoint = function(NS){
                     return;
                 }
 
-                var elBoard = Y.one('.app-workspace-page');
+                var bBox = this.get(BOUNDING_BOX);
+
+                var elBoard = bBox.one('.app-workspace-page');
                 if (!elBoard){
                     return;
                 }
