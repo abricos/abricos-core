@@ -111,4 +111,50 @@ Component.entryPoint = function(NS){
     };
     NS.WidgetWaiting = Waiting;
 
+    var EditorStatus = function(){
+    };
+    EditorStatus.ATTRS = {
+        isEdit: {
+            value: true
+        }
+    };
+    EditorStatus.prototype = {
+        initializer: function(){
+            Y.after(this._syncUIEditorStatus, this, SYNCUI);
+            Y.after(this._bindUIEditorStatus, this, BINDUI);
+        },
+        _syncUIEditorStatus: function(){
+            this._uiSetEditorStatus(this.get('isEdit'));
+        },
+        _bindUIEditorStatus: function(){
+            this.after('isEditChange', this._afterEditorStatusChange);
+        },
+        _afterEditorStatusChange: function(e){
+            if (e.src != UI){
+                this._uiSetEditorStatus(e.newVal);
+            }
+        },
+        _uiSetEditorStatus: function(val){
+            var boundingBox = this.get(BOUNDING_BOX);
+            boundingBox.all('[data-isedit]').each(function(node){
+                var flag = node.getData('isedit');
+                switch (flag) {
+                    case 'show':
+                        node.setStyle('display', val ? '' : 'none');
+                        break;
+                    case 'hide':
+                        node.setStyle('display', val ? 'none' : '');
+                        break;
+                    case 'disable':
+                        node.set('disabled', val);
+                        break;
+                    case 'enable':
+                        node.set('disabled', !val);
+                        break;
+                }
+            }, this);
+        }
+    };
+    NS.WidgetEditorStatus = EditorStatus;
+
 };
