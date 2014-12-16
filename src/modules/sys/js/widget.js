@@ -48,6 +48,13 @@ Component.entryPoint = function(NS){
 
             e.dataClick = e.target.getData('click');
 
+            if (!e.dataClick){
+                var elPrev = e.target.ancestor('[data-click]');
+                if (elPrev){
+                    e.dataClick = elPrev.getData('click');
+                }
+            }
+
             if (L.isFunction(this.onClick)
                 && this.onClick.apply(this, arguments)){
 
