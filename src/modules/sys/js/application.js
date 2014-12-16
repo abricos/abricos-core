@@ -323,13 +323,21 @@ Component.entryPoint = function(NS){
                 if (!sURL){
                     return;
                 }
-                var arr = sURL.split('.'), s = URL;
+                var arr = sURL.split('.'), s = URL, si, aParam = [],
+                    rex = /(.*)\((.*)\)/i;
                 for (var i = 0; i < arr.length; i++){
-                    if (!(s = s[arr[i]])){
+                    si = arr[i];
+                    if (i === (arr.length - 1) && rex.test(si)){
+                        var ex = rex.exec(si);
+                        si = ex[1];
+                        aParam = ex[2].split(",");
+                    }
+                    if (!(s = s[si])){
                         return;
                     }
                 }
-                s = L.isFunction(s) ? s() : s;
+
+                s = L.isFunction(s) ? s.apply(null, aParam) : s;
                 if (!L.isString(s)){
                     return;
                 }
