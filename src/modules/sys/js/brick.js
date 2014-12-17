@@ -1685,7 +1685,8 @@ Brick.dateExt = function(){
 
 			var i, m, j, k, r, elib = [], mlib = [];
 
-			var ylib = _isLoadYUI2 ? [] : ['yui2-dom', 'yui2-event'];
+			// var ylib = _isLoadYUI2 ? [] : ['yui2-dom', 'yui2-event'];
+			var ylib = [];
 			_isLoadYUI2 = true;
 
 			for (i=0;i<this._modules.length;i++){

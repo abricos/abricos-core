@@ -8,7 +8,7 @@ var Component = new Brick.Component();
 Component.requires = {
     yui: ['base'],
     mod: [
-        {name: '{C#MODNAME}', files: ['component.js', 'widget.js', 'io.js']},
+        {name: '{C#MODNAME}', files: ['widget.js', 'io.js']},
         {name: 'widget', files: ['notice.js']}
     ]
 };
