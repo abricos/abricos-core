@@ -230,6 +230,14 @@ class Ab_CoreBrickBuilder {
     private $_cssfile = array();
 
     /**
+     * CSS файл шаблона [tcss]путь к файлу[/tcss]
+     *
+     * @access private
+     */
+    private $_tcssfile = array();
+
+
+    /**
      * Массив модулей используемых в построение страницы
      *
      * @access private
@@ -398,6 +406,10 @@ class Ab_CoreBrickBuilder {
         $this->_cssfile[$file] = $file;
     }
 
+    public function AddTemplateCSSFile($file) {
+        $this->_tcssfile[$file] = $file;
+    }
+
     private function SetVar(Ab_CoreBrick $brick, $search, $replace) {
         $brick->content = str_replace($search, $replace, $brick->content);
     }
@@ -480,32 +492,6 @@ class Ab_CoreBrickBuilder {
         print substr($content, $position, strlen($content) - $position);
     }
 
-    private function FetchCSSModVars() {
-        $ret = array();
-
-        foreach ($this->_cssmod as $modname => $files) {
-            foreach ($files as $file => $value) {
-                $webcssfile = "/modules/".$modname."/css/".$file;
-
-                $weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$file;
-                if (file_exists(CWD.$weboverride)) {
-                    $webcssfile = $weboverride;
-                }
-                if (!file_exists(CWD.$webcssfile)) {
-                    continue;
-                }
-                if (filesize(CWD.$webcssfile) <= 5) {
-                    continue;
-                }
-
-                $ret[$webcssfile] = $modname;
-
-                $this->AddCSSFile($webcssfile);
-            }
-        }
-        return $ret;
-    }
-
     private function FetchVars(Ab_CoreBrick $brick) {
 
         if ($brick->type == Brick::BRICKTYPE_TEMPLATE) {
@@ -527,7 +513,28 @@ class Ab_CoreBrickBuilder {
             }
             $this->_globalVar['js'] = $brick->param->var['js'];
 
-            $this->FetchCSSModVars();
+
+            foreach ($this->_cssmod as $modname => $files) {
+                foreach ($files as $file => $value) {
+                    $webcssfile = "/modules/".$modname."/css/".$file;
+
+                    $weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$file;
+                    if (file_exists(CWD.$weboverride)) {
+                        $webcssfile = $weboverride;
+                    }
+                    if (!file_exists(CWD.$webcssfile)) {
+                        continue;
+                    }
+                    if (filesize(CWD.$webcssfile) <= 5) {
+                        continue;
+                    }
+
+                    $this->AddCSSFile($webcssfile);
+                }
+            }
+            foreach ($this->_tcssfile as $value) {
+                $this->AddCSSFile("/tt/".Brick::$style."/css/".$value);
+            }
 
             // добавление css файлов
             $sCSS = "";
@@ -541,6 +548,7 @@ class Ab_CoreBrickBuilder {
                 $sVersion .= filemtime(CWD.$value);
                 $aCSS [] = $value;
             }
+
             if (count($aCSS) > 0) {
                 $sCSS .= "<link href='/gzip.php?v=".md5($sVersion)."&file=".implode(",", $aCSS)."' type='text/css' rel='stylesheet' />\n";
             }
@@ -590,6 +598,9 @@ class Ab_CoreBrickBuilder {
         }
         foreach ($p->css as $value) {
             $this->AddCSSFile($value);
+        }
+        foreach ($p->tcss as $value) {
+            $this->AddTemplateCSSFile($value);
         }
         foreach ($p->jsmod as $key => $files) {
             foreach ($files as $file) {

@@ -335,8 +335,13 @@ function getFileContents($path, $notcheck = false) {
     if ($extension == "css") {
 
         $realPath = realpath(".");
-        $rBase = str_replace($realPath, "", $fi['dirname']);
+        $rBase = str_replace($realPath, "", $fi['dirname'])."/";
 
+        $content = preg_replace('/(url\()(\'\.\.\/)+/', 'url(\'' . $rBase."../", $content); // url ('../foo.png')
+        $content = preg_replace('/(url\()(\"\.\.\/)+/', 'url(\"' . $rBase."../", $content); // url ("../foo.png")
+        $content = preg_replace('/(url\()(\.\.\/)+/', 'url(' . $rBase."../", $content); // url (../foo.png)
+
+        /*
         $pattern = '#((url\()([^\\|^\/|^\.\.]\S+)(\)))#';
 
         //Handle image path corrections (order is important)
@@ -367,11 +372,11 @@ function getFileContents($path, $notcheck = false) {
                 continue;
             }
 
-
             $tmp = str_replace($url, $absUrl, $matches[0][$i]);
 
             $content = str_replace($matches[0][$i], $tmp, $content);
         }
+        /**/
     }
 
     return $content;

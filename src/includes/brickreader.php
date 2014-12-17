@@ -423,9 +423,15 @@ class Ab_CoreBrickReader {
             $p->cssmod[$key] = explode(',', $value);
         }
 
+
         // JavaScript файлы
         $p->jsfile = Ab_CoreBrickReader::BrickParseValue($param, "js");
+
+        // Свободные CSS файлы шаблона
         $p->css = Ab_CoreBrickReader::BrickParseValue($param, "css");
+
+        // CSS файлы шаблона
+        $p->tcss = Ab_CoreBrickReader::BrickParseValue($param, "tcss");
 
         $ret->param = $p;
 
