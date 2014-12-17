@@ -361,7 +361,7 @@ class Ab_CoreBrickBuilder {
      * @param string $file имя файла
      */
     public function AddJSModule($moduleName, $file) {
-        if (!isset($this->_jsmod[$moduleName])){
+        if (!isset($this->_jsmod[$moduleName])) {
             $this->_jsmod[$moduleName] = array();
         }
         $this->_jsmod[$moduleName][$file] = true;
@@ -377,8 +377,11 @@ class Ab_CoreBrickBuilder {
         $this->_cssmod[$moduleName][$file] = true;
     }
 
-    public function GetCSSModFiles() {
-        return $this->FetchCSSModVars();
+    /**
+     * @return array
+     * @deprecated
+     */
+    private function GetCSSModFiles() {
     }
 
     /**
@@ -495,10 +498,9 @@ class Ab_CoreBrickBuilder {
                     continue;
                 }
 
-                $mod = Abricos::GetModule($modname);
                 $ret[$webcssfile] = $modname;
 
-                $this->AddCSSFile($webcssfile."?v=".$mod->version);
+                $this->AddCSSFile($webcssfile);
             }
         }
         return $ret;
@@ -527,34 +529,20 @@ class Ab_CoreBrickBuilder {
 
             $this->FetchCSSModVars();
 
-            // проверка css модулей по умолчания
-            foreach ($this->_usemod as $modname => $value) {
-                $mod = Abricos::GetModule($modname);
-                if (empty($mod->defaultCSS)) {
-                    continue;
-                }
-                $webcssfile = "/modules/".$modname."/css/".$mod->defaultCSS;
-                $cssfile = CWD.$webcssfile;
-                if (!file_exists($cssfile)) {
-                    continue;
-                }
-                // есть ли перегруженный файл css
-                $weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$mod->defaultCSS;
-                $override = CWD.$weboverride;
-                if (file_exists($override)) {
-                    if (filesize($override) <= 5) {
-                        continue;
-                    }
-                    $webcssfile = $weboverride;
-                }
-                $webcssfile .= "?v=".$mod->version;
-                $this->AddCSSFile($webcssfile);
-            }
-
             // добавление css файлов
             $sCSS = "";
+            $aCSS = array();
+            $sVersion = "";
             foreach ($this->_cssfile as $value) {
-                $sCSS .= "<link href='".$value."' type='text/css' rel='stylesheet' />\n";
+                if (!file_exists(CWD.$value)) {
+                    $sCSS .= "<link href='".$value."' type='text/css' rel='stylesheet' />\n";
+                    continue;
+                }
+                $sVersion .= filemtime(CWD.$value);
+                $aCSS [] = $value;
+            }
+            if (count($aCSS) > 0) {
+                $sCSS .= "<link href='/gzip.php?v=".md5($sVersion)."&file=".implode(",", $aCSS)."' type='text/css' rel='stylesheet' />\n";
             }
             $this->_globalVar['css'] = $brick->param->var['css'] = $sCSS;
         }
@@ -801,7 +789,7 @@ class Ab_CoreBrickManager {
         if (!empty($p->module)) {
             foreach ($p->module as $key => $value) {
                 foreach ($value as $obj) {
-                    if (!property_exists($obj, 'param')){
+                    if (!property_exists($obj, 'param')) {
                         $obj->param = false;
                     }
                     $childBrick = $this->BuildOutput($key, $obj->name, Brick::BRICKTYPE_BRICK, $brick, $obj->param);
@@ -1051,7 +1039,7 @@ class Ab_CoreCustomBrickManager {
 
     public function GetBrick($owner, $name, $type) {
         $key = $owner.$name.$type;
-        if (!array_key_exists($key, $this->bricks)){
+        if (!array_key_exists($key, $this->bricks)) {
             return null;
         }
 

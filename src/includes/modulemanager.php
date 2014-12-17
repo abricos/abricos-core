@@ -63,8 +63,9 @@ abstract class Ab_Module {
 
     /**
      * CSS по умолчанию (имя файла в папке css модуля).
+     * @deprecated
      */
-    public $defaultCSS = "";
+    private $defaultCSS = "";
 
     /**
      * Список зависимых модулей и их версии
