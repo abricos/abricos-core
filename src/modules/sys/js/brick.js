@@ -103,34 +103,27 @@ Brick.env.user = {
 };
 
 YUI.GlobalConfig = {
-// filter: 'raw',
 	timeout: 15000,
-    combine: false,
-    base: "/gzip.php?base=vendor/alloyui&v="+Brick.env.lib.aui+"&file=",
+    // base: "/gzip.php?base=vendor/alloyui&v="+Brick.env.lib.aui+"&file=",
+	combine: true,
+	root: '',
+	base: '',
+	comboBase: "/gzip.php?base=vendor/alloyui&v="+Brick.env.lib.aui+"&file=",
     comboSep: ',',
     groups: {
-    	/*
-    	aui: {
-    	    combine: false,
-    	    base: "/gzip.php?base=js/alloy-ui&file=",
-            patterns:  {
-                'aui-': { }
-            }
-    	},
-    	/**/
-    	gallery: {
-    	    combine: false,
-    	    base: "/gzip.php?base=vendor/yui3gallery&file=",
-            patterns:  {
-                'gallery-': { }
-            }
-    	},
         yui2: {
+			/*
             combine: false,
             base: "/gzip.php?base=vendor/yui2in3&file=",
             comboBase: '/gzip.php?file=',
             root: '/vendor/yui2in3/',
-            patterns:  {
+			/**/
+			combine: true,
+			root: '',
+			base: '',
+			comboBase: "/gzip.php?base=vendor/yui2in3&v="+Brick.env.lib.aui+"&file=",
+			comboSep: ',',
+			patterns:  {
                 'yui2-': {
                     configFn: function(me) {
                         if(/-skin|reset|fonts|grids|base/.test(me.name)) {

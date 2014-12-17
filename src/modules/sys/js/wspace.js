@@ -6,6 +6,7 @@
 var Component = new Brick.Component();
 Component.requires = {
     mod: [
+        {name: 'widget', files: ['lib.js']},
         {name: '{C#MODNAME}', files: ['lib.js']}
     ]
 };

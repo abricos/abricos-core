@@ -6,7 +6,7 @@
 
 var Component = new Brick.Component();
 Component.requires = {
-    yui: ['widget'],
+    yui: ['base', 'widget'],
     mod: [
         {name: 'sys', files: ['component.js']}
     ]
