@@ -182,6 +182,9 @@ Component.entryPoint = function(NS){
         workspacePage: {
             value: null
         },
+        workspacePageAsync: {
+            value: null
+        },
         workspaceWidget: {
             value: null
         }
@@ -189,8 +192,23 @@ Component.entryPoint = function(NS){
     AppWorkspace.prototype = {
         initializer: function(){
             this.on('initAppWidget', function(e, err, appInstance){
-                this.showWorkspacePage(this.get('workspacePage'));
+                this._showWorkspacePage();
             });
+        },
+
+        _showWorkspacePage: function(){
+            var getWSPageAsync = this.get('workspacePageAsync');
+            if (Y.Lang.isFunction(getWSPageAsync)){
+                this.set(WAITING, true);
+                var instance = this;
+
+                getWSPageAsync.call(this, function(err, page){
+                    instance.set(WAITING, false);
+                    instance.showWorkspacePage(page);
+                });
+            }else{
+                this.showWorkspacePage(this.get('workspacePage'));
+            }
         },
 
         showWorkspacePage: function(page){
