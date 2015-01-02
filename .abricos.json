@@ -1,0 +1,63 @@
+{
+  "vendor": {
+    "alloyui": {
+      "endpoint": "https://github.com/liferay/alloy-ui/releases/download/3.0.0/alloy-3.0.0.zip",
+      "build": [
+        {
+          "cwd": "build",
+          "src": "**",
+          "dest": ""
+        },
+        {
+          "src": "*.md",
+          "dest": ""
+        }
+      ]
+    },
+    "jevix": {
+      "endpoint": "https://github.com/abricos/Jevix.git",
+      "build": [
+        "jevix.class.php",
+        "readme.mediawiki"
+      ]
+    },
+    "yui2in3": {
+      "endpoint": "https://github.com/abricos/yui3-2in3.git",
+      "build": [
+        {
+          "cwd": "build",
+          "src": "**"
+        },
+        "README.textile"
+      ]
+    },
+    "jquery": {
+      "endpoint": "~2.1.1",
+      "build": [
+        {
+          "cwd": "dist",
+          "src": "**"
+        },
+        "MIT-LICENSE.txt"
+      ]
+    },
+    "bootstrap": {
+      "endpoint": "~3.3.1",
+      "build": [
+        {
+          "cwd": "dist",
+          "src": "**",
+          "dest": ""
+        },
+        "README.md",
+        "LICENSE"
+      ]
+    },
+    "font-awesome": {
+      "endpoint": "~4.2.0",
+      "build": [
+        "fonts/**", "css/**", "README.md"
+      ]
+    }
+  }
+}

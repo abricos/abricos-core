@@ -1,14 +1,14 @@
 {
   "name": "abricos",
   "description": "Abricos Platform - Content Management System (CMS) and Internet Application Platform (WebOS)",
-  "version": "0.5.6",
+  "version": "0.6.0",
   "author": {
     "name": "Alexander Kuzmin",
     "email": "roosit@abricos.org",
     "web": "http://abricosjs.org",
     "twitter": "roositab"
   },
-  "license": "GPLv2",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git://github.com/abricos/abricos-core.git"
