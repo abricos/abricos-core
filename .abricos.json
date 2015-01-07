@@ -1,5 +1,16 @@
 {
   "vendor": {
+    "abricosjs": {
+      "endpoint": "https://github.com/abricos/abricos.js.git",
+      "build": [
+        {
+          "cwd": "src",
+          "src": "**"
+        },
+        "README.md",
+        "LICENSE"
+      ]
+    },
     "alloy-3.0.0": {
       "endpoint": "https://github.com/liferay/alloy-ui/releases/download/3.0.0/alloy-3.0.0.zip",
       "build": [
@@ -55,7 +66,9 @@
     "font-awesome": {
       "endpoint": "~4.2.0",
       "build": [
-        "fonts/**", "css/**", "README.md"
+        "fonts/**",
+        "css/**",
+        "README.md"
       ]
     }
   }

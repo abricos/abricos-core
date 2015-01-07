@@ -54,8 +54,8 @@ class Ab_CoreBrickReader {
         $mods = Abricos::$modules->RegisterAllModule();
         foreach ($mods as $module) {
             $files = array();
-            $files1 = globa(CWD."/modules/".$module->name."/brick/pub_*.html");
-            $files2 = globa(CWD."/modules/".$module->name."/brick/p_*.html");
+            $files1 = globa(CWD."/modules/".$module->name."/brick/pub_*".Ab_CoreBrickReader::FILE_EXT);
+            $files2 = globa(CWD."/modules/".$module->name."/brick/p_*".Ab_CoreBrickReader::FILE_EXT);
 
             if (!empty($files1)) {
                 foreach ($files1 as $file) {
@@ -68,7 +68,7 @@ class Ab_CoreBrickReader {
                 }
             }
             foreach ($files as $file) {
-                $bname = basename($file, ".html");
+                $bname = basename($file, Ab_CoreBrickReader::FILE_EXT);
                 $key = $module->name.".".$bname;
                 if (empty($brickdb[$key])) {
                     $brick = Ab_CoreBrickReader::ReadBrickFromFile($file, $module->name);
@@ -103,9 +103,9 @@ class Ab_CoreBrickReader {
 
         $mods = Abricos::$modules->RegisterAllModule();
         foreach ($mods as $module) {
-            $files = globa(CWD."/modules/".$module->name."/content/*.html");
+            $files = globa(CWD."/modules/".$module->name."/content/*".Ab_CoreBrickReader::FILE_EXT);
             foreach ($files as $file) {
-                $bname = basename($file, ".html");
+                $bname = basename($file, Ab_CoreBrickReader::FILE_EXT);
                 $key = $module->name.".".$bname;
                 if (empty($brickdb[$key])) {
                     $brick = Ab_CoreBrickReader::ReadBrickFromFile($file, $module->name);
@@ -396,7 +396,10 @@ class Ab_CoreBrickReader {
                 }
                 // CSS файлы модуля
                 if (isset($modObj->css)){
-                    $p->cssmod[$modName] = $modObj->css;
+                    $p->cssmod[$modName] = array();
+                    for ($i = 0; $i < count($modObj->css); $i++){
+                        $p->cssmod[$modName][] = $modObj->css[$i];
+                    }
                 }
                 // JavaScript модули
                 if (isset($modObj->js)){
@@ -458,39 +461,7 @@ class Ab_CoreBrickReader {
         return $ret;
     }
 
-    private static function BrickParseValue($text, $name) {
-        $array = array();
 
-        /* Разбор - переменные кирпича */
-        $pattern = "#\[".$name."\](.+?)\[/".$name."\]#is";
-        while (true) {
-            $mathes = array();
-            if (preg_match($pattern, $text, $mathes) == 0) break;
-
-            $array[$mathes[1]] = trim($mathes[1]);
-
-            $text = preg_replace($pattern, "", $text, 1);
-        }
-        return $array;
-    }
-
-    private static function BrickParseVar($text, $name) {
-        $array = array();
-
-        /* Разбор - переменные кирпича */
-        $pattern = "#\[".$name."=(.+?)\](.*?)\[/".$name."\]#is";
-
-        while (true) {
-            $mathes = array();
-
-            if (preg_match($pattern, $text, $mathes) == 0) break;
-
-            $array[$mathes[1]] = trim($mathes[2]);
-
-            $text = preg_replace($pattern, "", $text, 1);
-        }
-        return $array;
-    }
 
 }
 

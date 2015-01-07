@@ -513,12 +513,11 @@ class Ab_CoreBrickBuilder {
             }
             $this->_globalVar['js'] = $brick->param->var['js'];
 
-
             foreach ($this->_cssmod as $modname => $files) {
                 foreach ($files as $file => $value) {
-                    $webcssfile = "/modules/".$modname."/css/".$file;
+                    $webcssfile = "/modules/".$modname."/assets/".$file;
 
-                    $weboverride = "/template/".Brick::$style."/override/".$modname."/css/".$file;
+                    $weboverride = "/template/".Brick::$style."/override/".$modname."/assets/".$file;
                     if (file_exists(CWD.$weboverride)) {
                         $webcssfile = $weboverride;
                     }
