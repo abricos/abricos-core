@@ -43,24 +43,6 @@ class Ab_CoreJSCFile {
             $this->error();
         }
 
-        $overPath = realpath($rootPath."/template/".$tname."/override/".$module."/js/".$component);
-
-        $this->fileHTML = $compPath.".htm";
-        if (file_exists($this->fileHTML)) {
-            $override = $overPath.".htm";
-            if (file_exists($override)) {
-                $this->fileHTML = $override;
-            }
-        }
-
-        $this->fileCSS = $compPath.".css";
-        if (file_exists($this->fileCSS)) {
-            $override = $overPath.".css";
-            if (file_exists($override)) {
-                $this->fileCSS = $override;
-            }
-        }
-
         // $this->fileLANG = $modPath."/langs/".$component."_".$lang.".js";
 
         $this->fileLangs = globa($modPath."/langs/".$component."_*.js");

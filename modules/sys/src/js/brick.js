@@ -104,11 +104,11 @@ Brick.env.user = {
 
 YUI.GlobalConfig = {
 	timeout: 15000,
-    // base: "/gzip.php?base=vendor/alloyui&v="+Brick.env.lib.aui+"&file=",
+    // base: "/gzip.php?base=vendor/alloy-3.0.0&v="+Brick.env.lib.aui+"&file=",
 	combine: true,
 	root: '',
 	base: '',
-	comboBase: "/gzip.php?base=vendor/alloyui&v="+Brick.env.lib.aui+"&file=",
+	comboBase: "/gzip.php?base=vendor/alloy-3.0.0&v="+Brick.env.lib.aui+"&file=",
     comboSep: ',',
     groups: {
         yui2: {
