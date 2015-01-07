@@ -1,17 +1,9 @@
 <!--[*]
 [script]brick_jsvar.php[/script]
 [bkvar=g]0[/bkvar]
-[bkvar=s][/bkvar]
-[bkvar=unm]guest[/bkvar]
-[bkvar=fnm][/bkvar]
-[bkvar=lnm][/bkvar]
-[bkvar=uid]0[/bkvar]
-[bkvar=agr]1[/bkvar]
-[bkvar=jsv][/bkvar]
 [bkvar=ttname][/bkvar]
 [bkvar=jsyui][/bkvar]
 [bkvar=enmod][/bkvar]
-[bkvar=lang]en[/bkvar]
 
 [p=fullcssforie][/p]
 [bkvar=fullcssres][/bkvar]
@@ -21,15 +13,14 @@
 
 [*]-->
 
-<script src="/gzip.php?base=/vendor&v=[bkvar]jsyui[/bkvar]&file=alloy-3.0.0/aui/aui-min.js,abricosjs/abricos.js" type="text/javascript" charset="utf-8"></script>
-<script src="/gzip.php?type=sys&version=[bkvar]jsv[/bkvar]&lang=[bkvar]lang[/bkvar]&tt=[bkvar]ttname[/bkvar]" type="text/javascript" charset="utf-8"></script>
+<script src="/gzip.php?base=/vendor&v=[bkvar]jsyui[/bkvar]&file=alloyui/aui/aui-min.js,abricos.js/abricos.js" type="text/javascript" charset="utf-8"></script>
+<script src="/gzip.php?type=sys&version={v#jsv}&lang={v#lang}&tt={v#ttname}" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
-	var u=Brick.env.user;u.id=[bkvar]uid[/bkvar];u.group=[bkvar]g[/bkvar];u.session='[bkvar]s[/bkvar]';u.name='[bkvar]unm[/bkvar]';u.firstname='[bkvar]fnm[/bkvar]';u.lastname='[bkvar]lnm[/bkvar]';u.agr=[bkvar]agr[/bkvar];
-	Brick.env.ttname='[bkvar]ttname[/bkvar]';
+	var u=Brick.env.user;u.id={v#uid};u.session='{v#s}';u.name='{v#unm}';u.firstname='{v#fnm}';u.lastname='{v#lnm}';u.agr={v#agr};
+	Brick.env.ttname='{v#ttname}';
 	Brick.env.lib.yui='[bkvar]jsyui[/bkvar]';
-	Brick.env.enmod=[[bkvar]enmod[/bkvar]];
-    Brick.env.language='[bkvar]lang[/bkvar]';
-    Abricos.config.lang='{v#langid}';
+	Brick.env.language='{v#lang}';
+	Abricos.config.lang='{v#langid}';
 </script>
 
 [bkvar]fullcssres[/bkvar]
