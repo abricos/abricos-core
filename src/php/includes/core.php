@@ -74,7 +74,6 @@ final class Abricos {
      */
     public static $DOMAIN = '';
 
-
     public function __construct(&$config) {
         Abricos::$adress = new Ab_URI(Ab_URI::fetch_uri());
         Abricos::$inputCleaner = new Ab_CoreInputCleaner();
@@ -194,8 +193,6 @@ final class Abricos {
             $modman = $modSys;
             $contentName = 'tajax';
         } else {
-            $flagDevelopPage = $adress->level >= 2 && $adress->dir[1] == 'develop' && Abricos::$config['Misc']['develop_mode'];
-
             $aDir0 = isset($adress->dir[0]) ? $adress->dir[0] : "";
 
             for ($i = 0; $i < $modules->list->Count(); $i++) {
@@ -214,7 +211,7 @@ final class Abricos {
             // сначало проверить в настройках
             if (is_null($modman)) {
                 $superModule = "";
-                if (isset(Abricos::$config['Takelink']['__super']['module'])){
+                if (isset(Abricos::$config['Takelink']['__super']['module'])) {
                     $superModule = Abricos::$config['Takelink']['__super']['module'];
                 }
                 if (!empty($superModule)) {
@@ -228,12 +225,7 @@ final class Abricos {
                 $modman = $modSys;
             }
 
-            // имя кирпича
-            if ($flagDevelopPage) {
-                $contentName = 'develop';
-            } else {
-                $contentName = $modman->GetContentName();
-            }
+            $contentName = $modman->GetContentName();
         }
 
         Brick::$modman = $modman;
@@ -289,7 +281,7 @@ final class Abricos {
             // поиск для перегруженных кирпичей
             $find = false;
             foreach ($contentName as $cname) {
-                if (file_exists(CWD."/tt/".Brick::$style."/override/".$modman->name."/content/".$cname.".html")) {
+                if (file_exists(CWD."/template/".Brick::$style."/override/".$modman->name."/content/".$cname.Ab_CoreBrickReader::FILE_EXT)) {
                     $contentName = $cname;
                     $find = true;
                     break;
@@ -297,7 +289,7 @@ final class Abricos {
             }
             if (!$find) {
                 foreach ($contentName as $cname) {
-                    if (file_exists(CWD."/modules/".$modman->name."/content/".$cname.".html")) {
+                    if (file_exists(CWD."/modules/".$modman->name."/content/".$cname.Ab_CoreBrickReader::FILE_EXT)) {
                         $contentName = $cname;
                         $find = true;
                         break;

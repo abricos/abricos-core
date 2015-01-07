@@ -420,49 +420,6 @@ class Ab_CoreQuery {
         return $db->query_read($sql);
     }
 
-    public static function CacheClear(Ab_Database $db) {
-        $sql = "TRUNCATE TABLE ".$db->prefix."sys_cache";
-        $db->query_write($sql);
-    }
-
-    public static function CacheUpdate(Ab_Database $db, $cacheid, $body) {
-        $sql = "
-			UPDATE ".$db->prefix."sys_cache
-			SET
-				body='".bkstr($body)."',
-				upddate=".TIMENOW."
-			WHERE cacheid=".bkint($cacheid)."
-			LIMIT 1
-		";
-        $db->query_write($sql, true);
-    }
-
-    public static function CacheAppend(Ab_Database $db, $modname, $brickname, $body) {
-        $sql = "
-			INSERT INTO ".$db->prefix."sys_cache
-			(module, name, body, upddate) VALUES (
-				'".bkstr($modname)."',
-				'".bkstr($brickname)."',
-				'".bkstr($body)."',
-				'".TIMENOW."'
-			)
-		";
-        $db->query_write($sql);
-    }
-
-    public static function Cache(Ab_Database $db, $modname, $brickname) {
-        $sql = "
-			SELECT 
-				cacheid as id,
-				body as bd,
-				upddate as ud
-			FROM ".$db->prefix."sys_cache
-			WHERE module='".$modname."' AND name='".$brickname."'
-			LIMIT 1
-		";
-        return $db->query_first($sql);
-    }
-
     public static function PhraseList(Ab_Database $db, $modName) {
         $sql = "
 			SELECT

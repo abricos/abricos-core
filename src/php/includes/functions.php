@@ -49,6 +49,19 @@ function array_to_object($arr){
     return new stdClass();
 }
 
+function object_to_array($obj){
+    if (is_array($obj)){
+        return $obj;
+    }else if (is_object($obj)){
+        $ret = array();
+        foreach($obj as $key => $val){
+            $ret[$key] =$val;
+        }
+        return $ret;
+    }
+    return array();
+}
+
 function verify_link(&$link) {
     if (preg_match('#^www\.#si', $link)) {
         $link = 'http://'.$link;

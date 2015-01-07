@@ -54,7 +54,7 @@ if ($libType == 'sys') {
     $newFiles = array();
     foreach ($files as $file) {
         if ($module == "_template") {
-            $newFiles[] = '/tt/'.$templateName.'/jsmod/'.$file;
+            $newFiles[] = '/template/'.$templateName.'/jsmod/'.$file;
         } else {
             $newFiles[] = '/modules/'.$module.'/js/'.$file;
         }
@@ -226,7 +226,7 @@ if ($libType == 'sys') {
         }
 
         if ($entry == "_template") {
-            $jsdir = $realPath."/tt/".$templateName."/jsmod";
+            $jsdir = $realPath."/template/".$templateName."/jsmod";
         } else {
             $jsdir = $realPath."/modules/".$entry."/js";
         }

@@ -11,6 +11,8 @@
  */
 class Ab_CoreBrickReader {
 
+    const FILE_EXT = ".json";
+
     public $isAdmin = false;
 
     /**
@@ -136,7 +138,7 @@ class Ab_CoreBrickReader {
             $template[$row['own'].".".$row['nm']] = $row;
         }
 
-        $dir = dir(CWD."/tt/");
+        $dir = dir(CWD."/template/");
         while (($dirname = $dir->read())) {
             if ($dirname == "." || $dirname == ".." || empty($dirname)) {
                 continue;
@@ -145,9 +147,9 @@ class Ab_CoreBrickReader {
                 continue;
             }
 
-            $files = globa(CWD."/tt/".$dirname."/*.html");
+            $files = globa(CWD."/template/".$dirname."/*".Ab_CoreBrickReader::FILE_EXT);
             foreach ($files as $file) {
-                $bname = basename($file, ".html");
+                $bname = basename($file, Ab_CoreBrickReader::FILE_EXT);
                 $key = $dirname.".".$bname;
 
                 if (empty($template[$key])) {
@@ -256,15 +258,15 @@ class Ab_CoreBrickReader {
         if ($type == Brick::BRICKTYPE_TEMPLATE) {
             // загрузка шаблона поставляемого с модулем
             if ($owner == "_my") {
-                $path = CWD."/modules/".Brick::$modman->name."/tt/".$name.".html";
+                $path = CWD."/modules/".Brick::$modman->name."/template/".$name.Ab_CoreBrickReader::FILE_EXT;
 
                 // возможность перегрузить шаблон поставляемый с модулем
-                $override = CWD."/tt/".Brick::$style."/override/".Brick::$modman->name."/tt/".$name.".html";
+                $override = CWD."/template/".Brick::$style."/override/".Brick::$modman->name."/template/".$name.Ab_CoreBrickReader::FILE_EXT;
                 if (file_exists($override)) {
                     $path = $override;
                 }
             } else {
-                $path = CWD."/tt/".$owner."/".$name.".html";
+                $path = CWD."/template/".$owner."/".$name.Ab_CoreBrickReader::FILE_EXT;
             }
         } else {
             $nextpath = "";
@@ -279,15 +281,15 @@ class Ab_CoreBrickReader {
                     $nextPartPath = "content-part/";
                     break;
             }
-            $path = CWD."/modules/".$owner."/".$nextpath.$name.".html";
+            $path = CWD."/modules/".$owner."/".$nextpath.$name.Ab_CoreBrickReader::FILE_EXT;
 
             // возможно c поставляемым шаблоном есть перегруженный кирпич
-            $override = CWD."/tt/".Brick::$style."/override/".$owner."/".$nextpath.$name.".html";
+            $override = CWD."/template/".Brick::$style."/override/".$owner."/".$nextpath.$name.Ab_CoreBrickReader::FILE_EXT;
             if (file_exists($override)) {
                 $path = $override;
             }
 
-            $overridePart = CWD."/tt/".Brick::$style."/override/".$owner."/".$nextPartPath.$name.".html";
+            $overridePart = CWD."/template/".Brick::$style."/override/".$owner."/".$nextPartPath.$name.Ab_CoreBrickReader::FILE_EXT;
             if (file_exists($overridePart)) {
                 $partPath = $overridePart;
             }
@@ -301,6 +303,7 @@ class Ab_CoreBrickReader {
     }
 
     public static function ReadBrickFromFile($file, $modname = '', $partPath = '') {
+
         $ret = new stdClass();
         $ret->isError = false;
         if (!file_exists($file)) {
@@ -344,94 +347,93 @@ class Ab_CoreBrickReader {
             }
         }
 
-        $pattern = "#<!--\[\*\](.+?)\[\*\]-->#is";
-        $mathes = array();
-        preg_match($pattern, $filebody, $mathes);
-        $param = isset($mathes[1]) ? $mathes[1] : '';
+        $data = json_decode($filebody);
 
         $ret->hash = "";
         if (file_exists($file)) {
             $ret->hash = md5("sz".filesize($file)."tm".filemtime($file));
         }
 
-        $ret->body = preg_replace($pattern, '', $filebody);
+        $ret->body = $data->content;
+
         $p = new Ab_CoreBrickParam();
 
         // локальные переменные кирпича
-        $p->var = Ab_CoreBrickReader::BrickParseVar($param, "bkvar");
-        $var = Ab_CoreBrickReader::BrickParseVar($param, "v");
-        foreach ($var as $key => $value) {
-            $p->var[$key] = $value;
+        if (isset($data->var)){
+            $p->var = object_to_array($data->var);
         }
 
         // глобальные переменные
-        $p->gvar = Ab_CoreBrickReader::BrickParseVar($param, "var");
+        if (isset($data->globalVar)){
+            $p->gvar = object_to_array($data->globalVar);
+        }
 
         // подключаемые модули
         // объявление может быть из нескольких кирпичей с параметрами
         // например: [mod=mymod]mybrick1|p1=mystr|p2=10,mybrick2[/mod]
-        $arr = Ab_CoreBrickReader::BrickParseVar($param, "mod");
-        foreach ($arr as $key => $value) {
-            if (!array_key_exists($key, $p->module)){
-                $p->module[$key] = array();
-            }
-
-            $mods = explode(',', $value);
-            foreach ($mods as $modstr) {
-                // модуль и его параметры
-                $tmp = explode("|", $modstr);
-                // если кирпич обявляется несколько раз с разными параметрами, то
-                // необходимо идентифицировать его по id
-                $brickname = $tmp[0];
-                $inparam = array();
-                $cnt = count($tmp);
-                for ($i = 1; $i < $cnt; $i++) {
-                    $ttmp = explode("=", $tmp[$i]);
-                    $inparam[$ttmp[0]] = $ttmp[1];
+        if (isset($data->module)){
+            foreach ($data->module as $modName => $modObj){
+                $p->module[$modName] = array();
+                if (isset($modObj->brick)){
+                    $bmod = new stdClass();
+                    for ($i = 0; $i < count($modObj->brick); $i++){
+                        if (is_string($modObj->brick[$i])){
+                            $bmod->name = $modObj->brick[$i];
+                        }else{
+                            $bmod->name = $modObj->brick[$i]->name;
+                            if (isset($modObj->brick[$i]->args)){
+                                $bmod->param = object_to_array($modObj->brick[$i]->args);
+                            }
+                        }
+                    }
+                    $p->module[$modName][] = $bmod;
                 }
-                $bmod = new stdClass();
-                $bmod->name = $brickname;
-                if (count($inparam) > 0) {
-                    $bmod->param = $inparam;
+                // Фразы
+                if (isset($modObj->phrase)){
+                    foreach ($modObj->phrase as $phName => $phVal){
+                        $p->phrase[$modName.":".$phName] = $phVal;
+                    }
                 }
-                $p->module[$key][] = $bmod;
+                // CSS файлы модуля
+                if (isset($modObj->css)){
+                    $p->cssmod[$modName] = $modObj->css;
+                }
+                // JavaScript модули
+                if (isset($modObj->js)){
+                    $p->jsmod[$modName] = $modObj->js;
+                }
             }
         }
 
         // шаблон
-        $arr = Ab_CoreBrickReader::BrickParseVar($param, "tt");
-        foreach ($arr as $key => $value) {
-            $p->template['name'] = $key;
-            $p->template['owner'] = $value;
-            break;
+        if (isset($data->template)){
+            $p->template['name'] = $data->template->name;
+            $p->template['owner'] = $data->template->owner;
         }
 
-        // Фразы
-        $p->phrase = Ab_CoreBrickReader::BrickParseVar($param, "ph");
-        $p->param = Ab_CoreBrickReader::BrickParseVar($param, "p");
-        $p->script = Ab_CoreBrickReader::BrickParseValue($param, "script");
-
-        // JavaScript модули
-        $arr = Ab_CoreBrickReader::BrickParseVar($param, "mjs");
-        foreach ($arr as $key => $value) {
-            $p->jsmod[$key] = explode(',', $value);
+        // параметры
+        if (isset($data->parameter)){
+            $p->param = object_to_array($data->parameter);
         }
 
-        // CSS файлы модуля
-        $arr = Ab_CoreBrickReader::BrickParseVar($param, "mcss");
-        foreach ($arr as $key => $value) {
-            $p->cssmod[$key] = explode(',', $value);
+        if (isset($data->script)){
+            $p->script = $data->script;
         }
-
 
         // JavaScript файлы
-        $p->jsfile = Ab_CoreBrickReader::BrickParseValue($param, "js");
+        if (isset($data->jsFile)){
+            $p->jsfile = $data->jsFile;
+        }
 
         // Свободные CSS файлы шаблона
-        $p->css = Ab_CoreBrickReader::BrickParseValue($param, "css");
+        if (isset($data->cssFile)){
+            $p->css = $data->cssFile;
+        }
 
         // CSS файлы шаблона
-        $p->tcss = Ab_CoreBrickReader::BrickParseValue($param, "tcss");
+        if (isset($data->templateCSSFile)){
+            $p->tcss = $data->templateCSSFile;
+        }
 
         $ret->param = $p;
 

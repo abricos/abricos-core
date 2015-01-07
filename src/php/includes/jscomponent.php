@@ -43,7 +43,7 @@ class Ab_CoreJSCFile {
             $this->error();
         }
 
-        $overPath = realpath($rootPath."/tt/".$tname."/override/".$module."/js/".$component);
+        $overPath = realpath($rootPath."/template/".$tname."/override/".$module."/js/".$component);
 
         $this->fileHTML = $compPath.".htm";
         if (file_exists($this->fileHTML)) {

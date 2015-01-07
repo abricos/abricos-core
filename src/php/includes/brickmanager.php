@@ -518,7 +518,7 @@ class Ab_CoreBrickBuilder {
                 foreach ($files as $file => $value) {
                     $webcssfile = "/modules/".$modname."/css/".$file;
 
-                    $weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$file;
+                    $weboverride = "/template/".Brick::$style."/override/".$modname."/css/".$file;
                     if (file_exists(CWD.$weboverride)) {
                         $webcssfile = $weboverride;
                     }
@@ -533,7 +533,7 @@ class Ab_CoreBrickBuilder {
                 }
             }
             foreach ($this->_tcssfile as $value) {
-                $this->AddCSSFile("/tt/".Brick::$style."/css/".$value);
+                $this->AddCSSFile("/template/".Brick::$style."/css/".$value);
             }
 
             // добавление css файлов
@@ -699,21 +699,6 @@ class Ab_CoreBrickManager {
             }
         }
 
-        // кеш, применим только к шаблону
-        if ($brickType == Brick::BRICKTYPE_TEMPLATE) {
-            if (array_key_exists('brick_cache', Abricos::$config['Misc']) && Abricos::$config['Misc']['brick_cache']) {
-                $time = TIMENOW - 5 * 360;
-                $cache = Ab_CoreQuery::Cache($db, $owner, $brickName);
-                if (empty($cache) || $cache['ud'] < $time) {
-                    $recache = true;
-                }
-                if (!$recache && !empty($cache)) {
-                    $brick = unserialize($cache['bd']);
-                    return $brick;
-                }
-            }
-        }
-
         // Возможно кирпичь редактировался пользователем, тогда он будет взят из базы 
         if (is_null($brick) && !is_null($this->custom)) {
             $customBrick = $this->custom->GetBrick($owner, $brickName, $brickType);
@@ -787,7 +772,7 @@ class Ab_CoreBrickManager {
 
             if (empty($p->template["owner"])) {
                 $towner = $sysPhrases->Get('style', 'default');
-                if (!file_exists(CWD."/tt/".$towner."/main.html")) {
+                if (!file_exists(CWD."/template/".$towner."/main.html")) {
                     $p->template["owner"] = "default";
                     $sysPhrases->Set('style', 'default');
                 } else {
@@ -926,6 +911,12 @@ class Ab_CoreBrickParam {
      * @var mixed
      */
     public $cssmod = array();
+    /**
+     * CSS файлы шаблона
+     *
+     * @var mixed
+     */
+    public $tcss = array();
 
 }
 
