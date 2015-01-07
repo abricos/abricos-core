@@ -304,11 +304,15 @@ class Ab_CoreBrickReader {
 
     public static function ReadBrickFromFile($file, $modname = '', $partPath = '') {
 
+        $p = new Ab_CoreBrickParam();
         $ret = new stdClass();
         $ret->isError = false;
+        $ret->param = $p;
+
         if (!file_exists($file)) {
-            $filebody = "File not found: ".$file;
             $ret->isError = true;
+            $ret->body = "File not found: ".$file;
+            return $ret;
         } else {
             $filebody = file_get_contents($file);
         }
@@ -341,6 +345,7 @@ class Ab_CoreBrickReader {
                         }
                     }
                     if (!is_null($ph)) {
+                        $ph = addslashes($ph);
                         $filebody = str_replace("{#".$key."}", $ph, $filebody);
                     }
                 }
@@ -355,8 +360,6 @@ class Ab_CoreBrickReader {
         }
 
         $ret->body = $data->content;
-
-        $p = new Ab_CoreBrickParam();
 
         // локальные переменные кирпича
         if (isset($data->var)){
@@ -437,8 +440,6 @@ class Ab_CoreBrickReader {
         if (isset($data->templateCSSFile)){
             $p->tcss = $data->templateCSSFile;
         }
-
-        $ret->param = $p;
 
         if (empty($partPath)) {
             return $ret;
