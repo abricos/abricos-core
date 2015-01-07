@@ -8,8 +8,6 @@
 [ph=sys:counter][/ph]
 
 [bkvar=ttowner]default[/bkvar]
-[bkvar=js][/bkvar]
-[bkvar=css][/bkvar]
 
 [mod=sys]jsvar[/mod]
 [mod=rss]meta[/mod]
@@ -21,7 +19,15 @@
 [mod=news]newsblock[/mod]
 [mod=user]usermenubutton[/mod]
 
-[mcss=sys]widget.css[/mcss] // Будет удалет. Оставлен для совместимости
+[var=ttvs]0.0.1[/var]
+
+[var=css][/var]
+[var=js][/var]
+
+[css]/vendor/bootstrap/css/bootstrap.min.css[/css]
+[css]/vendor/font-awesome/css/font-awesome.min.css[/css]
+
+[tcss]main.css[/tcss]
 
 [*]--><!DOCTYPE html>
 <html lang="ru" class="yui3-loading">
@@ -34,18 +40,11 @@
 
     [mod]sys:jsvar[/mod]
 
-    <link href="/vendor/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet">
-    <link href="/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <script src="/gzip.php?base=/vendor&v=[var]ttvs[/var]&file=jquery/jquery.min.js,bootstrap/js/bootstrap.min.js"></script>
 
-    <link href="/tt/[bkvar]ttowner[/bkvar]/css/main.css?v=0.1.0" type="text/css" rel="stylesheet"/>
+    [var]js[/var]
 
-    <script src="/gzip.php?base=/vendor&v=[var]version[/var]&file=jquery/jquery.min.js,bootstrap/js/bootstrap.min.js"></script>
-
-    [bkvar]css[/bkvar]
-
-    [bkvar]js[/bkvar]
-
-    <link rel="stylesheet" href="/tt/[bkvar]ttowner[/bkvar]/css/override.css?v=0.1.0" type="text/css"/>
+    [var]css[/var]
 
     [mod]rss:meta[/mod]
 
@@ -92,7 +91,7 @@
             <div class="row">
                 <div class="col-md-2 logo">
                     <a href="/">
-                        <img src="/tt/[bkvar]ttowner[/bkvar]/i/logo.png?v=0.1"
+                        <img src="/template/[bkvar]ttowner[/bkvar]/assets/i/logo.png?v=0.1"
                              title="[ph]sys:site_name[/ph]"
                              alt="[ph]sys:site_name[/ph]">
                     </a>

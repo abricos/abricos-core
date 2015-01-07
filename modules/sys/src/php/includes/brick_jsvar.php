@@ -87,7 +87,7 @@ while (false !== ($entry = $dir->read())) {
 	$files = globa($jsdir."/*.htm");
 	foreach ($files as $file){
 		// если есть перегруженый шаблон, то чтение его версии
-		$override = CWD."/tt/".$template."/override/".$entry."/js/".basename($file);
+		$override = CWD."/template/".$template."/override/".$entry."/js/".basename($file);
 
 		if (file_exists($override)){
 			$key += filemtime($override)+filesize($override)+11;
@@ -108,7 +108,7 @@ while (false !== ($entry = $dir->read())) {
 }
 
 // js модули шаблона
-$files = globa(CWD."/tt/".$template."/jsmod/*.js");
+$files = globa(CWD."/tempalte/".$template."/jsmod/*.js");
 foreach ($files as $file){
 	$key += filemtime($file)+filesize($file)+1;
 }

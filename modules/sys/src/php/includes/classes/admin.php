@@ -54,12 +54,12 @@ class SystemManager_Admin {
         }
 
         $rows = array();
-        $dir = dir(CWD."/tt");
+        $dir = dir(CWD."/template");
         while (false !== ($entry = $dir->read())) {
             if ($entry == "." || $entry == ".." || empty($entry) || $entry == "_sys" || $entry == "_my") {
                 continue;
             }
-            if (!file_exists(CWD."/tt/".$entry."/main.html")) {
+            if (!file_exists(CWD."/template/".$entry."/main".Ab_CoreBrickReader::FILE_EXT)) {
                 continue;
             }
             $rows[] = $entry;

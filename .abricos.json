@@ -1,12 +1,11 @@
 {
   "vendor": {
-    "alloyui": {
-      "endpoint": "~3.0.0",
+    "alloy-3.0.0": {
+      "endpoint": "https://github.com/liferay/alloy-ui/releases/download/3.0.0/alloy-3.0.0.zip",
       "build": [
         {
           "cwd": "build",
-          "src": "**",
-          "dest": ""
+          "src": "**"
         },
         {
           "src": "*.md",

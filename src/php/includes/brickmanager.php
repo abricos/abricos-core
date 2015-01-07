@@ -533,7 +533,7 @@ class Ab_CoreBrickBuilder {
                 }
             }
             foreach ($this->_tcssfile as $value) {
-                $this->AddCSSFile("/template/".Brick::$style."/css/".$value);
+                $this->AddCSSFile("/template/".Brick::$style."/assets/".$value);
             }
 
             // добавление css файлов
@@ -772,7 +772,7 @@ class Ab_CoreBrickManager {
 
             if (empty($p->template["owner"])) {
                 $towner = $sysPhrases->Get('style', 'default');
-                if (!file_exists(CWD."/template/".$towner."/main.html")) {
+                if (!file_exists(CWD."/template/".$towner."/main".Ab_CoreBrickReader::FILE_EXT)) {
                     $p->template["owner"] = "default";
                     $sysPhrases->Set('style', 'default');
                 } else {
