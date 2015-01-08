@@ -89,8 +89,12 @@ Component.entryPoint = function(NS){
 
             this.elSetHTML('board', "");
 
-            var elBoard = Y.one('#' + this.gel('board').id),
-                elDiv = Y.Node.create('<div></div>');
+            var elBoard = this.gel('board'),
+                elBoardId = '#' + elBoard.id;
+
+            elBoard = Y.one(elBoardId);
+
+            var elDiv = Y.Node.create('<div></div>');
 
             elBoard.appendChild(elDiv);
 
