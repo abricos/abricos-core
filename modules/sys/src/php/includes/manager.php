@@ -62,7 +62,7 @@ class SystemManager extends Ab_ModuleManager {
             array(
                 "name" => "config",
                 "title" => $lng['bosmenu']['config'],
-                "icon" => "/modules/user/images/cpanel-24.png",
+                "icon" => "{C#ASSETS:M:user}/images/cpanel-24.png",
                 "url" => "sys/wspace/ws",
                 "parent" => "controlPanel"
             )

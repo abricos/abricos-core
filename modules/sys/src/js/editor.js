@@ -348,7 +348,7 @@ Component.entryPoint = function(){
 
             this._buttons['code'] = new EditorButton(this, {
                 name: 'code',
-                image: '/modules/sys/images/ed_code.gif',
+                image: '{C#ASSETS}/images/ed_code.gif',
                 onClick: function(){
                     __self.set('mode', Editor.MODE_CODE);
                 }
@@ -356,7 +356,7 @@ Component.entryPoint = function(){
 
             this._buttons['visual'] = new EditorButton(this, {
                 name: 'visual',
-                image: '/modules/sys/images/ed_visual.gif',
+                image: '{C#ASSETS}/images/ed_visual.gif',
                 onClick: function(){
                     __self.set('mode', Editor.MODE_VISUAL);
                 }
@@ -366,21 +366,21 @@ Component.entryPoint = function(){
             if (isToolbarExpert){
                 this._buttons['tb_full'] = new EditorButton(this, {
                     name: 'tb_full',
-                    image: '/modules/sys/images/ed_tb_full.gif',
+                    image: '{C#ASSETS}/images/ed_tb_full.gif',
                     onClick: function(){
                         __self.set('toolbar', Editor.TOOLBAR_FULL);
                     }
                 });
                 this._buttons['tb_standart'] = new EditorButton(this, {
                     name: 'tb_standart',
-                    image: '/modules/sys/images/ed_tb_standart.gif',
+                    image: '{C#ASSETS}/images/ed_tb_standart.gif',
                     onClick: function(){
                         __self.set('toolbar', Editor.TOOLBAR_STANDART);
                     }
                 });
                 this._buttons['tb_minimal'] = new EditorButton(this, {
                     name: 'tb_minimal',
-                    image: '/modules/sys/images/ed_tb_minimal.gif',
+                    image: '{C#ASSETS}/images/ed_tb_minimal.gif',
                     onClick: function(){
                         __self.set('toolbar', Editor.TOOLBAR_MINIMAL);
                     }
@@ -389,7 +389,7 @@ Component.entryPoint = function(){
             if (isFileUploadRole){
                 this._buttons['filemanager'] = new EditorButton(this, {
                     name: 'filemanager',
-                    image: '/modules/sys/images/ed_filemanager.gif',
+                    image: '{C#ASSETS}/images/ed_filemanager.gif',
                     onClick: function(){
                         Brick.Component.API.fire('filemanager', 'api', 'showFileBrowserPanel', function(result){
                             __self.insertValue(result['html']);

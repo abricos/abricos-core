@@ -191,7 +191,6 @@ if ($libType == 'fullcssforie'){
 
 } else if ($libType === 'mod' || $libType === 'sys'){
 
-
     // Append main file
     foreach ($files as $file){
         $cname = basename($file, ".js");
@@ -329,43 +328,6 @@ function getFileContents($path, $notcheck = false){
         $content = preg_replace('/(url\()(\'\.\.\/)+/', 'url(\''.$rBase."../", $content); // url ('../foo.png')
         $content = preg_replace('/(url\()(\"\.\.\/)+/', 'url(\"'.$rBase."../", $content); // url ("../foo.png")
         $content = preg_replace('/(url\()(\.\.\/)+/', 'url('.$rBase."../", $content); // url (../foo.png)
-
-        /*
-        $pattern = '#((url\()([^\\|^\/|^\.\.]\S+)(\)))#';
-
-        //Handle image path corrections (order is important)
-        $content = preg_replace($pattern,
-            '${2}'.$rBase.'/${3}${4}',
-            $content, -1, $count
-        ); // just filename or subdirs/filename (e.g) url(foo.png),
-        // url(foo/foo.png)
-
-        preg_match_all('/(url\()(\.\.\/\S+)(\))/', $content, $matches);
-
-        $urls = $matches[2];
-        $reps = array();
-        for ($i = 0; $i < count($urls); $i++) {
-            $url = $urls[$i];
-            if ($reps[$url]) {
-                continue;
-            }
-            $reps[$url] = true;
-
-            $urlFile = realpath($fi['dirname']."/".$url);
-            if (empty($urlFile)) {
-                continue;
-            }
-
-            $absUrl = str_replace($realPath, "", $urlFile);
-            if ($absUrl == $urlFile) {
-                continue;
-            }
-
-            $tmp = str_replace($url, $absUrl, $matches[0][$i]);
-
-            $content = str_replace($matches[0][$i], $tmp, $content);
-        }
-        /**/
     }
 
     return $content;
