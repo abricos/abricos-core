@@ -962,7 +962,6 @@ Brick.dateExt = function(){
 			var mp = LNG['monthp'],
 				ds = LNG['dayst'];
 
-
 			if (!udate || udate == null){ return ""; }
 			if (typeof udate['getTime'] == 'function'){
 				udate = udate.getTime()/1000;
