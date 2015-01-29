@@ -50,6 +50,8 @@ final class Abricos {
      */
     public static $config;
 
+    public static $isDevelopMode = false;
+
     /**
      * @var Ab_CoreModuleManager
      */
@@ -92,6 +94,10 @@ final class Abricos {
 
         if (empty($config['Misc']['language'])) {
             $config['Misc']['language'] = 'ru';
+        }
+
+        if (isset($config['Misc']['develop_mode'])){
+            Abricos::$isDevelopMode = $config['Misc']['develop_mode'];
         }
 
         define('LNG', $config['Misc']['language']);
@@ -448,6 +454,10 @@ final class Abricos {
 }
 
 class Ab_Notification {
+
+    public $errorInfo;
+
+    public $messageId;
 
     /**
      * Отправить EMail пользователю
