@@ -141,6 +141,7 @@ class AbricosAPIResponse400 extends AbricosAPIResponse {
     public $data = null;
 
     public function __construct(){
+        parent::__construct();
         $this->headers['status'] = 'HTTP/1.1 400 Invalid request';
     }
 
@@ -166,9 +167,43 @@ class AbricosAPIResponse403 extends AbricosAPIResponse {
     public $data = null;
 
     public function __construct(){
+        parent::__construct();
         $this->headers['status'] = 'HTTP/1.1 403 Access denied';
     }
-
 }
+
+class AbricosAPIResponseError extends AbricosAPIResponse {
+
+    public $errorCode = "UNKNOW";
+    public $message = "";
+
+    private $_errors;
+
+    public function __construct($errors){
+        parent::__construct();
+        $this->_errors = $errors;
+        $this->data = null;
+        $this->headers['status'] = 'HTTP/1.1 422 Unprocesable entity';
+    }
+
+    public function SetError($errorNum){
+        $errors = $this->_errors;
+
+        if (!isset($errors[$errorNum])){
+            if (!isset($errors['unknow'])){
+                return $this;
+            }
+            $item = $errors['unknow'];
+        }
+        if (empty($item)){
+            $item = $errors[$errorNum];
+        }
+        $this->errorCode = $item[0];
+        $this->message = $item[1];
+
+        return $this;
+    }
+}
+
 
 ?>
