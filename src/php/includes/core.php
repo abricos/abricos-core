@@ -190,14 +190,13 @@ final class Abricos {
             $modman = $modSys;
             $contentName = $this->_superContentFile;
             $isSuperContent = true;
-        } else if ($adress->level >= 2 && $adress->dir[0] == 'ajax') {
-            // TODO: remove
-            $modman = $modSys;
-            $contentName = 'ajax';
-        } else if ($adress->level >= 2 && $adress->dir[0] == 'tajax') {
-            // TODO: remove
+        } else if ($adress->level >= 2 && $adress->dir[0] === 'tajax') {
             $modman = $modSys;
             $contentName = 'tajax';
+        } else if ($adress->level >= 1 && $adress->dir[0] === 'api') {
+            $modman = $modSys;
+            $contentName = 'api';
+            require 'api.php';
         } else {
             $aDir0 = isset($adress->dir[0]) ? $adress->dir[0] : "";
 

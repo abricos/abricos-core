@@ -89,42 +89,6 @@ class Ab_CoreInputCleaner {
     }
 
     /**
-     *
-     * @ignore
-     */
-    private function &clean_array(&$source, $variables){
-        $return = array();
-
-        foreach ($variables AS $varname => $vartype){
-            $return["$varname"] =& $this->clean($source["$varname"], $vartype, isset($source["$varname"]));
-        }
-        return $return;
-    }
-
-    /**
-     * Makes GPC variables safe to use
-     *
-     * @param    string    Either, g, p, c, r or f (corresponding to get, post, cookie, request and files)
-     * @param    array    Array of variable names and types we want to extract from the source array
-     *
-     * @return    array
-     * @ignore
-     */
-    private function clean_array_gpc($source, $variables){
-        $sg =& $GLOBALS[$this->superglobal_lookup["$source"]];
-
-        foreach ($variables AS $varname => $vartype){
-            if (!isset($this->GPC["$varname"])){
-                $this->GPC["$varname"] =& $this->clean(
-                    $sg["$varname"],
-                    $vartype,
-                    isset($sg["$varname"])
-                );
-            }
-        }
-    }
-
-    /**
      * Обработать глобальную переменную для безопасного использования
      *
      * Например:

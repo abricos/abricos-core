@@ -10,11 +10,18 @@
 class AbricosItem {
     public $id;
 
-    public function __construct($d) {
+    public function __construct($d){
         $this->id = $d['id'];
     }
 
-    public function ToAJAX() {
+    /**
+     * @deprecated
+     */
+    public function ToAJAX(){
+        return $this->ToJSON();
+    }
+
+    public function ToJSON(){
         $ret = new stdClass();
         $ret->id = $this->id;
         return $ret;
@@ -27,23 +34,30 @@ class AbricosListConfig {
 
     private $_total = 0;
 
-    public function __construct($d = null) {
-        if (!is_array($d)) {
+    public function __construct($d = null){
+        if (!is_array($d)){
             return;
         }
         $this->page = max(intval($d['page']), 1);
         $this->limit = intval($d['limit']);
     }
 
-    public function SetTotal($total) {
+    public function SetTotal($total){
         $this->_total = intval($total);
     }
 
-    public function GetTotal() {
+    public function GetTotal(){
         return $this->_total;
     }
 
-    public function ToAJAX() {
+    /**
+     * @deprecated
+     */
+    public function ToAJAX(){
+        return $this->ToJSON();
+    }
+
+    public function ToJSON(){
         $ret = new stdClass();
         $ret->page = $this->page;
         $ret->limit = $this->limit;
@@ -51,7 +65,7 @@ class AbricosListConfig {
         return $ret;
     }
 
-    public function GetFrom() {
+    public function GetFrom(){
         return ($this->page - 1) * $this->limit;
     }
 }
@@ -71,23 +85,23 @@ class AbricosList {
 
     protected $isCheckDouble = false;
 
-    public function __construct($config = null) {
+    public function __construct($config = null){
         $this->_list = array();
         $this->_map = array();
-        if (empty($config)) {
+        if (empty($config)){
             $config = new $this->classConfig();
         }
         $this->config = $config;
     }
 
-    public function Add($item) {
-        if (empty($item)) {
+    public function Add($item){
+        if (empty($item)){
             return;
         }
 
-        if ($this->isCheckDouble) {
+        if ($this->isCheckDouble){
             $checkItem = $this->Get($item->id);
-            if (!empty($checkItem)) {
+            if (!empty($checkItem)){
                 return;
             }
         }
@@ -102,11 +116,11 @@ class AbricosList {
     /**
      * Массив идентификаторов
      */
-    public function Ids() {
+    public function Ids(){
         return $this->_ids;
     }
 
-    public function Count() {
+    public function Count(){
         return count($this->_list);
     }
 
@@ -114,7 +128,7 @@ class AbricosList {
      * @param integer $index
      * @return AbricosItem
      */
-    public function GetByIndex($index) {
+    public function GetByIndex($index){
         return $this->_list[$index];
     }
 
@@ -122,18 +136,18 @@ class AbricosList {
      * @param mixed $id
      * @return AbricosItem || null
      */
-    public function Get($id) {
-        if (!array_key_exists($id, $this->_map)) {
+    public function Get($id){
+        if (!array_key_exists($id, $this->_map)){
             return null;
         }
         $index = $this->_map[$id];
         return $this->_list[$index];
     }
 
-    public function ToAJAX() {
+    public function ToAJAX(){
         $list = array();
         $count = $this->Count();
-        for ($i = 0; $i < $count; $i++) {
+        for ($i = 0; $i < $count; $i++){
             $list[] = $this->GetByIndex($i)->ToAJAX();
         }
 
