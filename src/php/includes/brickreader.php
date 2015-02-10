@@ -378,8 +378,8 @@ class Ab_CoreBrickReader {
             foreach ($data->module as $modName => $modObj){
                 $p->module[$modName] = array();
                 if (isset($modObj->brick)){
-                    $bmod = new stdClass();
                     for ($i = 0; $i < count($modObj->brick); $i++){
+                        $bmod = new stdClass();
                         if (is_string($modObj->brick[$i])){
                             $bmod->name = $modObj->brick[$i];
                         }else{
@@ -388,8 +388,8 @@ class Ab_CoreBrickReader {
                                 $bmod->param = object_to_array($modObj->brick[$i]->args);
                             }
                         }
+                        $p->module[$modName][] = $bmod;
                     }
-                    $p->module[$modName][] = $bmod;
                 }
                 // Фразы
                 if (isset($modObj->phrase)){
