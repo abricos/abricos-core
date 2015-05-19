@@ -119,7 +119,7 @@ Component.entryPoint = function(NS){
                         defArgsOffset = info.args.length;
                         for (var i = 0; i < defArgsOffset; i++){
                             funcArg = funcArgs[i];
-                            if (Y.Lang.isFunction(funcArg.toJSON)){
+                            if (funcArg && Y.Lang.isFunction(funcArg.toJSON)){
                                 funcArg = funcArg.toJSON();
                             }
                             rData[info.args[i]] = funcArg;
@@ -206,7 +206,7 @@ Component.entryPoint = function(NS){
                     instance.set(WAITING, false);
                     instance.showWorkspacePage(page);
                 });
-            }else{
+            } else {
                 this.showWorkspacePage(this.get('workspacePage'));
             }
         },
