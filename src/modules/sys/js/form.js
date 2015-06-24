@@ -65,6 +65,21 @@ Component.entryPoint = function(NS){
         _syncUIForm: function(){
             this.updateUIFromModel();
         },
+        eachFieldNode: function(func){
+            if (!Y.Lang.isFunction(func)){
+                return;
+            }
+            var eFunc = function(node){
+                var name = node.get('name');
+                if (name === ""){
+                    return;
+                }
+                func(name, node);
+            };
+            var boundingBox = this.get(BOUNDING_BOX);
+            boundingBox.all('.form-control').each(eFunc, this);
+            boundingBox.all('[data-form]').each(eFunc, this);
+        },
         updateUIFromModel: function(){
             var model = this.get('model');
             if (model){
@@ -76,17 +91,18 @@ Component.entryPoint = function(NS){
                 || !this.get('updateUIFromModel')){
                 return;
             }
-
-            var boundingBox = this.get(BOUNDING_BOX);
-
-            boundingBox.all('.form-control').each(function(fieldNode){
-                var name = fieldNode.get('name');
-
-                if (model.attrAdded(name)
-                    && fieldNode.get('type') !== 'hidden'){
-                    fieldNode.set('value', model.get(name));
+            this.eachFieldNode(function(name, node){
+                if (!model.attrAdded(name)
+                    || node.get('type') === 'hidden'){
+                    return;
                 }
-            }, this);
+                var value = model.get(name);
+                if (Form.isCheckable(node)){
+                    node.set('checked', value ? 'checked' : '');
+                } else {
+                    node.set('value', value);
+                }
+            });
 
             this.onUpdateUIFromModel(model);
         },
@@ -97,12 +113,10 @@ Component.entryPoint = function(NS){
             if (!model){
                 return;
             }
+            this._disableAttrChangeEventBugFix = true;
 
-            var boundingBox = this.get(BOUNDING_BOX);
-
-            var setField = function(node){
-                var name = node.get('name'),
-                    value = node.get('value');
+            this.eachFieldNode(function(name, node){
+                var value = node.get('value');
 
                 if (Form.isCheckable(node)){
                     value = node.get('checked') ? 1 : 0;
@@ -112,11 +126,7 @@ Component.entryPoint = function(NS){
                     // TODO: silent not working
                     model.set(name, value, {silent: true});
                 }
-            };
-
-            this._disableAttrChangeEventBugFix = true;
-            boundingBox.all('.form-control').each(setField, this);
-            boundingBox.all('[data-form]').each(setField, this);
+            });
 
             this.onUpdateModelFromUI(model);
             this._disableAttrChangeEventBugFix = false;
@@ -127,11 +137,11 @@ Component.entryPoint = function(NS){
             var boundingBox = this.get(BOUNDING_BOX),
                 findNode = null;
 
-            boundingBox.all('.form-control').each(function(node){
-                if (node.get('name') === name){
+            this.eachFieldNode(function(fName, node){
+                if (fName === name){
                     findNode = node;
                 }
-            }, this);
+            });
 
             return findNode;
         }
