@@ -374,10 +374,10 @@ class Ab_CoreModuleManager {
         $adress = Abricos::$adress;
         $link = $adress->level === 0 ? "__super" : $adress->dir[0];
         $mainLink = null;
-        if (!empty($cfg) && count($cfg) > 0 && !empty($link)) {
-            $cfgLink = $cfg[$link];
-            $modName = $cfgLink["module"];
-            $enmod = is_array($cfgLink["enmod"]) > 0 ? $cfgLink["enmod"] : array();
+        if (is_array($cfg) && count($cfg) > 0 && !empty($link)) {
+            $cfgLink = isset($cfg[$link]) ? $cfg[$link] : array();
+            $modName = isset($cfgLink["module"]) ? $cfgLink["module"] : "";
+            $enmod = isset($cfgLink["enmod"]) && is_array($cfgLink["enmod"]) ? $cfgLink["enmod"] : array();
             while (($row = $db->fetch_array($rows))) {
                 $name = $row['name'];
                 if ($name == $modName) {
