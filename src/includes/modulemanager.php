@@ -22,6 +22,20 @@
 abstract class Ab_Module {
 
     /**
+     * CSS по умолчанию (имя файла в папке css модуля).
+     * @deprecated
+     */
+    private $defaultCSS = "";
+
+    /**
+     * TODO: remove
+     *
+     * @deprecated
+     */
+    private $lang;
+
+
+    /**
      * Ошибка модуля. Если true, модуль не инициализируется в ядре
      *
      * @var boolean
@@ -62,12 +76,6 @@ abstract class Ab_Module {
     public $takelink = "";
 
     /**
-     * CSS по умолчанию (имя файла в папке css модуля).
-     * @deprecated
-     */
-    private $defaultCSS = "";
-
-    /**
      * Список зависимых модулей и их версии
      * Например:
      * <code>
@@ -82,36 +90,30 @@ abstract class Ab_Module {
      */
     public $depends = array();
 
-    /**
-     * TODO: remove
-     *
-     * @deprecated
-     */
-    private $lang;
+    public $defaultLocale = 'ru-RU';
 
     private $_i18n = null;
 
-    public function GetI18n() {
-        if (is_array($this->_i18n)) {
-            return $this->_i18n;
+    /**
+     * @return Ab_CoreI18n
+     */
+    public function I18n(){
+        if (empty($this->_i18n)){
+            require_once 'i18n.php';
+            $this->_i18n = new Ab_CoreI18n($this);
         }
-        $this->_i18n = array();
-
-        $file = CWD."/modules/".$this->name."/i18n/".Abricos::$LNG.".php";
-        if (!file_exists($file)) {
-            // TODO: remove
-            $file = CWD."/modules/".$this->name."/language/".Abricos::$LNG.".php";
-        }
-
-        if (file_exists($file)) {
-            $arr = include($file);
-            if (is_array($arr)) {
-                $this->_i18n = $arr;
-            }
-        }
-
         return $this->_i18n;
     }
+
+    /**
+     * @return array|null
+     * @deprecated
+     */
+    public function GetI18n() {
+
+        return $this->I18n()->GetData();
+    }
+
 
     /**
      * Когда управление по формированию ответа сервера переходит модулю,

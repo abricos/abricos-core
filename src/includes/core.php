@@ -61,11 +61,18 @@ final class Abricos {
     public static $phrases;
 
     /**
-     * Идентификатор языка
+     * Идентификатор языка контента
      *
      * @var string
      */
     public static $LNG = 'ru';
+
+    /**
+     * Локаль интерфейса пользователя
+     *
+     * @var string
+     */
+    public static $locale = 'ru-RU';
 
     /**
      * Идентификатор домена (мультидоменная система)
@@ -75,28 +82,30 @@ final class Abricos {
     public static $DOMAIN = '';
 
 
-    public function __construct(&$config) {
+    public function __construct(&$config){
         Abricos::$adress = new Ab_URI(Ab_URI::fetch_uri());
         Abricos::$inputCleaner = new Ab_CoreInputCleaner();
         Abricos::$phrases = new Ab_CorePhraseManager();
 
-        if (!isset($config['module'])) {
+        if (!isset($config['module'])){
             $config['module'] = array();
         }
 
-        if (!isset($config['JsonDB']['use']) || !$config['JsonDB']['use']) {
+        if (!isset($config['JsonDB']['use']) || !$config['JsonDB']['use']){
             $config['JsonDB']['password'] = TIMENOW;
         }
-        if (empty($config['Misc']['language'])) {
+
+        if (!isset($config['Misc']['language'])){
             $config['Misc']['language'] = 'ru';
         }
 
-        if (empty($config['Misc']['language'])) {
-            $config['Misc']['language'] = 'ru';
-        }
-
-        define('LNG', $config['Misc']['language']);
         Abricos::$LNG = $config['Misc']['language'];
+
+        if (!isset($config['Misc']['locale'])){
+            $config['Misc']['locale'] = 'ru-RU';
+        }
+
+        Abricos::$locale = $config['Misc']['locale'];
 
         Abricos::$DOMAIN = isset($config['Misc']['domain']) ? $config['Misc']['domain'] : '';
 
@@ -113,7 +122,7 @@ final class Abricos {
         $modSysInfo = $modules->list->Get('sys');
 
         // TODO: временное решение в связи с переходом с CMSBrick на Abricos
-        if (!empty($modSysInfo) && empty($modSysInfo->installDate)) {
+        if (!empty($modSysInfo) && empty($modSysInfo->installDate)){
             Ab_CoreQuery::UpdateToAbricosPackage($db);
         }
         $modules->RegisterByName('sys');
@@ -124,12 +133,12 @@ final class Abricos {
         // проверка на наличие нового модуля в движке
         $smoddir = CWD."/modules/";
         $dir = dir($smoddir);
-        while (($sDir = $dir->read()) !== false) {
-            if ($sDir != '.' && $sDir != '..' && is_dir($smoddir.$sDir)) {
+        while (($sDir = $dir->read()) !== false){
+            if ($sDir != '.' && $sDir != '..' && is_dir($smoddir.$sDir)){
                 $modInfo = $modules->list->Get($sDir);
-                if (empty($modInfo)) { // модуль явно не зарегистрирован
+                if (empty($modInfo)){ // модуль явно не зарегистрирован
                     // а модуль ли это?
-                    if (file_exists($smoddir.$sDir."/module.php")) { // чтото похожее на него
+                    if (file_exists($smoddir.$sDir."/module.php")){ // чтото похожее на него
                         // регистрируем его в системе
                         $modules->RegisterByName($sDir);
                     }
@@ -145,7 +154,7 @@ final class Abricos {
      * Запрашивается ли супер-контент
      * Супер-контент должен располагаться по адресу /content/[lang]/...
      */
-    public function IsSuperContent() {
+    public function IsSuperContent(){
         $adr = Abricos::$adress;
 
         $path = $adr->uri;
@@ -154,13 +163,13 @@ final class Abricos {
         $path = str_replace("..", "", $path);
         $path = preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $path);
 
-        if (!empty(Abricos::$config['supercontent']['path'])) {
-            $path = Abricos::$config['supercontent']['path']."/".Abricos::$LNG.$path;
+        if (!empty(Abricos::$config['supercontent']['path'])){
+            $path = Abricos::$config['supercontent']['path']."/".Abricos::$locale.$path;
         } else {
-            $path = CWD."/content/".Abricos::$LNG.$path;
+            $path = CWD."/content/".Abricos::$locale.$path;
         }
 
-        if (!file_exists($path)) {
+        if (!file_exists($path)){
             return false;
         }
 
@@ -169,7 +178,7 @@ final class Abricos {
         return true;
     }
 
-    private function BuildOutput() {
+    private function BuildOutput(){
 
         // Определить модуль управления выводом
         $adress = Abricos::$adress;
@@ -181,15 +190,15 @@ final class Abricos {
         // Основное управление сайтом ложится на системный модуль
         $modSys = Abricos::GetModule('sys');
 
-        if ($this->IsSuperContent()) {
+        if ($this->IsSuperContent()){
             $modman = $modSys;
             $contentName = $this->_superContentFile;
             $isSuperContent = true;
-        } else if ($adress->level >= 2 && $adress->dir[0] == 'ajax') {
+        } else if ($adress->level >= 2 && $adress->dir[0] == 'ajax'){
             // TODO: remove
             $modman = $modSys;
             $contentName = 'ajax';
-        } else if ($adress->level >= 2 && $adress->dir[0] == 'tajax') {
+        } else if ($adress->level >= 2 && $adress->dir[0] == 'tajax'){
             // TODO: remove
             $modman = $modSys;
             $contentName = 'tajax';
@@ -198,38 +207,38 @@ final class Abricos {
 
             $aDir0 = isset($adress->dir[0]) ? $adress->dir[0] : "";
 
-            for ($i = 0; $i < $modules->list->Count(); $i++) {
+            for ($i = 0; $i < $modules->list->Count(); $i++){
                 $info = $modules->list->GetByIndex($i);
 
-                if ($aDir0 != $info->takelink || empty($info->takelink)) {
+                if ($aDir0 != $info->takelink || empty($info->takelink)){
                     continue;
                 }
                 $modman = $modules->RegisterByName($info->name);
-                if (empty($modman)) {
+                if (empty($modman)){
                     Abricos::SetPageStatus(PAGESTATUS_500);
                 }
                 break;
             }
 
             // сначало проверить в настройках
-            if (is_null($modman)) {
+            if (is_null($modman)){
                 $superModule = "";
                 if (isset(Abricos::$config['Takelink']['__super']['module'])){
                     $superModule = Abricos::$config['Takelink']['__super']['module'];
                 }
-                if (!empty($superModule)) {
+                if (!empty($superModule)){
                     $modman = $modules->RegisterByName($superModule);
                 }
             }
-            if (is_null($modman)) {
+            if (is_null($modman)){
                 $modman = $modules->GetSuperModule();
             }
-            if (is_null($modman)) {
+            if (is_null($modman)){
                 $modman = $modSys;
             }
 
             // имя кирпича
-            if ($flagDevelopPage) {
+            if ($flagDevelopPage){
                 $contentName = 'develop';
             } else {
                 $contentName = $modman->GetContentName();
@@ -238,10 +247,10 @@ final class Abricos {
 
         Brick::$modman = $modman;
 
-        if (empty($contentName)) {
+        if (empty($contentName)){
             Abricos::$pageStatus = PAGESTATUS_404;
         }
-        if (Abricos::$pageStatus != PAGESTATUS_OK) {
+        if (Abricos::$pageStatus != PAGESTATUS_OK){
             Brick::$modman = $modman = $modSys;
             $contentName = $modman->GetContentName();
             header("HTTP/1.1 404 Not Found");
@@ -257,47 +266,47 @@ final class Abricos {
 
         // возможно стиль предопределен в конфиге для этого урла
 
-        if (!empty(Abricos::$config["Template"])) {
+        if (!empty(Abricos::$config["Template"])){
             $uri = Abricos::$adress->requestURI;
             $cfg = &Abricos::$config["Template"];
             $find = false;
 
-            if (!empty($cfg["ignore"])) {
-                foreach ($cfg["ignore"] as &$exp) {
+            if (!empty($cfg["ignore"])){
+                foreach ($cfg["ignore"] as &$exp){
                     $find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
-                    if ($find) {
+                    if ($find){
                         break;
                     }
                 }
             }
-            if (!$find && !empty($cfg["exp"])) {
-                foreach ($cfg["exp"] as &$exp) {
+            if (!$find && !empty($cfg["exp"])){
+                foreach ($cfg["exp"] as &$exp){
                     $find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
-                    if ($find) {
+                    if ($find){
                         Brick::$style = $exp["owner"];
                         break;
                     }
                 }
             }
-            if (!$find && !empty($cfg["default"])) {
+            if (!$find && !empty($cfg["default"])){
                 Brick::$style = $cfg["default"]['owner'];
             }
         }
 
 
-        if (is_array($contentName)) {
+        if (is_array($contentName)){
             // поиск для перегруженных кирпичей
             $find = false;
-            foreach ($contentName as $cname) {
-                if (file_exists(CWD."/tt/".Brick::$style."/override/".$modman->name."/content/".$cname.".html")) {
+            foreach ($contentName as $cname){
+                if (file_exists(CWD."/tt/".Brick::$style."/override/".$modman->name."/content/".$cname.".html")){
                     $contentName = $cname;
                     $find = true;
                     break;
                 }
             }
-            if (!$find) {
-                foreach ($contentName as $cname) {
-                    if (file_exists(CWD."/modules/".$modman->name."/content/".$cname.".html")) {
+            if (!$find){
+                foreach ($contentName as $cname){
+                    if (file_exists(CWD."/modules/".$modman->name."/content/".$cname.".html")){
                         $contentName = $cname;
                         $find = true;
                         break;
@@ -308,7 +317,7 @@ final class Abricos {
 
         $brick = $bm->BuildOutput($modman->name, $contentName, Brick::BRICKTYPE_CONTENT, null, null, $isSuperContent);
 
-        if (Abricos::$pageStatus == PAGESTATUS_500) {
+        if (Abricos::$pageStatus == PAGESTATUS_500){
             header("HTTP/1.1 500 Internal Server Error");
             exit;
         }
@@ -319,15 +328,15 @@ final class Abricos {
         // в кирпич-шаблон и определить его как последний собираемый кирпич
         $newChildren = array();
         $template = null;
-        foreach ($brick->child as $childbrick) {
-            if ($childbrick->type == Brick::BRICKTYPE_TEMPLATE) {
+        foreach ($brick->child as $childbrick){
+            if ($childbrick->type == Brick::BRICKTYPE_TEMPLATE){
                 $template = $childbrick;
             } else {
                 $newChildren[] = $childbrick;
             }
         }
 
-        if (is_null($template)) {
+        if (is_null($template)){
             header("HTTP/1.1 500 Internal Server Error");
             print("Template not found. Add the started brick: [tt=main][/tt]");
             exit;
@@ -353,8 +362,8 @@ final class Abricos {
      *
      * @var $status
      */
-    public static function SetPageStatus($status) {
-        if (Abricos::$pageStatus > PAGESTATUS_OK) {
+    public static function SetPageStatus($status){
+        if (Abricos::$pageStatus > PAGESTATUS_OK){
             return;
         }
         Abricos::$pageStatus = $status;
@@ -367,12 +376,12 @@ final class Abricos {
      *
      * @return Ab_Notification
      */
-    public static function Notify() {
-        if (!is_null(Abricos::$_notification)) {
+    public static function Notify(){
+        if (!is_null(Abricos::$_notification)){
             return Abricos::$_notification;
         }
         $modNotify = Abricos::GetModule('notify');
-        if (empty($modNotify)) {
+        if (empty($modNotify)){
             Abricos::$_notification = new Ab_Notification();
         } else {
             Abricos::$_notification = $modNotify->GetManager();
@@ -390,7 +399,7 @@ final class Abricos {
      * @param integer $vartype Тип переменной
      * @return mixed
      */
-    public static function CleanGPC($source, $varname, $vartype = TYPE_NOCLEAN) {
+    public static function CleanGPC($source, $varname, $vartype = TYPE_NOCLEAN){
         return Abricos::$inputCleaner->clean_gpc($source, $varname, $vartype);
     }
 
@@ -400,7 +409,7 @@ final class Abricos {
      * @see Ab_CoreModuleManager::Register()
      * @param Ab_Module $module Экземпляр класса модуля
      */
-    public static function ModuleRegister(Ab_Module $module) {
+    public static function ModuleRegister(Ab_Module $module){
         Abricos::$modules->Register($module);
     }
 
@@ -411,7 +420,7 @@ final class Abricos {
      * @param string $modname имя модуля
      * @return Ab_Module зарегистрированный модуль в платформе
      */
-    public static function GetModule($modname) {
+    public static function GetModule($modname){
         return Abricos::$modules->GetModule($modname);
     }
 
@@ -421,9 +430,9 @@ final class Abricos {
      * @param string $modname имя модуля
      * @return Ab_ModuleManager менеджер модуля
      */
-    public static function GetModuleManager($modname) {
+    public static function GetModuleManager($modname){
         $module = Abricos::GetModule($modname);
-        if (empty($module)) {
+        if (empty($module)){
             return null;
         }
         return $module->GetManager();
@@ -434,7 +443,7 @@ final class Abricos {
      *
      * @return Ab_UserText
      */
-    public static function TextParser($fullerase = false) {
+    public static function TextParser($fullerase = false){
         require_once('usertext.php');
         return new Ab_UserText($fullerase);
     }
@@ -445,8 +454,8 @@ final class Abricos {
     /**
      * @return Services_JSON
      */
-    public static function GetJSONManager() {
-        if (empty(Abricos::$_json)) {
+    public static function GetJSONManager(){
+        if (empty(Abricos::$_json)){
             require_once CWD.'/includes/json/json.php';
             Abricos::$_json = new Services_JSON();
         }
@@ -465,7 +474,7 @@ class Ab_Notification {
      * @param string $message
      * @return boolean true - если сообщение отправлено
      */
-    public function SendMail($email, $subject, $message) {
+    public function SendMail($email, $subject, $message){
     }
 }
 

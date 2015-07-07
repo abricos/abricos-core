@@ -16,16 +16,13 @@ class SystemModule extends Ab_Module {
      */
     public static $instance;
 
-    // TODO: remove
-    private $adress = null;
-
     public static $YUIVersion = "3.14.0";
 
     private $_manager = null;
 
     public function __construct() {
         SystemModule::$instance = $this;
-        $this->version = "0.5.6";
+        $this->version = "0.5.7";
         $this->name = "sys";
 
         $this->permission = new Ab_CoreSystemPermission($this);
