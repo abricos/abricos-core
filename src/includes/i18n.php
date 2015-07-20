@@ -19,7 +19,7 @@ class Ab_CoreI18n {
         $this->module = $module;
     }
 
-    private function _LocaleNormalize($locale){
+    public function LocaleNormalize($locale){
         if (empty($locale)){
             $locale = Abricos::$locale;
         }
@@ -32,8 +32,17 @@ class Ab_CoreI18n {
     }
 
     private function _LoadLocale($locale){
-        $locale = $this->_LocaleNormalize($locale);
-        $file = realpath(CWD."/modules/".$this->module->name."/i18n/".$locale.".php");
+        $locale = $this->LocaleNormalize($locale);
+        $file = CWD."/modules/".$this->module->name."/i18n/".$locale.".php";
+
+        if (!file_exists($file)){
+            // TODO: support for older versions
+            if ($locale === 'ru-RU'){
+                $file = CWD."/modules/".$this->module->name."/i18n/ru.php";
+            } else if ($locale === 'en-EN'){
+                $file = CWD."/modules/".$this->module->name."/i18n/en.php";
+            }
+        }
 
         $arr = array();
         if (file_exists($file)){
@@ -50,7 +59,7 @@ class Ab_CoreI18n {
      * @return array
      */
     public function &GetData($locale = ''){
-        $locale = $this->_LocaleNormalize($locale);
+        $locale = $this->LocaleNormalize($locale);
         if (!isset($this->_locales[$locale])){
             $this->_LoadLocale($locale);
         }
@@ -59,7 +68,7 @@ class Ab_CoreI18n {
 
     public function Translate($phraseId, $locale = ''){
 
-        $locale = $this->_LocaleNormalize($locale);
+        $locale = $this->LocaleNormalize($locale);
         $data = &$this->GetData($locale);
 
         $aPhrases = explode(".", $phraseId);
