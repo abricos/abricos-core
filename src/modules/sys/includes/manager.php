@@ -57,11 +57,12 @@ class SystemManager extends Ab_ModuleManager {
         if (!$this->IsAdminRole()) {
             return null;
         }
-        $lng = $this->module->GetI18n();
+        $i18n = $this->module->I18n();
+
         return array(
             array(
                 "name" => "config",
-                "title" => $lng['bosmenu']['config'],
+                "title" => $i18n->Translate('bosmenu.config'),
                 "icon" => "/modules/user/images/cpanel-24.png",
                 "url" => "sys/wspace/ws",
                 "parent" => "controlPanel"
