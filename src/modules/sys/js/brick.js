@@ -1302,8 +1302,8 @@ Brick.dateExt = function(){
 // TODO: suppord older versions
 (function(){
     Brick.util.Language = {
-        add: function(){
-            
+        add: function(locale, phrases){
+            Abricos.Language.add('', locale, phrases);
         }
     };
 })();
