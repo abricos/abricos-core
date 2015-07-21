@@ -41,29 +41,29 @@ $diskCacheFileKey = "";
 
 @mkdir($cachePath, 0777, true);
 
-if ($libType == 'sys') {
+if ($libType == 'sys'){
     $mime = 'js';
     $files = array('/modules/sys/js/brick.js');
     $module = "sys";
-} else if ($libType == 'fullcssforie') {
+} else if ($libType == 'fullcssforie'){
     $mime = 'css';
     $files = array('fullcssforie');
     $module = "sys";
-} else if ($libType == 'mod') {
+} else if ($libType == 'mod'){
     $mime = 'js';
     $newFiles = array();
-    foreach ($files as $file) {
-        if ($module == "_template") {
+    foreach ($files as $file){
+        if ($module == "_template"){
             $newFiles[] = '/tt/'.$templateName.'/jsmod/'.$file;
         } else {
             $newFiles[] = '/modules/'.$module.'/js/'.$file;
         }
     }
     $files = $newFiles;
-} else if (count($files) > 0 && empty($mime)) {
+} else if (count($files) > 0 && empty($mime)){
     $fi = pathinfo($files[0]);
     $ext = strtolower($fi['extension']);
-    switch ($ext) {
+    switch ($ext){
         case "js":
             $mime = "js";
             break;
@@ -73,7 +73,7 @@ if ($libType == 'sys') {
     }
 }
 
-switch ($mime) {
+switch ($mime){
     case "js":
         $headContentType = "Content-type: text/javascript; charset=utf-8";
         break;
@@ -84,7 +84,7 @@ switch ($mime) {
 
 header($headContentType);
 
-if ($compress) {
+if ($compress){
     if (isset($_SERVER['HTTP_ACCEPT_ENCODING']))
         $encodings = explode(',', strtolower(preg_replace("/\s+/", "", $_SERVER['HTTP_ACCEPT_ENCODING'])));
 
@@ -97,7 +97,7 @@ if ($compress) {
         )
         && !$zlibOn
         && function_exists('gzencode')
-    ) {
+    ){
         // function_exists('ob_gzhandler') && !ini_get('zlib.output_compression'))
 
 
@@ -108,14 +108,14 @@ if ($compress) {
 }
 
 // Setup cache info
-if ($diskCache) {
-    if (!$cachePath) {
+if ($diskCache){
+    if (!$cachePath){
         // header($headContentType);
         die("alert('Real path failed.');");
     }
 
     $key = "";
-    foreach ($files as $file) {
+    foreach ($files as $file){
         $key .= preg_replace("/[^0-9a-z\-_]+/i", "", $file);
     }
     $diskCacheFileKey = "js_".md5($key);
@@ -133,7 +133,7 @@ if ($diskCache) {
 $cacheFileExists = file_exists($cacheFile) && $diskCache;
 $etag = $cacheKey;
 
-if ($cacheFileExists) {
+if ($cacheFileExists){
     $if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? stripslashes($_SERVER['HTTP_IF_MODIFIED_SINCE']) : FALSE;
     $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : FALSE;
 
@@ -142,7 +142,7 @@ if ($cacheFileExists) {
     if ($if_modified_since && $if_none_match
         && $if_none_match == $etag // etag must match
         && $if_modified_since == $last_modified
-    ) { // if-modified-since must match
+    ){ // if-modified-since must match
         header('HTTP/1.1 304 Not Modified');
 
         // All 304 responses must send an etag if the 200 response for the same object contained an etag
@@ -157,7 +157,7 @@ header("ETag: $etag");
 header("Expires: ".gmdate("D, d M Y H:i:s", time() + $expiresOffset)." GMT");
 
 // Use cached file disk cache
-if ($cacheFileExists) {
+if ($cacheFileExists){
     header("Last-Modified: $last_modified");
 
     if ($compress)
@@ -171,30 +171,30 @@ if ($cacheFileExists) {
 
 $content = "";
 
-if ($libType == 'sys') {
+if ($libType == 'sys'){
     $module = 'sys';
 }
 
-if ($libType == 'fullcssforie') {
+if ($libType == 'fullcssforie'){
 
     $dir = dir($realPath."/modules");
-    while (false !== ($entry = $dir->read())) {
-        if ($entry == "." || $entry == ".." || empty($entry)) {
+    while (false !== ($entry = $dir->read())){
+        if ($entry == "." || $entry == ".." || empty($entry)){
             continue;
         }
 
         $jsdir = $realPath."/modules/".$entry."/js";
 
         $cssfiles = globa($jsdir."/*.css");
-        foreach ($cssfiles as $file) {
+        foreach ($cssfiles as $file){
             $content .= "\n".getFileContents($file);
         }
     }
 
-} else if ($libType == 'mod' || $libType == 'sys') {
+} else if ($libType == 'mod' || $libType == 'sys'){
 
     // Append main file
-    foreach ($files as $file) {
+    foreach ($files as $file){
         $cname = basename($file, ".js");
 
         $jsCompFile = new Ab_CoreJSCFile($module, $cname, $templateName, $lang);
@@ -202,7 +202,7 @@ if ($libType == 'fullcssforie') {
     }
 
 } else {
-    foreach ($files as $file) {
+    foreach ($files as $file){
         $content .= "\n".getFileContents($realPath."/".$basedir."/".$file);
     }
 }
@@ -211,36 +211,36 @@ if ($libType == 'fullcssforie') {
 // 1) чтение системного js файла /modules/sys/js/brick.js
 // 2) определение версии всех js модулей по формуле md5(размер+время модификации) 
 // и составление списка с добавление в системный js файл скрипт
-if ($libType == 'sys') {
+if ($libType == 'sys'){
     $content .= "\n(function(){\nvar m={},v=[];\n";
 
     // проход по всем модулям
     $dir = dir($realPath."/modules");
-    while (false !== ($entry = $dir->read())) {
+    while (false !== ($entry = $dir->read())){
 
         // Добавление js модулей шаблона
-        if ($entry == ".") {
+        if ($entry == "."){
             $entry = "_template";
         }
 
-        if ($entry == "." || $entry == ".." || empty($entry)) {
+        if ($entry == "." || $entry == ".." || empty($entry)){
             continue;
         }
 
-        if ($entry == "_template") {
+        if ($entry == "_template"){
             $jsdir = $realPath."/tt/".$templateName."/jsmod";
         } else {
             $jsdir = $realPath."/modules/".$entry."/js";
         }
 
         $jsfiles = globa($jsdir."/*.js");
-        if (empty($jsfiles)) {
+        if (empty($jsfiles)){
             continue;
         }
         $content .= "\nv=[];\n";
 
         // чтение всех js модулей в модуле
-        foreach ($jsfiles as $jsfile) {
+        foreach ($jsfiles as $jsfile){
             $cname = basename($jsfile, ".js");
             $bname = basename($jsfile);
             $jsCompFile = new Ab_CoreJSCFile($entry, $cname, $templateName, $lang);
@@ -256,7 +256,7 @@ Brick.Modules = m;
 }
 
 // Generate GZIP'd content
-if ($compress) {
+if ($compress){
     header("Content-Encoding: ".$enc);
     $cacheData = gzencode($content, 9, FORCE_GZIP);
 } else {
@@ -264,15 +264,15 @@ if ($compress) {
 }
 
 // Write gz file
-if ($diskCache && $cacheKey != "") {
+if ($diskCache && $cacheKey != ""){
     $chFiles = globa($cachePath."/*");
-    if (count($chFiles) >= $cacheLimitCount) {
-        foreach ($chFiles as $rfile) {
+    if (count($chFiles) >= $cacheLimitCount){
+        foreach ($chFiles as $rfile){
             @unlink($rfile);
         }
     } else {
         $chFiles = globa($cachePath."/".$diskCacheFileKey."*");
-        foreach ($chFiles as $rfile) {
+        foreach ($chFiles as $rfile){
             if (!strpos($rfile, $cacheFileName))
                 @unlink($rfile);
         }
@@ -287,12 +287,12 @@ echo $cacheData;
 
 /////////////////////////////// Functions /////////////////////////////// 
 
-function globa($pattern, $flag = 0) {
+function globa($pattern, $flag = 0){
     $res = glob($pattern, $flag);
     return $res ? $res : array();
 }
 
-function getParam($name, $def = false) {
+function getParam($name, $def = false){
     if (!isset($_GET[$name]))
         return $def;
 
@@ -301,13 +301,13 @@ function getParam($name, $def = false) {
     return preg_replace("/[^0-9a-z\-_,\/\.]+/i", "", $ret);
 }
 
-function getFileContents($path, $notcheck = false) {
+function getFileContents($path, $notcheck = false){
     $path = realpath($path);
     $fi = pathinfo($path);
     $extension = strtolower($fi["extension"]);
 
-    if (!$notcheck) {
-        switch ($extension) {
+    if (!$notcheck){
+        switch ($extension){
             case "css":
             case "htm":
             case "js":
@@ -320,7 +320,7 @@ function getFileContents($path, $notcheck = false) {
     if (!$path || !@is_file($path))
         return "";
 
-    if (function_exists("file_get_contents")) {
+    if (function_exists("file_get_contents")){
         $content = @file_get_contents($path);
     } else {
         $content = "";
@@ -334,14 +334,14 @@ function getFileContents($path, $notcheck = false) {
         fclose($fp);
     }
 
-    if ($extension == "css") {
+    if ($extension == "css"){
 
         $realPath = realpath(".");
         $rBase = str_replace($realPath, "", $fi['dirname'])."/";
 
-        $content = preg_replace('/(url\()(\'\.\.\/)+/', 'url(\'' . $rBase."../", $content); // url ('../foo.png')
-        $content = preg_replace('/(url\()(\"\.\.\/)+/', 'url(\"' . $rBase."../", $content); // url ("../foo.png")
-        $content = preg_replace('/(url\()(\.\.\/)+/', 'url(' . $rBase."../", $content); // url (../foo.png)
+        $content = preg_replace('/(url\()(\'\.\.\/)+/', 'url(\''.$rBase."../", $content); // url ('../foo.png')
+        $content = preg_replace('/(url\()(\"\.\.\/)+/', 'url(\"'.$rBase."../", $content); // url ("../foo.png")
+        $content = preg_replace('/(url\()(\.\.\/)+/', 'url('.$rBase."../", $content); // url (../foo.png)
 
         /*
         $pattern = '#((url\()([^\\|^\/|^\.\.]\S+)(\)))#';
@@ -384,12 +384,12 @@ function getFileContents($path, $notcheck = false) {
     return $content;
 }
 
-function putFileContents($path, $content) {
+function putFileContents($path, $content){
     if (function_exists("file_put_contents"))
         return @file_put_contents($path, $content);
 
     $fp = @fopen($path, "wb");
-    if ($fp) {
+    if ($fp){
         fwrite($fp, $content);
         fclose($fp);
     }
