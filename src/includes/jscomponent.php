@@ -265,20 +265,7 @@ Abricos.Language.add('".$this->key."', '".$key."', ".$value.");
             return "";
         }
 
-        $module = $this->module;
-
-        // TODO: remove old define of template
         $content = "
-(function(){
-    var mt=Brick.util.Template;
-    if(typeof mt['".$module."']=='undefined'){mt['".$module."']={}};
-    var t=mt['".$module."'];
-";
-        $content .= $this->parseHTML($htm);
-        $content .= "
-})();";
-
-        $content .= "
 Abricos.Template.add('".$this->key."', '".$this->parseHTMLnew($htm)."');
         ";
 
