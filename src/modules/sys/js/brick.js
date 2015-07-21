@@ -1,7 +1,3 @@
-/*
- @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- */
-
 /**
  * Ядро Abricos
  * @module Sys
@@ -404,6 +400,14 @@ Brick.namespace('util');
             // w._TM = component.template.build(ts, override);
             // w._T = w._TM.data; w._TId = w._TM.idManager;
             return w._TM;
+        };
+
+        // TODO: support older versions
+        component.template = {
+            build: function(ts){
+                var key = new Abricos.Key(['mod', moduleName, componentName]);
+                return new Abricos.TemplateManager(key, ts);
+            }
         };
 
         component.requires = component.requires || {};
@@ -1252,7 +1256,7 @@ Brick.dateExt = function(){
                                     + "&version=" + mv
                                     + "&tt=" + Brick.env.ttname
                                     + "&n=" + ldCk['n']
-                                    + "&lang=" + Brick.env.language
+                                    + "&lang=" + Abricos.config.lang
                                     + "&file=" + mb;
                             }
 
@@ -1303,7 +1307,26 @@ Brick.dateExt = function(){
 (function(){
     Brick.util.Language = {
         add: function(locale, phrases){
-            Abricos.Language.add('', locale, phrases);
+            if (locale === 'ru'){
+                locale = 'ru-RU';
+            } else if (locale === 'en'){
+                locale = 'en-EN';
+            }
+            var key, data;
+            for (var n in phrases){
+                key = n;
+                data = phrases[n];
+                break;
+            }
+            if (!key){
+                return;
+            }
+            Abricos.Language.add(key, locale, data);
+        },
+        getc: function(phraseId){
+            return Abricos.Language.get(phraseId, {
+                isData: true
+            });
         }
     };
 })();

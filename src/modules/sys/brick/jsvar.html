@@ -22,13 +22,13 @@
 [*]-->
 
 <script src="/gzip.php?base=/vendor&v=[bkvar]jsyui[/bkvar]&file=alloyui/aui/aui-min.js,abricos.js/abricos.js" type="text/javascript" charset="utf-8"></script>
-<script src="/gzip.php?type=sys&version=[bkvar]jsv[/bkvar]&lang=[bkvar]lang[/bkvar]&tt=[bkvar]ttname[/bkvar]" type="text/javascript" charset="utf-8"></script>
+<script src="/gzip.php?type=sys&version=[bkvar]jsv[/bkvar]&lang={v#langid}&tt=[bkvar]ttname[/bkvar]" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
-	var u=Brick.env.user;u.id=[bkvar]uid[/bkvar];u.group=[bkvar]g[/bkvar];u.session='[bkvar]s[/bkvar]';u.name='[bkvar]unm[/bkvar]';u.firstname='[bkvar]fnm[/bkvar]';u.lastname='[bkvar]lnm[/bkvar]';u.agr=[bkvar]agr[/bkvar];
-	Brick.env.ttname='[bkvar]ttname[/bkvar]';
-	Brick.env.lib.yui='[bkvar]jsyui[/bkvar]';
-	Brick.env.enmod=[[bkvar]enmod[/bkvar]];
-    Brick.env.language='[bkvar]lang[/bkvar]';
+    var env=Brick.env,u=env.user;
+    u.id=[bkvar]uid[/bkvar];u.group=[bkvar]g[/bkvar];u.session='[bkvar]s[/bkvar]';u.name='[bkvar]unm[/bkvar]';u.firstname='[bkvar]fnm[/bkvar]';u.lastname='[bkvar]lnm[/bkvar]';u.agr=[bkvar]agr[/bkvar];
+    env.ttname='[bkvar]ttname[/bkvar]';
+    env.lib.yui='[bkvar]jsyui[/bkvar]';
+    env.enmod=[[bkvar]enmod[/bkvar]];
     Abricos.config.lang='{v#langid}';
 </script>
 
