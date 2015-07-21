@@ -409,6 +409,13 @@ Brick.namespace('util');
                 return new Abricos.TemplateManager(key, ts);
             }
         };
+        component.language = Abricos.Language.get(['mod', moduleName], {
+                isData: true
+            }) || {};
+        component.language.get = function(phraseId, mName){
+            mName = mName || moduleName;
+            return Abricos.Language.get('mod.' + mName + '.' + phraseId);
+        };
 
         component.requires = component.requires || {};
         var loadinfo = component.requires;
