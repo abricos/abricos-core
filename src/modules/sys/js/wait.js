@@ -1,9 +1,3 @@
-/*
-@version $Id$
-@copyright Copyright (C) 2008 Abricos. All rights reserved.
-@license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
-
 /**
  * @module Sys
  * @namespace Brick.widget
@@ -21,7 +15,7 @@ Component.entryPoint = function(){
 		E = YAHOO.util.Event,
 		L = YAHOO.lang;
 
-	var TMG = this.template;
+	var buildTemplate = this.buildTemplate;
 	
 	var LayWait = function(container, placeInBody){
 		this.init(container, placeInBody);
@@ -31,7 +25,7 @@ Component.entryPoint = function(){
 			placeInBody = placeInBody || true;
 			container = L.isString(container) ? Dom.get(container) : container;
 			this.el = null;
-			var TM = TMG.build('laywait'), T = TM.data, TId = TM.idManager;
+			var TM = buildTemplate(this, 'laywait');
 			
 			if (L.isNull(container)){ return; }
 			

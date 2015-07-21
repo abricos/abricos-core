@@ -1,7 +1,3 @@
-/*
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- */
-
 /**
  * @module Sys
  * @namespace Brick.widget
@@ -18,13 +14,13 @@ Component.requires = {
         {name: 'filemanager', files: ['lib.js']}
     ]
 };
-Component.entryPoint = function(){
+Component.entryPoint = function(NS){
 
     var Y = Brick.YUI,
         L = Y.Lang,
         Dom = Y.DOM;
 
-    var TM = this.template;
+    var buildTemplate = this.buildTemplate;
 
     var isFileUploadRole = false;
 
@@ -176,8 +172,7 @@ Component.entryPoint = function(){
         Brick.widget.EditorManager = EditorManager;
     })();
 
-    var EM = Brick.widget.EditorManager,
-        _T = {}, _TId = {};
+    var EM = Brick.widget.EditorManager;
 
     /**
      * @class Editor
@@ -325,19 +320,17 @@ Component.entryPoint = function(){
          * @private
          */
         _createTextArea: function(){
+            var TM = buildTemplate(this, 'editor,css');
 
             var el = this.get('element');
 
-            var T = _T[el.id];
-            var TId = _TId[el.id];
-
             this._wrap = document.createElement('div');
             this._wrap.id = el.id + '_wrap';
-            this._wrap.innerHTML = T['editor'];
+            this._wrap.innerHTML = TM.replace('editor');
 
             var par = el.parentNode;
             par.replaceChild(this._wrap, el);
-            Dom.byId(TId['editor']['editowrap']).appendChild(el);
+            Dom.byId(TM.gelid('editowrap')).appendChild(el);
         },
 
         _initButtons: function(){
@@ -516,16 +509,12 @@ Component.entryPoint = function(){
                 return false;
             }
             if (el.id == ''){
-                el.id = Y.guid(id);
+                el.id = Y.guid();
             }
 
             var id = el.id;
 
             Editor._instances[id] = this;
-
-            var tm = TM.get(id);
-            _T[id] = tm.data;
-            _TId[id] = tm.idManager;
 
             this._createTextArea();
             this._initButtons();
@@ -779,14 +768,11 @@ Component.entryPoint = function(){
 
             this.owner = owner;
             this.name = config.name;
-            var el = owner.get('element');
-
-            var T = _T[el.id];
-            var TId = _TId[el.id];
-            var tm = TM.get(el.id);
+            var el = owner.get('element'),
+                TM = owner._TM;
 
             if (!_buttonsAddedCss[this.name]){
-                var css = tm.replace('css', {
+                var css = TM.replace('css', {
                     name: this.name,
                     image: config.image
                 });
@@ -799,7 +785,7 @@ Component.entryPoint = function(){
             this._element = new YAHOO.widget.Button({
                 label: "",
                 id: this.name,
-                container: TId['editor']['buttons']
+                container: TM.gelid(('editor.buttons'))
             });
             this._element.on("click", function(){
                 if (L.isFunction(config.onClick)){
