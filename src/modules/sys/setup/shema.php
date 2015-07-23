@@ -93,26 +93,6 @@ if ($updateManager->isInstall()){
 		  KEY name (name)
 		)".$charset
 	);
-	
-	// Настройки по умолчанию
-	if (Abricos::$LNG == 'ru'){
-		$db->query_write("
-			INSERT INTO ".$pfx."sys_phrase (module, name, phrase, language) VALUES
-				('sys', 'style', 'default', 'ru'),
-				('sys', 'site_name', 'Название сайта', 'ru'),
-				('sys', 'site_title', 'Краткое описание Вашего сайта', 'ru'),
-				('sys', 'admin_mail', '', 'ru')
-		");
-	}else{
-		$db->query_write("
-			INSERT INTO ".$pfx."sys_phrase (module, name, phrase, language) VALUES
-				('sys', 'style', 'default', '".Abricos::$LNG."'),
-				('sys', 'site_name', 'Site Name', '".Abricos::$LNG."'),
-				('sys', 'site_title', 'Brief description of your site', '".Abricos::$LNG."'),
-				('sys', 'admin_mail', '', 'ru')
-		");
-	}
-
 }
 
 if ($updateManager->isUpdate('0.5.3')){

@@ -166,7 +166,7 @@ final class Abricos {
         if (!empty(Abricos::$config['supercontent']['path'])){
             $path = Abricos::$config['supercontent']['path']."/".Abricos::$locale.$path;
         } else {
-            $path = CWD."/content/".Abricos::$locale.$path;
+            $path = CWD."/content/".Abricos::$LNG.$path;
         }
 
         if (!file_exists($path)){
