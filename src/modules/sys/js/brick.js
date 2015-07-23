@@ -976,9 +976,12 @@ Brick.dateExt = function(){
 
     return {
         convert: function(udate, type, hideTime){
+            var LNG = Abricos.Language;
+            /*
             var LNG = Abricos.Language.get('mod.sys.date', {
                 isData: true
             });
+            /**/
 
             var mp = LNG['monthp'],
                 ds = LNG['dayst'];
@@ -998,9 +1001,11 @@ Brick.dateExt = function(){
 
             var day = z(cd.getDate());
             var mon = z(cd.getMonth() + 1);// +1 т.к. нумерация идет с 0
-            var mons = mp[cd.getMonth() + 1];
+            var mons = sMonth;
             var min = z(cd.getMinutes());
             var hour = z(cd.getHours());
+
+            var sMonth = LNG.get('mod.sys.brick.date.monthp.'+(cd.getMonth() + 1));
 
             if (type == 1){
                 var s = day + '.' + mon + '.' + cd.getFullYear();
@@ -1011,7 +1016,7 @@ Brick.dateExt = function(){
             } else if (type == 2){// Добавлена возможность отображения даты в виде дд.мм.гггг
                 return day + '.' + mon + '.' + cd.getFullYear();
             } else if (type == 3){
-                return day + ' ' + mp[cd.getMonth() + 1] + ' ' + cd.getFullYear();
+                return day + ' ' + sMonth + ' ' + cd.getFullYear();
             } else if (type == 4){
                 return hour + ':' + (min);
             } else {
@@ -1020,11 +1025,11 @@ Brick.dateExt = function(){
 
                 var v = (Math.round(ld.getTime() / 1000) - udate) / 60 / 60 / 24;
                 if (v > 0 && v < 1){
-                    s = ds[1];
+                    s = LNG.get('mod.sys.brick.date.dayst.1');
                 } else if (v < 0 && v > -2){
-                    s = ds[2];
+                    s = LNG.get('mod.sys.brick.date.dayst.2');
                 } else {
-                    s = day + ' ' + mp[cd.getMonth() + 1] + ' ' + cd.getFullYear();
+                    s = day + ' ' + sMonth + ' ' + cd.getFullYear();
                 }
                 var tm = hour + ':' + (min);
                 if (!hideTime){
