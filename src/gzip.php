@@ -19,7 +19,7 @@ require_once 'includes/jscomponent.php';
 $files = explode(',', getParam("file", ""));
 $basedir = getParam("base", "");
 $version = getParam("version", "");
-$lang = getParam("lang", "ru");
+$locale = getParam("locale", "ru");
 $libType = getParam("type", "");
 $templateName = getParam("tt", "default");
 $module = getParam("module", "");
@@ -197,7 +197,7 @@ if ($libType == 'fullcssforie'){
     foreach ($files as $file){
         $cname = basename($file, ".js");
 
-        $jsCompFile = new Ab_CoreJSCFile($module, $cname, $templateName, $lang);
+        $jsCompFile = new Ab_CoreJSCFile($module, $cname, $templateName, $locale);
         $content .= "\n".$jsCompFile->build();
     }
 
@@ -243,7 +243,7 @@ if ($libType == 'sys'){
         foreach ($jsfiles as $jsfile){
             $cname = basename($jsfile, ".js");
             $bname = basename($jsfile);
-            $jsCompFile = new Ab_CoreJSCFile($entry, $cname, $templateName, $lang);
+            $jsCompFile = new Ab_CoreJSCFile($entry, $cname, $templateName, $locale);
 
             $key = $jsCompFile->buildKey();
             $content .= "v[v.length]={f:'".$bname."', k:'".$key."'};\n";

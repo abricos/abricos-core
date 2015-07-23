@@ -13,25 +13,25 @@ class Ab_CoreJSCFile {
     public $module = "";
     public $component = "";
     public $template = "default";
-    public $language = "ru";
+    public $locale = "ru-RU";
 
     public $fileJS = "";
     public $fileHTML = "";
     public $fileCSS = "";
     // public $fileLANG = "";
-    public $fileLangs = array();
+    public $localeFiles = array();
     public $fileJSONLangs = array();
 
-    public function __construct($pModule, $pComponent, $pTname = "default", $pLang = "ru") {
+    public function __construct($pModule, $pComponent, $pTname = "default", $locale = "ru-RU") {
         $tname = $this->parseName($pTname);
         $module = $this->parseName($pModule);
         $component = $this->parseName($pComponent);
-        $lang = $this->parseName($pLang);
+        $locale = $this->parseName($locale);
 
         $this->module = $module;
         $this->component = $component;
         $this->template = $tname;
-        $this->language = $lang;
+        $this->locale = $locale;
 
         $rootPath = realpath(".");
         $modPath = $rootPath."/modules/".$module."/js";
@@ -61,9 +61,9 @@ class Ab_CoreJSCFile {
             }
         }
 
-        // $this->fileLANG = $modPath."/langs/".$component."_".$lang.".js";
+        // $this->fileLANG = $modPath."/langs/".$component."_".$locale.".js";
 
-        $this->fileLangs = globa($modPath."/langs/".$component."_*.js");
+        $this->localeFiles = globa($modPath."/langs/".$component."_*.js");
         $this->fileJSONLangs = globa($modPath."/langs/".$component."_*.json");
     }
 
@@ -84,11 +84,11 @@ class Ab_CoreJSCFile {
         $js = $this->readJS();
         $htm = $this->readHTML();
         $css = $this->readCSS();
-        $langs = $this->readLangs();
-        $langsJSON = $this->readJSONLangs();
+        $locales = $this->readLangs();
+        $localesJSON = $this->readJSONLangs();
 
         $jscomp = new Ab_CoreJSCBuilder($this->module, $this->component);
-        return $jscomp->build($js, $htm, $css, $langs, $langsJSON);
+        return $jscomp->build($js, $htm, $css, $locales, $localesJSON);
     }
 
     public function readJS() {
@@ -105,8 +105,8 @@ class Ab_CoreJSCFile {
 
     public function readLangs() {
         $ret = array();
-        foreach ($this->fileLangs as $fileLang) {
-            $ret[] = $this->read($fileLang);
+        foreach ($this->localeFiles as $localeFile) {
+            $ret[] = $this->read($localeFile);
         }
         return $ret;
     }
@@ -114,13 +114,13 @@ class Ab_CoreJSCFile {
     public function readJSONLangs() {
 
         $ret = array();
-        foreach ($this->fileJSONLangs as $fileLang) {
-            $fi = pathinfo($fileLang);
+        foreach ($this->fileJSONLangs as $localeFile) {
+            $fi = pathinfo($localeFile);
             $fn = $fi['filename'];
 
             $langId = str_replace($this->component."_", "", $fn);
             if (!empty($langId)) {
-                $ret[$langId] = $this->read($fileLang);
+                $ret[$langId] = $this->read($localeFile);
             }
         }
 
@@ -175,7 +175,7 @@ class Ab_CoreJSCFile {
         $key += $this->buildKeyByFile($this->fileHTML);
         $key += $this->buildKeyByFile($this->fileLANG);
         $key += 5;
-        return md5($this->module.$this->component.$this->language.$key);
+        return md5($this->module.$this->component.$this->locale.$key);
     }
 
     public function buildKeyByFile($file) {
@@ -201,13 +201,13 @@ class Ab_CoreJSCBuilder {
         $this->key = "mod.".$module.".".$this->component;
     }
 
-    public function build($js, $htm, $css, $langs, $langsJSON) {
+    public function build($js, $htm, $css, $locales, $localesJSON) {
         $module = $this->module;
         $component = $this->component;
 
         $content = $js;
-        $content .= $this->buildLanguage($langs);
-        $content .= $this->buildLanguageJSON($langsJSON);
+        $content .= $this->buildLanguage($locales);
+        $content .= $this->buildLanguageJSON($localesJSON);
         $content .= $this->buildHTML($htm);
         $content .= $this->buildCSS($css);
 
@@ -236,10 +236,10 @@ class Ab_CoreJSCBuilder {
         return $content;
     }
 
-    public function buildLanguage($langs) {
+    public function buildLanguage($locales) {
         $ret = "";
-        if (is_array($langs)) {
-            foreach ($langs as $lang) {
+        if (is_array($locales)) {
+            foreach ($locales as $lang) {
                 $ret .= "(function(){".$lang."})();";
             }
         }
@@ -247,10 +247,10 @@ class Ab_CoreJSCBuilder {
         return $ret;
     }
 
-    public function buildLanguageJSON($langs) {
+    public function buildLanguageJSON($locales) {
         $ret = "";
-        if (is_array($langs)) {
-            foreach ($langs as $key => $value) {
+        if (is_array($locales)) {
+            foreach ($locales as $key => $value) {
                 $ret .= "
 Abricos.Language.add('".$this->key."', '".$key."', ".$value.");
 ";

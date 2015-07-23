@@ -4,12 +4,12 @@
 [p=fullcssforie][/p]
 
 [bkvar=fullcsstpl]
-	<link rel="stylesheet" href="/gzip.php?type=fullcssforie&version={v#jsvs}&lang={v#locale}&tt={v#template}&mime=css" type="text/css" />
+	<link rel="stylesheet" href="/gzip.php?type=fullcssforie&version={v#jsvs}&locale={v#locale}&tt={v#template}&mime=css" type="text/css" />
 [/bkvar]
 
 [*]-->
 <script src="/gzip.php?base=/vendor&v={v#yuivs}&file=alloyui/aui/aui-min.js,abricos.js/abricos.js" type="text/javascript" charset="utf-8"></script>
-<script src="/gzip.php?type=sys&version={v#jsvs}&lang={v#locale}&tt={v#template}" type="text/javascript" charset="utf-8"></script>
+<script src="/gzip.php?type=sys&version={v#jsvs}&locale={v#locale}&tt={v#template}" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" charset="utf-8">
     var env=Brick.env,u=env.user;
     u.id='{v#userid}'|0;
@@ -20,7 +20,7 @@
     u.agr='{v#agr}'|0;
     env.ttname='{v#template}';
     env.lib.yui='{v#yuivs}';
-    Abricos.config.lang='{v#locale}';
+    Abricos.config.locale='{v#locale}';
 </script>
 
 {v#fullcssres}
