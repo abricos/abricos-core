@@ -22,7 +22,7 @@ class SystemModule extends Ab_Module {
 
     public function __construct() {
         SystemModule::$instance = $this;
-        $this->version = "0.5.7";
+        $this->version = "0.5.6";
         $this->name = "sys";
 
         $this->permission = new Ab_CoreSystemPermission($this);
