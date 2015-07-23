@@ -1,5 +1,7 @@
 <?php
 
+require_once 'structure.php';
+
 /**
  * Абстрактный класс модуля в платформе Абрикос
  *
@@ -482,6 +484,81 @@ class Ab_CoreModuleManager {
     }
 
     /**
+     * Update module database structure
+     *
+     * @param Ab_Module $module
+     * @param Ab_ModuleInfo $modInfo
+     */
+    private function _UpdateModuleDbStructure($module, $modInfo){
+        $modName = $module->name;
+
+        $serverVersion = $modInfo->version;
+        $newVersion = $module->version;
+
+        $cmp = Ab_UpdateManager::CompareVersion($serverVersion, $newVersion);
+
+        if ($cmp == -1){
+            die("<strong>Core error</strong>: Current module '$modName' has an older version<br />");
+            return false;
+        } // downgrade модуля запрещен
+
+        $modInfo->instance = $module;
+
+        if ($cmp == 0){
+            return false;
+        }
+
+        Ab_UpdateManager::$current = new Ab_UpdateManager($module, $modInfo);
+
+        $shema = CWD."/modules/".$modName."/includes/shema.php";
+        if (!file_exists($shema)){
+            $shema = CWD."/modules/".$modName."/setup/shema.php";
+        }
+        if (file_exists($shema)){
+            require_once($shema);
+        }
+        Ab_CoreQuery::ModuleUpdateVersion(Abricos::$db, $module);
+
+        return true;
+    }
+
+    /**
+     * Update module database language content
+     *
+     * @param Ab_Module $module
+     * @param Ab_ModuleInfo $modInfo
+     */
+    private function _UpdateModuleDbLanguage($module, $modInfo){
+        $modName = $module->name;
+
+        $serverVersion = $modInfo->languageVersion;
+        $newVersion = $module->version;
+
+        $cmp = Ab_UpdateManager::CompareVersion($serverVersion, $newVersion);
+
+        if ($cmp == -1){
+            die("<strong>Core error</strong>: Current module '$modName' has an older version<br />");
+            return false;
+        } // downgrade модуля запрещен
+
+        $modInfo->instance = $module;
+
+        if ($cmp == 0){
+            return false;
+        }
+
+        Ab_UpdateManager::$current = new Ab_UpdateManager($module, $modInfo);
+
+        $shema = CWD."/modules/".$modName."/setup/shema_".Abricos::$LNG.".php";
+        if (file_exists($shema)){
+            require_once($shema);
+        }
+        Ab_CoreQuery::ModuleUpdateLanguageVersion(Abricos::$db, $module);
+
+        return true;
+    }
+
+    /**
      * Регистрация модуля.
      *
      * @param Ab_Module $module
@@ -493,46 +570,37 @@ class Ab_CoreModuleManager {
 
         $modName = $module->name;
 
-        $info = $this->list->Get($modName);
-        if (empty($info)){
+        $modInfo = $this->list->Get($modName);
+        if (empty($modInfo)){
             Ab_CoreQuery::ModuleAppend(Abricos::$db, $module);
             $this->FetchModulesInfo();
         }
 
-        $info = $this->list->Get($modName);
         if (Abricos::$db->error > 0){
             die(Abricos::$db->errorText);
         }
 
-        $serverVersion = $info->version;
-        $newVersion = $module->version;
-
+        $modInfo = $this->list->Get($modName);
         require_once 'updatemanager.php';
-        $cmp = Ab_UpdateManager::CompareVersion($serverVersion, $newVersion);
 
-        if ($cmp == -1){
-            return;
-        } // downgrade модуля запрещен
-
-        $info->instance = $module;
-
-        if ($cmp == 0){
+        $this->_UpdateModuleDbStructure($module, $modInfo);
+        $isUpdate = $this->_UpdateModuleDbLanguage($module, $modInfo);
+        if (!$isUpdate){
             return;
         }
 
-        Ab_UpdateManager::$current = new Ab_UpdateManager($module, $info);
-
-        $shema = CWD."/modules/".$modName."/includes/shema.php";
-        if (file_exists($shema)){
-            require_once($shema);
-        }
-        Ab_CoreQuery::ModuleUpdateVersion(Abricos::$db, $module);
         $this->FetchModulesInfo();
 
         Ab_UpdateManager::$current = null;
         $this->updateManager = null;
+
         // Удалить временные файлы
         $chFiles = globa(CWD."/cache/*.gz");
+        foreach ($chFiles as $rfile){
+            @unlink($rfile);
+        }
+
+        $chFiles = globa(CWD."/cache/gzip/*.gz");
         foreach ($chFiles as $rfile){
             @unlink($rfile);
         }
@@ -548,17 +616,17 @@ class Ab_CoreModuleManager {
         if (empty($name)){
             return null;
         }
-        $info = $this->list->Get($name);
+        $modInfo = $this->list->Get($name);
 
-        if (!empty($info) && !empty($info->instance)){
-            return $info->instance;
+        if (!empty($modInfo) && !empty($modInfo->instance)){
+            return $modInfo->instance;
         }
         /* попытка зарегистрировать модуль */
         $this->RegisterByName($name);
 
-        $info = $this->list->Get($name);
-        if (!empty($info) && !empty($info->instance)){
-            return $info->instance;
+        $modInfo = $this->list->Get($name);
+        if (!empty($modInfo) && !empty($modInfo->instance)){
+            return $modInfo->instance;
         }
         return null;
     }
@@ -568,9 +636,9 @@ class Ab_CoreModuleManager {
      */
     public function GetSuperModule(){
         for ($i = 0; $i < $this->list->Count(); $i++){
-            $info = $this->list->GetByIndex($i);
-            if ($info->takelink === '__super'){
-                return $this->RegisterByName($info->name);
+            $modInfo = $this->list->GetByIndex($i);
+            if ($modInfo->takelink === '__super'){
+                return $this->RegisterByName($modInfo->name);
             }
         }
         return null;
@@ -580,11 +648,11 @@ class Ab_CoreModuleManager {
         $ret = array();
 
         for ($i = 0; $i < $this->list->Count(); $i++){
-            $info = $this->list->GetByIndex($i);
-            if (empty($info->instance)){
+            $modInfo = $this->list->GetByIndex($i);
+            if (empty($modInfo->instance)){
                 continue;
             }
-            $ret[$info->name] = $info->instance;
+            $ret[$modInfo->name] = $modInfo->instance;
         }
         return $ret;
     }

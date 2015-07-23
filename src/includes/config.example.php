@@ -46,8 +46,11 @@ $config['Misc']['cookieprefix'] = 'cms_';
 // время хранения COOKIE в секундах
 $config['Misc']['cookietimeout'] = 86400 * 14;
 
-// язык
-$config['Misc']['language'] = "ru-RU";
+// язык контента
+$config['Misc']['language'] = "ru";
+
+// язык интерфейса пользователя
+$config['Misc']['locale'] = "ru-RU";
 
 /*
  * Включить/выключить режим "Разработчика" работы платформы

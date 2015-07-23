@@ -68,7 +68,7 @@ final class Abricos {
     public static $LNG = 'ru';
 
     /**
-     * Локаль интерфейса пользователя
+     * Язык интерфейса пользователя
      *
      * @var string
      */
