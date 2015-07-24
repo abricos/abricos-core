@@ -68,6 +68,13 @@ final class Abricos {
     public static $LNG = 'ru';
 
     /**
+     * Поддерживаемые языки контента на сайте
+     *
+     * @var array
+     */
+    public static $supportLanguageList = array();
+
+    /**
      * Язык интерфейса пользователя
      *
      * @var string
