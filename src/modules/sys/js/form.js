@@ -14,12 +14,7 @@ Component.requires = {
 Component.entryPoint = function(NS){
 
     var Y = Brick.YUI,
-        RENDERUI = 'renderUI',
-        BINDUI = 'bindUI',
-        SYNCUI = 'syncUI',
-
         UI = Y.Widget.UI_SRC,
-
         BOUNDING_BOX = 'boundingBox';
 
     var Form = function(){
@@ -51,6 +46,9 @@ Component.entryPoint = function(NS){
         },
         updateUIFromModel: {
             value: true
+        },
+        formFocusFiled: {
+            value: null
         }
     };
     Form.NAME = 'form';
@@ -91,6 +89,9 @@ Component.entryPoint = function(NS){
                 || !this.get('updateUIFromModel')){
                 return;
             }
+            var focusField = this.get('formFocusField'),
+                focusFieldNode;
+
             this.eachFieldNode(function(name, node){
                 if (!model.attrAdded(name)
                     || node.get('type') === 'hidden'){
@@ -102,7 +103,20 @@ Component.entryPoint = function(NS){
                 } else {
                     node.set('value', value);
                 }
+                if (Y.Lang.isString(focusField) && name === focusField){
+                    focusFieldNode = node;
+                }
             });
+
+            if (focusFieldNode && !this._isFocusFieldNode){
+                this._isFocusFieldNode = true;
+                setTimeout(function(){
+                    try {
+                        focusFieldNode.focus();
+                    } catch (e) {
+                    }
+                }, 100);
+            }
 
             this.onUpdateUIFromModel(model);
         },
