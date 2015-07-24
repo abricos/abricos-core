@@ -32,11 +32,7 @@ Component.entryPoint = function(NS){
                 if (val && Y.Lang.isFunction(val.toJSON)){
                     var attrs = val.toJSON();
                     for (var n in attrs){
-                        val.after(n + 'Change', function(e){
-                            if (e.src !== 'UI'){
-                                this.updateUIFromModel();
-                            }
-                        }, this);
+                        val.after(n + 'Change', this._onModelFieldChange, this);
                     }
                     this._updateUIFromModel(val);
                 }
@@ -59,6 +55,20 @@ Component.entryPoint = function(NS){
     Form.prototype = {
         initializer: function(){
             Y.after(this._syncUIForm, this, 'syncUI');
+        },
+        _onModelFieldChange: function(e){
+            if (e.src !== 'UI'){
+                this.updateUIFromModel();
+            }
+        },
+        destructor: function(){
+            var model = this.get('model');
+            if (model && Y.Lang.isFunction(model.toJSON)){
+                var attrs = model.toJSON();
+                for (var n in attrs){
+                    model.detach(n + 'Change', this._onModelFieldChange);
+                }
+            }
         },
         _syncUIForm: function(){
             this.updateUIFromModel();
