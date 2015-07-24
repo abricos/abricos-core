@@ -936,7 +936,7 @@ Brick.namespace('util');
      * cfg.event {Function|null} событие обработчик
      *
      * @namespace Brick
-     * @method sendCommand
+     * @method ajax
      * @static
      * @param {String} module Имя модуля
      * @param {Object} cfg Параметры запроса
@@ -977,14 +977,6 @@ Brick.dateExt = function(){
     return {
         convert: function(udate, type, hideTime){
             var LNG = Abricos.Language;
-            /*
-            var LNG = Abricos.Language.get('mod.sys.date', {
-                isData: true
-            });
-            /**/
-
-            var mp = LNG['monthp'],
-                ds = LNG['dayst'];
 
             if (!udate || udate == null){
                 return "";
@@ -996,16 +988,14 @@ Brick.dateExt = function(){
                 return "";
             }
             hideTime = hideTime || false;
-            var msec = udate * 1000;
-            var cd = new Date(msec);
 
-            var day = z(cd.getDate());
-            var mon = z(cd.getMonth() + 1);// +1 т.к. нумерация идет с 0
-            var mons = sMonth;
-            var min = z(cd.getMinutes());
-            var hour = z(cd.getHours());
-
-            var sMonth = LNG.get('mod.sys.brick.date.monthp.'+(cd.getMonth() + 1));
+            var msec = udate * 1000,
+                cd = new Date(msec),
+                day = z(cd.getDate()),
+                mon = z(cd.getMonth() + 1), // +1 т.к. нумерация идет с 0
+                min = z(cd.getMinutes()),
+                hour = z(cd.getHours()),
+                sMonth = LNG.get('mod.sys.brick.date.monthp.' + (cd.getMonth() + 1));
 
             if (type == 1){
                 var s = day + '.' + mon + '.' + cd.getFullYear();
