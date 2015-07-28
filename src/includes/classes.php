@@ -240,6 +240,32 @@ class AbricosModel extends AbricosItem {
         }
         return null;
     }
+
+    public function ToJSON(){
+        $ret = parent::ToJSON();
+
+        $struct = $this->_structure;
+        if (empty($struct)){
+            return $ret;
+        }
+
+        $count = $struct->Count();
+        for ($i = 0; $i < $count; $i++){
+            $field = $struct->GetByIndex($i);
+            if (!isset($this->_data[$field->name])){
+                continue;
+            }
+            if ($field->multiLang){
+                $value = $this->_data[$field->name]->ToJSON();
+            } else {
+                $value = $this->_data[$field->name];
+            }
+            $jsonName = $field->json;
+            $ret->$jsonName = $value;
+        }
+
+        return $ret;
+    }
 }
 
 class AbricosModelList extends AbricosList {
@@ -254,6 +280,13 @@ class AbricosMultiLangValue {
     public function __construct($name, $d){
         $this->name = $name;
         $this->Set($d);
+    }
+
+    public static function FieldName($name, $lng = ''){
+        if (empty($lng)){
+            $lng = Abricos::$LNG;
+        }
+        return $name."_".$lng;
     }
 
     public function Set($d){
@@ -298,11 +331,8 @@ class AbricosMultiLangValue {
         return $this->_data[$this->_actualLang];
     }
 
-    public static function FieldName($name, $lng = ''){
-        if (empty($lng)){
-            $lng = Abricos::$LNG;
-        }
-        return $name."_".$lng;
+    public function ToJSON(){
+        return $this->_data;
     }
 
 }
@@ -332,6 +362,13 @@ class AbricosModelStructureField extends AbricosItem {
      */
     public $default;
 
+    /**
+     * JSON name
+     *
+     * @var string
+     */
+    public $json;
+
     public function __construct($name, $data = null){
         $this->name = $this->id = $name;
 
@@ -354,6 +391,7 @@ class AbricosModelStructureField extends AbricosItem {
         if (isset($data->default)){
             $this->default = $this->TypeVal($data->default);
         }
+        $this->json = isset($data->json) ? $data->json : $name;
     }
 
     public function TypeVal($value){
