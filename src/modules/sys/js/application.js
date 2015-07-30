@@ -8,7 +8,7 @@ var Component = new Brick.Component();
 Component.requires = {
     yui: ['base'],
     mod: [
-        {name: '{C#MODNAME}', files: ['widget.js', 'io.js']},
+        {name: '{C#MODNAME}', files: ['widget.js', 'io.js', 'appModel.js']},
         {name: 'widget', files: ['notice.js']}
     ]
 };
@@ -47,23 +47,38 @@ Component.entryPoint = function(NS){
             res = res || {};
 
             var tRes = {},
-                data = res.data || {};
+                rData = res.data || {};
 
-            for (var n in data){
-                var fName = n + 'ParseResponse';
-
-                if (Y.Lang.isFunction(this[fName])){
-                    this[fName](data, tRes);
-                }
+            if (!Y.Lang.isArray(rData)){
+                rData = [rData];
             }
+            for (var i = 0; i < rData.length; i++){
+                var data = rData[i];
 
-            this.ajaxParseResponse(data, tRes);
+                for (var n in data){
+                    var fName = n + 'ParseResponse';
+
+                    if (Y.Lang.isFunction(this[fName])){
+                        this[fName](data, tRes);
+                    }
+                }
+
+                this.ajaxParseResponse(data, tRes);
+            }
 
             if (Y.Lang.isFunction(details.callback)){
                 details.callback.apply(details.context, [err, tRes]);
             }
         },
         ajaxa: function(rData, callback, context){
+            if (this.get('isLoadAppStructure') && !this.get('appStructure')){
+                if (!Y.Lang.isArray(rData)){
+                    rData = [rData];
+                }
+                rData.splice(0, 0, {
+                    do: 'appStructure'
+                });
+            }
             this.ajax(rData, this._defaultAJAXCallback, {
                 arguments: {callback: callback, context: context}
             });
@@ -78,6 +93,12 @@ Component.entryPoint = function(NS){
             },
             moduleName: {
                 value: null
+            },
+            appStructure: {
+                value: null
+            },
+            isLoadAppStructure: {
+                value: false
             }
         }
     });
@@ -86,6 +107,15 @@ Component.entryPoint = function(NS){
     NS.Application.build = function(component, ajaxes, px, extensions, sx){
         extensions = extensions || [];
         sx = sx || {};
+
+        ajaxes = Y.merge({
+            appStructure: {
+                cache: 'appStructure',
+                response: function(d){
+                    return new NS.AppStructure(d);
+                }
+            }
+        }, ajaxes || {});
 
         var moduleName = component.moduleName;
         var ns = Brick.mod[moduleName];
@@ -317,8 +347,13 @@ Component.entryPoint = function(NS){
             }
             this.set(WAITING, true);
 
+            var appNamespace = this.get('appNamespace');
+            if (!appNamespace){
+                appNamespace = this.get('component').namespace;
+            }
+
             var instance = this;
-            this.get('component').namespace.initApp({
+            appNamespace.initApp({
                 initCallback: function(err, appInstance){
                     instance._initAppWidget(err, appInstance);
                 }
@@ -388,6 +423,9 @@ Component.entryPoint = function(NS){
                 value: true
             },
             appInstance: {
+                value: null
+            },
+            appNamespace: {
                 value: null
             },
             useExistingWidget: {

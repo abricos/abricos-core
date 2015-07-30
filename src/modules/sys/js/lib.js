@@ -5,13 +5,43 @@
 
 var Component = new Brick.Component();
 Component.requires = {
+    yui: ['model', 'model-list'],
     mod: [
-        {name: '{C#MODNAME}', files: ['application.js', 'model.js']}
+        {name: '{C#MODNAME}', files: ['application.js']}
     ]
 };
 Component.entryPoint = function(NS){
 
     var COMPONENT = this;
+
+    NS.CoreConfig = Y.Base.create('coreConfig', Y.Model, [], {}, {
+        ATTRS: {
+            site_name: {value: ''},
+            site_title: {value: ''},
+            admin_mail: {value: ''},
+            style: {value: 'default'},
+            styles: {value: ['default']},
+            meta_title: {value: ''},
+            meta_keys: {value: ''},
+            meta_desc: {value: ''}
+        }
+    });
+
+    NS.Module = Y.Base.create('module', Y.Model, [], {}, {
+        ATTRS: {
+            title: {value: ''},
+            name: {value: ''},
+            takelink: {value: ''},
+            version: {value: ''},
+            installdate: {value: 0},
+            updatedate: {value: 0},
+            roles: {value: []}
+        }
+    });
+
+    NS.ModuleList = Y.Base.create('moduleList', Y.ModelList, [], {
+        model: NS.Module
+    });
 
     NS.URL = {
         ws: "#app={C#MODNAMEURI}/wspace/ws/",

@@ -147,12 +147,14 @@ class AbricosList {
         $list = array();
         $count = $this->Count();
         for ($i = 0; $i < $count; $i++){
-            $list[] = $this->GetByIndex($i)->ToAJAX();
+            $list[] = $this->GetByIndex($i)->ToJSON();
         }
 
         $ret = new stdClass();
         $ret->list = $list;
-        $ret->config = $this->config->ToAJAX();
+        if (!empty($this->config)){
+            $ret->config = $this->config->ToJSON();
+        }
 
         return $ret;
     }
@@ -161,7 +163,19 @@ class AbricosList {
      * @deprecated
      */
     public function ToAJAX(){
-        return $this->ToJSON();
+        $list = array();
+        $count = $this->Count();
+        for ($i = 0; $i < $count; $i++){
+            $list[] = $this->GetByIndex($i)->ToAJAX();
+        }
+
+        $ret = new stdClass();
+        $ret->list = $list;
+        if (!empty($this->config)){
+            $ret->config = $this->config->ToAJAX();
+        }
+
+        return $ret;
     }
 }
 
@@ -407,6 +421,22 @@ class AbricosModelStructureField extends AbricosItem {
         }
         return $value;
     }
+
+    public function ToJSON(){
+        $ret = parent::ToJSON();
+        unset($ret->id);
+        $ret->name = $this->name;
+        if ($this->multiLang){
+            $ret->multiLang = $this->multiLang;
+        }
+        $ret->type = $this->type;
+        if (isset($this->default)){
+            $ret->default = $this->default;
+        }
+        $ret->json = $this->json;
+
+        return $ret;
+    }
 }
 
 class AbricosModelStructure extends AbricosList {
@@ -447,6 +477,16 @@ class AbricosModelStructure extends AbricosList {
     public function Get($name){
         return parent::Get($name);
     }
+
+
+    public function ToJSON(){
+        $ret = parent::ToJSON();
+        $ret->name = $this->name;
+        $ret->fields = $ret->list;
+        unset($ret->list);
+
+        return $ret;
+    }
 }
 
 class AbricosModelManager {
@@ -484,6 +524,7 @@ class AbricosModelManager {
      * @return AbricosModelStructure|null
      */
     public function GetStructure($name){
+        $name = trim($name);
         if (isset($this->structures[$name])){
             return $this->structures[$name];
         }
@@ -496,6 +537,23 @@ class AbricosModelManager {
         $struct = new AbricosModelStructure($name, $data);
         $this->structures[$name] = $struct;
         return $struct;
+    }
+
+    public function ToJSON($names){
+        if (is_string($names)){
+            $names = explode(",", $names);
+        }
+        $ret = new stdClass();
+        $ret->structures = array();
+
+        foreach ($names as $name){
+            $struct = $this->GetStructure($name);
+            if (empty($struct)){
+                continue;
+            }
+            $ret->structures[] = $struct->ToJSON();
+        }
+        return $ret;
     }
 }
 
