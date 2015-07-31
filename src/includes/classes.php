@@ -398,6 +398,7 @@ class AbricosModelStructureField extends AbricosItem {
                 case 'int':
                 case 'bool':
                 case 'double':
+                case 'multilang':
                     $this->type = $data->type;
                     break;
             }

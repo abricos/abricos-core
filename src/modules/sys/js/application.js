@@ -6,7 +6,6 @@
 
 var Component = new Brick.Component();
 Component.requires = {
-    yui: ['base'],
     mod: [
         {name: '{C#MODNAME}', files: ['widget.js', 'io.js', 'appModel.js']},
         {name: 'widget', files: ['notice.js']}
@@ -112,7 +111,9 @@ Component.entryPoint = function(NS){
             appStructure: {
                 cache: 'appStructure',
                 response: function(d){
-                    return new NS.AppStructure(d);
+                    var appStructure = new NS.AppStructure(d);
+                    this.set('appStructure', appStructure);
+                    return appStructure
                 }
             }
         }, ajaxes || {});
@@ -128,7 +129,7 @@ Component.entryPoint = function(NS){
                 if (Y.Lang.isFunction(info.response)){
 
                     px[act + 'ParseResponse'] = function(data, res){
-                        res[act] = info.response(data[act]);
+                        res[act] = info.response.call(this, data[act]);
 
                         if (info.cache){
                             this._appCache[info.cache] = res[act];

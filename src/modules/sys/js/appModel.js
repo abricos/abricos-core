@@ -4,7 +4,9 @@
  */
 
 var Component = new Brick.Component();
-Component.requires = {};
+Component.requires = {
+    yui: ['base', 'arraylist']
+};
 Component.entryPoint = function(NS){
 
     var Y = Brick.YUI;
@@ -90,9 +92,12 @@ Component.entryPoint = function(NS){
                 return this._add(appItem, options);
             }
         },
+        _createAppItemInstance: function(data){
+            return new (this.appItem)(data);
+        },
         _add: function(appItem, options){
             if (!appItem._isAbricosAppItem){
-                appItem = new this.appItem(appItem);
+                appItem = this._createAppItemInstance(appItem);
             }
             var id = appItem.get(this.idField);
             if (this._idMap[id]){
@@ -292,10 +297,111 @@ Component.entryPoint = function(NS){
             this.structureList = new NS.AppItem.StructureList({
                 items: config.structures
             });
-            this.structureList.each(function(s){
-                console.log(s.toJSON());
-            });
-
         }
     });
+
+    NS.AppModel = Y.Base.create('appModel', NS.AppItem, [], {
+        appInstance: null,
+        structureName: null,
+        structure: null,
+        initializer: function(config){
+            config || (config = {});
+            if (config.appInstance){
+                this.appInstance = config.appInstance;
+            }
+            this.buildAttributes();
+
+            if (this.structure){
+                this.structure.fieldList.each(function(field){
+                    var fInfo = field.toJSON();
+                    if (fInfo.json in config){
+                        this.set(fInfo.name, config[fInfo.json]);
+                    }
+                }, this);
+            }
+            console.log(this.toJSON());
+        },
+        buildAttributes: function(){
+            if (!this.structure){
+                if (!this.structureName || !this.appInstance){
+                    return;
+                }
+                var appStructure = this.appInstance.get('appStructure');
+                if (!appStructure){
+                    return;
+                }
+                this.structure = appStructure.structureList.getById(this.structureName);
+                if (!this.structure){
+                    return;
+                }
+            }
+            this.structure.fieldList.each(function(field){
+                var name = field.get('name');
+                if (this.attrAdded(name)){
+                    return;
+                }
+                this.addAttr(name, {
+                    field: field,
+                    setter: '_attrFieldSetter',
+                    getter: '_attrFieldGetter'
+                });
+            }, this);
+        },
+        getField: function(name){
+            var attrCfg = this._state.data[name];
+            if (!attrCfg){
+                return null;
+            }
+            return attrCfg.field || null;
+        },
+        _attrFieldSetter: function(val, name){
+            var field = this.getField(name);
+
+            return NS.AppModel.convert(val, field);
+        },
+        _attrFieldGetter: function(val, name){
+            var field = this.getField(name);
+            return NS.AppModel.convert(val, field);
+        }
+    }, {
+        ATTRS: {}
+    });
+    NS.AppModel.convert = function(val, field){
+        if (!field){
+            return val
+        }
+
+        switch (field.get('type')) {
+            case 'string':
+                return Y.Lang.isString(val) ? val : '';
+            case 'int':
+                return (val | 0);
+        }
+        return val;
+    };
+
+    var AppModelList = function(){
+        AppModelList.superclass.constructor.apply(this, arguments);
+    };
+    NS.AppModelList = Y.extend(AppModelList, NS.AppItemList, {
+        appInstance: null,
+        appItem: NS.AppModel,
+        init: function(config){
+            config || (config = {});
+            if (config.appInstance){
+                this.appInstance = config.appInstance;
+            }
+            AppModelList.superclass.init.apply(this, arguments);
+        },
+        _createAppItemInstance: function(data){
+            data = data || {};
+            if (this.appInstance){
+                data.appInstance = this.appInstance;
+            }
+            return new (this.appItem)(data);
+        }
+    }, {
+        NAME: 'appModelList'
+    });
+
 };
