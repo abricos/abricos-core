@@ -192,7 +192,6 @@ class AbricosModel extends AbricosItem {
     protected $_structure = null;
 
     public function __construct($d){
-
         if (empty($this->_structure) && !empty($this->_structModule) && !empty($this->_structName)){
             $this->_structure = AbricosModelManager::GetManager($this->_structModule)->GetStructure($this->_structName);
         }
@@ -216,7 +215,7 @@ class AbricosModel extends AbricosItem {
         $count = $struct->Count();
         for ($i = 0; $i < $count; $i++){
             $field = $struct->GetByIndex($i);
-            if ($field->multiLang){
+            if ($field->type === 'multilang'){
                 $this->__set($field->name, $d);
             } else if (isset($d[$field->name])){
                 $this->__set($field->name, $d[$field->name]);
@@ -230,7 +229,8 @@ class AbricosModel extends AbricosItem {
             $this->_data[$name] = $value;
             return;
         }
-        if ($field->multiLang){
+
+        if ($field->type === 'multilang'){
             if (isset($this->_data[$name])){
                 $this->_data[$name]->Set($value);
             } else {
@@ -269,7 +269,7 @@ class AbricosModel extends AbricosItem {
             if (!isset($this->_data[$field->name])){
                 continue;
             }
-            if ($field->multiLang){
+            if ($field->type === 'multilang'){
                 $value = $this->_data[$field->name]->ToJSON();
             } else {
                 $value = $this->_data[$field->name];
@@ -356,16 +356,9 @@ class AbricosModelStructureField extends AbricosItem {
     public $name;
 
     /**
-     * This field is Multi-language
-     *
-     * @var bool
-     */
-    public $multiLang = false;
-
-    /**
      * Field type
      *
-     * @var string Values: 'string|int|bool|double'
+     * @var string Values: 'string|int|bool|double|multilang'
      */
     public $type = 'string';
 
@@ -388,9 +381,6 @@ class AbricosModelStructureField extends AbricosItem {
 
         if (empty($data)){
             return;
-        }
-        if (isset($data->multiLang)){
-            $this->multiLang = intval($data->multiLang);
         }
         if (isset($data->type)){
             switch ($data->type){
@@ -427,9 +417,6 @@ class AbricosModelStructureField extends AbricosItem {
         $ret = parent::ToJSON();
         unset($ret->id);
         $ret->name = $this->name;
-        if ($this->multiLang){
-            $ret->multiLang = $this->multiLang;
-        }
         $ret->type = $this->type;
         if (isset($this->default)){
             $ret->default = $this->default;

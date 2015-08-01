@@ -33,7 +33,7 @@ Component.entryPoint = function(NS){
         },
         initCallbackFire: function(){
             var initCallback = this.get('initCallback');
-            if (Y.Lang.isFunction(initCallback)){
+            if (L.isFunction(initCallback)){
                 initCallback(null, this);
             }
         },
@@ -346,21 +346,42 @@ Component.entryPoint = function(NS){
 
                 bBox.setHTML(this.template.replace(defTName, tData));
             }
+
             this.set(WAITING, true);
 
-            var appNamespace = this.get('appNamespace');
-            if (!appNamespace){
-                appNamespace = this.get('component').namespace;
-            }
-
-            var instance = this;
-            appNamespace.initApp({
-                initCallback: function(err, appInstance){
-                    instance._initAppWidget(err, appInstance);
+            var appInstance = this.get('appInstance');
+            if (appInstance){
+                this._initAppWidget(null, appInstance);
+            } else {
+                var appNamespace = this.get('appNamespace');
+                if (!appNamespace){
+                    appNamespace = this.get('component').namespace;
                 }
+
+                var instance = this;
+                appNamespace.initApp({
+                    initCallback: function(err, appInstance){
+                        instance._initAppWidget(err, appInstance);
+                    }
+                });
+            }
+        },
+        _initAppWidget: function(err, appInstance){
+            this.set('appInstance', appInstance);
+            this.set(WAITING, false);
+
+            this._appURLUpdate();
+
+            var args = this._appWidgetArguments
+            this.onInitAppWidget.apply(this, [err, appInstance, {
+                arguments: args
+            }]);
+            this.fire('initAppWidget', err, appInstance, {
+                arguments: args
             });
         },
-
+        onInitAppWidget: function(){
+        },
         _appURLUpdate: function(){
             var appInstance = this.get('appInstance');
             if (!appInstance){
@@ -397,23 +418,6 @@ Component.entryPoint = function(NS){
                 }
                 node.set('href', s);
             }, this);
-        },
-
-        _initAppWidget: function(err, appInstance){
-            this.set('appInstance', appInstance);
-            this.set(WAITING, false);
-
-            this._appURLUpdate();
-
-            var args = this._appWidgetArguments
-            this.onInitAppWidget.apply(this, [err, appInstance, {
-                arguments: args
-            }]);
-            this.fire('initAppWidget', err, appInstance, {
-                arguments: args
-            });
-        },
-        onInitAppWidget: function(){
         }
     }, {
         ATTRS: {

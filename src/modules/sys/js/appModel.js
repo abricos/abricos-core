@@ -248,7 +248,19 @@ Component.entryPoint = function(NS){
     });
     Y.augment(AppItemList, Y.ArrayList);
 
-    NS.AppItem.Field = Y.Base.create('appItem_Field', NS.AppItem, [], {}, {
+    NS.AppStructure = Y.Base.create('appStructure', Y.Base, [], {
+        structureList: null,
+
+        initializer: function(config){
+            config || (config = {});
+
+            this.structureList = new NS.AppStructure.StructureList({
+                items: config.structures
+            });
+        }
+    });
+
+    NS.AppStructure.Field = Y.Base.create('appStructure_Field', NS.AppItem, [], {}, {
         ATTRS: {
             name: {value: ''},
             multiLang: {value: false},
@@ -257,23 +269,24 @@ Component.entryPoint = function(NS){
             json: {value: ''}
         }
     });
-    NS.AppItem.FieldList = Y.Base.create('appItem_FieldList', NS.AppItemList, [], {
-        appItem: NS.AppItem.Field,
+
+    NS.AppStructure.FieldList = Y.Base.create('appStructure_FieldList', NS.AppItemList, [], {
+        appItem: NS.AppStructure.Field,
         idField: 'name'
     });
 
-    NS.AppItem.Structure = Y.Base.create('appItem_Structure', NS.AppItem, [], {
+    NS.AppStructure.Structure = Y.Base.create('appStructure_Structure', NS.AppItem, [], {
         fieldList: null,
 
         initializer: function(config){
             config || (config = {});
 
-            this.fieldList = new NS.AppItem.FieldList({
+            this.fieldList = new NS.AppStructure.FieldList({
                 items: config.fields
             });
         },
         toJSON: function(){
-            var json = NS.AppItem.Structure.superclass.toJSON.apply(this, arguments);
+            var json = NS.AppStructure.Structure.superclass.toJSON.apply(this, arguments);
             json.fields = this.fieldList.toJSON();
             return json;
         }
@@ -283,21 +296,9 @@ Component.entryPoint = function(NS){
         }
     });
 
-    NS.AppItem.StructureList = Y.Base.create('appItem_StructureList', NS.AppItemList, [], {
-        appItem: NS.AppItem.Structure,
+    NS.AppStructure.StructureList = Y.Base.create('appStructure_StructureList', NS.AppItemList, [], {
+        appItem: NS.AppStructure.Structure,
         idField: 'name'
-    });
-
-    NS.AppStructure = Y.Base.create('appStructure', Y.Base, [], {
-        structureList: null,
-
-        initializer: function(config){
-            config || (config = {});
-
-            this.structureList = new NS.AppItem.StructureList({
-                items: config.structures
-            });
-        }
     });
 
     NS.AppModel = Y.Base.create('appModel', NS.AppItem, [], {
@@ -319,7 +320,6 @@ Component.entryPoint = function(NS){
                     }
                 }, this);
             }
-            console.log(this.toJSON());
         },
         buildAttributes: function(){
             if (!this.structure){
@@ -393,6 +393,14 @@ Component.entryPoint = function(NS){
             }
             AppModelList.superclass.init.apply(this, arguments);
         },
+        /*
+        initializer: function(){
+            console.log(this);
+            this.each(function(item){
+                console.log(item.toJSON());
+            });
+        },
+        /**/
         _createAppItemInstance: function(data){
             data = data || {};
             if (this.appInstance){
@@ -401,7 +409,10 @@ Component.entryPoint = function(NS){
             return new (this.appItem)(data);
         }
     }, {
-        NAME: 'appModelList'
+        NAME: 'appModelList',
+        ATTRS: {
+
+        }
     });
 
 };
