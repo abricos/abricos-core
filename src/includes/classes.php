@@ -143,6 +143,17 @@ class AbricosList {
         return $this->_list[$index];
     }
 
+    public function GetBy($name, $value){
+        $count = $this->Count();
+        for ($i = 0; $i < $count; $i++){
+            $item = $this->GetByIndex($i);
+            if (isset($item->$name) && $item->$name === $value){
+                return $item;
+            }
+        }
+        return null;
+    }
+
     public function ToJSON(){
         $list = array();
         $count = $this->Count();
@@ -195,30 +206,33 @@ class AbricosModel extends AbricosItem {
         if (empty($this->_structure) && !empty($this->_structModule) && !empty($this->_structName)){
             $this->_structure = AbricosModelManager::GetManager($this->_structModule)->GetStructure($this->_structName);
         }
-
-        $struct = $this->_structure;
-        if (!empty($struct)){
-            $this->id = isset($d[$struct->idField]) ? $d[$struct->idField] : 0;
-            $this->Update($d);
-        } else {
-            parent::__construct($d);
+        if (!($this->_structure instanceof AbricosModelStructure)){
+            throw new Exception('Structure not found in AbricosModel');
         }
+        $struct = $this->_structure;
+
+        $this->id = isset($d[$struct->idField]) ? $d[$struct->idField] : 0;
+        $this->Update($d);
     }
 
     public function Update($d){
         $struct = $this->_structure;
-        if (empty($struct)){
-            $this->_data = $d;
-            return;
-        }
-
         $count = $struct->Count();
+
         for ($i = 0; $i < $count; $i++){
             $field = $struct->GetByIndex($i);
-            if ($field->type === 'multilang'){
+
+
+            if ($field->type === 'multiLang'){
                 $this->__set($field->name, $d);
-            } else if (isset($d[$field->name])){
-                $this->__set($field->name, $d[$field->name]);
+            } else {
+                $val = null;
+                if (isset($d[$field->name])){
+                    $val = $d[$field->name];
+                } else if (isset($field->dbField) && isset($d[$field->dbField])){
+                    $val = $d[$field->dbField];
+                }
+                $this->__set($field->name, $val);
             }
         }
     }
@@ -230,12 +244,20 @@ class AbricosModel extends AbricosItem {
             return;
         }
 
-        if ($field->type === 'multilang'){
+        if ($field->type === 'multiLang'){
             if (isset($this->_data[$name])){
                 $this->_data[$name]->Set($value);
             } else {
                 $this->_data[$name] = new AbricosMultiLangValue($name, $value);
             }
+        } else if ($field->type === 'model' || $field->type === 'modelList'){
+
+            if (isset($this->_data[$name])){
+                $this->_data[$name]->Update($value);
+            } else {
+                $this->_data[$name] = $this->_structure->manager->InstanceClass($field->typeClass, $value);
+            }
+
         } else {
             $this->_data[$name] = $field->TypeVal($value);
         }
@@ -269,12 +291,12 @@ class AbricosModel extends AbricosItem {
             if (!isset($this->_data[$field->name])){
                 continue;
             }
-            if ($field->type === 'multilang'){
+            if ($field->type === 'multiLang'){
                 $value = $this->_data[$field->name]->ToJSON();
             } else {
                 $value = $this->_data[$field->name];
             }
-            $jsonName = $field->json;
+            $jsonName = isset($field->json) ? $field->json : $field->name;
             $ret->$jsonName = $value;
         }
 
@@ -291,7 +313,7 @@ class AbricosMultiLangValue {
     protected $_data = array();
     private $_actualLang;
 
-    public function __construct($name, $d){
+    public function __construct($name, $d = ''){
         $this->name = $name;
         $this->Set($d);
     }
@@ -353,14 +375,27 @@ class AbricosMultiLangValue {
 
 class AbricosModelStructureField extends AbricosItem {
 
+    /**
+     * @var AbricosModelManager
+     */
+    public $manager;
+
+    /**
+     * @var string
+     */
     public $name;
 
     /**
      * Field type
      *
-     * @var string Values: 'string|int|bool|double|multilang'
+     * @var string Values: 'string|int|bool|double|multiLang'
      */
     public $type = 'string';
+
+    /**
+     * @var string
+     */
+    public $typeClass;
 
     /**
      * Default value
@@ -376,27 +411,48 @@ class AbricosModelStructureField extends AbricosItem {
      */
     public $json;
 
-    public function __construct($name, $data = null){
+    /**
+     * @var string
+     */
+    public $dbField;
+
+    public function __construct($manager, $name, $data = null){
+        $this->manager = $manager;
         $this->name = $this->id = $name;
 
         if (empty($data)){
             return;
         }
         if (isset($data->type)){
-            switch ($data->type){
+            $type = trim($data->type);
+            $a = explode(':', $type);
+            if (count($a) === 2){
+                $type = trim($a[0]);
+                $this->typeClass = trim($a[1]);
+            }
+
+            switch ($type){
                 case 'string':
                 case 'int':
                 case 'bool':
                 case 'double':
-                case 'multilang':
-                    $this->type = $data->type;
+                case 'array':
+                case 'multiLang':
+                case 'model':
+                case 'modelList':
+                    $this->type = $type;
                     break;
             }
         }
         if (isset($data->default)){
             $this->default = $this->TypeVal($data->default);
         }
-        $this->json = isset($data->json) ? $data->json : $name;
+        if (isset($data->dbField)){
+            $this->dbField = $data->dbField;
+        }
+        if (isset($data->json)){
+            $this->json = $data->json;
+        }
     }
 
     public function TypeVal($value){
@@ -418,6 +474,10 @@ class AbricosModelStructureField extends AbricosItem {
         unset($ret->id);
         $ret->name = $this->name;
         $ret->type = $this->type;
+        if (isset($this->typeClass)){
+            $ret->type .= ':'.$this->typeClass;
+        }
+
         if (isset($this->default)){
             $ret->default = $this->default;
         }
@@ -427,14 +487,39 @@ class AbricosModelStructureField extends AbricosItem {
     }
 }
 
+/**
+ * Class AbricosModelStructure
+ *
+ * @method AbricosModelStructureField GetByIndex(int $i)
+ * @method AbricosModelStructureField Get(string $name)
+ */
 class AbricosModelStructure extends AbricosList {
 
+    /**
+     * @var AbricosModelManager
+     */
+    public $manager;
+
+    /**
+     * @var string
+     */
     public $name;
 
+    /**
+     * @var string
+     */
     public $idField = 'id';
 
-    public function __construct($name, $data = null){
+    /**
+     * @param AbricosModelManager $manager
+     * @param string $name
+     * @param mixed $data
+     */
+    public function __construct($manager, $name, $data = null){
+        $this->manager = $manager;
+
         $this->name = $name;
+
         if (empty($data)){
             return;
         }
@@ -445,27 +530,10 @@ class AbricosModelStructure extends AbricosList {
 
         if (isset($data->fields)){
             foreach ($data->fields as $fieldName => $value){
-                $this->Add(new AbricosModelStructureField($fieldName, $value));
+                $this->Add(new AbricosModelStructureField($this->manager, $fieldName, $value));
             }
         }
     }
-
-    /**
-     * @param $i
-     * @return AbricosModelStructureField
-     */
-    public function GetByIndex($i){
-        return parent::GetByIndex($i);
-    }
-
-    /**
-     * @param mixed $name
-     * @return AbricosModelStructureField
-     */
-    public function Get($name){
-        return parent::Get($name);
-    }
-
 
     public function ToJSON(){
         $ret = parent::ToJSON();
@@ -486,7 +554,9 @@ class AbricosModelManager {
      */
     public $module;
 
-    public $structures = array();
+    protected $structures = array();
+
+    protected $classes = array();
 
     public function __construct(Ab_Module $module){
         $this->module = $module;
@@ -507,6 +577,21 @@ class AbricosModelManager {
         return AbricosModelManager::$_managers[$modName];
     }
 
+    public function RegisterClass($structName, $className){
+        $this->classes[$structName] = $className;
+    }
+
+    public function InstanceClass($structName){
+        $className = $this->classes[$structName];
+
+        $args = func_get_args();
+        $p0 = isset($args[1]) ? $args[1] : null;
+        $p1 = isset($args[2]) ? $args[2] : null;
+        $p2 = isset($args[3]) ? $args[3] : null;
+
+        return new $className($p0, $p1, $p2);
+    }
+
     /**
      * @param $name
      * @return AbricosModelStructure|null
@@ -522,7 +607,7 @@ class AbricosModelManager {
         }
         $json = file_get_contents($file);
         $data = json_decode($json);
-        $struct = new AbricosModelStructure($name, $data);
+        $struct = new AbricosModelStructure($this, $name, $data);
         $this->structures[$name] = $struct;
         return $struct;
     }

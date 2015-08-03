@@ -302,6 +302,7 @@ Component.entryPoint = function(NS){
     });
 
     NS.AppModel = Y.Base.create('appModel', NS.AppItem, [], {
+        isAppModel: true,
         appInstance: null,
         structureName: null,
         structure: null,
@@ -362,10 +363,57 @@ Component.entryPoint = function(NS){
         _attrFieldGetter: function(val, name){
             var field = this.getField(name);
             return NS.AppModel.convert(val, field);
+        },
+        toJSON: function(toString){
+            if (!toString){
+                return NS.AppModel.superclass.toJSON.apply(this);
+            }
+
+            var ret = {}, val, name, type, langName,
+                LANGS = Brick.env.languages, lng, i, lngValCur;
+
+            this.structure.fieldList.each(function(field){
+                name = field.get('name');
+                if (!this.attrAdded(name)){
+                    return;
+                }
+                val = this.get(name);
+                if (field.get('type') === 'multilang'){
+                    lngValCur = '';
+                    for (i = 0; i < LANGS.length; i++){
+                        lng = LANGS[i];
+                        langName = NS.AppModel.langFieldName(name, lng);
+                        ret[langName] = val[lng] || '';
+                        if (lng === Brick.env.language){
+                            lngValCur = ret[langName];
+                        }
+                    }
+                    if (lngValCur === '' && LANGS.length > 1){
+                        for (i = 0; i < LANGS.length; i++){
+                            lng = LANGS[i];
+                            if (lng === Brick.env.language){
+                                continue;
+                            }
+                            if (val[lng] && val[lng] !== ''){
+                                lngValCur = val[lng];
+                                break;
+                            }
+                        }
+                    }
+                    ret[name] = lngValCur;
+                } else {
+                    ret[name] = val;
+                }
+            }, this);
+
+            return ret;
         }
     }, {
         ATTRS: {}
     });
+    NS.AppModel.langFieldName = function(name, lang){
+        return name + '_' + lang;
+    }
     NS.AppModel.convert = function(val, field){
         if (!field){
             return val
@@ -394,13 +442,13 @@ Component.entryPoint = function(NS){
             AppModelList.superclass.init.apply(this, arguments);
         },
         /*
-        initializer: function(){
-            console.log(this);
-            this.each(function(item){
-                console.log(item.toJSON());
-            });
-        },
-        /**/
+         initializer: function(){
+         console.log(this);
+         this.each(function(item){
+         console.log(item.toJSON());
+         });
+         },
+         /**/
         _createAppItemInstance: function(data){
             data = data || {};
             if (this.appInstance){
@@ -410,9 +458,7 @@ Component.entryPoint = function(NS){
         }
     }, {
         NAME: 'appModelList',
-        ATTRS: {
-
-        }
+        ATTRS: {}
     });
 
 };
