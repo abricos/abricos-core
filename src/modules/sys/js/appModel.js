@@ -35,9 +35,8 @@ Component.entryPoint = function(NS){
 
         idField: 'id',
 
-        initializer: function(config){
+        init: function(config){
             config || (config = {});
-
             this.idField = config.idField || this.idField;
 
             var appItem = this.appItem = config.appItem || this.appItem;
@@ -48,6 +47,12 @@ Component.entryPoint = function(NS){
                     Y.error('AppItemList: AppItem class not found: ' + appItem);
                 }
             }
+
+            NS.AppItemList.superclass.init.apply(this, arguments);
+        },
+
+        initializer: function(config){
+            config || (config = {});
 
             this.publish('add', {defaultFN: this._defAddFn});
             this.publish('remove', {defaultFN: this._defRemoveFn});
