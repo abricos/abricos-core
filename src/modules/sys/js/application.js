@@ -168,6 +168,21 @@ Component.entryPoint = function(NS){
                     if (info.cache && this._appCache[info.cache]){
                         var ret = {};
                         ret[act] = this._appCache[info.cache];
+
+                        // TODO: develop - if request not in cache
+                        if (info.request){
+                            var req = info.request;
+                            if (Y.Lang.isString(req)){
+                                req = req.split(',');
+                            }
+                            for (var i = 0; i < req.length; i++){
+                                var actr = req[i];
+                                if (this._appCache[actr]){
+                                    ret[actr] = this._appCache[actr];
+                                }
+                            }
+                        }
+
                         return callback.apply(context, [null, ret]);
                     }
 
