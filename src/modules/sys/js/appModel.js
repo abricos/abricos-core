@@ -5,7 +5,7 @@
 
 var Component = new Brick.Component();
 Component.requires = {
-    yui: ['base', 'arraylist']
+    yui: ['yui-base', 'model-list']
 };
 Component.entryPoint = function(NS){
 

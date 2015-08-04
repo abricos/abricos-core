@@ -170,6 +170,20 @@ Component.entryPoint = function(NS){
                         ret[act] = this._appCache[info.cache];
                         return callback.apply(context, [null, ret]);
                     }
+
+                    if (info.request){
+                        var req = info.request;
+                        if (Y.Lang.isString(req)){
+                            req = req.split(',');
+                        }
+                        rData = [rData]
+                        for (var i = 0; i < req.length; i++){
+                            rData[rData.length] = {
+                                'do': req[i]
+                            };
+                        }
+                    }
+
                     this.ajaxa(rData, callback, context);
                 };
             })();

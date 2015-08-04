@@ -76,7 +76,12 @@ class AbricosList {
      */
     public $config;
 
-    public $classConfig = 'AbricosListConfig';
+    /**
+     * @var string
+     * @deprecated
+     */
+    public $classConfig;
+    // public $classConfig = 'AbricosListConfig';
 
     protected $_list = array();
     protected $_map = array();
@@ -87,7 +92,7 @@ class AbricosList {
     public function __construct($config = null){
         $this->_list = array();
         $this->_map = array();
-        if (empty($config)){
+        if (empty($config) && isset($this->classConfig)){
             $config = new $this->classConfig();
         }
         $this->config = $config;
@@ -188,6 +193,7 @@ class AbricosList {
 
         return $ret;
     }
+
 }
 
 class AbricosModel extends AbricosItem {
@@ -302,10 +308,59 @@ class AbricosModel extends AbricosItem {
 
         return $ret;
     }
+
+    public function ToArray($fieldName = ''){
+        $struct = $this->_structure;
+        if (empty($struct)){
+            return array('id' => $this->id);
+        }
+
+        $ret = array();
+
+        if (!empty($fieldName)){
+            $field = $struct->Get($fieldName);
+            $ret[$fieldName] = isset($this->_data[$fieldName])
+                ? $this->_data[$fieldName]
+                : $field->default;
+            return $ret;
+        }
+
+        $count = $struct->Count();
+        for ($i = 0; $i < $count; $i++){
+            $field = $struct->GetByIndex($i);
+            if (!isset($this->_data[$field->name])){
+                continue;
+            }
+            if ($field->type === 'multiLang'){
+                $value = $this->_data[$field->name]->ToArray();
+            } else {
+                $value = $this->_data[$field->name];
+            }
+            $ret[$field->name] = $value;
+        }
+
+        return $ret;
+    }
+
 }
 
 class AbricosModelList extends AbricosList {
 
+    public function ToArray($fieldName = ''){
+        $ret = array();
+        $count = $this->Count();
+        for ($i = 0; $i < $count; $i++){
+            /** @var AbricosModel $item */
+            $item = $this->GetByIndex($i);
+
+            if (empty($fieldName)){
+                $ret[] = $item->ToArray();
+            } else {
+                $ret[] = $item->$fieldName;
+            }
+        }
+        return $ret;
+    }
 }
 
 class AbricosMultiLangValue {
@@ -368,6 +423,10 @@ class AbricosMultiLangValue {
     }
 
     public function ToJSON(){
+        return $this->_data;
+    }
+
+    public function ToArray(){
         return $this->_data;
     }
 
