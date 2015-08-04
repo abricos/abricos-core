@@ -1,11 +1,6 @@
-/*!
- * Copyright 2008-2014 Alexander Kuzmin <roosit@abricos.org>
- * Licensed under the MIT license
- */
-
 var Component = new Brick.Component();
 Component.requires = {
-    yui: ['yui-base', 'model-list']
+    yui: ['yui-base', 'model-list'] // TODO: change model-list to arraylist
 };
 Component.entryPoint = function(NS){
 
@@ -306,18 +301,26 @@ Component.entryPoint = function(NS){
         appInstance: null,
         structureName: null,
         structure: null,
-        initializer: function(config){
+        init: function(config){
             config || (config = {});
             if (config.appInstance){
                 this.appInstance = config.appInstance;
             }
+
+            NS.AppModel.superclass.init.apply(this, arguments);
+        },
+        initializer: function(config){
+            config || (config = {});
+
             this.buildAttributes();
 
             if (this.structure){
                 this.structure.fieldList.each(function(field){
-                    var fInfo = field.toJSON();
-                    if (fInfo.json in config){
-                        this.set(fInfo.name, config[fInfo.json]);
+                    var fInfo = field.toJSON(),
+                        name = fInfo.json ? fInfo.json : fInfo.name;
+
+                    if (name in config){
+                        this.set(fInfo.name, config[name]);
                     }
                 }, this);
             }
@@ -336,6 +339,7 @@ Component.entryPoint = function(NS){
                     return;
                 }
             }
+
             this.structure.fieldList.each(function(field){
                 var name = field.get('name');
                 if (this.attrAdded(name)){
@@ -441,14 +445,6 @@ Component.entryPoint = function(NS){
             }
             AppModelList.superclass.init.apply(this, arguments);
         },
-        /*
-         initializer: function(){
-         console.log(this);
-         this.each(function(item){
-         console.log(item.toJSON());
-         });
-         },
-         /**/
         _createAppItemInstance: function(data){
             data = data || {};
             if (this.appInstance){
