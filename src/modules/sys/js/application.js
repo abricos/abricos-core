@@ -396,6 +396,9 @@ Component.entryPoint = function(NS){
         },
         onInitAppWidget: function(){
         },
+        appURLUpdate: function(){
+            this._appURLUpdate();
+        },
         _appURLUpdate: function(){
             var appInstance = this.get('appInstance');
             if (!appInstance){
