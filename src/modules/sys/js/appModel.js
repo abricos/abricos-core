@@ -89,7 +89,7 @@ Component.entryPoint = function(NS){
                     return this._add(appItem, appItemOptions);
                 }, this);
             } else {
-                return this._add(appItem, options);
+                return this._add(appItems, options);
             }
         },
         _createAppItemInstance: function(data){

@@ -33,7 +33,7 @@ if (empty($mod)){
         $result->data = array();
         $counter = 0;
         foreach ($data as $d){
-            if ($counter++ >= 5){
+            if ($counter++ >= 15){
                 break;
             }
             $result->data[] = $modManager->AJAX($d);
