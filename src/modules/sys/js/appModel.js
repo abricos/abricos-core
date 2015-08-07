@@ -54,8 +54,8 @@ Component.entryPoint = function(NS){
         initializer: function(config){
             config || (config = {});
 
-            this.publish('add', {defaultFN: this._defAddFn});
-            this.publish('remove', {defaultFN: this._defRemoveFn});
+            this.publish('add', {defaultFn: this._defAddFn});
+            this.publish('remove', {defaultFn: this._defRemoveFn});
 
             this._clear();
 
