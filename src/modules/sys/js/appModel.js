@@ -433,6 +433,8 @@ Component.entryPoint = function(NS){
                 return Y.Lang.isString(val) ? val : '';
             case 'int':
                 return (val | 0);
+            case 'double':
+                return parseFloat(val || 0);
         }
         return val;
     };
