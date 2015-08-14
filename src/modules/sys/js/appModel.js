@@ -264,7 +264,18 @@ Component.entryPoint = function(NS){
         ATTRS: {
             name: {value: ''},
             multiLang: {value: false},
-            type: {value: 'string'},
+            type: {
+                value: 'string',
+                setter: function(val){
+                    var a = val.split(':');
+                    if (a.length > 1){
+                        val = a[0];
+                        this.set('typeClass', a[1]);
+                    }
+                    return val;
+                }
+            },
+            typeClass: {value: null},
             default: {value: ''},
             json: {value: ''}
         }
@@ -359,19 +370,42 @@ Component.entryPoint = function(NS){
         },
         getField: function(name){
             var attrCfg = this._state.data[name];
-            if (!attrCfg){
-                return null;
+            return attrCfg ? (attrCfg.field || null) : null;
+        },
+        _convertFieldVal: function(val, name, act){
+            var attrCfg = this._state.data[name],
+                field = this.getField(name);
+
+            if (!field){
+                return val
             }
-            return attrCfg.field || null;
+
+            switch (field.get('type')) {
+                case 'string':
+                    return Y.Lang.isString(val) ? val : '';
+                case 'int':
+                    return (val | 0);
+                case 'double':
+                    return parseFloat(val || 0);
+                case 'list':
+                    if (act === 'set' && !attrCfg.value){
+                        var app = this.appInstance,
+                            className = field.get('typeClass'),
+                            typeClass = app.get(className) || Brick.mod[app.get('moduleName')][className];
+                        val = new typeClass({
+                            appInstance: app,
+                            items: val.list
+                        });
+                    }
+                    return val;
+            }
+            return val;
         },
         _attrFieldSetter: function(val, name){
-            var field = this.getField(name);
-
-            return NS.AppModel.convert(val, field);
+            return this._convertFieldVal(val, name, 'set');
         },
         _attrFieldGetter: function(val, name){
-            var field = this.getField(name);
-            return NS.AppModel.convert(val, field);
+            return this._convertFieldVal(val, name, 'get');
         },
         toJSON: function(toString){
             if (!toString){
@@ -423,21 +457,6 @@ Component.entryPoint = function(NS){
     NS.AppModel.langFieldName = function(name, lang){
         return name + '_' + lang;
     }
-    NS.AppModel.convert = function(val, field){
-        if (!field){
-            return val
-        }
-
-        switch (field.get('type')) {
-            case 'string':
-                return Y.Lang.isString(val) ? val : '';
-            case 'int':
-                return (val | 0);
-            case 'double':
-                return parseFloat(val || 0);
-        }
-        return val;
-    };
 
     var AppModelList = function(){
         AppModelList.superclass.constructor.apply(this, arguments);

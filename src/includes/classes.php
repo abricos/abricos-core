@@ -256,7 +256,7 @@ class AbricosModel extends AbricosItem {
             } else {
                 $this->_data[$name] = new AbricosMultiLangValue($name, $value);
             }
-        } else if ($field->type === 'model' || $field->type === 'modelList'){
+        } else if ($field->type === 'list'){
 
             if (isset($this->_data[$name])){
                 $this->_data[$name]->Update($value);
@@ -297,7 +297,9 @@ class AbricosModel extends AbricosItem {
             if (!isset($this->_data[$field->name])){
                 continue;
             }
-            if ($field->type === 'multiLang'){
+            if ($field->type === 'multiLang'
+                || $field->type === 'list'
+            ){
                 $value = $this->_data[$field->name]->ToJSON();
             } else {
                 $value = $this->_data[$field->name];
@@ -447,7 +449,7 @@ class AbricosModelStructureField extends AbricosItem {
     /**
      * Field type
      *
-     * @var string Values: 'string|int|bool|double|multiLang'
+     * @var string Values: 'string|int|bool|double|multiLang|list'
      */
     public $type = 'string';
 
@@ -497,8 +499,7 @@ class AbricosModelStructureField extends AbricosItem {
                 case 'double':
                 case 'array':
                 case 'multiLang':
-                case 'model':
-                case 'modelList':
+                case 'list':
                     $this->type = $type;
                     break;
             }
@@ -536,12 +537,12 @@ class AbricosModelStructureField extends AbricosItem {
         if (isset($this->typeClass)){
             $ret->type .= ':'.$this->typeClass;
         }
-
         if (isset($this->default)){
             $ret->default = $this->default;
         }
-        $ret->json = $this->json;
-
+        if (isset($this->json)){
+            $ret->json = $this->json;
+        }
         return $ret;
     }
 }
