@@ -15,7 +15,33 @@ Component.entryPoint = function(NS){
 
     NS.TemplateManagerExt = Y.extend(TemplateManagerExt, Abricos.TemplateManager, {
         one: function(elName){
+            var a = elName.split(',');
+            if (a.length > 1){
+                var ret = [];
+                for (var i = 0, node; i < a.length; i++){
+                    node = Y.one(this.gel(a[i]));
+                    if (node){
+                        ret[ret.length] = node;
+                    }
+                }
+                return ret;
+            }
+
             return Y.one(this.gel(elName));
+        },
+        setHTML: function(elName, html){
+            if (Y.Lang.isObject(elName)){
+                for (var n in elName){
+                    this.setHTML(n, elName[n]);
+                }
+                return;
+            }
+
+            var node = this.one(elName);
+            if (!node){
+                return;
+            }
+            node.setHTML(html);
         },
         hide: function(elName){
             this.addClass(elName, 'hide');
@@ -26,23 +52,44 @@ Component.entryPoint = function(NS){
         _toggleViewMethod: function(on, elName){
             this[on ? 'show' : 'hide'](elName);
         },
-        toggleView: function(on, elName1, elName2){
-            this._toggleViewMethod(on, elName1);
-            this._toggleViewMethod(!on, elName2);
+        toggleView: function(on, elNameShow, elNameHide){
+            this._toggleViewMethod(on, elNameShow);
+            this._toggleViewMethod(!on, elNameHide);
+        },
+        visible: function(elName, status){
+            this._toggleViewMethod(status, elName);
+        },
+        _invoke: function(elName, method, a, b, c, d, e, f){
+            var node = this.one(elName);
+            if (!node){
+                return;
+            }
+            if (!Y.Lang.isArray(node)){
+                node = [node];
+            }
+            for (var i = 0; i < node.length; i++){
+                node[i][method](a, b, c, d, e, f);
+            }
         },
         addClass: function(elName, className){
-            var node = this.one(elName);
-            if (!node){
-                return;
-            }
-            node.addClass(className);
+            this._invoke(elName, 'addClass', className);
         },
         removeClass: function(elName, className){
-            var node = this.one(elName);
-            if (!node){
-                return;
+            this._invoke(elName, 'removeClass', className);
+        },
+        replaceClass: function(elName, find, replace, conversely){
+            if (conversely){
+                this._invoke(elName, 'replaceClass', replace, find);
+            } else {
+                this._invoke(elName, 'replaceClass', find, replace);
             }
-            node.removeClass(className);
+        },
+        toggleClass: function(elName, className, isAppend){
+            if (isAppend){
+                this.addClass(elName, className);
+            } else {
+                this.removeClass(elName, className);
+            }
         }
     }, {
         NAME: 'templateManagerExt'
