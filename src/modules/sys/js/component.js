@@ -4,11 +4,49 @@
  */
 
 var Component = new Brick.Component();
-Component.requires = {
-};
+Component.requires = {};
 Component.entryPoint = function(NS){
 
     var Y = Brick.YUI;
+
+    var TemplateManagerExt = function(){
+        TemplateManagerExt.superclass.constructor.apply(this, arguments);
+    };
+
+    NS.TemplateManagerExt = Y.extend(TemplateManagerExt, Abricos.TemplateManager, {
+        one: function(elName){
+            return Y.one(this.gel(elName));
+        },
+        hide: function(elName){
+            this.addClass(elName, 'hide');
+        },
+        show: function(elName){
+            this.removeClass(elName, 'hide');
+        },
+        _toggleViewMethod: function(on, elName){
+            this[on ? 'show' : 'hide'](elName);
+        },
+        toggleView: function(on, elName1, elName2){
+            this._toggleViewMethod(on, elName1);
+            this._toggleViewMethod(!on, elName2);
+        },
+        addClass: function(elName, className){
+            var node = this.one(elName);
+            if (!node){
+                return;
+            }
+            node.addClass(className);
+        },
+        removeClass: function(elName, className){
+            var node = this.one(elName);
+            if (!node){
+                return;
+            }
+            node.removeClass(className);
+        }
+    }, {
+        NAME: 'templateManagerExt'
+    });
 
     /**
      * Template extension, which can be used to manage template.
@@ -52,7 +90,7 @@ Component.entryPoint = function(NS){
          * TODO. Wanna help? Please send a Pull Request.
          *
          * @property template
-         * @type Abricos.TemplateManager
+         * @type Brick.mod.sys.TemplateManagerExt
          */
         template: null,
 
@@ -66,7 +104,7 @@ Component.entryPoint = function(NS){
 
             var tBlockNames = this.get('templateBlockName');
 
-            this.template = new Abricos.TemplateManager(component.key, tBlockNames);
+            this.template = new NS.TemplateManagerExt(component.key, tBlockNames);
         },
 
         gel: function(elKey){
