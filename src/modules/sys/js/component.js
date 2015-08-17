@@ -90,6 +90,15 @@ Component.entryPoint = function(NS){
             } else {
                 this.removeClass(elName, className);
             }
+        },
+        append: function(elName, html){
+            var node = this.one(elName);
+            if (!node){
+                return null;
+            }
+            var el = Y.Node.create(html);
+            node.appendChild(el);
+            return el;
         }
     }, {
         NAME: 'templateManagerExt'
