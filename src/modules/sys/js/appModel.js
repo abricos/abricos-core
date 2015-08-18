@@ -390,13 +390,14 @@ Component.entryPoint = function(NS){
                 case 'double':
                     return parseFloat(val || 0);
                 case 'list':
-                    if (act === 'set' && !attrCfg.value){
+                    if ((act === 'get' && !val)
+                        || (act === 'set' && !attrCfg.value)){
                         var app = this.appInstance,
                             className = field.get('typeClass'),
                             typeClass = app.get(className) || Brick.mod[app.get('moduleName')][className];
                         val = new typeClass({
                             appInstance: app,
-                            items: val.list
+                            items: val ? val.list : []
                         });
                     }
                     return val;
