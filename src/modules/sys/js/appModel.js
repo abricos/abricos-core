@@ -383,6 +383,8 @@ Component.entryPoint = function(NS){
             switch (field.get('type')) {
                 case 'string':
                     return Y.Lang.isString(val) ? val : '';
+                case 'bool':
+                    return !!val;
                 case 'int':
                     return (val | 0);
                 case 'double':

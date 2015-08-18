@@ -520,7 +520,7 @@ class AbricosModelStructureField extends AbricosItem {
             case 'string':
                 return strval($value);
             case 'bool':
-                return boolval($value);
+                return !!$value;
             case 'int':
                 return intval($value);
             case 'double':
