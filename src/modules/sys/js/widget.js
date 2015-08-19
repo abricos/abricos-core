@@ -24,6 +24,7 @@ Component.entryPoint = function(NS){
         BOUNDING_BOX = 'boundingBox';
 
     var WidgetClick = function(){
+        this._initClicks();
     };
     WidgetClick.prototype = {
         initializer: function(){
@@ -55,6 +56,19 @@ Component.entryPoint = function(NS){
                 }
             }
 
+            var state = this._clickState;
+            if (e.dataClick && !!state.get(e.dataClick, 'added')){
+                var event = state.get(e.dataClick, 'event');
+                if (Y.Lang.isString(event)){
+                    event = this[event];
+                }
+                if (L.isFunction(event)){
+                    event.apply(this, arguments);
+                    e.halt();
+                    return;
+                }
+            }
+
             if (L.isFunction(this.onClick)
                 && this.onClick.apply(this, arguments)){
 
@@ -64,6 +78,32 @@ Component.entryPoint = function(NS){
 
             if (!this.fire('click', {dataClick: e.dataClick})){
                 e.halt();
+            }
+        },
+        _initClicks: function(){
+            this._clickState = new Y.State();
+            var clicks = this.constructor.CLICKS;
+            if (!clicks){
+                return;
+            }
+            clicks = Y.AttributeCore.protectAttrs(clicks);
+            var state = this._clickState,
+                name, added, config;
+
+            for (name in clicks){
+                if (!clicks.hasOwnProperty(name)){
+                    continue;
+                }
+                added = state.get(name, 'added');
+                if (added){
+                    continue;
+                }
+                config = clicks[name];
+                config.added = true;
+                if (!config.event){
+                    config.event = name;
+                }
+                state.data[name] = config;
             }
         }
     };
