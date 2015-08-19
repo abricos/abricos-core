@@ -14,20 +14,22 @@ Component.entryPoint = function(NS){
     };
 
     NS.TemplateManagerExt = Y.extend(TemplateManagerExt, Abricos.TemplateManager, {
-        one: function(elName){
+        _parseElName: function(elName){
             var a = elName.split(',');
-            if (a.length > 1){
-                var ret = [];
-                for (var i = 0, node; i < a.length; i++){
-                    node = Y.one(this.gel(a[i]));
-                    if (node){
-                        ret[ret.length] = node;
-                    }
+            return a;
+        },
+        one: function(elName){
+            var a = this._parseElName(elName);
+            var ret = [];
+            for (var i = 0, node; i < a.length; i++){
+                node = Y.one(this.gel(a[i]));
+                if (node){
+                    node.tpName = a[i];
+                    ret[ret.length] = node;
                 }
-                return ret;
             }
 
-            return Y.one(this.gel(elName));
+            return a.length === 1 ? ret[0] : ret;
         },
         setHTML: function(elName, html){
             if (Y.Lang.isObject(elName)){
@@ -42,6 +44,35 @@ Component.entryPoint = function(NS){
                 return;
             }
             node.setHTML(html);
+        },
+        setValue: function(elName, value){
+            if (Y.Lang.isObject(elName)){
+                for (var n in elName){
+                    this.setValue(n, elName[n]);
+                }
+                return;
+            }
+
+            var node = this.one(elName);
+            if (!node){
+                return;
+            }
+            node.set('value', value);
+        },
+        getValue: function(elName){
+            var vals = this._invoke(elName, 'get', 'value'),
+                elNames = this._parseElName(elName),
+                ret = {};
+
+            for (var i = 0, val, name; i < elNames.length; i++){
+                name = elNames[i];
+                val = vals[name] || {};
+                ret[name] = val.result;
+            }
+            if (elNames.length === 1){
+                return ret[elNames[0]];
+            }
+            return ret;
         },
         hide: function(elName){
             this.addClass(elName, 'hide');
@@ -60,16 +91,22 @@ Component.entryPoint = function(NS){
             this._toggleViewMethod(status, elName);
         },
         _invoke: function(elName, method, a, b, c, d, e, f){
-            var node = this.one(elName);
-            if (!node){
+            var nodes = this.one(elName);
+            if (!nodes){
                 return;
             }
-            if (!Y.Lang.isArray(node)){
-                node = [node];
+            if (!Y.Lang.isArray(nodes)){
+                nodes = [nodes];
             }
-            for (var i = 0; i < node.length; i++){
-                node[i][method](a, b, c, d, e, f);
+            var ret = {};
+            for (var i = 0, node; i < nodes.length; i++){
+                node = nodes[i];
+                ret[node.tpName] = {
+                    node: node,
+                    result: node[method](a, b, c, d, e, f)
+                };
             }
+            return ret;
         },
         addClass: function(elName, className){
             this._invoke(elName, 'addClass', className);
