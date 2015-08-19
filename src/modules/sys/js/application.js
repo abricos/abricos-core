@@ -126,12 +126,36 @@ Component.entryPoint = function(NS){
                 var act = n,
                     info = ajaxes[act];
 
-                if (Y.Lang.isFunction(info.response)){
+                if (Y.Lang.isFunction(info.response) || Y.Lang.isString(info.type)){
 
                     px[act + 'ParseResponse'] = function(data, res){
-                        res[act] = info.response.call(this, data[act]);
+                        if (info.type){
+                            var a = info.type.split(':'),
+                                type = a[0],
+                                typeClass;
 
-                        if (info.cache){
+                            switch (type) {
+                                case 'modelList':
+                                    typeClass = this.get(a[1]) || NS.AppModelList;
+
+                                    res[act] = new typeClass({
+                                        appInstance: this,
+                                        items: data[act].list || []
+                                    });
+                                    break;
+                            }
+                        } else {
+                            res[act] = info.response.call(this, data[act]);
+                        }
+                        if (info.attribute){
+                            if (!this.attrAdded(act)){
+                                this.addAttr(act, {
+                                    value: res[act]
+                                });
+                            } else {
+                                this.set(act, res[act]);
+                            }
+                        } else if (info.cache){
                             this._appCache[info.cache] = res[act];
                         }
                     };
