@@ -21,15 +21,86 @@ Component.entryPoint = function(NS){
 
         SLICE = Array.prototype.slice;
 
+    var ADDED = 'added';
+
+    var RequestCore = function(){
+        this._initRequests();
+    };
+    RequestCore.prototype = {
+        _initRequests: function(){
+            this._reqsState = new Y.State();
+
+            var ctor = this.constructor,
+                c = ctor;
+
+            while (c){
+                this.addRequests(c.REQS);
+                c = c.superclass ? c.superclass.constructor : null;
+            }
+        },
+        requestAdded: function(name){
+            return !!(this._reqsState.get(name, ADDED));
+        },
+        addRequest: function(name, config){
+            var state = this._reqsState;
+            if (state.get(name, ADDED)){
+                return;
+            }
+
+            config = Y.merge({
+                args: [],
+                attribute: false,
+                type: null,
+                typeClass: null,
+                attach: null,
+                response: false
+            }, config || {});
+
+            if (Y.Lang.isString(config.type)){
+                var a = config.type.split(':');
+                config.type = a[0];
+                switch (config.type) {
+                    case 'modelList':
+                        if (!config.typeClass){
+                            config.typeClass = a[1];
+                        }
+                        if (!this.attrAdded(name) && config.attribute){
+                            this.addAttr(name, {});
+                        }
+                        break;
+                }
+            }
+            if (!config.type || !config.typeClass){
+                config.type = config.typeClass = null;
+            }
+
+            config[ADDED] = true;
+            state.data[name] = config;
+        },
+        addRequests: function(reqs){
+            if (!reqs){
+                return;
+            }
+            reqs = Y.AttributeCore.protectAttrs(reqs);
+            var name;
+            for (name in reqs){
+                if (!reqs.hasOwnProperty(name)){
+                    continue;
+                }
+                this.addRequest(name, reqs[name]);
+            }
+        }
+    };
+    NS.RequestCore = RequestCore;
+
     NS.Application = Y.Base.create('application', Y.Base, [
+        NS.RequestCore,
         NS.AJAX,
         NS.Language
     ], {
         initializer: function(){
             var ns = this.get('component');
             ns.namespace.appInstance = this;
-
-            this._appCache = {};
         },
         initCallbackFire: function(){
             var initCallback = this.get('initCallback');
@@ -37,12 +108,118 @@ Component.entryPoint = function(NS){
                 initCallback(null, this);
             }
         },
-        onAJAXError: function(err){
-            Brick.mod.widget.notice.show(err.msg);
+        request: function(name){
+            if (!this.requestAdded(name)){
+                return;
+            }
+
+            var state = this._reqsState,
+                info = state.data[name];
+
+            var funcArgs = SLICE.call(arguments),
+                funcArg,
+                defArgsOffset = 1;
+
+            var rData = {
+                'do': name
+            };
+
+            if (Y.Lang.isArray(info.args)){
+                defArgsOffset = info.args.length + 1;
+                for (var i = 0; i < info.args.length; i++){
+                    funcArg = funcArgs[i + 1];
+                    if (funcArg && Y.Lang.isFunction(funcArg.toJSON)){
+                        funcArg = funcArg.toJSON();
+                    }
+                    rData[info.args[i]] = funcArg;
+                }
+            }
+
+            var callback, context;
+            if (funcArgs[defArgsOffset]){
+                callback = funcArgs[defArgsOffset];
+            }
+            if (funcArgs[defArgsOffset + 1]){
+                context = funcArgs[defArgsOffset + 1];
+            }
+
+            var cacheResult;
+            if (info.attribute){
+                cacheResult = this.get(name);
+            }
+
+            if (cacheResult){
+                var ret = {};
+                ret[name] = cacheResult;
+
+                // TODO: develop - if attach not in cache
+                if (info.attach){
+                    var req = info.attach;
+                    if (Y.Lang.isString(req)){
+                        req = req.split(',');
+                    }
+                    for (var i = 0; i < req.length; i++){
+                        var actr = req[i];
+                        if (this.requestAdded(actr) && state.get('actr', 'attribute')){
+                            ret[actr] = this.get(actr);
+                        }
+                    }
+                }
+
+                return callback.apply(context, [null, ret]);
+            }
+
+            if (info.attach){
+                var req = info.attach;
+                if (Y.Lang.isString(req)){
+                    req = req.split(',');
+                }
+                rData = [rData]
+                for (var i = 0; i < req.length; i++){
+                    rData[rData.length] = {
+                        'do': req[i]
+                    };
+                }
+            }
+
+            this._appRequest(rData, callback, context);
         },
-        ajaxParseResponse: function(data, res){
+        _appRequest: function(rData, callback, context){
+            if (this.get('isLoadAppStructure') && !this.get('appStructure')){
+                if (!Y.Lang.isArray(rData)){
+                    rData = [rData];
+                }
+                rData.splice(0, 0, {do: 'appStructure'});
+            }
+            this.ajax(rData, this._onAppResponses, {
+                arguments: {callback: callback, context: context}
+            });
         },
-        _defaultAJAXCallback: function(err, res, details){
+        _onAppResponse: function(name, data, res){
+            if (!this.requestAdded(name)){
+                return;
+            }
+            var info = this._reqsState.data[name];
+
+            if (info.type && info.typeClass){
+                switch (info.type) {
+                    case 'modelList':
+                        var typeClass = this.get(info.typeClass) || NS.AppModelList;
+
+                        res[name] = new typeClass({
+                            appInstance: this,
+                            items: data[name].list || []
+                        });
+                        break;
+                }
+            } else {
+                res[name] = info.response.call(this, data[name]);
+            }
+            if (info.attribute){
+                this.set(name, res[name]);
+            }
+        },
+        _onAppResponses: function(err, res, details){
             res = res || {};
 
             var tRes = {},
@@ -51,15 +228,11 @@ Component.entryPoint = function(NS){
             if (!Y.Lang.isArray(rData)){
                 rData = [rData];
             }
+
             for (var i = 0; i < rData.length; i++){
                 var data = rData[i];
-
-                for (var n in data){
-                    var fName = n + 'ParseResponse';
-
-                    if (Y.Lang.isFunction(this[fName])){
-                        this[fName](data, tRes);
-                    }
+                for (var name in data){
+                    this._onAppResponse(name, data, tRes);
                 }
 
                 this.ajaxParseResponse(data, tRes);
@@ -69,18 +242,17 @@ Component.entryPoint = function(NS){
                 details.callback.apply(details.context, [err, tRes]);
             }
         },
+        onAJAXError: function(err){
+            Brick.mod.widget.notice.show(err.msg);
+        },
+        ajaxParseResponse: function(data, res){
+        },
+
+        /**
+         * @deprecated
+         */
         ajaxa: function(rData, callback, context){
-            if (this.get('isLoadAppStructure') && !this.get('appStructure')){
-                if (!Y.Lang.isArray(rData)){
-                    rData = [rData];
-                }
-                rData.splice(0, 0, {
-                    do: 'appStructure'
-                });
-            }
-            this.ajax(rData, this._defaultAJAXCallback, {
-                arguments: {callback: callback, context: context}
-            });
+            this._request.apply(this, arguments);
         }
     }, {
         ATTRS: {
@@ -93,155 +265,35 @@ Component.entryPoint = function(NS){
             moduleName: {
                 value: null
             },
-            appStructure: {
-                value: null
-            },
             isLoadAppStructure: {
                 value: false
+            }
+        },
+        REQS: {
+            appStructure: {
+                attribute: true,
+                response: function(d){
+                    return new NS.AppStructure(d);
+                }
             }
         }
     });
 
-
     NS.Application.build = function(component, ajaxes, px, extensions, sx){
         extensions = extensions || [];
         sx = sx || {};
-
-        var ATTRS = sx.ATTRS || {};
-
-        ajaxes = Y.merge({
-            appStructure: {
-                cache: 'appStructure',
-                response: function(d){
-                    var appStructure = new NS.AppStructure(d);
-                    this.set('appStructure', appStructure);
-                    return appStructure
-                }
-            }
-        }, ajaxes || {});
+        ajaxes = sx.REQS = Y.merge(ajaxes, sx.REQS || {});
 
         var moduleName = component.moduleName;
         var ns = Brick.mod[moduleName];
 
         for (var n in ajaxes){
             (function(){
-                var act = n,
-                    info = ajaxes[act],
-                    type,
-                    typeClassName;
-
-                if (Y.Lang.isString(info.type)){
-                    var a = info.type.split(':');
-                    type = a[0];
-                    switch (type) {
-                        case 'modelList':
-                            typeClassName = a[1];
-                            if (!ATTRS[act] && info.attribute){
-                                ATTRS[act] = {};
-                            }
-                            break;
-                        default :
-                            type = undefined;
-                    }
-                }
-
-                if (Y.Lang.isFunction(info.response) || type){
-
-                    px[act + 'ParseResponse'] = function(data, res){
-                        if (info.type){
-                            switch (type) {
-                                case 'modelList':
-                                    var typeClass = this.get(typeClassName) || NS.AppModelList;
-
-                                    res[act] = new typeClass({
-                                        appInstance: this,
-                                        items: data[act].list || []
-                                    });
-                                    break;
-                            }
-                        } else {
-                            res[act] = info.response.call(this, data[act]);
-                        }
-                        if (info.attribute){
-                            this.set(act, res[act]);
-                        } else if (info.cache){
-                            this._appCache[info.cache] = res[act];
-                        }
-                    };
-                }
-
+                var act = n;
                 px[act] = function(){
-                    var funcArgs = SLICE.call(arguments),
-                        funcArg,
-                        defArgsOffset = 0;
-
-                    var rData = {
-                        'do': act
-                    };
-
-                    if (Y.Lang.isArray(info.args)){
-                        defArgsOffset = info.args.length;
-                        for (var i = 0; i < defArgsOffset; i++){
-                            funcArg = funcArgs[i];
-                            if (funcArg && Y.Lang.isFunction(funcArg.toJSON)){
-                                funcArg = funcArg.toJSON();
-                            }
-                            rData[info.args[i]] = funcArg;
-                        }
-                    }
-
-                    var callback, context;
-                    if (funcArgs[defArgsOffset]){
-                        callback = funcArgs[defArgsOffset];
-                    }
-                    if (funcArgs[defArgsOffset + 1]){
-                        context = funcArgs[defArgsOffset + 1];
-                    }
-
-                    var cacheResult;
-                    if (info.attribute){
-                        cacheResult = this.get(act);
-                    } else if (info.cache && this._appCache[info.cache]){
-                        cacheResult = this._appCache[info.cache];
-                    }
-
-                    if (cacheResult){
-                        var ret = {};
-                        ret[act] = cacheResult;
-
-                        // TODO: develop - if request not in cache
-                        if (info.request){
-                            var req = info.request;
-                            if (Y.Lang.isString(req)){
-                                req = req.split(',');
-                            }
-                            for (var i = 0; i < req.length; i++){
-                                var actr = req[i];
-                                if (this._appCache[actr]){
-                                    ret[actr] = this._appCache[actr];
-                                } else if (this.get(actr)){
-                                    ret[actr] = this.get(actr);
-                                }
-                            }
-                        }
-
-                        return callback.apply(context, [null, ret]);
-                    }
-
-                    if (info.request){
-                        var req = info.request;
-                        if (Y.Lang.isString(req)){
-                            req = req.split(',');
-                        }
-                        rData = [rData]
-                        for (var i = 0; i < req.length; i++){
-                            rData[rData.length] = {
-                                'do': req[i]
-                            };
-                        }
-                    }
-
-                    this.ajaxa(rData, callback, context);
+                    var args = SLICE.call(arguments);
+                    args.splice(0, 0, act);
+                    this.request.apply(this, args);
                 };
             })();
         }
