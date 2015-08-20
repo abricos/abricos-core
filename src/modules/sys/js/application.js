@@ -107,6 +107,8 @@ Component.entryPoint = function(NS){
         extensions = extensions || [];
         sx = sx || {};
 
+        var ATTRS = sx.ATTRS || {};
+
         ajaxes = Y.merge({
             appStructure: {
                 cache: 'appStructure',
@@ -124,19 +126,32 @@ Component.entryPoint = function(NS){
         for (var n in ajaxes){
             (function(){
                 var act = n,
-                    info = ajaxes[act];
+                    info = ajaxes[act],
+                    type,
+                    typeClassName;
 
-                if (Y.Lang.isFunction(info.response) || Y.Lang.isString(info.type)){
+                if (Y.Lang.isString(info.type)){
+                    var a = info.type.split(':');
+                    type = a[0];
+                    switch (type) {
+                        case 'modelList':
+                            typeClassName = a[1];
+                            if (!ATTRS[act] && info.attribute){
+                                ATTRS[act] = {};
+                            }
+                            break;
+                        default :
+                            type = undefined;
+                    }
+                }
+
+                if (Y.Lang.isFunction(info.response) || type){
 
                     px[act + 'ParseResponse'] = function(data, res){
                         if (info.type){
-                            var a = info.type.split(':'),
-                                type = a[0],
-                                typeClass;
-
                             switch (type) {
                                 case 'modelList':
-                                    typeClass = this.get(a[1]) || NS.AppModelList;
+                                    var typeClass = this.get(typeClassName) || NS.AppModelList;
 
                                     res[act] = new typeClass({
                                         appInstance: this,
@@ -148,13 +163,7 @@ Component.entryPoint = function(NS){
                             res[act] = info.response.call(this, data[act]);
                         }
                         if (info.attribute){
-                            if (!this.attrAdded(act)){
-                                this.addAttr(act, {
-                                    value: res[act]
-                                });
-                            } else {
-                                this.set(act, res[act]);
-                            }
+                            this.set(act, res[act]);
                         } else if (info.cache){
                             this._appCache[info.cache] = res[act];
                         }
@@ -189,9 +198,16 @@ Component.entryPoint = function(NS){
                         context = funcArgs[defArgsOffset + 1];
                     }
 
-                    if (info.cache && this._appCache[info.cache]){
+                    var cacheResult;
+                    if (info.attribute){
+                        cacheResult = this.get(act);
+                    } else if (info.cache && this._appCache[info.cache]){
+                        cacheResult = this._appCache[info.cache];
+                    }
+
+                    if (cacheResult){
                         var ret = {};
-                        ret[act] = this._appCache[info.cache];
+                        ret[act] = cacheResult;
 
                         // TODO: develop - if request not in cache
                         if (info.request){
@@ -203,6 +219,8 @@ Component.entryPoint = function(NS){
                                 var actr = req[i];
                                 if (this._appCache[actr]){
                                     ret[actr] = this._appCache[actr];
+                                } else if (this.get(actr)){
+                                    ret[actr] = this.get(actr);
                                 }
                             }
                         }
