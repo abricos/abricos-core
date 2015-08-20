@@ -99,6 +99,8 @@ Component.entryPoint = function(NS){
         NS.Language
     ], {
         initializer: function(){
+            // this.publish('response');
+
             var ns = this.get('component');
             ns.namespace.appInstance = this;
         },
@@ -213,7 +215,7 @@ Component.entryPoint = function(NS){
                         break;
                 }
             } else {
-                res[name] = info.response.call(this, data[name]);
+                res[name] = Y.Lang.isFunction(info.response) ? info.response.call(this, data[name]) : data[name];
             }
             if (info.attribute){
                 this.set(name, res[name]);
@@ -235,7 +237,7 @@ Component.entryPoint = function(NS){
                     this._onAppResponse(name, data, tRes);
                 }
 
-                this.ajaxParseResponse(data, tRes);
+                // this.ajaxParseResponse(data, tRes);
             }
 
             if (Y.Lang.isFunction(details.callback)){
@@ -245,8 +247,7 @@ Component.entryPoint = function(NS){
         onAJAXError: function(err){
             Brick.mod.widget.notice.show(err.msg);
         },
-        ajaxParseResponse: function(data, res){
-        },
+        // ajaxParseResponse: function(data, res){        },
 
         /**
          * @deprecated
