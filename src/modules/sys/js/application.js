@@ -23,6 +23,86 @@ Component.entryPoint = function(NS){
 
     var ADDED = 'added';
 
+    var NavigatorCore = function(){
+        this._initNavigator();
+    };
+    NavigatorCore.prototype = {
+        _initNavigator: function(){
+            this._urlsState = new Y.State();
+
+            var ctor = this.constructor,
+                c = ctor;
+
+            while (c){
+                this.addURLs(c.URLS);
+                c = c.superclass ? c.superclass.constructor : null;
+            }
+        },
+        getURL: function(name){
+            if (!this.URLAdded(name)){
+                return '';
+            }
+            var config = this._urlsState.data[name];
+            if (Y.Lang.isFunction(config.value)){
+                var args = SLICE.call(arguments).slice(1);
+                return config.value.apply(this, args);
+            }
+            return config.value;
+
+        },
+        URLAdded: function(name){
+            return !!(this._urlsState.get(name, ADDED));
+        },
+        addURL: function(name, url){
+            var state = this._urlsState;
+            if (this.URLAdded(name)){
+                return;
+            }
+            var config = {
+                value: url
+            };
+            config[ADDED] = true;
+            state.data[name] = config;
+        },
+        addURLs: function(urls){
+            if (!urls){
+                return;
+            }
+
+            var parse = function(objs){
+                if (Y.Lang.isString(objs) || Y.Lang.isFunction(objs)){
+                    return objs;
+                }
+                var a = [], name, ta, obj, i;
+                for (name in objs){
+                    if (!objs.hasOwnProperty(name)){
+                        continue;
+                    }
+                    obj = objs[name];
+                    ta = parse(obj);
+                    if (Y.Lang.isArray(ta)){
+                        for (i = 0; i < ta.length; i++){
+                            a[a.length] = {
+                                key: name + '.' + ta[i].key,
+                                val: ta[i].val
+                            };
+                        }
+                    } else {
+                        a[a.length] = {key: name, val: ta};
+                    }
+                }
+                return a;
+            }
+
+            var a = parse(urls), i;
+            for (i = 0; i < a.length; i++){
+                this.addURL(a[i].key, a[i].val);
+            }
+            console.log(this.getURL('group.view', 123));
+        }
+    };
+    NS.NavigatorCore = NavigatorCore;
+
     var RequestCore = function(){
         this._initRequests();
     };
@@ -94,6 +174,7 @@ Component.entryPoint = function(NS){
     NS.RequestCore = RequestCore;
 
     NS.Application = Y.Base.create('application', Y.Base, [
+        NavigatorCore,
         NS.RequestCore,
         NS.AJAX,
         NS.Language
