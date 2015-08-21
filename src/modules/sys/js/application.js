@@ -1,6 +1,6 @@
 /*!
  * Abricos Platform (http://abricos.org)
- * Copyright 2008-2014 Alexander Kuzmin <roosit@abricos.org>
+ * Copyright 2008-2015 Alexander Kuzmin <roosit@abricos.org>
  * Licensed under the MIT license
  */
 
@@ -299,13 +299,13 @@ Component.entryPoint = function(NS){
     NS.RequestCore = RequestCore;
 
     NS.Application = Y.Base.create('application', Y.Base, [
-        Navigator,
+        NS.Navigator,
         NS.RequestCore,
         NS.AJAX,
         NS.Language
     ], {
         initializer: function(){
-            // this.publish('response');
+            this.publish('appResponses');
 
             var ns = this.get('component');
             ns.namespace.appInstance = this;
@@ -442,19 +442,21 @@ Component.entryPoint = function(NS){
                 for (var name in data){
                     this._onAppResponse(name, data, tRes);
                 }
-
-                // TODO: Change to Event fire
-                // this.ajaxParseResponse(data, tRes);
             }
 
             if (Y.Lang.isFunction(details.callback)){
                 details.callback.apply(details.context, [err, tRes]);
             }
+
+            this.fire('appResponses', {
+                error: err,
+                responses: rData,
+                result: tRes
+            });
         },
         onAJAXError: function(err){
             Brick.mod.widget.notice.show(err.msg);
         },
-        // ajaxParseResponse: function(data, res){        },
 
         /**
          * @deprecated
@@ -544,36 +546,20 @@ Component.entryPoint = function(NS){
         workspacePage: {
             value: null
         },
-        workspacePageAsync: {
-            value: null
-        },
         workspaceWidget: {
             value: null
         }
     };
     AppWorkspace.prototype = {
-        initializer: function(){
-            this.on('initAppWidget', function(e, err, appInstance){
-                this._showWorkspacePage();
-            });
-        },
-
-        _showWorkspacePage: function(){
-            var getWSPageAsync = this.get('workspacePageAsync');
-            if (Y.Lang.isFunction(getWSPageAsync)){
-                this.set(WAITING, true);
-                var instance = this;
-
-                getWSPageAsync.call(this, function(err, page){
-                    instance.set(WAITING, false);
-                    instance.showWorkspacePage(page);
-                });
-            } else {
-                this.showWorkspacePage(this.get('workspacePage'));
-            }
+        onInitAppWidget: function(err, appInstance){
+            this.showWorkspacePage();
         },
 
         showWorkspacePage: function(page){
+            if (!page && !this._isFirstShowWSPage){
+                page = this.get('workspacePage');
+                this._isFirstShowWSPage = true;
+            }
             if (!page || !page.component || !page.widget){
                 return;
             }
@@ -699,6 +685,7 @@ Component.entryPoint = function(NS){
         },
         _initAppWidget: function(err, appInstance){
             this.set('appInstance', appInstance);
+
             this.set(WAITING, false);
 
             this._appURLUpdate();
