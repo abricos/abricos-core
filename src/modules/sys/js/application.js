@@ -444,15 +444,15 @@ Component.entryPoint = function(NS){
                 }
             }
 
-            if (Y.Lang.isFunction(details.callback)){
-                details.callback.apply(details.context, [err, tRes]);
-            }
-
             this.fire('appResponses', {
                 error: err,
                 responses: rData,
                 result: tRes
             });
+
+            if (Y.Lang.isFunction(details.callback)){
+                details.callback.apply(details.context, [err, tRes]);
+            }
         },
         onAJAXError: function(err){
             Brick.mod.widget.notice.show(err.msg);
@@ -554,7 +554,6 @@ Component.entryPoint = function(NS){
         onInitAppWidget: function(err, appInstance){
             this.showWorkspacePage();
         },
-
         showWorkspacePage: function(page){
             if (!page && !this._isFirstShowWSPage){
                 page = this.get('workspacePage');
