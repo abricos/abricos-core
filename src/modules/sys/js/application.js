@@ -26,6 +26,35 @@ Component.entryPoint = function(NS){
     var NavigatorCore = function(){
         this._initNavigator();
     };
+    /**
+     * Example: user.view(532,avatar) => return {
+     *      key: 'user.view',
+     *      args: ['532', 'avatar']
+     * }
+     * @param sURL
+     */
+    NavigatorCore.parseURL = function(sURL){
+        var a = sURL.split('.'),
+            key = [],
+            args = [],
+            ex,
+            rex = /(.*)\((.*)\)/i;
+
+        for (var i = 0, si; i < a.length; i++){
+            si = a[i];
+            if (i === (a.length - 1) && rex.test(si)){
+                ex = rex.exec(si);
+                si = ex[1];
+                args = ex[2].split(",");
+            }
+            key[key.length] = si;
+        }
+        return {
+            key: key.join('.'),
+            args: args
+        };
+    };
+
     NavigatorCore.prototype = {
         _initNavigator: function(){
             this._urlsState = new Y.State();
@@ -98,10 +127,66 @@ Component.entryPoint = function(NS){
             for (i = 0; i < a.length; i++){
                 this.addURL(a[i].key, a[i].val);
             }
-            console.log(this.getURL('group.view', 123));
+        },
+        _defineURLSources: function(sources){
+            if (!sources){
+                sources = this;
+            }
+            if (!Y.Lang.isArray(sources)){
+                sources = [sources];
+            }
+            var ret = [], find = false;
+            for (var i = 0, si; i < sources.length; i++){
+                si = sources[i];
+                if (!Y.Lang.isFunction(si.getURL)){
+                    continue;
+                }
+                if ((si === this && !find) || si !== this){
+                    ret[ret.length] = si;
+                }
+                if (si === this){
+                    find = true;
+                }
+            }
+            if (!find){
+                ret[ret.length] = this;
+            }
+            return ret;
+        },
+        replaceURL: function(html, sources){
+            sources = this._defineURLSources(sources);
+            // TODO: release
+        },
+        fillURLNode: function(el, sources){
+            el = Y.one(el);
+            if (!el){
+                return;
+            }
+            sources = this._defineURLSources(sources);
+
+            var sURL, p, i, url, source;
+            el.all('[data-url]').each(function(node){
+                sURL = node.getData('url');
+                if (!sURL){
+                    return;
+                }
+                p = NS.NavigatorCore.parseURL(sURL);
+                url = null;
+                for (i = 0; i < sources.length; i++){
+                    source = sources[i];
+                    url = source.getURL.apply(source, [p.key].concat(p.args));
+                    if (url && url !== ''){
+                        break;
+                    }
+                }
+                if (url){
+                    node.set('href', url);
+                }
+            }, this);
         }
     };
     NS.NavigatorCore = NavigatorCore;
+
 
     var RequestCore = function(){
         this._initRequests();
@@ -318,6 +403,7 @@ Component.entryPoint = function(NS){
                     this._onAppResponse(name, data, tRes);
                 }
 
+                // TODO: Change to Event fire
                 // this.ajaxParseResponse(data, tRes);
             }
 
@@ -591,41 +677,11 @@ Component.entryPoint = function(NS){
             this._appURLUpdate();
         },
         _appURLUpdate: function(){
-            var appInstance = this.get('appInstance');
-            if (!appInstance){
+            var app = this.get('appInstance');
+            if (!app){
                 return;
             }
-
-            var URL = Brick.mod[appInstance.get('moduleName')]['URL'];
-            if (!URL){
-                return;
-            }
-
-            this.get('boundingBox').all('[data-url]').each(function(node){
-                var sURL = node.getData('url');
-                if (!sURL){
-                    return;
-                }
-                var arr = sURL.split('.'), s = URL, si, aParam = [],
-                    rex = /(.*)\((.*)\)/i;
-                for (var i = 0; i < arr.length; i++){
-                    si = arr[i];
-                    if (i === (arr.length - 1) && rex.test(si)){
-                        var ex = rex.exec(si);
-                        si = ex[1];
-                        aParam = ex[2].split(",");
-                    }
-                    if (!(s = s[si])){
-                        return;
-                    }
-                }
-
-                s = L.isFunction(s) ? s.apply(null, aParam) : s;
-                if (!L.isString(s)){
-                    return;
-                }
-                node.set('href', s);
-            }, this);
+            app.fillURLNode(this.get('boundingBox'), this);
         }
     }, {
         ATTRS: {
