@@ -15,6 +15,9 @@ Component.entryPoint = function(NS){
 
     NS.TemplateManagerExt = Y.extend(TemplateManagerExt, Abricos.TemplateManager, {
         _parseElName: function(elName){
+            if (!elName || !Y.Lang.isString(elName)){
+                return [];
+            }
             var a = elName.split(',');
             return a;
         },
