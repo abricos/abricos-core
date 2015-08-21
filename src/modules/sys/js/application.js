@@ -23,7 +23,7 @@ Component.entryPoint = function(NS){
 
     var ADDED = 'added';
 
-    var NavigatorCore = function(){
+    var Navigator = function(){
         this._initNavigator();
     };
     /**
@@ -33,7 +33,7 @@ Component.entryPoint = function(NS){
      * }
      * @param sURL
      */
-    NavigatorCore.parseURL = function(sURL){
+    Navigator.parseURL = function(sURL){
         var a = sURL.split('.'),
             key = [],
             args = [],
@@ -55,7 +55,70 @@ Component.entryPoint = function(NS){
         };
     };
 
-    NavigatorCore.prototype = {
+    /**
+     * Example: unparseURL('user.view', 523, 'avatar') => 'user.view(523,avatar)'
+     * @param key
+     * @param args...
+     */
+    Navigator.unparseURL = function(key){
+        var args = SLICE.call(arguments).slice(1);
+        if (args.length > 0){
+            return key + '(' + args.join(',') + ')'
+        }
+        return key;
+    };
+
+    Navigator.getURL = function(sURL, sources){
+        if (!sURL || !sources){
+            return;
+        }
+        if (!Y.Lang.isArray(sources)){
+            sources = [sources];
+        }
+        var p = NS.Navigator.parseURL(sURL),
+            url = null;
+
+        for (var i = 0, source; i < sources.length; i++){
+            source = sources[i];
+            url = source.getURL.apply(source, [p.key].concat(p.args));
+            if (url && url !== ''){
+                return url;
+            }
+        }
+        return null;
+    };
+
+    Navigator.fillNode = function(el, sources){
+        el = Y.one(el);
+        if (!el || !sources){
+            return;
+        }
+        if (!Y.Lang.isArray(sources)){
+            sources = [sources];
+        }
+        var sURL, url;
+        el.all('[data-url]').each(function(node){
+            sURL = node.getData('url');
+            if ((url = NS.Navigator.getURL(sURL, sources))){
+                node.set('href', url);
+            }
+        }, this);
+    };
+
+    /**
+     * Example: Navigator.go('user.view(234,avatar)', [...]);
+     * @param sURL
+     * @param sources
+     */
+    Navigator.go = function(sURL, sources){
+        var url = Navigator.getURL(sURL, sources);
+        if (!url){
+            return;
+        }
+        window.location.href = url;
+    };
+
+    Navigator.prototype = {
         _initNavigator: function(){
             this._urlsState = new Y.State();
 
@@ -67,13 +130,13 @@ Component.entryPoint = function(NS){
                 c = c.superclass ? c.superclass.constructor : null;
             }
         },
-        getURL: function(name){
+        getURL: function(name, config){
+            var args = SLICE.call(arguments).slice(1);
             if (!this.URLAdded(name)){
                 return '';
             }
             var config = this._urlsState.data[name];
             if (Y.Lang.isFunction(config.value)){
-                var args = SLICE.call(arguments).slice(1);
                 return config.value.apply(this, args);
             }
             return config.value;
@@ -128,7 +191,7 @@ Component.entryPoint = function(NS){
                 this.addURL(a[i].key, a[i].val);
             }
         },
-        _defineURLSources: function(sources){
+        defineURLSources: function(sources){
             if (!sources){
                 sources = this;
             }
@@ -153,39 +216,16 @@ Component.entryPoint = function(NS){
             }
             return ret;
         },
-        replaceURL: function(html, sources){
-            sources = this._defineURLSources(sources);
-            // TODO: release
-        },
-        fillURLNode: function(el, sources){
-            el = Y.one(el);
-            if (!el){
+        go: function(){
+            var url = this.getURL.apply(this, arguments);
+
+            if (!url){
                 return;
             }
-            sources = this._defineURLSources(sources);
-
-            var sURL, p, i, url, source;
-            el.all('[data-url]').each(function(node){
-                sURL = node.getData('url');
-                if (!sURL){
-                    return;
-                }
-                p = NS.NavigatorCore.parseURL(sURL);
-                url = null;
-                for (i = 0; i < sources.length; i++){
-                    source = sources[i];
-                    url = source.getURL.apply(source, [p.key].concat(p.args));
-                    if (url && url !== ''){
-                        break;
-                    }
-                }
-                if (url){
-                    node.set('href', url);
-                }
-            }, this);
+            window.location.href = url;
         }
     };
-    NS.NavigatorCore = NavigatorCore;
+    NS.Navigator = Navigator;
 
 
     var RequestCore = function(){
@@ -259,7 +299,7 @@ Component.entryPoint = function(NS){
     NS.RequestCore = RequestCore;
 
     NS.Application = Y.Base.create('application', Y.Base, [
-        NavigatorCore,
+        Navigator,
         NS.RequestCore,
         NS.AJAX,
         NS.Language
@@ -681,7 +721,20 @@ Component.entryPoint = function(NS){
             if (!app){
                 return;
             }
-            app.fillURLNode(this.get('boundingBox'), this);
+            var sources = app.defineURLSources(this),
+                el = this.get('boundingBox');
+
+            NS.Navigator.fillNode(el, sources);
+        },
+        go: function(){
+            var app = this.get('appInstance');
+            if (!app){
+                return;
+            }
+            var sources = app.defineURLSources(this),
+                url = NS.Navigator.unparseURL.apply(null, arguments);
+
+            NS.Navigator.go(url, sources);
         }
     }, {
         ATTRS: {
