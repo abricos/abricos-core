@@ -15,7 +15,6 @@ Component.entryPoint = function(NS){
 
     var Y = Brick.YUI,
         L = Y.Lang,
-        RENDERUI = 'renderUI',
         BINDUI = 'bindUI',
         SYNCUI = 'syncUI',
 
@@ -82,13 +81,34 @@ Component.entryPoint = function(NS){
         },
         _initClicks: function(){
             this._clickState = new Y.State();
-            var clicks = this.constructor.CLICKS;
+            var clicks = Y.merge(this.constructor.CLICKS);//clone
             if (!clicks){
                 return;
             }
+            var nClicks = {}, a, name, i;
+            for (name in clicks){
+                a = name.split(',');
+                for (i = 0; i < a.length; i++){
+                    a[i] = Y.Lang.trim(a[i]);
+                    if (a[i].length === 0){
+                        continue;
+                    }
+                    nClicks[a[i]] = Y.Lang.isString(clicks[name]) ? clicks[name] : Y.merge(clicks[name]);
+                }
+            }
+            clicks = nClicks;
+            for (name in clicks){
+                if (Y.Lang.isString(clicks[name])){
+                    clicks[name] = {
+                        event: clicks[name]
+                    };
+                }
+            }
+
             clicks = Y.AttributeCore.protectAttrs(clicks);
+
             var state = this._clickState,
-                name, added, config;
+                added, config;
 
             for (name in clicks){
                 if (!clicks.hasOwnProperty(name)){
