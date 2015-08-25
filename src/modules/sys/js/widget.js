@@ -84,7 +84,16 @@ Component.entryPoint = function(NS){
         },
         _initClicks: function(){
             this._clickState = new Y.State();
-            var clicks = Y.merge(this.constructor.CLICKS);//clone
+
+            var ctor = this.constructor,
+                c = ctor,
+                clicks = {};
+
+            while (c){
+                clicks = Y.merge(clicks, c.CLICKS);
+                c = c.superclass ? c.superclass.constructor : null;
+            }
+
             if (!clicks){
                 return;
             }

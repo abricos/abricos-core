@@ -584,6 +584,7 @@ Component.entryPoint = function(NS){
 
                 var currentWidget = this.get('workspaceWidget');
                 if (currentWidget){
+                    console.log();
                     currentWidget.destroy();
                 }
                 var elDiv = Y.Node.create('<div></div>');
@@ -689,7 +690,7 @@ Component.entryPoint = function(NS){
 
             this._appURLUpdate();
 
-            var args = this._appWidgetArguments
+            var args = this._appWidgetArguments;
             this.onInitAppWidget.apply(this, [err, appInstance, {
                 arguments: args
             }]);
