@@ -52,7 +52,10 @@ Component.entryPoint = function(NS){
                 var elPrev = e.target.ancestor('[data-click]');
                 if (elPrev){
                     e.dataClick = elPrev.getData('click');
+                    e.defineTarget = elPrev;
                 }
+            } else {
+                e.defineTarget = e.target;
             }
 
             var state = this._clickState;
