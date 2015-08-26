@@ -426,6 +426,9 @@ Component.entryPoint = function(NS){
             if (info.attribute){
                 this.set(name, res[name]);
             }
+            if (res[name] && Y.Lang.isFunction(info.onResponse)){
+                info.onResponse.call(this, res[name]);
+            }
         },
         _onAppResponses: function(err, res, details){
             res = res || {};
