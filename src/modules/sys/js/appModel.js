@@ -238,6 +238,36 @@ Component.entryPoint = function(NS){
         map: function(fn, context){
             return Y.Array.map(this._items, fn, context);
         },
+        /**
+         * @method sort
+         * @param {Object} [options] Data to be mixed into the event facade of the `reset` event.
+         *  @param {Boolean} [options.silent=false] If `true`, no `reset` event will be fired.
+         *  @param {Boolean} [options.descending=false] If `true`, the sort is performed in descending order.
+         */
+        sort: function(options){
+            if (!this.comparator) {
+                return this;
+            }
+            var models = this._items.concat();
+
+            models.sort(Y.rbind(this._sort, this, options));
+
+            return this;
+        },
+        _compare: function (a, b) {
+            return a < b ? -1 : (a > b ? 1 : 0);
+        },
+        _sort: function (a, b, options) {
+            var result = this._compare(this.comparator(a), this.comparator(b));
+
+            // Early return when items are equal in their sort comparison.
+            if (result === 0) {
+                return result;
+            }
+
+            // Flips sign when the sort is to be peformed in descending order.
+            return options && options.descending ? -result : result;
+        },
         toArray: function(){
             return this._items.concat();
         },
