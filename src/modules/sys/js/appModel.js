@@ -10,6 +10,9 @@ Component.entryPoint = function(NS){
         AppItem.superclass.constructor.apply(this, arguments);
     };
     NS.AppItem = Y.extend(AppItem, Y.Base, {
+
+        _isAbricosAppItem: true,
+
         toJSON: function(){
             var attrs = this.getAttrs();
 
