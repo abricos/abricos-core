@@ -562,11 +562,21 @@ Component.entryPoint = function(NS){
                 page = this.get('workspacePage');
                 this._isFirstShowWSPage = true;
             }
+
+            this.set(WAITING, true);
+
+            var currentWidget = this.get('workspaceWidget');
+            if (currentWidget){
+                currentWidget.destroy();
+            }
+
             if (!page || !page.component || !page.widget){
+                this.set('workspacePage', null);
+                this.set('workspaceWidget', null);
                 return;
             }
+
             this.set('workspacePage', page);
-            this.set(WAITING, true);
 
             Brick.use(this.get('component').moduleName, page.component, function(err, ns){
                 this.set(WAITING, false);
@@ -585,11 +595,6 @@ Component.entryPoint = function(NS){
                     return;
                 }
 
-                var currentWidget = this.get('workspaceWidget');
-                if (currentWidget){
-                    console.log();
-                    currentWidget.destroy();
-                }
                 var elDiv = Y.Node.create('<div></div>');
                 elBoard.appendChild(elDiv);
 
@@ -598,11 +603,9 @@ Component.entryPoint = function(NS){
                     args = ns[wName].parseURLParam(page.args);
                 }
 
-                currentWidget = new widgetClass(
+                this.set('workspaceWidget', new widgetClass(
                     Y.mix({'boundingBox': elDiv}, args)
-                );
-
-                this.set('workspaceWidget', currentWidget)
+                ))
             }, this);
         }
     };
