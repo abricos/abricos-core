@@ -22,8 +22,9 @@ Component.entryPoint = function(NS){
 
         BOUNDING_BOX = 'boundingBox';
 
-    var WidgetClick = function(){
-        this._initClicks();
+    var WidgetClick = function(options){
+        var CLICKS = options && options.CLICKS ? options.CLICKS : null;
+        this._initClicks(CLICKS);
     };
     WidgetClick.prototype = {
         initializer: function(){
@@ -60,12 +61,15 @@ Component.entryPoint = function(NS){
 
             var state = this._clickState;
             if (e.dataClick && !!state.get(e.dataClick, 'added')){
-                var event = state.get(e.dataClick, 'event');
+                var click = state.data[e.dataClick],
+                    event = click.event,
+                    context = click.context;
+
                 if (Y.Lang.isString(event)){
                     event = this[event];
                 }
                 if (L.isFunction(event)){
-                    event.apply(this, arguments);
+                    event.apply(context || this, arguments);
                     e.halt();
                     return;
                 }
@@ -82,7 +86,7 @@ Component.entryPoint = function(NS){
                 e.halt();
             }
         },
-        _initClicks: function(){
+        _initClicks: function(options){
             this._clickState = new Y.State();
 
             var ctor = this.constructor,
@@ -92,6 +96,10 @@ Component.entryPoint = function(NS){
             while (c){
                 clicks = Y.merge(clicks, c.CLICKS);
                 c = c.superclass ? c.superclass.constructor : null;
+            }
+
+            if (options){
+                clicks = Y.merge(clicks, options);
             }
 
             if (!clicks){
@@ -134,6 +142,9 @@ Component.entryPoint = function(NS){
                 config.added = true;
                 if (!config.event){
                     config.event = name;
+                }
+                if (!config.context){
+                    config.context = this;
                 }
                 state.data[name] = config;
             }
