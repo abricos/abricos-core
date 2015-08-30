@@ -59,13 +59,16 @@ Component.entryPoint = function(NS){
 
     NS.Application.build(COMPONENT, {
         coreConfig: {
-            cache: 'coreConfig',
+            attribute: true,
             response: function(d){
                 return new NS.CoreConfig(d);
             }
         },
+        coreConfigSave: {
+            args: ['coreConfig']
+        },
         moduleList: {
-            cache: 'moduleList',
+            attribute: true,
             response: function(d){
                 return new NS.ModuleList({
                     items: d.list
@@ -75,12 +78,6 @@ Component.entryPoint = function(NS){
     }, {
         initializer: function(){
             this.initCallbackFire();
-        },
-        coreConfigSave: function(model, callback, context){
-            this.ajaxa({
-                'do': 'coreConfigSave',
-                'coreConfig': model.toJSON()
-            }, callback, context);
         }
     });
 };
