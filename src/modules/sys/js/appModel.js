@@ -133,7 +133,14 @@ Component.entryPoint = function(NS){
             this._idMap[id] = appItem;
             this._items.splice(e.index, 0, appItem);
         },
-        remote: function(appItem, options){
+        removeById: function(id){
+            var appItem = this.getById(id);
+            if (!appItem){
+                return;
+            }
+            this.remove(appItem);
+        },
+        remove: function(appItem, options){
             this._remove(appItem, options);
         },
         _remove: function(appItem, options){
@@ -141,7 +148,7 @@ Component.entryPoint = function(NS){
 
             options || (options = {});
 
-            if (Lang.isNumber(appItem)){
+            if (Y.Lang.isNumber(appItem)){
                 index = appItem;
                 appItem = this.item(index);
             } else {
@@ -245,7 +252,7 @@ Component.entryPoint = function(NS){
          *  @param {Boolean} [options.descending=false] If `true`, the sort is performed in descending order.
          */
         sort: function(options){
-            if (!this.comparator) {
+            if (!this.comparator){
                 return this;
             }
             var models = this._items.concat();
@@ -254,14 +261,14 @@ Component.entryPoint = function(NS){
 
             return this;
         },
-        _compare: function (a, b) {
+        _compare: function(a, b){
             return a < b ? -1 : (a > b ? 1 : 0);
         },
-        _sort: function (a, b, options) {
+        _sort: function(a, b, options){
             var result = this._compare(this.comparator(a), this.comparator(b));
 
             // Early return when items are equal in their sort comparison.
-            if (result === 0) {
+            if (result === 0){
                 return result;
             }
 
