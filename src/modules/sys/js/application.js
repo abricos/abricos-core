@@ -228,11 +228,12 @@ Component.entryPoint = function(NS){
     NS.Navigator = Navigator;
 
 
-    var RequestCore = function(){
-        this._initRequests();
+    var RequestCore = function(options){
+        var reqsOptions = options && options.REQS ? options.REQS : null;
+        this._initRequests(reqsOptions);
     };
     RequestCore.prototype = {
-        _initRequests: function(){
+        _initRequests: function(reqsOptions){
             this._reqsState = new Y.State();
 
             var ctor = this.constructor,
@@ -241,6 +242,10 @@ Component.entryPoint = function(NS){
             while (c){
                 this.addRequests(c.REQS);
                 c = c.superclass ? c.superclass.constructor : null;
+            }
+
+            if (reqsOptions){
+                this.addRequests(reqsOptions);
             }
         },
         requestAdded: function(name){
