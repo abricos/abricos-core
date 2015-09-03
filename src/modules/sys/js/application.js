@@ -551,38 +551,52 @@ Component.entryPoint = function(NS){
     };
     AppWorkspace.NAME = 'appWorkspace';
     AppWorkspace.ATTRS = {
-        workspacePage: {
-            value: null
-        },
-        workspaceWidget: {
-            value: null
-        }
+        workspaceWidget: {},
+        defaultPage: {}
     };
     AppWorkspace.prototype = {
-        onInitAppWidget: function(err, appInstance){
-            this.showWorkspacePage();
+        onInitAppWidget: function(err, appInstance, options){
+            var args = options.arguments[0];
+
+            this.showWorkspacePage(args.workspacePage);
+        },
+        defineDefaultPage: function(callback, context){
+            callback.call(context || this, null, this.get('defaultPage'));
         },
         showWorkspacePage: function(page){
-            if (!page && !this._isFirstShowWSPage){
-                page = this.get('workspacePage');
-                this._isFirstShowWSPage = true;
+            page = new NS.AppWorkspacePage(page);
+
+            if (page.isEmpty()){
+                if (this.get('defineDefaultPage')){
+                    this.defineDefaultPage(function(err, defPage){
+                        this._showWorkspacePage(defPage);
+                    }, this);
+                } else {
+                    this._showWorkspacePage(this.get('defaultPage'));
+                }
+                return;
+            } else {
+                this._showWorkspacePage(page);
+            }
+        },
+        _showWorkspacePage: function(page){
+            page = new NS.AppWorkspacePage(page);
+
+            var curWidget = this.get('workspaceWidget'),
+                curPage = curWidget ? curWidget.get('workspacePage') : new NS.AppWorkspacePage();
+
+            if (curPage.id === page.id){
+                return;
             }
 
-            this.set(WAITING, true);
+            curWidget ? curWidget.destroy() : null;
 
-            var currentWidget = this.get('workspaceWidget');
-            if (currentWidget){
-                currentWidget.destroy();
-            }
-
-            if (!page || !page.component || !page.widget){
-                this.set('workspacePage', null);
+            if (page.isEmpty()){
                 this.set('workspaceWidget', null);
                 return;
             }
 
-            this.set('workspacePage', page);
-
+            this.set(WAITING, true);
             Brick.use(this.get('component').moduleName, page.component, function(err, ns){
                 this.set(WAITING, false);
 
@@ -609,43 +623,44 @@ Component.entryPoint = function(NS){
                 }
 
                 this.set('workspaceWidget', new widgetClass(
-                    Y.mix({'boundingBox': elDiv}, args)
+                    Y.mix({
+                        boundingBox: elDiv,
+                        workspacePage: page
+                    }, args)
                 ))
             }, this);
         }
     };
-    AppWorkspace.list = {};
-    AppWorkspace.build = function(moduleName, wsWidget, wsConfig){
-        wsConfig = Y.merge({
-            workspacePage: {}
-        }, wsConfig || {});
-
-        var cache = AppWorkspace.list[moduleName] = AppWorkspace.list[moduleName] || [],
-            wsName = wsWidget.NAME;
-
-        var initAppFunc = function(config, callback){
-            if (!L.isFunction(callback)){
-                callback = function(){
-                };
-            }
-            var w = cache[wsName];
-            if (w){
-                w.showWorkspacePage(config.workspacePage);
-                // TODO: событие на установку страницы
-                callback(null, w);
-            } else {
-                if (!config.boundingBox){
-                    config.boundingBox = config.getBoundingBox();
-                }
-                config.workspacePage = Y.merge(wsConfig.workspacePage, config.workspacePage || {});
-
-                cache[wsName] = w = new wsWidget(config);
-                callback(null, w);
-            }
+    AppWorkspace.build = function(moduleName, wsWidget){
+        return function(config){
+            return new wsWidget(config);
         };
-        return initAppFunc;
     };
     NS.AppWorkspace = AppWorkspace;
+
+    var AppWorkspacePage = function(p){
+        p = Y.merge({
+            component: '',
+            widget: '',
+            args: []
+        }, p || {});
+
+        this.component = p.component;
+        this.widget = p.widget;
+        this.args = p.args;
+
+        if (p.component === '' || p.widget === ''){
+            this.id = '';
+        } else {
+            this.id = p.component + ':' + p.widget + ':' + p.args.join(':');
+        }
+    };
+    AppWorkspacePage.prototype = {
+        isEmpty: function(){
+            return this.id === '';
+        }
+    };
+    NS.AppWorkspacePage = AppWorkspacePage;
 
     NS.AppWidget = Y.Base.create('appWidget', Y.Widget, [
         NS.Language,
@@ -681,17 +696,18 @@ Component.entryPoint = function(NS){
             if (appInstance){
                 this._initAppWidget(null, appInstance);
             } else {
-                var appNamespace = this.get('appNamespace');
-                if (!appNamespace){
-                    appNamespace = this.get('component').namespace;
-                }
+                var appNS = this.get('appNamespace') || this.get('component').namespace,
+                    instance = this;
 
-                var instance = this;
-                appNamespace.initApp({
-                    initCallback: function(err, appInstance){
-                        instance._initAppWidget(err, appInstance);
-                    }
-                });
+                if (Y.Lang.isFunction(appNS.initApp)){
+                    appNS.initApp({
+                        initCallback: function(err, appInstance){
+                            instance._initAppWidget(err, appInstance);
+                        }
+                    });
+                } else {
+                    this._initAppWidget({msg: 'App not found'}, null);
+                }
             }
         },
         _initAppWidget: function(err, appInstance){
@@ -701,13 +717,9 @@ Component.entryPoint = function(NS){
 
             this._appURLUpdate();
 
-            var args = this._appWidgetArguments;
-            this.onInitAppWidget.apply(this, [err, appInstance, {
-                arguments: args
-            }]);
-            this.fire('initAppWidget', err, appInstance, {
-                arguments: args
-            });
+            var args = {arguments: this._appWidgetArguments};
+            this.onInitAppWidget.apply(this, [err, appInstance, args]);
+            this.fire('initAppWidget', err, appInstance, args);
         },
         onInitAppWidget: function(){
         },
@@ -736,21 +748,12 @@ Component.entryPoint = function(NS){
         }
     }, {
         ATTRS: {
-            component: {
-                value: null
-            },
-            render: {
-                value: true
-            },
-            appInstance: {
-                value: null
-            },
-            appNamespace: {
-                value: null
-            },
-            useExistingWidget: {
-                value: false
-            }
+            component: {},
+            render: {value: true},
+            appInstance: {},
+            appNamespace: {},
+            useExistingWidget: {value: false},
+            workspacePage: {}
         }
     });
 

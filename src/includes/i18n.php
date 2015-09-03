@@ -67,9 +67,8 @@ class Ab_CoreI18n {
     }
 
     public function Translate($phraseId, $locale = ''){
-
         $locale = $this->LocaleNormalize($locale);
-        $data = &$this->GetData($locale);
+        $data = $this->GetData($locale);
 
         $aPhrases = explode(".", $phraseId);
         for ($i = 0; $i < count($aPhrases); $i++){
