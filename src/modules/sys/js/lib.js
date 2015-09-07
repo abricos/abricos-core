@@ -43,41 +43,42 @@ Component.entryPoint = function(NS){
         model: NS.Module
     });
 
-    NS.URL = {
-        ws: "#app={C#MODNAMEURI}/wspace/ws/",
-        config: {
-            view: function(){
-                return NS.URL.ws + 'coreconfig/CoreConfigWidget/'
-            }
-        },
-        module: {
-            list: function(){
-                return NS.URL.ws + 'modulelist/ModuleListWidget/'
-            }
-        }
-    };
-
-    NS.Application.build(COMPONENT, {
-        coreConfig: {
-            attribute: true,
-            response: function(d){
-                return new NS.CoreConfig(d);
-            }
-        },
-        coreConfigSave: {
-            args: ['coreConfig']
-        },
-        moduleList: {
-            attribute: true,
-            response: function(d){
-                return new NS.ModuleList({
-                    items: d.list
-                })
-            }
-        }
-    }, {
+    NS.Application.build(COMPONENT, {}, {
         initializer: function(){
             this.initCallbackFire();
+        }
+    }, [], {
+        REQS: {
+            coreConfig: {
+                attribute: true,
+                response: function(d){
+                    return new NS.CoreConfig(d);
+                }
+            },
+            coreConfigSave: {
+                args: ['coreConfig']
+            },
+            moduleList: {
+                attribute: true,
+                response: function(d){
+                    return new NS.ModuleList({
+                        items: d.list
+                    })
+                }
+            }
+        },
+        URLS: {
+            ws: "#app={C#MODNAMEURI}/wspace/ws/",
+            config: {
+                view: function(){
+                    return this.getURL('ws') + 'coreconfig/CoreConfigWidget/'
+                }
+            },
+            module: {
+                list: function(){
+                    return this.getURL('ws') + 'modulelist/ModuleListWidget/'
+                }
+            }
         }
     });
 };
