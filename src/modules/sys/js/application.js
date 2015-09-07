@@ -598,6 +598,9 @@ Component.entryPoint = function(NS){
 
             this.set(WAITING, true);
             Brick.use(this.get('component').moduleName, page.component, function(err, ns){
+                if (err){
+                    return;
+                }
                 this.set(WAITING, false);
 
                 var wName = page.widget,

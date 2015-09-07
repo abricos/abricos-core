@@ -690,4 +690,113 @@ class AbricosModelManager {
     }
 }
 
+abstract class AbricosApplication {
+
+    /**
+     * @var Ab_ModuleManager
+     */
+    public $manager;
+
+    /**
+     * @var Ab_Database
+     */
+    public $db;
+
+    /**
+     * @var AbricosModelManager
+     */
+    public $models;
+
+    public function __construct(Ab_ModuleManager $manager){
+        $this->manager = $manager;
+        $this->db = $manager->db;
+        $this->models = AbricosModelManager::GetManager($manager->module->name);
+        $this->RegisterClasses();
+    }
+
+    protected abstract function GetClasses();
+
+    protected function RegisterClasses(){
+        $classes = $this->GetClasses();
+        foreach ($classes as $key => $value){
+            $this->models->RegisterClass($key, $value);
+        }
+    }
+
+    protected abstract function GetStructures();
+
+    public abstract function ResponseToJSON($d);
+
+    public function AJAX($d){
+        switch ($d->do){
+            case "appStructure":
+                return $this->AppStructureToJSON();
+        }
+        return $this->ResponseToJSON($d);
+    }
+
+    public function AppStructureToJSON(){
+        $structures = $this->GetStructures();
+
+        $res = $this->models->ToJSON($structures);
+        if (empty($res)){
+            return null;
+        }
+
+        $ret = new stdClass();
+        $ret->appStructure = $res;
+
+        return $ret;
+    }
+
+    protected function ResultToJSON($name, $res){
+        $ret = new stdClass();
+
+        if (is_integer($res)){
+            $ret->err = $res;
+            return $ret;
+        }
+        if (is_object($res) && method_exists($res, 'ToJSON')){
+            $ret->$name = $res->ToJSON();
+        } else {
+            $ret->$name = $res;
+        }
+
+        return $ret;
+    }
+
+    protected function MergeObject($o1, $o2){
+        foreach ($o2 as $key => $v2){
+            if (isset($o1->$key) && is_array($o1->$key) && is_array($v2)){
+                $v1 = &$o1->$key;
+                for ($i = 0; $i < count($v2); $i++){
+                    $v1[] = $v2[$i];
+                }
+                $o1->$key = $v1;
+            } else if (isset($o1->$key) && is_object($o1->$key)
+                && isset($o2->$key) && is_object($o2->$key)
+            ){
+                $this->MergeObject($o1->$key, $o2->$key);
+            } else {
+                $o1->$key = $v2;
+            }
+        }
+    }
+
+    protected function ImplodeJSON($jsons, $ret = null){
+        if (empty($ret)){
+            $ret = new stdClass();
+        }
+        if (!is_array($jsons)){
+            $jsons = array($jsons);
+        }
+        foreach ($jsons as $json){
+            $this->MergeObject($ret, $json);
+        }
+        return $ret;
+    }
+
+
+}
+
 ?>
