@@ -417,11 +417,12 @@ Component.entryPoint = function(NS){
             if (info.type && info.typeClass){
                 switch (info.type) {
                     case 'modelList':
-                        var typeClass = this.get(info.typeClass) || NS.AppModelList;
+                        var typeClass = this.get(info.typeClass) || NS.AppModelList,
+                            di = data[name] || {};
 
                         res[name] = new typeClass({
                             appInstance: this,
-                            items: data[name].list || []
+                            items: di.list || []
                         });
                         break;
                 }
