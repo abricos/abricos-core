@@ -399,8 +399,7 @@ Brick.namespace('util');
             }
             w._TM = new Abricos.TemplateManager(key, ts);
             w._TId = w._TM.idMap;
-            // w._TM = component.template.build(ts, override);
-            // w._T = w._TM.data; w._TId = w._TM.idManager;
+            w._T = w._TM.data;
             return w._TM;
         };
 
