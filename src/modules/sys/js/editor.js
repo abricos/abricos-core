@@ -647,8 +647,8 @@ Component.entryPoint = function(NS){
             }
 
             var el = this.get('element');
-            delete _T[el.id];
-            delete _TId[el.id];
+            // delete _T[el.id];
+            // delete _TId[el.id];
 
             var par = this._wrap.parentNode;
             // this._wrap.removeChild(el);
