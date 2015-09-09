@@ -22,10 +22,21 @@ Component.entryPoint = function(NS){
             return a;
         },
         one: function(elName){
-            var a = this._parseElName(elName);
-            var ret = [];
-            for (var i = 0, node; i < a.length; i++){
-                node = Y.one(this.gel(a[i]));
+            var a = this._parseElName(elName),
+                ret = [], node, nodeId, aa;
+
+            for (var i = 0; i < a.length; i++){
+                aa = a[i].split('-');
+                if (aa.length === 2){
+                    nodeId = this.gelid(aa[0]);
+                    if (nodeId){
+                        nodeId = '#' + nodeId + '-' + aa[1];
+                        node = Y.one(nodeId);
+                    }
+                } else {
+                    node = Y.one(this.gel(a[i]));
+                }
+
                 if (node){
                     node.tpName = a[i];
                     ret[ret.length] = node;
