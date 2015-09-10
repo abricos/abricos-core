@@ -599,6 +599,9 @@ class AbricosModelStructure extends AbricosList {
         $ret = parent::ToJSON();
         $ret->name = $this->name;
         $ret->fields = $ret->list;
+        if ($this->idField !== 'id'){
+            $ret->idField = $this->idField;
+        }
         unset($ret->list);
 
         return $ret;

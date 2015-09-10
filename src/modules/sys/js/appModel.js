@@ -343,7 +343,11 @@ Component.entryPoint = function(NS){
         }
     }, {
         ATTRS: {
-            name: {value: ''}
+            name: {value: ''},
+            idField: {
+                validator: Y.Lang.isString,
+                value: 'id'
+            }
         }
     });
 
@@ -407,6 +411,14 @@ Component.entryPoint = function(NS){
                     getter: '_attrFieldGetter'
                 });
             }, this);
+            var idField = this.structure.get('idField');
+            if (idField !== 'id' && this.attrAdded(idField) && !this.attrAdded('id')){
+                this.addAttr('id', {
+                    getter: function(){
+                        return this.get(idField);
+                    }
+                });
+            }
         },
         getField: function(name){
             var attrCfg = this._state.data[name];

@@ -130,7 +130,7 @@ Component.entryPoint = function(NS){
                 c = c.superclass ? c.superclass.constructor : null;
             }
         },
-        getURL: function(name, config){
+        getURL: function(name){
             var args = SLICE.call(arguments).slice(1);
             if (!this.URLAdded(name)){
                 return '';
