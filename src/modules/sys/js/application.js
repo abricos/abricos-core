@@ -270,6 +270,7 @@ Component.entryPoint = function(NS){
                 var a = config.type.split(':');
                 config.type = a[0];
                 switch (config.type) {
+                    case 'model':
                     case 'modelList':
                         if (!config.typeClass){
                             config.typeClass = a[1];
@@ -415,11 +416,17 @@ Component.entryPoint = function(NS){
             var info = this._reqsState.data[name];
 
             if (info.type && info.typeClass){
+                var di = data[name] || {}, typeClass;
                 switch (info.type) {
+                    case 'model':
+                        typeClass = this.get(info.typeClass) || NS.AppModel;
+                        di = Y.merge(di || {}, {
+                            appInstance: this,
+                        });
+                        res[name] = new typeClass(di);
+                        break;
                     case 'modelList':
-                        var typeClass = this.get(info.typeClass) || NS.AppModelList,
-                            di = data[name] || {};
-
+                        typeClass = this.get(info.typeClass) || NS.AppModelList;
                         res[name] = new typeClass({
                             appInstance: this,
                             items: di.list || []
