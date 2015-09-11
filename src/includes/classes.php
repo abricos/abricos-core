@@ -291,10 +291,22 @@ class AbricosModel extends AbricosItem {
             return $ret;
         }
 
+        $useridField = $struct->Get('userid');
+        $isPersonalAccess = false;
+        if (!empty($useridField) && isset($this->_data['userid'])){
+            $userid = $this->_data['userid'];
+            if ($userid > 0 && intval($userid) === intval(Abricos::$user->id)){
+                $isPersonalAccess = true;
+            }
+        }
+
         $count = $struct->Count();
         for ($i = 0; $i < $count; $i++){
             $field = $struct->GetByIndex($i);
             if (!isset($this->_data[$field->name])){
+                continue;
+            }
+            if ($field->personal && !$isPersonalAccess){
                 continue;
             }
             if ($field->type === 'multiLang'
@@ -477,6 +489,11 @@ class AbricosModelStructureField extends AbricosItem {
      */
     public $dbField;
 
+    /**
+     * @var bool
+     */
+    public $personal = false;
+
     public function __construct($manager, $name, $data = null){
         $this->manager = $manager;
         $this->name = $this->id = $name;
@@ -512,6 +529,9 @@ class AbricosModelStructureField extends AbricosItem {
         }
         if (isset($data->json)){
             $this->json = $data->json;
+        }
+        if (isset($data->personal)){
+            $this->personal = $data->personal;
         }
     }
 
