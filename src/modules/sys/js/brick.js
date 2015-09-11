@@ -767,7 +767,7 @@ Brick.namespace('util');
 
         Brick.AppRoles.instances[mName] = this;
 
-        this._isLoadRoles = false;
+        var _isLoadRoles = false;
 
         this._setRoles = function(user){
             for (var nRole in mRoles){
@@ -777,7 +777,7 @@ Brick.namespace('util');
 
         this.load = function(callback, context){
             Brick.appFunc('user', 'userCurrent', function(err, res){
-                this._isLoadRoles = true;
+                _isLoadRoles = true;
 
                 this._setRoles(res.userCurrent);
 
