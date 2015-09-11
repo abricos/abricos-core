@@ -198,8 +198,15 @@ class AbricosList {
 
 class AbricosModel extends AbricosItem {
 
-    protected $_structModule = null;
-    protected $_structName = null;
+    /**
+     * @var Ab_Module
+     */
+    protected $_structModule;
+
+    /**
+     * @var string
+     */
+    protected $_structName;
 
     protected $_data = array();
 
@@ -209,6 +216,14 @@ class AbricosModel extends AbricosItem {
     protected $_structure = null;
 
     public function __construct($d){
+        if (is_string($this->_structModule)){
+            $this->_structModule = Abricos::GetModule($this->_structModule);
+        }
+
+        if (!($this->_structModule instanceof Ab_Module)){
+            throw new Exception('Module not found in AbricosModel');
+        }
+
         if (empty($this->_structure) && !empty($this->_structModule) && !empty($this->_structName)){
             $this->_structure = AbricosModelManager::GetManager($this->_structModule)->GetStructure($this->_structName);
         }
@@ -300,15 +315,40 @@ class AbricosModel extends AbricosItem {
             }
         }
 
+        $moduleManager = $this->_structModule->GetManager();
+
         $count = $struct->Count();
         for ($i = 0; $i < $count; $i++){
             $field = $struct->GetByIndex($i);
             if (!isset($this->_data[$field->name])){
                 continue;
             }
-            if ($field->personal && !$isPersonalAccess){
+
+            $pDefine = $field->personal;
+            $pAccess = true;
+            if ($pDefine){
+                $pAccess = $isPersonalAccess;
+            }
+
+            $rDefine = is_string($field->rolefn);
+            $rAccess = true;
+
+            if ($rDefine){
+                $rAccess = false;
+                if (method_exists($moduleManager, $field->rolefn)){
+                    $funcName = $field->rolefn;
+                    if ($moduleManager->$funcName()){
+                        $rAccess = true;
+                    }
+                }
+            }
+
+            if ((!$pAccess && !$rAccess) ||
+                ($pDefine && !$pAccess && !$rDefine) ||
+                ($rDefine && !$rAccess && !$pDefine)){
                 continue;
             }
+
             if ($field->type === 'multiLang'
                 || $field->type === 'list'
             ){
@@ -494,6 +534,11 @@ class AbricosModelStructureField extends AbricosItem {
      */
     public $personal = false;
 
+    /**
+     * @var string
+     */
+    public $rolefn = null;
+
     public function __construct($manager, $name, $data = null){
         $this->manager = $manager;
         $this->name = $this->id = $name;
@@ -532,6 +577,9 @@ class AbricosModelStructureField extends AbricosItem {
         }
         if (isset($data->personal)){
             $this->personal = $data->personal;
+        }
+        if (isset($data->rolefn)){
+            $this->rolefn = $data->rolefn;
         }
     }
 
