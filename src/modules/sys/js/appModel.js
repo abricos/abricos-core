@@ -99,6 +99,7 @@ Component.entryPoint = function(NS){
             return new (this.appItem)(data);
         },
         _add: function(appItem, options){
+            options = options || {};
             if (!appItem._isAbricosAppItem){
                 appItem = this._createAppItemInstance(appItem);
             }

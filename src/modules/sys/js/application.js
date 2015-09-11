@@ -263,7 +263,8 @@ Component.entryPoint = function(NS){
                 type: null,
                 typeClass: null,
                 attach: null,
-                response: false
+                response: null,
+                cache: null
             }, config || {});
 
             if (Y.Lang.isString(config.type)){
@@ -334,7 +335,8 @@ Component.entryPoint = function(NS){
                 funcArg,
                 defArgsOffset = 1;
 
-            var rData = {
+            var aArgs = [],
+                rData = {
                 'do': name
             };
 
@@ -342,6 +344,7 @@ Component.entryPoint = function(NS){
                 defArgsOffset = info.args.length + 1;
                 for (var i = 0; i < info.args.length; i++){
                     funcArg = funcArgs[i + 1];
+                    aArgs[aArgs.length] = funcArg;
                     if (funcArg && Y.Lang.isFunction(funcArg.toJSON)){
                         funcArg = funcArg.toJSON();
                     }
@@ -358,7 +361,10 @@ Component.entryPoint = function(NS){
             }
 
             var cacheResult;
-            if (info.attribute){
+            if (Y.Lang.isFunction(info.cache)){
+                cacheResult = info.cache.apply(this, aArgs);
+            }
+            if (!cacheResult && info.attribute){
                 cacheResult = this.get(name);
             }
 
