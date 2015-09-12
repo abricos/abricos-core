@@ -345,7 +345,8 @@ class AbricosModel extends AbricosItem {
 
             if ((!$pAccess && !$rAccess) ||
                 ($pDefine && !$pAccess && !$rDefine) ||
-                ($rDefine && !$rAccess && !$pDefine)){
+                ($rDefine && !$rAccess && !$pDefine)
+            ){
                 continue;
             }
 
@@ -355,6 +356,9 @@ class AbricosModel extends AbricosItem {
                 $value = $this->_data[$field->name]->ToJSON();
             } else {
                 $value = $this->_data[$field->name];
+            }
+            if (empty($value)){
+                continue;
             }
             $jsonName = isset($field->json) ? $field->json : $field->name;
             $ret->$jsonName = $value;
