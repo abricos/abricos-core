@@ -505,7 +505,7 @@ class AbricosModelStructureField extends AbricosItem {
     /**
      * Field type
      *
-     * @var string Values: 'string|int|bool|double|multiLang|list'
+     * @var string Values: 'string|int|bool|double|date|multiLang|list'
      */
     public $type = 'string';
 
@@ -563,6 +563,7 @@ class AbricosModelStructureField extends AbricosItem {
                 case 'int':
                 case 'bool':
                 case 'double':
+                case 'date':
                 case 'array':
                 case 'multiLang':
                 case 'list':
@@ -594,6 +595,7 @@ class AbricosModelStructureField extends AbricosItem {
             case 'bool':
                 return !!$value;
             case 'int':
+            case 'date':
                 return intval($value);
             case 'double':
                 return doubleval($value);
@@ -870,7 +872,6 @@ abstract class AbricosApplication {
         }
         return $ret;
     }
-
 
 }
 

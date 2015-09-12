@@ -440,6 +440,11 @@ Component.entryPoint = function(NS){
                     return !!val;
                 case 'int':
                     return (val | 0);
+                case 'date':
+                    if (act === 'set'){
+                        val = val === 0 ? null : new Date(val * 1000);
+                    }
+                    return val;
                 case 'double':
                     return parseFloat(val || 0);
                 case 'list':
@@ -477,7 +482,10 @@ Component.entryPoint = function(NS){
                     return;
                 }
                 val = this.get(name);
-                if (field.get('type') === 'multilang'){
+                type = field.get('type');
+                if (type === 'date'){
+                    ret[name] = val ? val.getTime() / 1000 : null;
+                } else if (type === 'multilang'){
                     lngValCur = '';
                     for (i = 0; i < LANGS.length; i++){
                         lng = LANGS[i];
