@@ -399,8 +399,7 @@ Brick.namespace('util');
             }
             w._TM = new Abricos.TemplateManager(key, ts);
             w._TId = w._TM.idMap;
-            // w._TM = component.template.build(ts, override);
-            // w._T = w._TM.data; w._TId = w._TM.idManager;
+            w._T = w._TM.data;
             return w._TM;
         };
 
@@ -768,7 +767,7 @@ Brick.namespace('util');
 
         Brick.AppRoles.instances[mName] = this;
 
-        this._isLoadRoles = false;
+        var _isLoadRoles = false;
 
         this._setRoles = function(user){
             for (var nRole in mRoles){
@@ -778,7 +777,7 @@ Brick.namespace('util');
 
         this.load = function(callback, context){
             Brick.appFunc('user', 'userCurrent', function(err, res){
-                this._isLoadRoles = true;
+                _isLoadRoles = true;
 
                 this._setRoles(res.userCurrent);
 
