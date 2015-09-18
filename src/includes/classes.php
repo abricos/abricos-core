@@ -719,6 +719,9 @@ class AbricosModelManager {
     }
 
     public function InstanceClass($structName){
+        if (!isset($this->classes[$structName])){
+            throw new Exception("Class $structName not registered in AbricosModelManager");
+        }
         $className = $this->classes[$structName];
 
         $args = func_get_args();
