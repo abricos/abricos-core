@@ -979,13 +979,14 @@ Brick.dateExt = function(){
         convert: function(udate, type, hideTime){
             var LNG = Abricos.Language;
 
-            if (!udate || udate == null){
+            if (!udate){
                 return "";
             }
-            if (typeof udate['getTime'] == 'function'){
+            if (typeof udate['getTime'] === 'function'){
                 udate = udate.getTime() / 1000;
             }
-            if (udate * 1 == 0){
+            udate = udate | 0;
+            if (udate === 0){
                 return "";
             }
             hideTime = hideTime || false;

@@ -1,10 +1,3 @@
-/**
- * @module Sys
- * @namespace Brick.widget
- */
-
-Brick.namespace('widget');
-
 var Component = new Brick.Component({
     buildTemplate: false
 });
@@ -15,6 +8,8 @@ Component.requires = {
     ]
 };
 Component.entryPoint = function(NS){
+
+    Brick.namespace('widget');
 
     var Y = Brick.YUI,
         L = Y.Lang,
@@ -573,8 +568,8 @@ Component.entryPoint = function(NS){
                 value: attr.toolbar || Editor.TOOLBAR_STANDART,
                 validator: function(value){
                     return value == Editor.TOOLBAR_STANDART
-                    || value == Editor.TOOLBAR_FULL
-                    || value == Editor.TOOLBAR_MINIMAL;
+                        || value == Editor.TOOLBAR_FULL
+                        || value == Editor.TOOLBAR_MINIMAL;
                 }
             });
 

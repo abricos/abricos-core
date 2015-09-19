@@ -264,6 +264,7 @@ Component.entryPoint = function(NS){
                 typeClass: null,
                 attach: null,
                 response: null,
+                onResponse: null,
                 cache: null
             }, config || {});
 
@@ -337,8 +338,8 @@ Component.entryPoint = function(NS){
 
             var aArgs = [],
                 rData = {
-                'do': name
-            };
+                    'do': name
+                };
 
             if (Y.Lang.isArray(info.args)){
                 defArgsOffset = info.args.length + 1;
@@ -440,7 +441,10 @@ Component.entryPoint = function(NS){
                         break;
                 }
             } else {
-                res[name] = Y.Lang.isFunction(info.response) ? info.response.call(this, data[name]) : data[name];
+                res[name] = data[name];
+                if (Y.Lang.isFunction(info.response)){
+                    res[name] = info.response.call(this, data[name]);
+                }
             }
             if (info.attribute){
                 this.set(name, res[name]);
