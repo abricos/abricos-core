@@ -1,20 +1,10 @@
-<!--{editor}-->
-<table><tbody>
-<tr>
-	<td>
-		<div id="{i#editowrap}"></div>
-	</td>
-	<td id="{i#buttons}" valign="top" style="width: 50px;"></td>
-</tr>
-</tbody></table>
-
-<!--{css}-->
-#{v#name}-button {
-	background: url({v#image}) center center no-repeat;
-	text-indent: -4em;
-	overflow: hidden;
-	padding: 0 .75em;
-	width: 2em;
-	*margin-left: 4em;   /* IE only */
-	*padding: 0 1.75em;  /* IE only */
-}
+<!--{widget}-->
+<div id="{i#id}" class="abricos-visual-editor">
+    <textarea id="{i#text}" class="form-control" data-wait="disable"></textarea>
+    <div id="{i#btnVisualMode}" class="button-visual-mode hide">
+        <a href="#" data-click="setVisualMode"
+           title="Переключить в режим визуального редактора">
+            <i class="fa fa-file-text-o"></i>
+        </a>
+    </div>
+</div>

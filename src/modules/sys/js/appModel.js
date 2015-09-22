@@ -441,8 +441,8 @@ Component.entryPoint = function(NS){
                 case 'int':
                     return (val | 0);
                 case 'date':
-                    if (act === 'set'){
-                        val = val === 0 ? null : new Date(val * 1000);
+                    if (act === 'set' || (!val && act === 'get')){
+                        val = !val ? null : new Date(val * 1000);
                     }
                     return val;
                 case 'double':

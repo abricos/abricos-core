@@ -1,0 +1,12 @@
+.abricos-visual-editor {
+  position: relative;
+}
+.abricos-visual-editor .button-visual-mode{
+    display: none;
+}
+.abricos-visual-editor:hover .button-visual-mode {
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: 2px;
+}
