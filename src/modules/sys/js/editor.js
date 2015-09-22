@@ -3,7 +3,8 @@ var Component = new Brick.Component({
 });
 Component.requires = {
     mod: [
-        {name: 'filemanager', files: ['lib.js']}
+        {name: 'filemanager', files: ['lib.js']},
+        {name: 'sys', files: ['application.js']}
     ]
 };
 Component.entryPoint = function(NS){
