@@ -216,6 +216,8 @@ class AbricosModel extends AbricosItem {
     protected $_structure = null;
 
     public function __construct($d){
+        unset($this->id); // hack for use method __get('id')
+
         if (is_string($this->_structModule)){
             $this->_structModule = Abricos::GetModule($this->_structModule);
         }
@@ -242,7 +244,6 @@ class AbricosModel extends AbricosItem {
 
         for ($i = 0; $i < $count; $i++){
             $field = $struct->GetByIndex($i);
-
 
             if ($field->type === 'multiLang'){
                 $this->__set($field->name, $d);
