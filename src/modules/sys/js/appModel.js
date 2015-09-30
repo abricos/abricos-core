@@ -276,13 +276,27 @@ Component.entryPoint = function(NS){
             // Flips sign when the sort is to be peformed in descending order.
             return options && options.descending ? -result : result;
         },
-        toArray: function(attrName){
+        toArray: function(attrName, options){
             if (!attrName){
                 return this._items.concat();
             }
-            var ret = [];
+            options = Y.merge({
+                distinct: false
+            }, options || {});
+
+            var ret = [],
+                distChecker = {},
+                value;
+
             this.each(function(item){
-                ret[ret.length] = item.get(attrName);
+                value = item.get(attrName);
+                if (options.distinct){
+                    if (distChecker[value]){
+                        return;
+                    }
+                    distChecker[value] = true;
+                }
+                ret[ret.length] = value;
             }, this);
             return ret;
         },
