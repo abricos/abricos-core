@@ -664,6 +664,16 @@ Component.entryPoint = function(NS){
             if (ns.appInstance){
                 return options.initCallback(null, ns.appInstance);
             }
+
+            /* // TODO: load roles
+            if (ns.roles && Y.Lang.isFunction(ns.roles.load)){
+                ns.roles.load(function(){
+                    new ns.App(options);
+                });
+            } else {
+                new ns.App(options);
+            }
+            /**/
             new ns.App(options);
         };
     };
