@@ -330,13 +330,18 @@ Component.entryPoint = function(NS){
                 value: 'string',
                 setter: function(val){
                     var a = val.split(':');
-                    if (a.length > 1){
+                    if (a.length === 2){
                         val = a[0];
                         this.set('typeClass', a[1]);
+                    } else if (a.length === 3){
+                        val = a[0];
+                        this.set('typeModule', a[1]);
+                        this.set('typeClass', a[2]);
                     }
                     return val;
                 }
             },
+            typeModule: {value: null},
             typeClass: {value: null},
             default: {value: ''},
             json: {value: ''}
@@ -454,7 +459,46 @@ Component.entryPoint = function(NS){
                 return val
             }
 
-            switch (field.get('type')) {
+            var type = field.get('type');
+            if (type === 'model' || type === 'modelList' || type === 'list'){ // TODO: deprecated list
+                var app = this.appInstance,
+                    typeModule = field.get('typeModule');
+
+                if (typeModule){
+                    app = this.appInstance.getApp(typeModule);
+
+                    if (!app){
+                        throw {msg: 'Type Module not found in AppStructure'};
+                    }
+                }
+
+                var className = field.get('typeClass'),
+                    typeClass = app.get(className) || Brick.mod[app.get('moduleName')][className];
+
+                if (!typeClass){
+                    throw {msg: 'Type Class not found in AppStructure'};
+                }
+
+                if ((act === 'get' && !val)
+                    || (act === 'set' && !attrCfg.value)){
+
+                    switch (type) {
+                        case 'list':
+                        case 'modelList':
+                            return new typeClass({
+                                appInstance: app,
+                                items: val ? val.list : []
+                            });
+                        case 'model':
+                            return new typeClass(Y.merge({
+                                appInstance: app
+                            }, val || {}));
+                    }
+                }
+                return val;
+            }
+
+            switch (type) {
                 case 'string':
                     return Y.Lang.isString(val) ? val : '';
                 case 'bool':
@@ -468,18 +512,6 @@ Component.entryPoint = function(NS){
                     return val;
                 case 'double':
                     return parseFloat(val || 0);
-                case 'list':
-                    if ((act === 'get' && !val)
-                        || (act === 'set' && !attrCfg.value)){
-                        var app = this.appInstance,
-                            className = field.get('typeClass'),
-                            typeClass = app.get(className) || Brick.mod[app.get('moduleName')][className];
-                        val = new typeClass({
-                            appInstance: app,
-                            items: val ? val.list : []
-                        });
-                    }
-                    return val;
             }
             return val;
         },
@@ -506,6 +538,8 @@ Component.entryPoint = function(NS){
                 type = field.get('type');
                 if (type === 'date'){
                     ret[name] = val ? val.getTime() / 1000 : null;
+                } else if (type === 'model' || type === 'modelList' || type === 'list'){
+                    ret[name] = val ? val.toJSON() : null;
                 } else if (type === 'multilang'){
                     lngValCur = '';
                     for (i = 0; i < LANGS.length; i++){
