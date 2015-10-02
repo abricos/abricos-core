@@ -607,20 +607,22 @@ Component.entryPoint = function(NS){
             isLoadAppStructure: {
                 value: false
             }
-        },
-        REQS: {
-            appStructure: {
-                attribute: true,
-                response: function(d){
-                    return new NS.AppStructure(d);
-                }
-            }
         }
     });
 
     NS.Application.build = function(component, ajaxes, px, extensions, sx){
         extensions = extensions || [];
         sx = sx || {};
+
+        sx.REQS = Y.merge({
+            appStructure: {
+                attribute: true,
+                response: function(d){
+                    return new NS.AppStructure(d);
+                }
+            }
+        }, sx.REQS || {});
+
         ajaxes = sx.REQS = Y.merge(ajaxes, sx.REQS || {});
 
         var moduleName = component.moduleName;
