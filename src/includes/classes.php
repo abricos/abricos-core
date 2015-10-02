@@ -260,6 +260,7 @@ class AbricosModel extends AbricosItem {
     }
 
     public function __set($name, $value){
+        /** @var AbricosModelStructureField $field */
         $field = !empty($this->_structure) ? $this->_structure->Get($name) : null;
         if (empty($field)){
             $this->_data[$name] = $value;
@@ -272,14 +273,36 @@ class AbricosModel extends AbricosItem {
             } else {
                 $this->_data[$name] = new AbricosMultiLangValue($name, $value);
             }
-        } else if ($field->type === 'list'){
-
-            if (isset($this->_data[$name])){
+        } else if ($field->type === 'model'){
+            if (empty($value)){
+                unset($this->_data[$name]);
+            } else if ($value instanceof AbricosModel){
+                $this->_data[$name] = $value;
+            } else if (isset($this->_data[$name])){
                 $this->_data[$name]->Update($value);
             } else {
-                $this->_data[$name] = $this->_structure->manager->InstanceClass($field->typeClass, $value);
-            }
+                $manager = isset($field->typeModule) ?
+                    AbricosModelManager::GetManager($field->typeModule) :
+                    $this->_structure->manager;
 
+                $this->_data[$name] = $manager->InstanceClass($field->typeClass, $value);
+            }
+        } else if ($field->type === 'modelList'
+            || $field->type === 'list' // deprecated
+        ){
+            if (empty($value)){
+                unset($this->_data[$name]);
+            } else if ($value instanceof AbricosModelList){
+                $this->_data[$name] = $value;
+            } else if (isset($this->_data[$name])){
+                $this->_data[$name]->Update($value);
+            } else {
+                $manager = isset($field->typeModule) ?
+                    AbricosModelManager::GetManager($field->typeModule) :
+                    $this->_structure->manager;
+
+                $this->_data[$name] = $manager->InstanceClass($field->typeClass, $value);
+            }
         } else {
             $this->_data[$name] = $field->TypeVal($value);
         }
@@ -352,7 +375,9 @@ class AbricosModel extends AbricosItem {
             }
 
             if ($field->type === 'multiLang'
-                || $field->type === 'list'
+                || $field->type === 'list' // TODO: deprecated in [Structure].json
+                || $field->type === 'model'
+                || $field->type === 'modelList'
             ){
                 $value = $this->_data[$field->name]->ToJSON();
             } else {
@@ -506,7 +531,7 @@ class AbricosModelStructureField extends AbricosItem {
     /**
      * Field type
      *
-     * @var string Values: 'string|int|bool|double|date|multiLang|list'
+     * @var string Values: 'string|int|bool|double|date|multiLang|model|modelList'
      */
     public $type = 'string';
 
@@ -514,6 +539,11 @@ class AbricosModelStructureField extends AbricosItem {
      * @var string
      */
     public $typeClass;
+
+    /**
+     * @var string
+     */
+    public $typeModule;
 
     /**
      * Default value
@@ -544,6 +574,11 @@ class AbricosModelStructureField extends AbricosItem {
      */
     public $rolefn = null;
 
+    /**
+     * @param AbricosModelManager $manager
+     * @param string $name
+     * @param null $data
+     */
     public function __construct($manager, $name, $data = null){
         $this->manager = $manager;
         $this->name = $this->id = $name;
@@ -554,7 +589,11 @@ class AbricosModelStructureField extends AbricosItem {
         if (isset($data->type)){
             $type = trim($data->type);
             $a = explode(':', $type);
-            if (count($a) === 2){
+            if (count($a) === 3){
+                $type = trim($a[0]);
+                $this->typeModule = trim($a[1]);
+                $this->typeClass = trim($a[2]);
+            } else if (count($a) === 2){
                 $type = trim($a[0]);
                 $this->typeClass = trim($a[1]);
             }
@@ -567,7 +606,9 @@ class AbricosModelStructureField extends AbricosItem {
                 case 'date':
                 case 'array':
                 case 'multiLang':
-                case 'list':
+                case 'model':
+                case 'modelList':
+                case 'list': // TODO: deprecated
                     $this->type = $type;
                     break;
             }
@@ -609,6 +650,9 @@ class AbricosModelStructureField extends AbricosItem {
         unset($ret->id);
         $ret->name = $this->name;
         $ret->type = $this->type;
+        if (isset($this->typeModule)){
+            $ret->type .= ':'.$this->typeModule;
+        }
         if (isset($this->typeClass)){
             $ret->type .= ':'.$this->typeClass;
         }
@@ -706,8 +750,14 @@ class AbricosModelManager {
      */
     public static function GetManager($module){
         if (is_string($module)){
+            $name = $module;
+
             $module = Abricos::GetModule($module);
+            if (empty($module)){
+                throw new Exception("Module `$name` not found in AbricosModelManager::GetManager");
+            }
         }
+
         $modName = $module->name;
         if (!isset(AbricosModelManager::$_managers[$modName])){
             AbricosModelManager::$_managers[$modName] = new AbricosModelManager($module);
@@ -721,7 +771,8 @@ class AbricosModelManager {
 
     public function InstanceClass($structName){
         if (!isset($this->classes[$structName])){
-            throw new Exception("Class $structName not registered in AbricosModelManager");
+            $modName = $this->module->name;
+            throw new Exception("Class $structName not registered in AbricosModelManager: module: $modName");
         }
         $className = $this->classes[$structName];
 
