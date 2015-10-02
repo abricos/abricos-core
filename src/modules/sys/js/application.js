@@ -227,6 +227,106 @@ Component.entryPoint = function(NS){
     };
     NS.Navigator = Navigator;
 
+    var AppsCore = function(options){
+        var appsOptions = options && options.APPS ? options.APPS : null;
+        this._initApps(appsOptions);
+    };
+    AppsCore.prototype = {
+        _initApps: function(appsOptions){
+            this._appsState = new Y.State();
+
+            var ctor = this.constructor,
+                c = ctor;
+
+            while (c){
+                this.addApps(c.APPS);
+                c = c.superclass ? c.superclass.constructor : null;
+            }
+
+            if (appsOptions){
+                this.addApps(appsOptions);
+            }
+        },
+        appAdded: function(name){
+            return !!(this._appsState.get(name, ADDED));
+        },
+        addApp: function(name, config){
+            var state = this._appsState;
+            if (state.get(name, ADDED)){
+                return;
+            }
+
+            config = Y.merge({
+                name: name,
+                instance: null
+            }, config || {});
+
+            config[ADDED] = true;
+            state.data[name] = config;
+        },
+        addApps: function(apps){
+            if (!apps){
+                return;
+            }
+            apps = Y.AttributeCore.protectAttrs(apps);
+            var name;
+            for (name in apps){
+                if (!apps.hasOwnProperty(name)){
+                    continue;
+                }
+                this.addApp(name, apps[name]);
+            }
+        },
+        getApp: function(name){
+            var state = this._appsState,
+                item = state.data[name];
+
+            return item ? item.instance : null;
+        },
+        initializeApps: function(callback, context){
+            var data = this._appsState.data,
+                arr = [];
+
+            var initApp = function(stack){
+                if (stack.length === 0){
+                    return callback.call(context || this);
+                }
+                var app = stack.pop();
+
+                Brick.use(app.name, 'lib', function(err, ns){
+                    if (err){
+                        app.error = err;
+                        return initApp(stack);
+                    }
+                    app.namespace = ns;
+                    ns.initApp({
+                        initCallback: function(err, appInstance){
+                            if (err){
+                                app.error = err;
+                                return initApp(stack);
+                            }
+                            app.instance = appInstance;
+                            initApp(stack);
+                        }
+                    });
+                });
+            };
+
+            for (var name in data){
+                if (!data.hasOwnProperty(name)){
+                    continue;
+                }
+                var app = data[name];
+                if (app.instance){
+                    continue;
+                }
+                arr[arr.length] = app;
+            }
+
+            initApp(arr);
+        }
+    };
+    NS.AppsCore = AppsCore;
 
     var RequestCore = function(options){
         var reqsOptions = options && options.REQS ? options.REQS : null;
@@ -307,6 +407,7 @@ Component.entryPoint = function(NS){
     NS.RequestCore = RequestCore;
 
     NS.Application = Y.Base.create('application', Y.Base, [
+        NS.AppsCore,
         NS.Navigator,
         NS.RequestCore,
         NS.AJAX,
@@ -320,9 +421,11 @@ Component.entryPoint = function(NS){
         },
         initCallbackFire: function(){
             var initCallback = this.get('initCallback');
-            if (L.isFunction(initCallback)){
-                initCallback(null, this);
-            }
+            this.initializeApps(function(){
+                if (L.isFunction(initCallback)){
+                    initCallback(null, this);
+                }
+            }, this);
         },
         request: function(name){
             if (!this.requestAdded(name)){
