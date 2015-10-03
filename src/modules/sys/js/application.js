@@ -552,9 +552,11 @@ Component.entryPoint = function(NS){
             if (info.attribute){
                 this.set(name, res[name]);
             }
+            var callback;
             if (res[name] && Y.Lang.isFunction(info.onResponse)){
-                info.onResponse.call(this, res[name]);
+                callback = info.onResponse.call(this, res[name]);
             }
+            return callback;
         },
         _onAppResponses: function(err, res, details){
             res = res || {};
@@ -566,22 +568,44 @@ Component.entryPoint = function(NS){
                 rData = [rData];
             }
 
-            for (var i = 0; i < rData.length; i++){
-                var data = rData[i];
-                for (var name in data){
-                    this._onAppResponse(name, data, tRes);
+            var rCallbacks = [], i, data, name, cb;
+
+            for (i = 0; i < rData.length; i++){
+                data = rData[i];
+                for (name in data){
+                    cb = this._onAppResponse(name, data, tRes);
+                    if (Y.Lang.isFunction(cb)){
+                        rCallbacks[rCallbacks.length] = cb;
+                    }
                 }
             }
 
-            this.fire('appResponses', {
-                error: err,
-                responses: rData,
-                result: tRes
-            });
+            var complete = function(){
+                this.fire('appResponses', {
+                    error: err,
+                    responses: rData,
+                    result: tRes
+                });
 
-            if (Y.Lang.isFunction(details.callback)){
-                details.callback.apply(details.context, [err, tRes]);
-            }
+                if (Y.Lang.isFunction(details.callback)){
+                    details.callback.apply(details.context, [err, tRes]);
+                }
+            };
+
+            var rCallbackFire = function(cbList){
+                if (cbList.length === 0){
+                    return complete.call(this);
+                }
+                cbList.pop().call(this, function(err, result){
+                    // TODO: implode errors
+                    if (!err){
+                        tRes = Y.merge(tRes, result || {});
+                    }
+                    return complete.call(this);
+                }, this);
+            };
+
+            rCallbackFire.call(this, rCallbacks);
         },
         onAJAXError: function(err){
             Brick.mod.widget.notice.show(err.msg);
