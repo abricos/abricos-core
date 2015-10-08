@@ -740,6 +740,11 @@ class AbricosModelManager {
 
     protected $classes = array();
 
+    /**
+     * @var array[string]
+     */
+    public $appExtends = array();
+
     public function __construct(Ab_Module $module){
         $this->module = $module;
     }
@@ -795,7 +800,15 @@ class AbricosModelManager {
         }
         $file = realpath(CWD."/modules/".$this->module->name."/model/".$name.".json");
         if (!$file){
-            return null;
+            for ($i = 0; $i < count($this->appExtends); $i++){
+                $file = realpath(CWD."/modules/".$this->appExtends[$i]."/model/".$name.".json");
+                if ($file){
+                    break;
+                }
+            }
+            if (!$file){
+                return null;
+            }
         }
         $json = file_get_contents($file);
         $data = json_decode($json);
@@ -839,10 +852,15 @@ abstract class AbricosApplication {
      */
     public $models;
 
-    public function __construct(Ab_ModuleManager $manager){
+    /**
+     * @param Ab_ModuleManager $manager
+     * @param array $appExtends (optional)
+     */
+    public function __construct(Ab_ModuleManager $manager, $appExtends = array()){
         $this->manager = $manager;
         $this->db = $manager->db;
         $this->models = AbricosModelManager::GetManager($manager->module->name);
+        $this->models->appExtends = $appExtends;
         $this->RegisterClasses();
     }
 
