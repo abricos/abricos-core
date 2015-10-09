@@ -254,6 +254,19 @@ class AbricosModel extends AbricosItem {
 
                 $this->_data[$name] = $manager->InstanceClass($field->typeClass, $value);
             }
+        } else if ($field->type === 'string'){
+            $value = $field->TypeVal($value);
+            if (!empty($field->valid)){
+                $a = explode(",", $field->valid);
+                for ($i = 0; $i < count($a); $i++){
+                    if ($a[$i] === $value){
+                        $this->_data[$name] = $value;
+                        break;
+                    }
+                }
+            } else {
+                $this->_data[$name] = $value;
+            }
         } else {
             $this->_data[$name] = $field->TypeVal($value);
         }
@@ -593,6 +606,11 @@ class AbricosModelStructureField extends AbricosItem {
     public $rolefn = null;
 
     /**
+     * @var string
+     */
+    public $valid;
+
+    /**
      * @param AbricosModelManager $manager
      * @param string $name
      * @param null $data
@@ -646,6 +664,9 @@ class AbricosModelStructureField extends AbricosItem {
         if (isset($data->rolefn)){
             $this->rolefn = $data->rolefn;
         }
+        if (isset($data->valid)){
+            $this->valid = $data->valid;
+        }
     }
 
     public function TypeVal($value){
@@ -679,6 +700,9 @@ class AbricosModelStructureField extends AbricosItem {
         }
         if (isset($this->json)){
             $ret->json = $this->json;
+        }
+        if (isset($this->valid)){
+            $ret->valid = $this->valid;
         }
         return $ret;
     }
