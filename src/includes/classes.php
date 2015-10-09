@@ -27,61 +27,19 @@ class AbricosItem {
     }
 }
 
-class AbricosListConfig {
-    public $page = 1;
-    public $limit = 0;
-
-    private $_total = 0;
-
-    public function __construct($d = null){
-        if (!is_array($d)){
-            return;
-        }
-        $this->page = max(intval($d['page']), 1);
-        $this->limit = intval($d['limit']);
-    }
-
-    public function SetTotal($total){
-        $this->_total = intval($total);
-    }
-
-    public function GetTotal(){
-        return $this->_total;
-    }
-
-    public function GetFrom(){
-        return ($this->page - 1) * $this->limit;
-    }
-
-    public function ToJSON(){
-        $ret = new stdClass();
-        $ret->page = $this->page;
-        $ret->limit = $this->limit;
-        $ret->total = $this->_total;
-        return $ret;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function ToAJAX(){
-        return $this->ToJSON();
-    }
-}
-
 class AbricosList {
 
     /**
      * @var AbricosListConfig
+     * @deprecated
      */
-    public $config;
+    private $config;
 
     /**
      * @var string
      * @deprecated
      */
-    public $classConfig;
-    // public $classConfig = 'AbricosListConfig';
+    private $classConfig;
 
     protected $_list = array();
     protected $_map = array();
@@ -89,13 +47,9 @@ class AbricosList {
 
     protected $isCheckDouble = false;
 
-    public function __construct($config = null){
+    public function __construct(){
         $this->_list = array();
         $this->_map = array();
-        if (empty($config) && isset($this->classConfig)){
-            $config = new $this->classConfig();
-        }
-        $this->config = $config;
     }
 
     public function Add($item){
@@ -168,9 +122,6 @@ class AbricosList {
 
         $ret = new stdClass();
         $ret->list = $list;
-        if (!empty($this->config)){
-            $ret->config = $this->config->ToJSON();
-        }
 
         return $ret;
     }
@@ -187,9 +138,6 @@ class AbricosList {
 
         $ret = new stdClass();
         $ret->list = $list;
-        if (!empty($this->config)){
-            $ret->config = $this->config->ToAJAX();
-        }
 
         return $ret;
     }
@@ -429,6 +377,60 @@ class AbricosModel extends AbricosItem {
 }
 
 class AbricosModelList extends AbricosList {
+
+    /**
+     * @var Ab_Module
+     */
+    protected $_structModule;
+
+    /**
+     * @var string
+     */
+    protected $_structName;
+
+    /**
+     * @var string
+     */
+    protected $_structData;
+
+    /**
+     * @var AbricosModelListStructure|null
+     */
+    protected $_structure = null;
+
+    public function __construct(){
+        parent::__construct();
+
+        if (is_string($this->_structModule)){
+            $this->_structModule = Abricos::GetModule($this->_structModule);
+
+            if (!($this->_structModule instanceof Ab_Module)){
+                throw new Exception('Module not found in AbricosModelList');
+            }
+
+            $models = AbricosModelManager::GetManager($this->_structModule);
+
+            if (empty($this->_structure) && !empty($this->_structModule) && !empty($this->_structName)){
+                $this->_structure = $models->GetStructure($this->_structName);
+            }
+
+            if (!($this->_structure instanceof AbricosModelStructure)){
+                throw new Exception('Structure not found in AbricosModelList');
+            }
+
+            if (isset($this->_structData)){
+                $data = $models->GetData($this->_structData);
+
+                if (is_object($data) && isset($data->items) && is_array($data->items)){
+                    $itemType = $this->_structure->itemType;
+                    for ($i = 0; $i < count($data->items); $i++){
+                        $item = $models->InstanceClass($itemType, $data->items[$i]);
+                        $this->Add($item);
+                    }
+                }
+            }
+        }
+    }
 
     public function ToArray($fieldName = ''){
         $ret = array();
@@ -690,6 +692,11 @@ class AbricosModelStructure extends AbricosList {
     public $idField = 'id';
 
     /**
+     * @var string
+     */
+    public $type = 'model';
+
+    /**
      * @param AbricosModelManager $manager
      * @param string $name
      * @param mixed $data
@@ -724,6 +731,25 @@ class AbricosModelStructure extends AbricosList {
         unset($ret->list);
 
         return $ret;
+    }
+}
+
+class AbricosModelListStructure extends AbricosModelStructure {
+
+    public $type = 'modelList';
+
+    /**
+     * @var string
+     */
+    public $itemType;
+
+    public function __construct($manager, $name, $data = null){
+        parent::__construct($manager, $name, $data);
+
+        if (!isset($data->itemType)){
+            throw new Exception("ItemType not set in ModelList Structure `$name`");
+        }
+        $this->itemType = $data->itemType;
     }
 }
 
@@ -812,9 +838,33 @@ class AbricosModelManager {
         }
         $json = file_get_contents($file);
         $data = json_decode($json);
-        $struct = new AbricosModelStructure($this, $name, $data);
+
+        if (isset($data->type) && $data->type === 'modelList'){
+            $struct = new AbricosModelListStructure($this, $name, $data);
+        } else {
+            $struct = new AbricosModelStructure($this, $name, $data);
+        }
         $this->structures[$name] = $struct;
         return $struct;
+    }
+
+    public function GetData($name){
+        $name = trim($name);
+        $file = realpath(CWD."/modules/".$this->module->name."/data/".$name.".json");
+        if (!$file){
+            for ($i = 0; $i < count($this->appExtends); $i++){
+                $file = realpath(CWD."/modules/".$this->appExtends[$i]."/data/".$name.".json");
+                if ($file){
+                    break;
+                }
+            }
+            if (!$file){
+                return null;
+            }
+        }
+        $json = file_get_contents($file);
+        $data = json_decode($json);
+        return $data;
     }
 
     public function ToJSON($names){
