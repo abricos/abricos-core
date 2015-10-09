@@ -182,6 +182,9 @@ class AbricosModel extends AbricosItem {
         }
         $struct = $this->_structure;
 
+        if (is_object($d)){
+            $d = get_object_vars($d);
+        }
         $this->id = isset($d[$struct->idField]) ? $d[$struct->idField] : 0;
         $this->Update($d);
     }
@@ -798,6 +801,10 @@ class AbricosModelManager {
 
     public function RegisterClass($structName, $className){
         $this->classes[$structName] = $className;
+        for ($i = 0; $i < count($this->appExtends); $i++){
+            $extModels = AbricosModelManager::GetManager($this->appExtends[$i]);
+            $extModels->RegisterClass($structName, $className);
+        }
     }
 
     public function InstanceClass($structName){
@@ -827,14 +834,14 @@ class AbricosModelManager {
         $file = realpath(CWD."/modules/".$this->module->name."/model/".$name.".json");
         if (!$file){
             for ($i = 0; $i < count($this->appExtends); $i++){
-                $file = realpath(CWD."/modules/".$this->appExtends[$i]."/model/".$name.".json");
-                if ($file){
-                    break;
+                $moduleName = $this->appExtends[$i];
+                $extModels = AbricosModelManager::GetManager($moduleName);
+                $struct = $extModels->GetStructure($name);
+                if ($struct){
+                    return $this->structures[$name] = $struct;
                 }
             }
-            if (!$file){
-                return null;
-            }
+            return null;
         }
         $json = file_get_contents($file);
         $data = json_decode($json);
