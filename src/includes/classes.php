@@ -401,7 +401,7 @@ class AbricosModelList extends AbricosList {
      */
     protected $_structure = null;
 
-    public function __construct(){
+    public function __construct($items){
         parent::__construct();
 
         if (is_string($this->_structModule)){
@@ -425,13 +425,26 @@ class AbricosModelList extends AbricosList {
                 $data = $models->GetData($this->_structData);
 
                 if (is_object($data) && isset($data->items) && is_array($data->items)){
-                    $itemType = $this->_structure->itemType;
-                    for ($i = 0; $i < count($data->items); $i++){
-                        $item = $models->InstanceClass($itemType, $data->items[$i]);
-                        $this->Add($item);
-                    }
+                    $this->Update($data->items);
                 }
             }
+        }
+        $this->Update($items);
+    }
+
+    /**
+     * @param array $data
+     */
+    public function Update($items){
+        if (!is_array($items) || empty($this->_structure)){
+            return;
+        }
+
+        $models = AbricosModelManager::GetManager($this->_structModule);
+        $itemType = $this->_structure->itemType;
+        for ($i = 0; $i < count($items); $i++){
+            $item = $models->InstanceClass($itemType, $items[$i]);
+            $this->Add($item);
         }
     }
 
