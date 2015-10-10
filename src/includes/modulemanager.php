@@ -194,6 +194,14 @@ abstract class Ab_Module {
     public function GetPhrases(){
         return Abricos::$phrases->GetList($this->name);
     }
+
+    public function ScriptRequire($phpScript){
+        return require $phpScript;
+    }
+
+    public function ScriptRequireOnce($phpScript){
+        return require_once $phpScript;
+    }
 }
 
 /**
