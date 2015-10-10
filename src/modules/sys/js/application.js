@@ -692,14 +692,14 @@ Component.entryPoint = function(NS){
             }
 
             /* // TODO: load roles
-            if (ns.roles && Y.Lang.isFunction(ns.roles.load)){
-                ns.roles.load(function(){
-                    new ns.App(options);
-                });
-            } else {
-                new ns.App(options);
-            }
-            /**/
+             if (ns.roles && Y.Lang.isFunction(ns.roles.load)){
+             ns.roles.load(function(){
+             new ns.App(options);
+             });
+             } else {
+             new ns.App(options);
+             }
+             /**/
             new ns.App(options);
         };
     };
@@ -828,6 +828,9 @@ Component.entryPoint = function(NS){
         NS.WidgetClick,
         NS.WidgetWaiting
     ], {
+        // patch: not added yui3 class
+        _renderBoxClassNames: function(){
+        },
         initializer: function(){
             this.publish('initAppWidget');
 
