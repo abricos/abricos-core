@@ -206,12 +206,18 @@ abstract class Ab_Module {
 
     public function ScriptRequire($file){
         $cd = $this->GetCurrentDir();
-        return require realpath($cd."/".$file);
+        if (!($path = realpath($cd."/".$file))){
+            throw new Exception("Script `$file` not found in module `$this->name`");
+        }
+        return require $path;
     }
 
     public function ScriptRequireOnce($file){
         $cd = $this->GetCurrentDir();
-        return require_once realpath($cd."/".$file);
+        if (!($path = realpath($cd."/".$file))){
+            throw new Exception("Script `$file` not found in module `$this->name`");
+        }
+        return require_once $path;
     }
 }
 

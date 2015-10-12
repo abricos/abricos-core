@@ -492,9 +492,14 @@ class AbricosMultiLangValue {
 
     public function Set($d){
         if (is_array($d)){
-            foreach (Abricos::$supportLanguageList as $lng){
-                $fieldName = AbricosMultiLangValue::FieldName($this->name, $lng);
-                $this->_data[$lng] = isset($d[$fieldName]) ? $d[$fieldName] : '';
+            $name = $this->name;
+            if (isset($d[$name])){
+                $this->_data[Abricos::$LNG] = strval($d[$name]);
+            } else {
+                foreach (Abricos::$supportLanguageList as $lng){
+                    $fieldName = AbricosMultiLangValue::FieldName($name, $lng);
+                    $this->_data[$lng] = isset($d[$fieldName]) ? $d[$fieldName] : '';
+                }
             }
         } else if (is_string($d)){
             $this->_data[Abricos::$LNG] = $d;
