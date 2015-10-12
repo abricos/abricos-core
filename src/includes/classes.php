@@ -195,17 +195,18 @@ class AbricosModel extends AbricosItem {
 
         for ($i = 0; $i < $count; $i++){
             $field = $struct->GetByIndex($i);
+            $name = $field->name;
 
             if ($field->type === 'multiLang'){
-                $this->__set($field->name, $d);
+                $this->__set($name, $d);
             } else {
                 $val = null;
-                if (isset($d[$field->name])){
-                    $val = $d[$field->name];
+                if (isset($d[$name])){
+                    $val = $d[$name];
                 } else if (isset($field->dbField) && isset($d[$field->dbField])){
                     $val = $d[$field->dbField];
                 }
-                $this->__set($field->name, $val);
+                $this->__set($name, $val);
             }
         }
     }
@@ -239,7 +240,7 @@ class AbricosModel extends AbricosItem {
                 $this->_data[$name] = $manager->InstanceClass($field->typeClass, $value);
             }
         } else if ($field->type === 'modelList'
-            || $field->type === 'list' // deprecated
+            || $field->type === 'list' // TODO: deprecated
         ){
             if (empty($value)){
                 unset($this->_data[$name]);
@@ -256,15 +257,7 @@ class AbricosModel extends AbricosItem {
             }
         } else if ($field->type === 'string'){
             $value = $field->TypeVal($value);
-            if (!empty($field->valid)){
-                $a = explode(",", $field->valid);
-                for ($i = 0; $i < count($a); $i++){
-                    if ($a[$i] === $value){
-                        $this->_data[$name] = $value;
-                        break;
-                    }
-                }
-            } else {
+            if (!is_null($value)){
                 $this->_data[$name] = $value;
             }
         } else {
@@ -274,9 +267,11 @@ class AbricosModel extends AbricosItem {
 
     public function __get($name){
         if (isset($this->_data[$name])){
+            /*
             if ($this->_data[$name] instanceof AbricosMultiLangValue){
                 return $this->_data[$name]->Get();
             }
+            /**/
             return $this->_data[$name];
         }
         $field = !empty($this->_structure) ? $this->_structure->Get($name) : null;
@@ -598,7 +593,7 @@ class AbricosModelStructureField extends AbricosItem {
     /**
      * @var bool
      */
-    public $personal = false;
+    public $personal;
 
     /**
      * @var string
@@ -670,9 +665,21 @@ class AbricosModelStructureField extends AbricosItem {
     }
 
     public function TypeVal($value){
+        if ($this->type === 'string'){
+            $value = strval($value);
+            if (empty($this->valid)){
+                return $value;
+            }
+            $a = explode(",", $this->valid);
+            $count = count($a);
+            for ($i = 0; $i < $count; $i++){
+                if ($a[$i] === $value){
+                    return $value;
+                }
+            }
+            return null;
+        }
         switch ($this->type){
-            case 'string':
-                return strval($value);
             case 'bool':
                 return !!$value;
             case 'int':
@@ -759,6 +766,41 @@ class AbricosModelStructure extends AbricosList {
                 $this->Add(new AbricosModelStructureField($this->manager, $fieldName, $value));
             }
         }
+    }
+
+    public function DataFix($data, $isArray){
+        if (!$isArray && is_array($data)){
+            $data = array_to_object($data);
+        }
+        if ($isArray && is_object($data)){
+            $data = get_object_vars($data);
+        }
+        $count = $this->Count();
+        for ($i = 0; $i < $count; $i++){
+            $field = $this->GetByIndex($i);
+            $name = $field->name;
+
+            if ($isArray){
+                if (!isset($data[$name])){
+                    $data[$name] = null;
+                }
+                $data[$name] = $field->TypeVal($data[$name]);
+            } else {
+                if (!isset($data->$name)){
+                    $data->$name = null;
+                }
+                $data->$name = $field->TypeVal($data->$name);
+            }
+        }
+        return $data;
+    }
+
+    public function DataFixToObject($data){
+        return $this->DataFix($data, false);
+    }
+
+    public function DataFixToArray($data){
+        return $this->DataFix($data, true);
     }
 
     public function ToJSON(){
