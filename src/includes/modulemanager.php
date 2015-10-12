@@ -195,12 +195,23 @@ abstract class Ab_Module {
         return Abricos::$phrases->GetList($this->name);
     }
 
-    public function ScriptRequire($phpScript){
-        return require $phpScript;
+    private $_moduleDir = null;
+
+    public function GetCurrentDir(){
+        if (!is_null($this->_moduleDir)){
+            return $this->_moduleDir;
+        }
+        return $this->_moduleDir = CWD."/modules/".$this->name;
     }
 
-    public function ScriptRequireOnce($phpScript){
-        return require_once $phpScript;
+    public function ScriptRequire($file){
+        $cd = $this->GetCurrentDir();
+        return require realpath($cd."/".$file);
+    }
+
+    public function ScriptRequireOnce($file){
+        $cd = $this->GetCurrentDir();
+        return require_once realpath($cd."/".$file);
     }
 }
 
