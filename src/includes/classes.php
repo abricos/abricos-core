@@ -242,7 +242,7 @@ class AbricosModel extends AbricosItem {
         } else if ($field->type === 'modelList'
             || $field->type === 'list' // TODO: deprecated
         ){
-            if (empty($value)){
+            if (empty($value) && !$field->notNULL){
                 unset($this->_data[$name]);
             } else if ($value instanceof AbricosModelList){
                 $this->_data[$name] = $value;
@@ -610,6 +610,8 @@ class AbricosModelStructureField extends AbricosItem {
      */
     public $valid;
 
+    public $notNULL;
+
     /**
      * @param AbricosModelManager $manager
      * @param string $name
@@ -666,6 +668,9 @@ class AbricosModelStructureField extends AbricosItem {
         }
         if (isset($data->valid)){
             $this->valid = $data->valid;
+        }
+        if (isset($data->notNULL)){
+            $this->notNULL = $data->notNULL;
         }
     }
 
