@@ -205,6 +205,13 @@ abstract class Ab_Module {
     }
 
     public function ScriptRequire($file){
+        if (is_array($file)){
+            $count = count($file);
+            for ($i = 0; $i < $count; $i++){
+                $this->ScriptRequireOnce($file[$i]);
+            }
+            return;
+        }
         $cd = $this->GetCurrentDir();
         if (!($path = realpath($cd."/".$file))){
             throw new Exception("Script `$file` not found in module `$this->name`");
@@ -213,6 +220,13 @@ abstract class Ab_Module {
     }
 
     public function ScriptRequireOnce($file){
+        if (is_array($file)){
+            $count = count($file);
+            for ($i = 0; $i < $count; $i++){
+                $this->ScriptRequireOnce($file[$i]);
+            }
+            return;
+        }
         $cd = $this->GetCurrentDir();
         if (!($path = realpath($cd."/".$file))){
             throw new Exception("Script `$file` not found in module `$this->name`");
