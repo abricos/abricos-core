@@ -147,6 +147,11 @@ class AbricosList {
 class AbricosModel extends AbricosItem {
 
     /**
+     * @var AbricosApplication
+     */
+    public $app;
+
+    /**
      * @var Ab_Module
      */
     protected $_structModule;
@@ -298,7 +303,11 @@ class AbricosModel extends AbricosItem {
             }
         }
 
-        $moduleManager = $this->_structModule->GetManager();
+        if (empty($this->app)){
+            $moduleManager = $this->_structModule->GetManager();
+        } else {
+            $moduleManager = $this->app->manager;
+        }
 
         $count = $struct->Count();
         for ($i = 0; $i < $count; $i++){
@@ -388,6 +397,11 @@ class AbricosModel extends AbricosItem {
 }
 
 class AbricosModelList extends AbricosList {
+
+    /**
+     * @var AbricosApplication
+     */
+    public $app;
 
     /**
      * @var Ab_Module
@@ -1017,6 +1031,17 @@ abstract class AbricosApplication {
         foreach ($classes as $key => $value){
             $this->models->RegisterClass($key, $value);
         }
+    }
+
+    public function InstanceClass($structName){
+        $args = func_get_args();
+        $p0 = isset($args[1]) ? $args[1] : null;
+        $p1 = isset($args[2]) ? $args[2] : null;
+        $p2 = isset($args[3]) ? $args[3] : null;
+
+        $obj = $this->models->InstanceClass($structName, $p0, $p1, $p2);
+        $obj->app = $this;
+        return $obj;
     }
 
     protected abstract function GetStructures();
