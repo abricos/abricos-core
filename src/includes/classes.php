@@ -230,6 +230,26 @@ class AbricosModel extends AbricosItem {
             } else {
                 $this->_data[$name] = new AbricosMultiLangValue($name, $value);
             }
+        } else if ($field->type === 'object'){
+            if (empty($value)){
+                unset($this->_data[$name]);
+            } else if (is_array($value)){
+                $this->_data[$name] = array_to_object($value);
+            } else {
+                $this->_data[$name] = $value;
+            }
+        } else if ($field->type === 'array'){
+            if (empty($value)){
+                unset($this->_data[$name]);
+            } else if (is_array($value)){
+                $this->_data[$name] = $value;
+            } else if (is_object($value)){
+                $this->_data[$name] = get_object_vars($value);
+            } else if (isset($this->_data[$name])){
+                $this->_data[$name] = $value;
+            } else {
+                $this->_data[$name] = $value;
+            }
         } else if ($field->type === 'model'){
             if (empty($value)){
                 unset($this->_data[$name]);
@@ -277,6 +297,7 @@ class AbricosModel extends AbricosItem {
                 return $this->_data[$name]->Get();
             }
             /**/
+
             return $this->_data[$name];
         }
         $field = !empty($this->_structure) ? $this->_structure->Get($name) : null;
@@ -576,7 +597,7 @@ class AbricosModelStructureField extends AbricosItem {
     /**
      * Field type
      *
-     * @var string Values: 'string|int|bool|double|date|multiLang|model|modelList'
+     * @var string Values: 'string|int|bool|double|date|multiLang|model|modelList|array|object'
      */
     public $type = 'string';
 
@@ -657,6 +678,7 @@ class AbricosModelStructureField extends AbricosItem {
                 case 'double':
                 case 'date':
                 case 'array':
+                case 'object':
                 case 'multiLang':
                 case 'model':
                 case 'modelList':
