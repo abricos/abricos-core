@@ -403,11 +403,12 @@ Component.entryPoint = function(NS){
 
             if (this.structure){
                 this.structure.fieldList.each(function(field){
-                    var fInfo = field.toJSON(),
-                        name = fInfo.json ? fInfo.json : fInfo.name;
+                    var fInfo = field.toJSON();
 
-                    if (name in config){
-                        this.set(fInfo.name, config[name]);
+                    if (fInfo.name in config){
+                        this.set(fInfo.name, config[fInfo.name]);
+                    } else if (fInfo.json in config){
+                        this.set(fInfo.name, config[fInfo.json]);
                     }
                 }, this);
             }
