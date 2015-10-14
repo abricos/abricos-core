@@ -377,6 +377,8 @@ class Ab_CoreModuleManager {
         $this->FetchModulesInfo();
     }
 
+    private $_isReadLanguages = false;
+
     private function AddModuleInfo($d){
         $name = $d['name'];
 
@@ -392,10 +394,23 @@ class Ab_CoreModuleManager {
         } else {
             $item->Update($d);
         }
+
+        if (!$this->_isReadLanguages){
+            $this->_isReadLanguages = true;
+
+            $list = array();
+            foreach ($d as $key => $value){
+                if (strpos($key, 'language_') === false){
+                    continue;
+                }
+                $lng = str_replace('language_', '', $key);
+                array_push($list, $lng);
+            }
+            Abricos::$supportLanguageList = $list;
+        }
+
         return $item;
     }
-
-    private $_isReadLanguages = false;
 
     private function FetchModulesInfo(){
         $db = Abricos::$db;
@@ -453,21 +468,6 @@ class Ab_CoreModuleManager {
             }
         } else {
             while (($row = $db->fetch_array($rows))){
-
-                if (!$this->_isReadLanguages){
-                    $this->_isReadLanguages = true;
-
-                    $list = array();
-                    foreach ($row as $key => $value){
-                        if (strpos($key, 'language_') === false){
-                            continue;
-                        }
-                        $lng = str_replace('language_', '', $key);
-                        array_push($list, $lng);
-                    }
-                    Abricos::$supportLanguageList = $list;
-                }
-
                 $this->AddModuleInfo($row);
             }
         }

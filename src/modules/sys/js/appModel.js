@@ -4,7 +4,9 @@ Component.requires = {
 };
 Component.entryPoint = function(NS){
 
-    var Y = Brick.YUI;
+    var Y = Brick.YUI,
+        LANGIDS = Brick.env.languages,
+        LANGID = Brick.env.language;
 
     var AppItem = function(){
         AppItem.superclass.constructor.apply(this, arguments);
@@ -325,7 +327,6 @@ Component.entryPoint = function(NS){
     NS.AppStructure.Field = Y.Base.create('appStructure_Field', NS.AppItem, [], {}, {
         ATTRS: {
             name: {value: ''},
-            multiLang: {value: false},
             type: {
                 value: 'string',
                 setter: function(val){
@@ -382,6 +383,52 @@ Component.entryPoint = function(NS){
         appItem: NS.AppStructure.Structure,
         idField: 'name'
     });
+
+    var MultiLangValue = function(d){
+        this._data = {};
+        this.set(d);
+    };
+    MultiLangValue.prototype = {
+        set: function(d){
+            if (Y.Lang.isString(d)){
+                this._data[LANGID] = d;
+            } else {
+                for (var n in d){
+                    this._data[n] = d[n];
+                }
+            }
+        },
+        _get: function(langid){
+            var ret = this._data[langid];
+
+            if (Y.Lang.isString(ret) && ret !== ''){
+                return ret;
+            }
+            return null;
+        },
+        get: function(){
+            var ret = this._get(LANGID);
+
+            if (!Y.Lang.isNull(ret)){
+                return ret;
+            }
+
+            for (var i = 0; i < LANGIDS.length; i++){
+                if (LANGIDS[i] === LANGID){
+                    continue;
+                }
+                ret = this._get(LANGIDS[i]);
+                if (!Y.Lang.isNull(ret)){
+                    return ret;
+                }
+            }
+            return '';
+        },
+        toJSON: function(){
+            return this._data;
+        }
+    };
+    NS.MultiLangValue = MultiLangValue;
 
     NS.AppModel = Y.Base.create('appModel', NS.AppItem, [], {
         isAppModel: true,
@@ -461,7 +508,14 @@ Component.entryPoint = function(NS){
             }
 
             var type = field.get('type');
-            if (type === 'model' || type === 'modelList' || type === 'list'){ // TODO: deprecated list
+            if (type === 'multiLang'){
+                if ((act === 'get' && !val)
+                    || (act === 'set' && !attrCfg.value)){
+
+                    return new NS.MultiLangValue(val);
+                }
+                return val;
+            } else if (type === 'model' || type === 'modelList' || type === 'list'){ // TODO: deprecated list
                 var app = this.appInstance,
                     typeModule = field.get('typeModule');
 
@@ -527,8 +581,7 @@ Component.entryPoint = function(NS){
                 return NS.AppModel.superclass.toJSON.apply(this);
             }
 
-            var ret = {}, val, name, type, langName,
-                LANGS = Brick.env.languages, lng, i, lngValCur;
+            var ret = {}, val, name, type;
 
             this.structure.fieldList.each(function(field){
                 name = field.get('name');
@@ -539,31 +592,8 @@ Component.entryPoint = function(NS){
                 type = field.get('type');
                 if (type === 'date'){
                     ret[name] = val ? val.getTime() / 1000 : null;
-                } else if (type === 'model' || type === 'modelList' || type === 'list'){
+                } else if (type === 'multiLang' || type === 'model' || type === 'modelList' || type === 'list'){
                     ret[name] = val ? val.toJSON() : null;
-                } else if (type === 'multilang'){
-                    lngValCur = '';
-                    for (i = 0; i < LANGS.length; i++){
-                        lng = LANGS[i];
-                        langName = NS.AppModel.langFieldName(name, lng);
-                        ret[langName] = val[lng] || '';
-                        if (lng === Brick.env.language){
-                            lngValCur = ret[langName];
-                        }
-                    }
-                    if (lngValCur === '' && LANGS.length > 1){
-                        for (i = 0; i < LANGS.length; i++){
-                            lng = LANGS[i];
-                            if (lng === Brick.env.language){
-                                continue;
-                            }
-                            if (val[lng] && val[lng] !== ''){
-                                lngValCur = val[lng];
-                                break;
-                            }
-                        }
-                    }
-                    ret[name] = lngValCur;
                 } else {
                     ret[name] = val;
                 }
