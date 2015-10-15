@@ -499,9 +499,17 @@ Component.entryPoint = function(NS){
                     req = req.split(',');
                 }
                 rData = [rData]
-                for (var i = 0; i < req.length; i++){
+                for (var i = 0, reqi, rinfo; i < req.length; i++){
+                    reqi = req[i];
+                    rinfo = state.data[reqi];
+                    if (!rinfo){
+                        continue;
+                    }
+                    if (rinfo.attribute && this.get(reqi)){
+                        continue;
+                    }
                     rData[rData.length] = {
-                        'do': req[i]
+                        'do': reqi
                     };
                 }
             }
