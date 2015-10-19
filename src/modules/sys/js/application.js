@@ -427,7 +427,7 @@ Component.entryPoint = function(NS){
                 }
             }, this);
         },
-        request: function(name){
+        _request: function(name){
             if (!this.requestAdded(name)){
                 return;
             }
@@ -666,7 +666,7 @@ Component.entryPoint = function(NS){
                 px[act] = function(){
                     var args = SLICE.call(arguments);
                     args.splice(0, 0, act);
-                    this.request.apply(this, args);
+                    this._request.apply(this, args);
                 };
             })();
         }
