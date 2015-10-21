@@ -723,7 +723,10 @@ Component.entryPoint = function(NS){
         onInitAppWidget: function(err, appInstance, options){
             var args = options.arguments[0];
 
+            this.onInitAppWorkspace(err, appInstance, options);
             this.showWorkspacePage(args.workspacePage);
+        },
+        onInitAppWorkspace: function(err, appInstance, options){
         },
         defineDefaultPage: function(callback, context){
             callback.call(context || this, null, this.get('defaultPage'));
