@@ -552,9 +552,9 @@ class Ab_CoreModuleManager {
 
         Ab_UpdateManager::$current = new Ab_UpdateManager($module, $modInfo);
 
-        $shema = CWD."/modules/".$modName."/includes/shema.php";
+        $shema = CWD."/modules/".$modName."/setup/shema.php";
         if (!file_exists($shema)){
-            $shema = CWD."/modules/".$modName."/setup/shema.php";
+            $shema = CWD."/modules/".$modName."/includes/shema.php";
         }
         if (file_exists($shema)){
             require_once($shema);
