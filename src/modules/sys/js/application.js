@@ -562,7 +562,7 @@ Component.entryPoint = function(NS){
             }
             var callback;
             if (res[name] && Y.Lang.isFunction(info.onResponse)){
-                callback = info.onResponse.call(this, res[name]);
+                callback = info.onResponse.call(this, res[name], data[name]);
             }
             return callback;
         },
