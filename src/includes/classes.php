@@ -251,7 +251,7 @@ class AbricosModel extends AbricosItem {
                 $this->_data[$name] = $value;
             }
         } else if ($field->type === 'model'){
-            if (empty($value)){
+            if (empty($value) && !$field->notNULL){
                 unset($this->_data[$name]);
             } else if ($value instanceof AbricosModel){
                 $this->_data[$name] = $value;
