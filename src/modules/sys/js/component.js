@@ -150,6 +150,18 @@ Component.entryPoint = function(NS){
             var el = Y.Node.create(html);
             node.appendChild(el);
             return el;
+        },
+        each: function(elName, fn, context){
+            var nodes = this.one(elName);
+            if (!nodes){
+                return;
+            }
+            if (!Y.Lang.isArray(nodes)){
+                nodes = [nodes];
+            }
+            for (var i = 0; i < nodes.length; i++){
+                fn.call(context || this, nodes[i]);
+            }
         }
     }, {
         NAME: 'templateManagerExt'
