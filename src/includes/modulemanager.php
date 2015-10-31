@@ -162,30 +162,22 @@ abstract class Ab_Module {
         return null;
     }
 
+    private $_manager = null;
+
     /**
-     * Получить менеджер модуля
-     *
-     * Пример из модуля Example:
-     * <code>
-     * class ExampleModule extends Ab_Module {
-     *    // экземпляр менеджера модуля
-     *    private $_manager = null;
-     *    ...
-     *    public function GetManager(){
-     *        if (is_null($this->_manager)){
-     *            require_once 'includes/manager.php';
-     *            $this->_manager = new ExampleManager($this);
-     *        }
-     *        return $this->_manager;
-     *    }
-     *    ...
-     * }
-     * </code>
-     *
      * @return Ab_ModuleManager
      */
     public function GetManager(){
-        return null;
+        if (is_null($this->_manager)){
+            $this->ScriptRequireOnce('includes/manager.php');
+
+            $className = ucwords($this->name)."Manager";
+            if (!class_exists($className)){
+                return;
+            }
+            $this->_manager = new $className($this);
+        }
+        return $this->_manager;
     }
 
     /**

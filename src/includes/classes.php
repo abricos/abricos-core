@@ -1017,6 +1017,22 @@ class AbricosModelManager {
     }
 }
 
+class AbricosResponse {
+    const ERR_BAD_REQUEST = 400;
+    const ERR_UNAUTHORIZED = 401;
+    const ERR_FORBIDDEN = 403;
+    const ERR_NOT_FOUND = 404;
+
+    const ERR_SERVER_ERROR = 500;
+
+    public static function IsError($response){
+        if (is_integer($response)){
+            return true;
+        }
+        return false;
+    }
+}
+
 abstract class AbricosApplication {
 
     /**
