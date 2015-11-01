@@ -223,6 +223,16 @@ Component.entryPoint = function(NS){
         getById: function(id){
             return this._idMap[id] || null;
         },
+        getBy: function(fieldName, value){
+            var find = null;
+            this.some(function(item){
+                if (item.get(fieldName) === value){
+                    find = item;
+                    return true;
+                }
+            }, this);
+            return find;
+        },
         each: function(callback, context){
             var items = this._items.concat(),
                 i, item, len;
