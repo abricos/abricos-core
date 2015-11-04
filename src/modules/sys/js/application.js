@@ -776,6 +776,8 @@ Component.entryPoint = function(NS){
                 this._showWorkspacePage(page);
             }
         },
+        onShowWorkspacePage: function(page, widget){
+        },
         _showWorkspacePage: function(page){
             page = new NS.AppWorkspacePage(page);
 
@@ -818,16 +820,19 @@ Component.entryPoint = function(NS){
                 elBoard.appendChild(elDiv);
 
                 var args = {};
-                if (L.isFunction(ns[wName].parseURLParam)){
-                    args = ns[wName].parseURLParam(page.args);
+                if (L.isFunction(widgetClass.parseURLParam)){
+                    args = widgetClass.parseURLParam(page.args);
                 }
 
-                this.set('workspaceWidget', new widgetClass(
+                var widget = new widgetClass(
                     Y.mix({
                         boundingBox: elDiv,
                         workspacePage: page
                     }, args)
-                ))
+                );
+
+                this.set('workspaceWidget', widget);
+                this.onShowWorkspacePage(page, widget);
             }, this);
         }
     };
