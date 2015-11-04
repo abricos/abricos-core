@@ -27,15 +27,31 @@ Component.entryPoint = function(NS){
         this._initNavigator();
     };
     /**
-     * Example: user.view(532,avatar) => return {
+     * Example:
+     * user.view(532,avatar) => return {
+     *      key: 'user.view',
+     *      args: ['532', 'avatar']
+     * }
+     *
+     * uprofile:user.view(532,avatar) => return {
+     *      module: 'uprofile',
      *      key: 'user.view',
      *      args: ['532', 'avatar']
      * }
      * @param sURL
      */
     Navigator.parseURL = function(sURL){
-        var a = sURL.split('.'),
-            key = [],
+        var a = sURL.split(':'),
+            module = '';
+
+        if (a.length === 2){
+            module = a[0];
+            sURL = a[1];
+        }
+
+        a = sURL.split('.');
+
+        var key = [],
             args = [],
             ex,
             rex = /(.*)\((.*)\)/i;
@@ -50,6 +66,7 @@ Component.entryPoint = function(NS){
             key[key.length] = si;
         }
         return {
+            module: module,
             key: key.join('.'),
             args: args
         };
@@ -77,6 +94,18 @@ Component.entryPoint = function(NS){
         }
         var p = NS.Navigator.parseURL(sURL),
             url = null;
+
+        if (p.module && Brick.mod[p.module] && Brick.mod[p.module].appInstance){
+            var source = Brick.mod[p.module].appInstance;
+            if (!Y.Lang.isFunction(source.getURL)){
+                return null;
+            }
+            url = source.getURL.apply(source, [p.key].concat(p.args));
+            if (url && url !== ''){
+                return url;
+            }
+            return null;
+        }
 
         for (var i = 0, source; i < sources.length; i++){
             source = sources[i];
