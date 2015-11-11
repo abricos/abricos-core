@@ -200,7 +200,7 @@ abstract class Ab_Module {
         if (is_array($file)){
             $count = count($file);
             for ($i = 0; $i < $count; $i++){
-                $this->ScriptRequireOnce($file[$i]);
+                $this->ScriptRequire($file[$i]);
             }
             return;
         }

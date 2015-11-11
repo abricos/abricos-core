@@ -1062,6 +1062,78 @@ abstract class AbricosApplication {
         $this->RegisterClasses();
     }
 
+    protected $_cache = array();
+
+    public function CacheClear(){
+        $this->_cache = array();
+    }
+
+    protected function GetAppClasses(){
+        return array();
+    }
+
+    protected $_cacheChildApps = array();
+
+    /**
+     * @param $name
+     * @return AbricosApplication
+     */
+    public function GetChildApp($name){
+        if (isset($this->_cacheChildApps[$name])){
+            return $this->_cacheChildApps[$name];
+        }
+        $classes = $this->GetAppClasses();
+        $className = $classes[$name];
+        return $this->_cacheChildApps[$name] =
+            new $className($this->manager, $this->models->appExtends);
+    }
+
+    public function GetChildApps(){
+        $ret = array();
+        $apps = $this->GetAppClasses();
+        foreach ($apps as $name => $value){
+            $ret[] = $this->GetChildApp($name);
+        }
+        return $ret;
+    }
+
+    protected $_cacheAppsByKey = array();
+
+    public function GetApp($key){
+        if (isset($this->_cacheAppsByKey[$key])){
+            return $this->_cacheAppsByKey[$key];
+        }
+        $arr = explode(".", $key);
+        $moduleName = $arr[0];
+        $module = Abricos::GetModule($moduleName);
+        if (empty($module)){
+            throw new Exception('Module `'.$moduleName.'` not found');
+        }
+        $manager = $module->GetManager();
+        if (empty($manager)){
+            throw new Exception('Manager not found in Module '.$moduleName);
+        }
+        if (!method_exists($manager, 'GetApp')){
+            throw new Exception('GetApp function not found in Manager of Module '.$moduleName);
+        }
+        $app = $manager->GetApp();
+        if (count($arr) > 1){
+            $app = $app->GetChildApp($arr[1]);
+        }
+        return $this->_cacheAppsByKey[$key] = $app;
+    }
+
+    public function IsAppFunctionExist($key, $fn){
+        $app = $this->GetApp($key);
+        if (empty($app)){
+            return false;
+        }
+        if (!method_exists($app, $fn)){
+            return false;
+        }
+        return true;
+    }
+
     protected abstract function GetClasses();
 
     protected function RegisterClasses(){
@@ -1091,12 +1163,34 @@ abstract class AbricosApplication {
             case "appStructure":
                 return $this->AppStructureToJSON();
         }
-        return $this->ResponseToJSON($d);
+        $ret = $this->ResponseToJSON($d);
+        if (!empty($ret)){
+            return $ret;
+        }
+
+        $extApps = $this->GetChildApps();
+        for ($i = 0; $i < count($extApps); $i++){
+            /** @var AbricosApplication $extApp */
+            $extApp = $extApps[$i];
+            $ret = $extApp->ResponseToJSON($d);
+            if (!empty($ret)){
+                return $ret;
+            }
+        }
+
+        return null;
     }
 
     public function AppStructureToJSON(){
-        $structures = $this->GetStructures();
+        $arr = array($this->GetStructures());
+        $extApps = $this->GetChildApps();
+        for ($i = 0; $i < count($extApps); $i++){
+            /** @var AbricosApplication $extApp */
+            $extApp = $extApps[$i];
+            $arr[] = $extApp->GetStructures();
+        }
 
+        $structures = implode(",", $arr);
         $res = $this->models->ToJSON($structures);
         if (empty($res)){
             return null;
