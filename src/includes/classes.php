@@ -307,6 +307,10 @@ class AbricosModel extends AbricosItem {
         return null;
     }
 
+    public function __isset($name){
+        return isset($this->_data[$name]);
+    }
+
     public function ToJSON(){
         $ret = parent::ToJSON();
 
