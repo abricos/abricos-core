@@ -78,7 +78,7 @@ Component.entryPoint = function(NS){
             component: {value: COMPONENT},
             templateBlockName: {value: 'widget'},
             content: {
-                value: MODE_VISUAL,
+                value: '',
                 getter: function(val){
                     if (!this.visualEditor){
                         return val;
