@@ -480,6 +480,8 @@ class Ab_Notification {
      * @param string $subject
      * @param string $message
      * @return boolean true - если сообщение отправлено
+     *
+     * @deprecated
      */
     public function SendMail($email, $subject, $message){
     }
