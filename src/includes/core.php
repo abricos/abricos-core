@@ -471,22 +471,6 @@ final class Abricos {
 
 }
 
-class Ab_Notification {
-
-    /**
-     * Отправить EMail пользователю
-     *
-     * @param string $email
-     * @param string $subject
-     * @param string $message
-     * @return boolean true - если сообщение отправлено
-     *
-     * @deprecated
-     */
-    public function SendMail($email, $subject, $message){
-    }
-}
-
 define('PAGESTATUS_OK', 0);
 define('PAGESTATUS_404', 404);
 define('PAGESTATUS_500', 500);
