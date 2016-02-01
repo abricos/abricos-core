@@ -12,15 +12,13 @@ Component.entryPoint = function(NS){
     var Y = Brick.YUI,
         COMPONENT = this,
         SYS = Brick.mod.sys,
-        FM = Brick.mod.filemanager;
 
-    var MODE_CODE = 'code',
+        MODE_CODE = 'code',
         MODE_VISUAL = 'visual',
 
         TOOLBAR_FULL = 'full',
         TOOLBAR_STANDART = 'average',
         TOOLBAR_MINIMAL = 'minimal';
-
 
     function insert_text_cursor(area, _text){
         if ((area.selectionStart) || (area.selectionStart == '0')){
@@ -34,7 +32,6 @@ Component.entryPoint = function(NS){
             sel.text = _text;
         }
     }
-
 
     NS.Editor = Y.Base.create('editorWidget', SYS.AppWidget, [], {
         onInitAppWidget: function(err, appInstance){
@@ -62,6 +59,7 @@ Component.entryPoint = function(NS){
                     new ns.VisualEditor({
                         srcNode: tp.gel('text'),
                         toolbar: this.get('toolbar'),
+                        mode: this.get('mode'),
                         initCallback: this._onLoadVisualEditor,
                         initContext: this
                     });
@@ -82,6 +80,7 @@ Component.entryPoint = function(NS){
             }
             this.visualEditor = visualEditor;
             visualEditor.on('modeChange', this._onModeChange, this);
+            this._onModeChange();
         },
         _onModeChange: function(e){
             var mode = e ? e.newVal : this.get('mode'),
@@ -118,16 +117,14 @@ Component.entryPoint = function(NS){
             mode: {
                 value: MODE_VISUAL,
                 getter: function(val){
-                    if (!this.visualEditor){
-                        return val;
-                    }
-                    return this.visualEditor.get('mode');
+                    return this.visualEditor ? this.visualEditor.get('mode') : val;
                 },
                 setter: function(val){
                     if (!this.visualEditor){
                         return val;
                     }
                     this.visualEditor.set('mode', val);
+                    return val;
                 }
             },
             toolbar: {value: TOOLBAR_MINIMAL},
@@ -154,7 +151,6 @@ Component.entryPoint = function(NS){
 
     NS.Editor._editors = {};
 
-
     var VisualEditor = function(){
         VisualEditor.superclass.constructor.apply(this, arguments);
     }
@@ -163,7 +159,8 @@ Component.entryPoint = function(NS){
         content: {value: ''},
         toolbar: {value: TOOLBAR_MINIMAL},
         initCallback: {validator: Y.Lang.isFunction},
-        initContext: {}
+        initContext: {},
+        mode: {}
     };
     Y.extend(VisualEditor, Y.Base, {});
     NS.VisualEditor = VisualEditor;
