@@ -21,6 +21,21 @@ Component.entryPoint = function(NS){
         TOOLBAR_STANDART = 'average',
         TOOLBAR_MINIMAL = 'minimal';
 
+
+    function insert_text_cursor(area, _text){
+        if ((area.selectionStart) || (area.selectionStart == '0')){
+            var p_start = area.selectionStart;
+            var p_end = area.selectionEnd;
+            area.value = area.value.substring(0, p_start) + _text + area.value.substring(p_end, area.value.length);
+        }
+        if (document.selection){
+            area.focus();
+            sel = document.selection.createRange();
+            sel.text = _text;
+        }
+    }
+
+
     NS.Editor = Y.Base.create('editorWidget', SYS.AppWidget, [], {
         onInitAppWidget: function(err, appInstance){
             var srcNode = this.get('srcNode');
@@ -69,10 +84,18 @@ Component.entryPoint = function(NS){
             visualEditor.on('modeChange', this._onModeChange, this);
         },
         _onModeChange: function(e){
-            var mode = e ? e.newVal : this.get('mode');
+            var mode = e ? e.newVal : this.get('mode'),
+                isCode = mode === NS.Editor.MODE_CODE;
 
-            this.template.toggleView(mode === NS.Editor.MODE_CODE, 'btnVisualMode');
+            this.template.toggleView(isCode, 'btnVisualMode,btnFileManager');
         },
+        openFileManager: function(){
+            var nodeText = this.template.one('text');
+
+            Brick.Component.API.fire('filemanager', 'api', 'showFileBrowserPanel', function(result){
+                insert_text_cursor(nodeText.getDOMNode(), result['html']);
+            });
+        }
     }, {
         ATTRS: {
             component: {value: COMPONENT},
@@ -115,7 +138,8 @@ Component.entryPoint = function(NS){
                 event: function(){
                     this.set('mode', MODE_VISUAL);
                 }
-            }
+            },
+            openFileManager: 'openFileManager'
         }
     });
 

@@ -1,12 +1,33 @@
 .abricos-visual-editor {
-  position: relative;
+    position: relative;
 }
-.abricos-visual-editor .button-visual-mode{
+
+.abricos-visual-editor .button-visual-mode {
     display: none;
 }
+
 .abricos-visual-editor:hover .button-visual-mode {
     display: block;
     position: absolute;
     top: 0px;
     right: 2px;
+}
+
+.abricos-visual-editor .button-file-manager {
+    display: none;
+}
+
+.abricos-visual-editor:hover .button-file-manager {
+    display: block;
+    position: absolute;
+    top: 0px;
+    right: 18px;
+}
+
+.abricos-visual-editor i.mce-i-icon-filemanager:before {
+    content: "\f0c7";
+    font-family: FontAwesome;
+    font-style: normal;
+    font-weight: normal;
+    text-decoration: inherit;
 }
