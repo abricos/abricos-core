@@ -171,13 +171,17 @@ abstract class Ab_Module {
         if (is_null($this->_manager)){
             $this->ScriptRequireOnce('includes/manager.php');
 
-            $className = ucwords($this->name)."Manager";
+            $className = $this->GetManagerClassName();
             if (!class_exists($className)){
                 return;
             }
             $this->_manager = new $className($this);
         }
         return $this->_manager;
+    }
+
+    protected function GetManagerClassName(){
+        return ucwords($this->name)."Manager";
     }
 
     /**
