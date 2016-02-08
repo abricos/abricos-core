@@ -94,6 +94,14 @@ Component.entryPoint = function(NS){
             Brick.Component.API.fire('filemanager', 'api', 'showFileBrowserPanel', function(result){
                 insert_text_cursor(nodeText.getDOMNode(), result['html']);
             });
+        },
+        insertValue: function(value){
+            if (this.get('mode') === NS.Editor.MODE_CODE){
+                var nodeText = this.template.one('text');
+                insert_text_cursor(nodeText.getDOMNode(), value);
+            } else {
+                this.visualEditor.insertValue(value);
+            }
         }
     }, {
         ATTRS: {
