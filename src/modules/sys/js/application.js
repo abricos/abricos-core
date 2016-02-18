@@ -388,6 +388,7 @@ Component.entryPoint = function(NS){
 
             config = Y.merge({
                 args: [],
+                argsHandle: null,
                 attribute: false,
                 type: null,
                 typeClass: null,
@@ -469,19 +470,23 @@ Component.entryPoint = function(NS){
                 defArgsOffset = 1;
 
             var aArgs = [],
+                args = info.args,
                 rData = {
                     'do': name
                 };
 
-            if (Y.Lang.isArray(info.args)){
-                defArgsOffset = info.args.length + 1;
-                for (var i = 0; i < info.args.length; i++){
+            if (Y.Lang.isArray(args)){
+                defArgsOffset = args.length + 1;
+                if (Y.Lang.isFunction(info.argsHandle)){
+                    args = info.argsHandle.apply(this, args);
+                }
+                for (var i = 0; i < args.length; i++){
                     funcArg = funcArgs[i + 1];
                     aArgs[aArgs.length] = funcArg;
                     if (funcArg && Y.Lang.isFunction(funcArg.toJSON)){
                         funcArg = funcArg.toJSON();
                     }
-                    rData[info.args[i]] = funcArg;
+                    rData[args[i]] = funcArg;
                 }
             }
 
