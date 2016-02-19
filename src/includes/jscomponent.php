@@ -175,7 +175,7 @@ class Ab_CoreJSCFile {
         $key += $this->buildKeyByFile($this->fileHTML);
         $key += $this->buildKeyByFile($this->fileLANG);
         $key += 5;
-        return md5($this->module.$this->component.$this->locale.$key);
+        return substr(md5($this->module.$this->component.$this->locale.$key), 0, 8);
     }
 
     public function buildKeyByFile($file) {

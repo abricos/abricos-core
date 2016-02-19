@@ -1260,7 +1260,7 @@ Brick.dateExt = function(){
                                     + "&version=" + mv
                                     + "&tt=" + Brick.env.ttname
                                     + "&n=" + ldCk['n']
-                                    + "&lang=" + Abricos.config.lang
+                                    + "&locale=" + Abricos.config.locale
                                     + "&file=" + mb;
                             }
 

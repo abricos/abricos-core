@@ -118,10 +118,10 @@ if ($diskCache){
     foreach ($files as $file){
         $key .= preg_replace("/[^0-9a-z\-_]+/i", "", $file);
     }
-    $diskCacheFileKey = "js_".md5($key);
+    $diskCacheFileKey = "js_".substr(md5($key), 0, 8);
 
     $cacheFile = $diskCacheFileKey;
-    $cacheKey = md5(implode("", $files).$version);
+    $cacheKey = substr(md5(implode("", $files).$version), 0, 8);
 
     $cacheFileName = $cacheFile."_".$cacheKey;
     if ($compress)

@@ -93,7 +93,7 @@ if (empty($replace['jsvs'])){
         $key += filemtime($file) + filesize($file) + 1;
     }
 
-    $replace['jsvs'] = md5($key.Abricos::$locale);
+    $replace['jsvs'] = substr(md5($key.Abricos::$locale), 0, 8);
 
     if ($isCache){
         @unlink($cacheFile);
