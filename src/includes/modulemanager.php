@@ -257,6 +257,7 @@ abstract class Ab_ModuleManager {
      * Пользователь
      *
      * @var UserItem
+     * @deprecated
      */
     protected $user;
 
@@ -264,6 +265,7 @@ abstract class Ab_ModuleManager {
      * Идентификатор пользователя
      *
      * @var integer
+     * @deprecated
      */
     protected $userid = 0;
 
@@ -286,6 +288,28 @@ abstract class Ab_ModuleManager {
 
     public function AJAX($data){
         return "";
+    }
+
+    protected $_application = null;
+
+    public function GetApp(){
+        if (is_null($this->_application)){
+            $this->module->ScriptRequireOnce(array(
+                'includes/models.php',
+                'includes/dbquery.php',
+                'includes/app.php'
+            ));
+            $className = $this->GetAppClassName();
+            if (!class_exists($className)){
+                return null;
+            }
+            $this->_application = new $className($this);
+        }
+        return $this->_application;
+    }
+
+    protected function GetAppClassName(){
+        return ucwords($this->module->name)."App";
     }
 
     private $_isRolesDisable = false;

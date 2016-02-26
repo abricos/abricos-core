@@ -469,6 +469,21 @@ final class Abricos {
         return Abricos::$_json;
     }
 
+    public static function GetApp($moduleName){
+        $module = Abricos::GetModule($moduleName);
+        if (empty($module)){
+            return null;
+        }
+        $manager = $module->GetManager();
+        if (empty($manager)){
+            return null;
+        }
+        $app = $manager->GetApp();
+        if (empty($app)){
+            return null;
+        }
+        return $app;
+    }
 }
 
 define('PAGESTATUS_OK', 0);
