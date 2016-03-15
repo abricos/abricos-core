@@ -1087,6 +1087,9 @@ abstract class AbricosApplication {
             return $this->_cacheChildApps[$name];
         }
         $classes = $this->GetAppClasses();
+        if (!isset($classes[$name])){
+            throw new Exception('Child app `'.$name.'` not found`');
+        }
         $className = $classes[$name];
         return $this->_cacheChildApps[$name] =
             new $className($this->manager, $this->models->appExtends);
