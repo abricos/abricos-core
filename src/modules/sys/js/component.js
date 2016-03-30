@@ -71,7 +71,13 @@ Component.entryPoint = function(NS){
             if (!node){
                 return;
             }
-            node.set('value', value);
+            if (node.get('tagName') === 'INPUT'
+                && node.get('type') === 'checkbox'){
+
+                node.set('checked', !!value);
+            }else{
+                node.set('value', value);
+            }
         },
         getValue: function(elName){
             var vals = this._invoke(elName, 'get', 'value'),
@@ -113,11 +119,19 @@ Component.entryPoint = function(NS){
                 nodes = [nodes];
             }
             var ret = {};
-            for (var i = 0, node; i < nodes.length; i++){
+            for (var i = 0, node, result; i < nodes.length; i++){
                 node = nodes[i];
+                if (method === 'get' && a === 'value'
+                    && node.get('tagName') === 'INPUT'
+                    && node.get('type') === 'checkbox'){
+
+                    result = node.get('checked');
+                } else {
+                    result = node[method](a, b, c, d, e, f);
+                }
                 ret[node.tpName] = {
                     node: node,
-                    result: node[method](a, b, c, d, e, f)
+                    result: result
                 };
             }
             return ret;
