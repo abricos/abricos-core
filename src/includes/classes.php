@@ -1106,7 +1106,7 @@ abstract class AbricosApplication {
 
     protected $_cacheAppsByKey = array();
 
-    public function GetApp($key){
+    public function GetApp($key, $notException = false){
         if (isset($this->_cacheAppsByKey[$key])){
             return $this->_cacheAppsByKey[$key];
         }
@@ -1114,13 +1114,22 @@ abstract class AbricosApplication {
         $moduleName = $arr[0];
         $module = Abricos::GetModule($moduleName);
         if (empty($module)){
+            if (!$notException){
+                return null;
+            }
             throw new Exception('Module `'.$moduleName.'` not found');
         }
         $manager = $module->GetManager();
         if (empty($manager)){
+            if (!$notException){
+                return null;
+            }
             throw new Exception('Manager not found in Module '.$moduleName);
         }
         if (!method_exists($manager, 'GetApp')){
+            if (!$notException){
+                return null;
+            }
             throw new Exception('GetApp function not found in Manager of Module '.$moduleName);
         }
         $app = $manager->GetApp();
