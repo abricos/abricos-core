@@ -567,7 +567,13 @@ Component.entryPoint = function(NS){
                 case 'string':
                     return Y.Lang.isString(val) ? val : '';
                 case 'bool':
-                    return !!val;
+                    if (val === 'false'){
+                        val = false;
+                    } else if (val === 'true'){
+                        val = true;
+                    } else {
+                        return !!val;
+                    }
                 case 'int':
                     return (val | 0);
                 case 'date':

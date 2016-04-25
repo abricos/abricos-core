@@ -271,6 +271,17 @@ final class Abricos {
         Brick::$builder = new Ab_CoreBrickBuilder();
         Brick::$style = $modSys->GetPhrases()->Get('style', 'default');
 
+        if (isset(Abricos::$config['module']['logs']['use'])
+            && Abricos::$config['module']['logs']['use']
+        ){
+            $logsModule = $modules->RegisterByName('logs');
+            if (!empty($logsModule)){
+                /** @var LogsApp $logsApp */
+                $logsApp = $this->GetApp('logs');
+                $logsApp->AccessLogAppend();
+            }
+        }
+
         // возможно стиль предопределен в конфиге для этого урла
 
         if (!empty(Abricos::$config["Template"])){
