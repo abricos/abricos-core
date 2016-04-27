@@ -1021,6 +1021,64 @@ class AbricosModelManager {
     }
 }
 
+class AbricosLogger {
+
+    const TRACE = 'trace';
+    const DEBUG = 'debug';
+    const INFO = 'info';
+    const WARN = 'warn';
+    const ERROR = 'error';
+    const FATAL = 'fatal';
+
+    const OWNER_TYPE_CORE = 'core';
+    const OWNER_TYPE_MODULE = 'module';
+    const OWNER_TYPE_OVER = 'over';
+
+    public static function IsEnable(){
+        return isset(Abricos::$config['module']['logs']['use'])
+        && Abricos::$config['module']['logs']['use'];
+    }
+
+    public static function Log($level, $message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        if (!AbricosLogger::IsEnable()){
+            return;
+        }
+        /** @var LogsApp $logsApp */
+        $logsApp = Abricos::GetApp('logs');
+        if (empty($logsApp)){
+            return;
+        }
+        $logsApp->LogAppend($level, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Trace($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::TRACE, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Debug($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::DEBUG, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Info($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::INFO, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Warn($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::WARN, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Error($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::ERROR, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Fatal($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::FATAL, $message, $ownerType, $ownerName, $debugInfo);
+    }
+}
+
+/**
+ * Class AbricosResponse
+ */
 class AbricosResponse {
     const ERR_BAD_REQUEST = 400;
     const ERR_UNAUTHORIZED = 401;
@@ -1037,6 +1095,9 @@ class AbricosResponse {
     }
 }
 
+/**
+ * Class AbricosApplication
+ */
 abstract class AbricosApplication {
 
     /**
@@ -1175,6 +1236,10 @@ abstract class AbricosApplication {
     public abstract function ResponseToJSON($d);
 
     public function AJAX($d){
+        $d->do = isset($d->do) ? strval($d->do) : '';
+
+        $this->LogTrace('AJAX response begin', array("do" => $d->do));
+
         switch ($d->do){
             case "appStructure":
                 return $this->AppStructureToJSON();
@@ -1193,6 +1258,8 @@ abstract class AbricosApplication {
                 return $ret;
             }
         }
+
+        $this->LogError('AJAX response unknow', array("do" => $d->do));
 
         return null;
     }
@@ -1265,6 +1332,35 @@ abstract class AbricosApplication {
         return $ret;
     }
 
+    /* * * * * * * * * * * * * Logging * * * * * * * * * * * */
+
+    public function Log($level, $message, $debugInfo = null){
+        AbricosLogger::Log($level, $message, AbricosLogger::OWNER_TYPE_MODULE, $this->manager->module->name, $debugInfo);
+    }
+
+    public function LogTrace($message, $debugInfo = null){
+        $this->Log(AbricosLogger::TRACE, $message, $debugInfo);
+    }
+
+    public function LogDebug($message, $debugInfo = null){
+        $this->Log(AbricosLogger::DEBUG, $message, $debugInfo);
+    }
+
+    public function LogInfo($message, $debugInfo = null){
+        $this->Log(AbricosLogger::INFO, $message, $debugInfo);
+    }
+
+    public function LogWarn($message, $debugInfo = null){
+        $this->Log(AbricosLogger::WARN, $message, $debugInfo);
+    }
+
+    public function LogError($message, $debugInfo = null){
+        $this->Log(AbricosLogger::ERROR, $message, $debugInfo);
+    }
+
+    public function LogFatal($message, $debugInfo = null){
+        $this->Log(AbricosLogger::FATAL, $message, $debugInfo);
+    }
 }
 
 ?>
