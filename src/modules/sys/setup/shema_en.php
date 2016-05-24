@@ -1,14 +1,11 @@
 <?php
 /**
- * Схема таблиц данного модуля.
- *
- * @version $Id$
  * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
  * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
- * @ignore
  */
 
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
@@ -26,5 +23,3 @@ if ($updateManager->isInstall()){
             ('sys', 'admin_mail', '', 'ru')
     ");
 }
-
-?>

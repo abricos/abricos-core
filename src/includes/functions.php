@@ -1,41 +1,42 @@
 <?php
 /**
  * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
  * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-function globa($pattern, $flag = 0) {
+function globa($pattern, $flag = 0){
     $res = glob($pattern, $flag);
     return $res ? $res : array();
 }
 
-function bkstr($value) {
+function bkstr($value){
     return addslashes($value);
 }
 
-function bkint($value) {
+function bkint($value){
     return intval($value);
 }
 
-function bkdouble($value) {
+function bkdouble($value){
     return doubleval($value);
 }
 
-function json_encode_ext($arr) {
+function json_encode_ext($arr){
     return Abricos::GetJSONManager()->encode($arr);
 }
 
-if (!function_exists('json_decode')) {
-    function json_decode($str) {
+if (!function_exists('json_decode')){
+    function json_decode($str){
         return Abricos::GetJSONManager()->decode($str);
     }
 }
 
-if (!function_exists('json_encode')) {
-    function json_encode($arr) {
+if (!function_exists('json_encode')){
+    function json_encode($arr){
         return Abricos::GetJSONManager()->encode($arr);
     }
 }
@@ -43,17 +44,17 @@ if (!function_exists('json_encode')) {
 function array_to_object($arr){
     if (is_array($arr)){
         return json_decode(json_encode($arr), false);
-    }else if (is_object($arr)){
+    } else if (is_object($arr)){
         return $arr;
     }
     return new stdClass();
 }
 
-function verify_link(&$link) {
-    if (preg_match('#^www\.#si', $link)) {
+function verify_link(&$link){
+    if (preg_match('#^www\.#si', $link)){
         $link = 'http://'.$link;
         return true;
-    } else if (!preg_match('#^[a-z0-9]+://#si', $link)) {
+    } else if (!preg_match('#^[a-z0-9]+://#si', $link)){
         // link doesn't match the http://-style format in the beginning -- possible attempted exploit
         return false;
     } else {
@@ -61,10 +62,10 @@ function verify_link(&$link) {
     }
 }
 
-function is_browser($browser, $version = 0) {
+function is_browser($browser, $version = 0){
     // TODO: update
     static $is;
-    if (!is_array($is)) {
+    if (!is_array($is)){
         $useragent = strtolower($_SERVER['HTTP_USER_AGENT']);
         $regs = array();
         $is = array(
@@ -88,7 +89,7 @@ function is_browser($browser, $version = 0) {
         # Mozilla/4.0 (compatible; MSIE 6.0; MSIE 5.5; Windows NT 4.0) Opera 7.0 [en]
         # Mozilla/4.0 (compatible; MSIE 5.0; Windows 2000) Opera 6.0 [en]
         # Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC) Opera 5.0 [en]
-        if (strpos($useragent, 'opera') !== false) {
+        if (strpos($useragent, 'opera') !== false){
             preg_match('#opera(/| )([0-9\.]+)#', $useragent, $regs);
             $is['opera'] = $regs[2];
         }
@@ -98,24 +99,24 @@ function is_browser($browser, $version = 0) {
         # Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.0.3705)
         # Mozilla/4.0 (compatible; MSIE 5.22; Mac_PowerPC)
         # Mozilla/4.0 (compatible; MSIE 5.0; Mac_PowerPC; e504460WanadooNL)
-        if (strpos($useragent, 'msie ') !== false AND !$is['opera']) {
+        if (strpos($useragent, 'msie ') !== false AND !$is['opera']){
             preg_match('#msie ([0-9\.]+)#', $useragent, $regs);
             $is['ie'] = $regs[1];
         }
 
         // detect macintosh
-        if (strpos($useragent, 'mac') !== false) {
+        if (strpos($useragent, 'mac') !== false){
             $is['mac'] = 1;
         }
 
         // detect safari
         # Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-us) AppleWebKit/74 (KHTML, like Gecko) Safari/74
         # Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/51 (like Gecko) Safari/51
-        if (strpos($useragent, 'applewebkit') !== false AND $is['mac']) {
+        if (strpos($useragent, 'applewebkit') !== false AND $is['mac']){
             preg_match('#applewebkit/(\d+)#', $useragent, $regs);
             $is['webkit'] = $regs[1];
 
-            if (strpos($useragent, 'safari') !== false) {
+            if (strpos($useragent, 'safari') !== false){
                 preg_match('#safari/([0-9\.]+)#', $useragent, $regs);
                 $is['safari'] = $regs[1];
             }
@@ -125,7 +126,7 @@ function is_browser($browser, $version = 0) {
         # Mozilla/5.0 (compatible; Konqueror/3.1; Linux; X11; i686)
         # Mozilla/5.0 (compatible; Konqueror/3.1; Linux 2.4.19-32mdkenterprise; X11; i686; ar, en_US)
         # Mozilla/5.0 (compatible; Konqueror/2.1.1; X11)
-        if (strpos($useragent, 'konqueror') !== false) {
+        if (strpos($useragent, 'konqueror') !== false){
             preg_match('#konqueror/([0-9\.-]+)#', $useragent, $regs);
             $is['konqueror'] = $regs[1];
         }
@@ -134,7 +135,7 @@ function is_browser($browser, $version = 0) {
         # Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.4b) Gecko/20030504 Mozilla
         # Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.2a) Gecko/20020910
         # Mozilla/5.0 (X11; U; Linux 2.4.3-20mdk i586; en-US; rv:0.9.1) Gecko/20010611
-        if (strpos($useragent, 'gecko') !== false AND !$is['safari'] AND !$is['konqueror']) {
+        if (strpos($useragent, 'gecko') !== false AND !$is['safari'] AND !$is['konqueror']){
             preg_match('#gecko/(\d+)#', $useragent, $regs);
             $is['mozilla'] = isset($regs[1]) ? $regs[1] : false;
 
@@ -143,45 +144,45 @@ function is_browser($browser, $version = 0) {
             # Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4b) Gecko/20030516 Mozilla Firebird/0.6
             # Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4a) Gecko/20030423 Firebird Browser/0.6
             # Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.6) Gecko/20040206 Firefox/0.8
-            if (strpos($useragent, 'firefox') !== false OR strpos($useragent, 'firebird') !== false OR strpos($useragent, 'phoenix') !== false) {
+            if (strpos($useragent, 'firefox') !== false OR strpos($useragent, 'firebird') !== false OR strpos($useragent, 'phoenix') !== false){
                 preg_match('#(phoenix|firebird|firefox)( browser)?/([0-9\.]+)#', $useragent, $regs);
                 $is['firebird'] = $regs[3];
-                if ($regs[1] == 'firefox') {
+                if ($regs[1] == 'firefox'){
                     $is['firefox'] = $regs[3];
                 }
             }
 
             // detect camino
             # Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en-US; rv:1.0.1) Gecko/20021104 Chimera/0.6
-            if (strpos($useragent, 'chimera') !== false OR strpos($useragent, 'camino') !== false) {
+            if (strpos($useragent, 'chimera') !== false OR strpos($useragent, 'camino') !== false){
                 preg_match('#(chimera|camino)/([0-9\.]+)#', $useragent, $regs);
                 $is['camino'] = $regs[2];
             }
         }
 
         // detect web tv
-        if (strpos($useragent, 'webtv') !== false) {
+        if (strpos($useragent, 'webtv') !== false){
             preg_match('#webtv/([0-9\.]+)#', $useragent, $regs);
             $is['webtv'] = $regs[1];
         }
 
         // detect pre-gecko netscape
-        if (preg_match('#mozilla/([1-4]{1})\.([0-9]{2}|[1-8]{1})#', $useragent, $regs)) {
+        if (preg_match('#mozilla/([1-4]{1})\.([0-9]{2}|[1-8]{1})#', $useragent, $regs)){
             $is['netscape'] = "$regs[1].$regs[2]";
         }
     }
 
     // sanitize the incoming browser name
     $browser = strtolower($browser);
-    if (substr($browser, 0, 3) == 'is_') {
+    if (substr($browser, 0, 3) == 'is_'){
         $browser = substr($browser, 3);
     }
 
     // return the version number of the detected browser if it is the same as $browser
-    if ($is["$browser"]) {
+    if ($is["$browser"]){
         // $version was specified - only return version number if detected version is >= to specified $version
-        if ($version) {
-            if ($is["$browser"] >= $version) {
+        if ($version){
+            if ($is["$browser"] >= $version){
                 return $is["$browser"];
             }
         } else {
@@ -193,14 +194,14 @@ function is_browser($browser, $version = 0) {
     return 0;
 }
 
-function go_headers_sent(&$filename, &$linenum) {
+function go_headers_sent(&$filename, &$linenum){
     return headers_sent($filename, $linenum);
 }
 
 /**/
-function cms_setcookie($name, $value = '', $permanent = true, $httponly = false) {
+function cms_setcookie($name, $value = '', $permanent = true, $httponly = false){
 
-    if ($permanent) {
+    if ($permanent){
         $expire = TIMENOW + 60 * 60 * 24 * 365;
     } else {
         $expire = 0;
@@ -215,12 +216,12 @@ function cms_setcookie($name, $value = '', $permanent = true, $httponly = false)
     $filename = 'N/A';
     $linenum = 0;
 
-    if (!go_headers_sent($filename, $linenum)) {
+    if (!go_headers_sent($filename, $linenum)){
 
-        if ($value === '' OR $value === false) {
-            if ($_SERVER['PATH_INFO'] OR $_ENV['PATH_INFO']) {
+        if ($value === '' OR $value === false){
+            if ($_SERVER['PATH_INFO'] OR $_ENV['PATH_INFO']){
                 $scriptpath = $_SERVER['PATH_INFO'] ? $_SERVER['PATH_INFO'] : $_ENV['PATH_INFO'];
-            } else if ($_SERVER['REDIRECT_URL'] OR $_ENV['REDIRECT_URL']) {
+            } else if ($_SERVER['REDIRECT_URL'] OR $_ENV['REDIRECT_URL']){
                 $scriptpath = $_SERVER['REDIRECT_URL'] ? $_SERVER['REDIRECT_URL'] : $_ENV['REDIRECT_URL'];
             } else {
                 $scriptpath = $_SERVER['PHP_SELF'] ? $_SERVER['PHP_SELF'] : $_ENV['PHP_SELF'];
@@ -230,15 +231,15 @@ function cms_setcookie($name, $value = '', $permanent = true, $httponly = false)
 
             $alldirs = '';
             $havepath = false;
-            if (!defined('SKIP_AGGRESSIVE_LOGOUT')) {
-                foreach ($dirarray AS $thisdir) {
+            if (!defined('SKIP_AGGRESSIVE_LOGOUT')){
+                foreach ($dirarray AS $thisdir){
                     $alldirs .= "$thisdir";
 
-                    if ($alldirs == "/" OR "$alldirs/" == "/") {
+                    if ($alldirs == "/" OR "$alldirs/" == "/"){
                         $havepath = true;
                     }
 
-                    if (!empty($thisdir)) {
+                    if (!empty($thisdir)){
                         // try unsetting without the / at the end
                         exec_go_setcookie($name, $value, $expire, $alldirs, "", $secure, $httponly);
                     }
@@ -248,7 +249,7 @@ function cms_setcookie($name, $value = '', $permanent = true, $httponly = false)
                 }
             }
 
-            if ($havepath == false) {
+            if ($havepath == false){
                 exec_go_setcookie($name, $value, $expire, "/", "", $secure, $httponly);
             }
         } else {
@@ -257,8 +258,8 @@ function cms_setcookie($name, $value = '', $permanent = true, $httponly = false)
     }
 }/**/
 
-function exec_go_setcookie($name, $value, $expires, $path = '', $domain = '', $secure = false, $httponly = false) {
-    if ($httponly AND $value) {
+function exec_go_setcookie($name, $value, $expires, $path = '', $domain = '', $secure = false, $httponly = false){
+    if ($httponly AND $value){
         // cookie names and values may not contain any of the characters listed
         foreach (array(
                      ",",
@@ -269,8 +270,8 @@ function exec_go_setcookie($name, $value, $expires, $path = '', $domain = '', $s
                      "\n",
                      "\013",
                      "\014"
-                 ) AS $bad_char) {
-            if (strpos($name, $bad_char) !== false OR strpos($value, $bad_char) !== false) {
+                 ) AS $bad_char){
+            if (strpos($name, $bad_char) !== false OR strpos($value, $bad_char) !== false){
                 return false;
             }
         }
@@ -300,7 +301,7 @@ function exec_go_setcookie($name, $value, $expires, $path = '', $domain = '', $s
     }
 }
 
-function exec_headers() {
+function exec_headers(){
     header("Expires: Mon, 26 Jul 2005 15:00:00 GMT");
     header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
     header("Cache-Control: no-store, no-cache, must-revalidate");
@@ -309,13 +310,13 @@ function exec_headers() {
     header("Pragma: no-cache");
 }
 
-if (!function_exists('file_get_contents')) {
-    function file_get_contents($filename) {
+if (!function_exists('file_get_contents')){
+    function file_get_contents($filename){
         $handle = @fopen($filename, 'rb');
-        if ($handle) {
+        if ($handle){
             do {
                 $data = fread($handle, 8192);
-                if (strlen($data) == 0) {
+                if (strlen($data) == 0){
                     break;
                 }
                 $contents .= $data;
@@ -328,22 +329,22 @@ if (!function_exists('file_get_contents')) {
     }
 }
 
-function cut_www($host) {
+function cut_www($host){
     $pos = strpos($host, "www.");
     if ($pos === false)
         return $host;
-    if ($pos == 0) {
+    if ($pos == 0){
         $check = explode(".", $host);
-        if (count($check) > 2) {
+        if (count($check) > 2){
             $host = substr($host, 4);
         }
     }
     return $host;
 }
 
-function cmsrand($min, $max, $seed = -1) {
-    if (!defined('RAND_SEEDED')) {
-        if ($seed == -1) {
+function cmsrand($min, $max, $seed = -1){
+    if (!defined('RAND_SEEDED')){
+        if ($seed == -1){
             $seed = (double)microtime() * 1000000;
         }
         mt_srand($seed);
@@ -352,7 +353,7 @@ function cmsrand($min, $max, $seed = -1) {
     return mt_rand($min, $max);
 }
 
-function htmlspecialchars_uni($text, $entities = true) {
+function htmlspecialchars_uni($text, $entities = true){
     return str_replace(
     // replace special html characters
         array(
@@ -374,8 +375,8 @@ function htmlspecialchars_uni($text, $entities = true) {
     );
 }
 
-function rusMonth($dt, $socr = false) {
-    if ($socr) {
+function rusMonth($dt, $socr = false){
+    if ($socr){
         $rusdtph = array(
             "m1" => "Янв",
             "m2" => "Фев",
@@ -409,15 +410,15 @@ function rusMonth($dt, $socr = false) {
     return $rusdtph["m".intval(date("m", $dt))];
 }
 
-function rusDateTime($dt) {
+function rusDateTime($dt){
     return date("d", $dt)." ".
     rusMonth($dt)." ".
     date("Y", $dt).", ".
     date("H:i", $dt);
 }
 
-function translateruen($p_text) {
-    if (empty($p_text)) {
+function translateruen($p_text){
+    if (empty($p_text)){
         return "";
     }
 
@@ -569,19 +570,16 @@ function translateruen($p_text) {
     $phrasa = str_split($t);
 
     $t = "";
-    foreach ($phrasa as $v) {
+    foreach ($phrasa as $v){
         $asc = ord($v);
         if (
             (97 <= $asc && $asc <= 122) ||
             (48 <= $asc && $asc <= 57) ||
             $asc == 95
-        ) {
+        ){
             $t .= $v;
         }
     }
 
     return $t;
 }
-
-
-?>

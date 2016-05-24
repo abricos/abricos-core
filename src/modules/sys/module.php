@@ -1,13 +1,15 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 /**
  * Системный модуль
- *
- * @package Abricos
- * @subpackage Core
- * @link http://abricos.org
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin <roosit@abricos.org>
  */
 class SystemModule extends Ab_Module {
 
@@ -20,7 +22,7 @@ class SystemModule extends Ab_Module {
 
     private $_manager = null;
 
-    public function __construct() {
+    public function __construct(){
         SystemModule::$instance = $this;
         $this->version = "0.5.7";
         $this->name = "sys";
@@ -33,16 +35,16 @@ class SystemModule extends Ab_Module {
      *
      * @return SystemManager
      */
-    public function GetManager() {
-        if (is_null($this->_manager)) {
+    public function GetManager(){
+        if (is_null($this->_manager)){
             require_once 'includes/manager.php';
             $this->_manager = new SystemManager($this);
         }
         return $this->_manager;
     }
 
-    public function GetContentName() {
-        switch (Abricos::$pageStatus) {
+    public function GetContentName(){
+        switch (Abricos::$pageStatus){
             case PAGESTATUS_404:
                 return '404';
             case PAGESTATUS_500:
@@ -52,7 +54,7 @@ class SystemModule extends Ab_Module {
         return '404';
     }
 
-    public function Bos_IsMenu() {
+    public function Bos_IsMenu(){
         return true;
     }
 
@@ -65,8 +67,8 @@ class SystemModule extends Ab_Module {
     ////////////////////////////////////////////////////////////////////
     private $brickReader = null;
 
-    public function getBrickReader() {
-        if (is_null($this->brickReader)) {
+    public function getBrickReader(){
+        if (is_null($this->brickReader)){
             $this->brickReader = new Ab_CoreBrickReader();
         }
         return $this->brickReader;
@@ -75,14 +77,14 @@ class SystemModule extends Ab_Module {
     public $ds = null;
 
     // TODO: remove
-    public function getDataSet() {
-        if (is_null($this->ds)) {
+    public function getDataSet(){
+        if (is_null($this->ds)){
             $json = Abricos::CleanGPC('p', 'json', TYPE_STR);
-            if (empty($json)) {
+            if (empty($json)){
                 return;
             }
             $obj = json_decode($json);
-            if (empty($obj->_ds)) {
+            if (empty($obj->_ds)){
                 return;
             }
             $this->ds = $obj->_ds;
@@ -90,25 +92,25 @@ class SystemModule extends Ab_Module {
         return $this->ds;
     }
 
-    public function columnToObj($result) {
+    public function columnToObj($result){
         $arr = array();
         $db = Abricos::$db;
         $count = $db->num_fields($result);
-        for ($i = 0; $i < $count; $i++) {
+        for ($i = 0; $i < $count; $i++){
             $arr[] = $db->field_name($result, $i);
         }
         return $arr;
     }
 
-    public function rowToObj($row) {
+    public function rowToObj($row){
         $ret = new stdClass();
         $ret->d = $row;
         return $row;
     }
 
-    public function &rowsToObj($rows) {
+    public function &rowsToObj($rows){
         $arr = array();
-        while (($row = Abricos::$db->fetch_array($rows))) {
+        while (($row = Abricos::$db->fetch_array($rows))){
             $arr[] = $this->rowToObj($row);
         }
         return $arr;
@@ -138,7 +140,7 @@ class Ab_CoreSystemAction {
  */
 class Ab_CoreSystemPermission extends Ab_UserPermission {
 
-    public function __construct(SystemModule $module) {
+    public function __construct(SystemModule $module){
         $defRoles = array(
             new Ab_UserRole(Ab_CoreSystemAction::ADMIN, Ab_UserGroup::ADMIN)
         );
@@ -148,13 +150,11 @@ class Ab_CoreSystemPermission extends Ab_UserPermission {
     /**
      * Получить роли
      */
-    public function GetRoles() {
+    public function GetRoles(){
         return array(
             Ab_CoreSystemAction::ADMIN => $this->CheckAction(Ab_CoreSystemAction::ADMIN)
         );
     }
 }
 
-Abricos::ModuleRegister(new SystemModule())
-
-?>
+Abricos::ModuleRegister(new SystemModule());

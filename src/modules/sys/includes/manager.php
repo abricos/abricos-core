@@ -1,14 +1,15 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 /**
  * Менеджер системного модуля
- *
- * @package Abricos
- * @subpackage Core
- * @link http://abricos.org
- * @copyright Copyright (C) 2012 Abricos. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin <roosit@abricos.org>
  */
 class SystemManager extends Ab_ModuleManager {
 
@@ -84,5 +85,3 @@ class SystemManager extends Ab_ModuleManager {
         );
     }
 }
-
-?>

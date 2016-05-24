@@ -1,4 +1,12 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 require_once 'structure.php';
 
@@ -14,12 +22,6 @@ require_once 'structure.php';
  * Главным файлом любого модуля в платформе является скрипт module.php,
  * который должен находиться в корневой папке модуля. Когда ядро платформы просматривает
  * доступные модули, то она смотрит именно этот файл.
- *
- * @package Abricos
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin <roosit@abricos.org>
- * @example modules/example/module.php
  */
 abstract class Ab_Module {
 
@@ -719,5 +721,3 @@ class Ab_CoreModuleManager {
         return $ret;
     }
 }
-
-?>

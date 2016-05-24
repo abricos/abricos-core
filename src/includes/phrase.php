@@ -1,13 +1,15 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 /**
  * Фраза
- *
- * @package Abricos
- * @subpackage Core
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin <roosit@abricos.org>
  */
 class Ab_CorePhraseItem extends AbricosItem {
 
@@ -34,18 +36,18 @@ class Ab_CorePhraseItem extends AbricosItem {
      */
     public $isCheckOver = false;
 
-    public function __construct($d) {
+    public function __construct($d){
         parent::__construct($d);
         $this->value = trim(strval($d['value']));
     }
 
-    public function ToAJAX() {
+    public function ToAJAX(){
         $ret = parent::ToAJAX();
         $ret->value = $this->value;
         return $ret;
     }
 
-    public function __toString() {
+    public function __toString(){
         return $this->value;
     }
 }
@@ -57,7 +59,7 @@ class Ab_CorePhraseList extends AbricosList {
     public $isNew = false;
     public $isUpdate = false;
 
-    public function __construct($modName) {
+    public function __construct($modName){
         parent::__construct();
 
         $this->modName = $modName;
@@ -67,10 +69,10 @@ class Ab_CorePhraseList extends AbricosList {
      * @param mixed $name
      * @return Ab_CorePhraseItem
      */
-    public function Get($name, $defValue = '') {
+    public function Get($name, $defValue = ''){
         $item = parent::Get($name);
 
-        if (!empty($item) && $item->isCheckOver) {
+        if (!empty($item) && $item->isCheckOver){
             return $item;
         }
         $mName = $this->modName;
@@ -81,7 +83,7 @@ class Ab_CorePhraseList extends AbricosList {
             $cfg = Abricos::$config['phrase'];
         }
 
-        if (!empty($cfg) && !empty($cfg[$mName]) && isset($cfg[$mName][$name])) {
+        if (!empty($cfg) && !empty($cfg[$mName]) && isset($cfg[$mName][$name])){
             $defValue = $cfg[$mName][$name];
             $readOnly = true;
             if (!empty($item)){
@@ -89,12 +91,12 @@ class Ab_CorePhraseList extends AbricosList {
             }
         }
 
-        if (empty($item)) {
+        if (empty($item)){
             $item = new Ab_CorePhraseItem(array(
                 "id" => $name,
                 "value" => $defValue
             ));
-            if (!$readOnly) {
+            if (!$readOnly){
                 $this->isNew = $item->isNew = true;
             }
             $this->Add($item);
@@ -110,10 +112,10 @@ class Ab_CorePhraseList extends AbricosList {
      * @param $value
      * @return Ab_CorePhraseItem
      */
-    public function Set($name, $value) {
+    public function Set($name, $value){
         $item = $this->Get($name);
         $value = trim(strval($value));
-        if ($item->value !== $value) {
+        if ($item->value !== $value){
             $this->isUpdate = $item->isUpdate = $item->value !== $value;
 
             $item->value = $value;
@@ -141,8 +143,8 @@ class Ab_CorePhraseManager {
      * @param $modName
      * @return Ab_CorePhraseList
      */
-    public function GetList($modName) {
-        if (!empty($this->_lists[$modName])) {
+    public function GetList($modName){
+        if (!empty($this->_lists[$modName])){
             return $this->_lists[$modName];
         }
         $db = Abricos::$db;
@@ -150,7 +152,7 @@ class Ab_CorePhraseManager {
         $list = new Ab_CorePhraseList($modName);
 
         $rows = Ab_CoreQuery::PhraseList($db, $modName);
-        while (($row = $db->fetch_array($rows))) {
+        while (($row = $db->fetch_array($rows))){
             $list->Add(new Ab_CorePhraseItem($row));
         }
 
@@ -160,16 +162,16 @@ class Ab_CorePhraseManager {
     /**
      * Сохранение фраз в базу
      */
-    public function Save() {
-        foreach ($this->_lists as $key => $list) {
-            if (!$list->isNew && !$list->isUpdate) {
+    public function Save(){
+        foreach ($this->_lists as $key => $list){
+            if (!$list->isNew && !$list->isUpdate){
                 continue;
             }
-            for ($i = 0; $i < $list->Count(); $i++) {
+            for ($i = 0; $i < $list->Count(); $i++){
                 $item = $list->GetByIndex($i);
-                if ($item->isNew) {
+                if ($item->isNew){
                     Ab_CoreQuery::PhraseAppend(Abricos::$db, $list->modName, $item->id, $item->value);
-                } else if ($item->isUpdate) {
+                } else if ($item->isUpdate){
                     Ab_CoreQuery::PhraseUpdate(Abricos::$db, $list->modName, $item->id, $item->value);
                 }
                 $item->isNew = $item->isUpdate = false;
@@ -179,6 +181,3 @@ class Ab_CorePhraseManager {
 
     }
 }
-
-
-?>

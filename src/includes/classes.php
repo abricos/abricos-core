@@ -1,10 +1,15 @@
 <?php
-
 /**
  * @package Abricos
  * @subpackage Core
- * @link http://abricos.org
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
  * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
+
+/**
+ * Class AbricosItem
  */
 class AbricosItem {
     public $id;
@@ -1362,5 +1367,3 @@ abstract class AbricosApplication {
         $this->Log(AbricosLogger::FATAL, $message, $debugInfo);
     }
 }
-
-?>

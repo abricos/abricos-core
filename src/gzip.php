@@ -394,5 +394,3 @@ function putFileContents($path, $content){
         fclose($fp);
     }
 }
-
-?>

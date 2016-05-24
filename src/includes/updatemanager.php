@@ -1,4 +1,12 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 /**
  * Менеджер обновлений модуля
@@ -9,12 +17,6 @@
  * {@link Ab_UpdateManager}::{@link Ab_UpdateManager::$current $current}
  * настроен на работу именно с этим модулем.
  * Это делает удобным процесс сопровождение новых версий модуля.
- *
- * @example modules/example/setup/shema.php
- * @package Abricos
- * @subpackage Core
- * @link http://abricos.org
- * @author Alexander Kuzmin <roosit@abricos.org>
  */
 class Ab_UpdateManager {
 
