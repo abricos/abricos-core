@@ -233,9 +233,13 @@ Component.entryPoint = function(NS){
             }, this);
             return find;
         },
-        each: function(callback, context){
+        each: function(callback, context, sortCompareFn){
             var items = this._items.concat(),
                 i, item, len;
+
+            if (Y.Lang.isFunction(sortCompareFn)){
+                items = items.sort(sortCompareFn);
+            }
 
             for (i = 0, len = items.length; i < len; i++){
                 item = items[i];
@@ -243,9 +247,13 @@ Component.entryPoint = function(NS){
             }
             return this;
         },
-        some: function(callback, context){
+        some: function(callback, context, sortCompareFn){
             var items = this._items.concat(),
                 i, item, len;
+
+            if (Y.Lang.isFunction(sortCompareFn)){
+                items = items.sort(sortCompareFn);
+            }
 
             for (i = 0, len = items.length; i < len; i++){
                 item = items[i];
