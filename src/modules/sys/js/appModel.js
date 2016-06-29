@@ -585,8 +585,14 @@ Component.entryPoint = function(NS){
                 case 'int':
                     return (val | 0);
                 case 'date':
-                    if (act === 'set' || (!val && act === 'get')){
-                        val = !val ? null : new Date(val * 1000);
+                    if (!val){
+                        return null;
+                    }
+                    if (act === 'set'){
+                        if (Y.Lang.isObject(val)){
+                            return val;
+                        }
+                        return new Date(val * 1000);
                     }
                     return val;
                 case 'double':
@@ -615,7 +621,7 @@ Component.entryPoint = function(NS){
                 val = this.get(name);
                 type = field.get('type');
                 if (type === 'date'){
-                    ret[name] = val ? val.getTime() / 1000 : null;
+                    ret[name] = val ? Math.round(val.getTime() / 1000) : null;
                 } else if (type === 'multiLang' || type === 'model' || type === 'modelList' || type === 'list'){
                     ret[name] = val ? val.toJSON() : null;
                 } else {
