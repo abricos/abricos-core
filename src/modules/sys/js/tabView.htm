@@ -7,9 +7,8 @@
 <!--{header}-->
 <li id="{i#index}-{v#index}" role="presentation"
     data-click="selectTab" data-index="{v#index}">
-    <a href="#" aria-controls="settings" role="tab"
+    <a id="{i#title}-{v#index}" href="#" aria-controls="settings" role="tab"
        data-click="selectTab" data-index="{v#index}">
-        {v#title}
     </a>
 </li>
 
@@ -17,4 +16,5 @@
 <div id="{i#index}-{v#index}"
      data-index="{v#index}"
      role="tabpanel" class="tab-pane">
+    <div id="{i#content}-{v#index}"></div>
 </div>
