@@ -59,6 +59,21 @@ Component.entryPoint = function(NS){
             }
             node.setHTML(html);
         },
+        getHTML: function(elName){
+            var vals = this._invoke(elName, 'getHTML'),
+                elNames = this._parseElName(elName),
+                ret = {};
+
+            for (var i = 0, val, name; i < elNames.length; i++){
+                name = elNames[i];
+                val = vals[name] || {};
+                ret[name] = val.result;
+            }
+            if (elNames.length === 1){
+                return ret[elNames[0]];
+            }
+            return ret;
+        },
         setValue: function(elName, value){
             if (Y.Lang.isObject(elName)){
                 for (var n in elName){
@@ -75,7 +90,7 @@ Component.entryPoint = function(NS){
                 && node.get('type') === 'checkbox'){
 
                 node.set('checked', !!value);
-            }else{
+            } else {
                 node.set('value', value);
             }
         },

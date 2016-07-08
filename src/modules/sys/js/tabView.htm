@@ -1,0 +1,20 @@
+<!--{widget}-->
+<div class="tabView">
+    <ul id="{i#headerList}" class="nav nav-tabs" role="tablist"></ul>
+    <div id="{i#paneList}" class="tab-content"></div>
+</div>
+
+<!--{header}-->
+<li id="{i#index}-{v#index}" role="presentation"
+    data-click="selectTab" data-index="{v#index}">
+    <a href="#" aria-controls="settings" role="tab"
+       data-click="selectTab" data-index="{v#index}">
+        {v#title}
+    </a>
+</li>
+
+<!--{pane}-->
+<div id="{i#index}-{v#index}"
+     data-index="{v#index}"
+     role="tabpanel" class="tab-pane">
+</div>
