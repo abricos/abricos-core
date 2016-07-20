@@ -6,7 +6,7 @@
         "jevix": "https://github.com/abricos/Jevix.git",
         "yui2in3": "https://github.com/abricos/yui3-2in3.git",
         "jquery": "~2.1.1",
-        "bootstrap": "~3.3.1",
-        "font-awesome": "~4.2.0"
+        "bootstrap": "~3.3.6",
+        "font-awesome": "~4.6.3"
     }
 }
