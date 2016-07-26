@@ -11,6 +11,10 @@ Component.entryPoint = function(NS){
     var TabViewPageBase = function(){
     };
     TabViewPageBase.prototype = {
+        destructor: function(){
+            this.get('paneNode').remove();
+            this.get('headerNode').remove();
+        },
         _renderTitle: function(val){
             var title = val || this.get('title'),
                 headerTitleNode = this.get('headerTitleNode');
@@ -21,6 +25,10 @@ Component.entryPoint = function(NS){
         }
     };
     TabViewPageBase.ATTRS = {
+        id: {
+            writeOnce: true,
+        },
+        index: {},
         owner: {value: null},
         headerNode: {value: null},
         headerTitleNode: {value: null},
@@ -28,10 +36,9 @@ Component.entryPoint = function(NS){
         srcNode: {value: null},
         name: {
             getter: function(val){
-                return Y.Lang.isString(val) && val !== "" ? val : "tab" + this.get('index');
+                return Y.Lang.isString(val) && val !== "" ? val : "tab" + this.get('id');
             },
         },
-        index: {value: 0},
         title: {
             getter: function(val){
                 return Y.Lang.isString(val) && val !== "" ? val : this.get('name');
@@ -71,6 +78,7 @@ Component.entryPoint = function(NS){
     NS.TabViewWidget = Y.Base.create('TabViewWidget', NS.AppWidget, [], {
         initializer: function(){
             this._list = [];
+            this._idCounter = 1;
         },
         destructor: function(){
             this.each(function(tab){
@@ -91,11 +99,13 @@ Component.entryPoint = function(NS){
 
             var tp = this.template,
                 list = this._list,
-                index = list.length,
-                headerHTML = tp.replace('header', {index: index}),
-                paneHTML = tp.replace('pane', {index: index}),
+                id = this._idCounter,
+                headerHTML = tp.replace('header', {id: id}),
+                paneHTML = tp.replace('pane', {id: id}),
                 TabViewPage = options.TabViewPage,
                 contentHTML = options.content;
+
+            this._idCounter++;
 
             delete options.content;
             delete options.TabViewPage;
@@ -104,11 +114,11 @@ Component.entryPoint = function(NS){
             tp.one('paneList').appendChild(paneHTML);
 
             options.owner = this;
-            options.index = index;
-            options.headerNode = tp.one('header.index-' + index);
-            options.headerTitleNode = tp.one('header.title-' + index);
-            options.paneNode = tp.one('pane.index-' + index);
-            options.srcNode = tp.one('pane.content-' + index);
+            options.id = id;
+            options.headerNode = tp.one('header.id-' + id);
+            options.headerTitleNode = tp.one('header.title-' + id);
+            options.paneNode = tp.one('pane.id-' + id);
+            options.srcNode = tp.one('pane.content-' + id);
 
             var tab = new TabViewPage(options);
             tab._renderTitle();
@@ -119,9 +129,10 @@ Component.entryPoint = function(NS){
 
             list[list.length] = tab;
 
-            if (index === 0){
+            if (list.length === 1){
                 this.selectTab(0);
             }
+            this._reindex();
             return tab;
         },
         each: function(fn, context){
@@ -130,25 +141,60 @@ Component.entryPoint = function(NS){
                 fn.call(context || this, list[i], i);
             }
         },
+        _reindex: function(){
+            this.each(function(tab, index){
+                tab.set('index', index);
+            }, this);
+        },
         item: function(i){
             return this._list[i];
+        },
+        itemById: function(id){
+            id = id | 0;
+            var ret = null;
+            this.each(function(item){
+                if (item.get('id') === id){
+                    ret = item;
+                }
+            }, this);
+            return ret;
         },
         getTabs: function(){
             return this._list;
         },
         selectTab: function(index){
             index = index | 0;
-            this.each(function(tab, i){
+            var ret = null;
+            this.each(function(item, i){
                 if (index === i){
-                    tab.get('paneNode').addClass('active');
-                    tab.get('headerNode').addClass('active');
+                    item.get('paneNode').addClass('active');
+                    item.get('headerNode').addClass('active');
+                    ret = item;
                 } else {
-                    tab.get('paneNode').removeClass('active');
-                    tab.get('headerNode').removeClass('active');
+                    item.get('paneNode').removeClass('active');
+                    item.get('headerNode').removeClass('active');
                 }
-                // tab.get('paneNode').toggleClass('active', index === i);
-                // tab.get('headerNode').toggleClass('active', index === i);
             }, this);
+            return ret;
+        },
+        selectTabById: function(id){
+            var item = this.itemById(id);
+            return !item ? null : this.selectTab(item.get('index'));
+        },
+        removeTab: function(index){
+            index = index | 0;
+            var list = [];
+            this.each(function(item, i){
+                if (index === i){
+                    item.destroy();
+                } else {
+                    list[list.length] = item;
+                }
+            }, this);
+            this._list = list;
+            this._reindex();
+
+            this.selectTab(0);
         },
     }, {
         ATTRS: {
@@ -159,8 +205,8 @@ Component.entryPoint = function(NS){
         CLICKS: {
             selectTab: {
                 event: function(e){
-                    var id = e.defineTarget.getData('index') | 0;
-                    this.selectTab(id);
+                    var id = e.defineTarget.getData('id') | 0;
+                    this.selectTabById(id);
                 }
             }
         },
