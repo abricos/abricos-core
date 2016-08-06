@@ -244,6 +244,12 @@ class Ab_URI {
         $this->uri = $this->requestURINonParam;
     }
 
+    public static function Site(){
+        $site = !empty($_SERVER['HTTPS']) ? 'https' : 'http';
+        $site .= "://".$_SERVER['HTTP_HOST'];
+        return $site;
+    }
+
     /**
      * Получить имя хоста этого сервера
      *
@@ -251,8 +257,7 @@ class Ab_URI {
      * @return string имя хоста текущего запроса
      */
     public static function fetch_host(){
-        $host = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];
-        return $host;
+        return $_SERVER['HTTP_HOST'];
     }
 
     /**
