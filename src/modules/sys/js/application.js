@@ -393,6 +393,7 @@ Component.entryPoint = function(NS){
                 type: null,
                 typeClass: null,
                 attach: null,
+                requestDataHandle: null,
                 response: null,
                 onResponse: null,
                 cache: null
@@ -488,6 +489,10 @@ Component.entryPoint = function(NS){
                     }
                     rData[args[i]] = funcArg;
                 }
+            }
+
+            if (Y.Lang.isFunction(info.requestDataHandle)){
+                rData = info.requestDataHandle.call(this, rData);
             }
 
             var callback, context;
