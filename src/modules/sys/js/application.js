@@ -493,6 +493,10 @@ Component.entryPoint = function(NS){
 
             if (Y.Lang.isFunction(info.requestDataHandle)){
                 rData = info.requestDataHandle.call(this, rData);
+                aArgs = [];
+                for (var i = 0; i < args.length; i++){
+                    aArgs[i] = rData[args[i]];
+                }
             }
 
             var callback, context;
