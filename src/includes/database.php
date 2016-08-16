@@ -270,7 +270,7 @@ abstract class Ab_Database {
      */
     protected abstract function insert_id_pt();
 
-    private function &execute_query(){
+    private function execute_query(){
         $this->querycount++;
         $result = $this->execute_query_pt();
         if (!$result){
@@ -284,7 +284,7 @@ abstract class Ab_Database {
      *
      * @ignore
      */
-    protected abstract function &execute_query_pt();
+    protected abstract function execute_query_pt();
 
     /**
      * Сформировать массив из строки результата SQL запроса SELECT
@@ -437,14 +437,6 @@ abstract class Ab_Database {
      */
     protected abstract function field_name_pt($queryresult, $index);
 
-    public function client_encoding(){
-        return $this->client_encoding_pt();
-    }
-
-    /**
-     * @ignore
-     */
-    protected abstract function client_encoding_pt();
 
     public function close(){
         return $this->close_pt();
