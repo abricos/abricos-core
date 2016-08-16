@@ -5,7 +5,7 @@ return array(
         '50' => 'Administrator'
     ),
     "bosmenu" => array(
-         "config" => "Settings Website"
+        "config" => "Settings Website"
     ),
     'content' => array(
         '404' => array(
@@ -15,4 +15,3 @@ return array(
         )
     )
 );
-?>
