@@ -16,6 +16,8 @@ Component.entryPoint = function(NS){
     var Y = Brick.YUI,
         L = Y.Lang,
 
+        UID = Brick.env.user.id | 0,
+
         WAITING = 'waiting',
         BOUNDING_BOX = 'boundingBox',
 
@@ -213,7 +215,7 @@ Component.entryPoint = function(NS){
                     }
                 }
                 return a;
-            }
+            };
 
             var a = parse(urls), i;
             for (i = 0; i < a.length; i++){
@@ -437,10 +439,151 @@ Component.entryPoint = function(NS){
     };
     NS.RequestCore = RequestCore;
 
+    var CronCore = function(options){
+        var cronsOptions = options && options.CRONS ? options.CRONS : null;
+        this._initCron(cronsOptions);
+    };
+    CronCore._uniqueId = 1;
+    CronCore._list = [];
+    CronCore._runTimer = new Date();
+    CronCore.each = function(fn, context){
+        var list = CronCore._list;
+        for (var i = 0; i < list.length; i++){
+            if (fn.call(context || list[i], list[i], i)){
+                break;
+            }
+        }
+    };
+    CronCore._initialize = function(){
+        if (CronCore._initialized){
+            return;
+        }
+        CronCore._initialized = true;
+        Y.one(document.body).on('mousemove', function(){
+            var ctime = (new Date()).getTime(),
+                ltime = this._runTimer.getTime();
+
+            if ((ctime - ltime) / 1000 < 60){
+                return;
+            }
+            this._runTimer = new Date();
+            this.run();
+        }, this);
+    };
+    CronCore.register = function(cron){
+        this._initialize();
+
+        var list = CronCore._list;
+        list[list.length] = cron;
+        return cron;
+    };
+    CronCore.remove = function(cron){
+        var list = CronCore._list;
+        CronCore.each(function(iCron, i){
+            if (cron === iCron){
+                list.slice(i, 1);
+                return true;
+            }
+        }, this);
+    };
+    CronCore.ATTRS = {
+        cronsId: {
+            readOnly: true,
+            getter: function(){
+                return this._cronsId;
+            }
+        }
+    };
+    CronCore.run = function(){
+        this.each(function(cron){
+            cron.runCrons();
+        }, this);
+    };
+    CronCore.prototype = {
+        _initCron: function(cronsOptions){
+            this._cronsState = new Y.State();
+            this._cronsId = NS.CronCore._uniqueId++;
+
+            var ctor = this.constructor,
+                c = ctor;
+
+            while (c){
+                this.addCrons(c.CRONS);
+                c = c.superclass ? c.superclass.constructor : null;
+            }
+
+            if (cronsOptions){
+                this.addCrons(cronsOptions);
+            }
+            NS.CronCore.register(this);
+        },
+        destructor: function(){
+            CronCore.remove(this);
+        },
+        addCron: function(name, config){
+            var state = this._cronsState;
+            if (state.get(name, ADDED)){
+                return;
+            }
+
+            config = Y.merge({
+                name: name,
+                interval: 0,
+                event: null,
+            }, config || {});
+
+            config[ADDED] = true;
+            config.lastRunTime = new Date();
+            config.instance = this;
+
+            state.data[name] = config;
+        },
+        addCrons: function(crons){
+            if (!crons){
+                return;
+            }
+            crons = Y.AttributeCore.protectAttrs(crons);
+            var name;
+            for (name in crons){
+                if (!crons.hasOwnProperty(name)){
+                    continue;
+                }
+                this.addCron(name, crons[name]);
+            }
+        },
+        runCrons: function(){
+            var crons = this._cronsState.data,
+                name, cron,
+                ctime = (new Date()).getTime();
+
+            for (name in crons){
+                if (!crons.hasOwnProperty(name)){
+                    continue;
+                }
+                cron = crons[name];
+
+                if (cron.interval > 0
+                    && ((ctime - cron.lastRunTime.getTime()) / 1000 > cron.interval)){
+                    cron.lastRunTime = new Date();
+
+                    if (Y.Lang.isFunction(cron.event)){
+                        try {
+                            cron.event.call(cron.instance, cron);
+                        } catch (e) {
+                        }
+                    }
+                }
+            }
+        }
+    };
+    NS.CronCore = CronCore;
+
+
     NS.Application = Y.Base.create('application', Y.Base, [
         NS.AppsCore,
         NS.Navigator,
         NS.RequestCore,
+        NS.CronCore,
         NS.AJAX,
         NS.Language
     ], {
@@ -611,6 +754,12 @@ Component.entryPoint = function(NS){
         },
         _onAppResponses: function(err, res, details){
             res = res || {};
+
+            if (res.userid !== UID){
+                window.location.reload(false);
+                return;
+            }
+
 
             var tRes = {},
                 rData = res.data || {};

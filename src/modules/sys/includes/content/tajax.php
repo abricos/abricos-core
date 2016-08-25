@@ -26,6 +26,7 @@ if (empty($pData)){
     $data = json_decode($pData);
 }
 $result = new stdClass();
+$result->userid = Abricos::$user->id;
 if (empty($mod)){
     // TODO: Отправить в header код ошибки 500
     // $result->error = 500;

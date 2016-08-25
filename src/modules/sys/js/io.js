@@ -1,6 +1,6 @@
 /*!
  * Abricos Platform (http://abricos.org)
- * Copyright 2008-2014 Alexander Kuzmin <roosit@abricos.org>
+ * Copyright 2008-2016 Alexander Kuzmin <roosit@abricos.org>
  * Licensed under the MIT license
  */
 
@@ -177,14 +177,19 @@ Component.entryPoint = function(NS){
 
         data: {},
 
+        userid: Brick.env.user.id | 0,
+
         _init: function(config){
             config || (config || {});
 
             this.request = config.request;
 
             var o = Y.JSON.parse(this.request.responseText);
-            if (o && o.data){
-                this.data = o.data;
+            if (o){
+                if (o.data){
+                    this.data = o.data;
+                }
+                this.userid = o.userid | 0;
             }
         }
     };
