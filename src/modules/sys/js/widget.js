@@ -1,9 +1,3 @@
-/*!
- * Abricos Platform (http://abricos.org)
- * Copyright 2008-2014 Alexander Kuzmin <roosit@abricos.org>
- * Licensed under the MIT license
- */
-
 var Component = new Brick.Component();
 Component.requires = {
     yui: ['base', 'widget'],
@@ -247,4 +241,50 @@ Component.entryPoint = function(NS){
     };
     NS.WidgetEditorStatus = EditorStatus;
 
+    var ContainerWidgetExt = function(){
+    };
+    ContainerWidgetExt.ATTRS = {};
+    ContainerWidgetExt.prototype = {
+        initializer: function(){
+            this._containerWidget = [];
+        },
+        destructor: function(){
+            this.cleanWidgets();
+        },
+        eachWidget: function(fn, context){
+            var list = this._containerWidget;
+            for (var i = 0; i < list.length; i++){
+                var wi = list[i];
+                fn.call(context || this, wi.widget, wi.name, i);
+            }
+        },
+        addWidget: function(name, widget){
+            var curWidget = this.getWidget(name);
+            if (curWidget){
+                throw new Exception('Widget is exist');
+            }
+            var list = this._containerWidget;
+            list[list.length] = {
+                name: name,
+                widget: widget
+            };
+            return widget;
+        },
+        getWidget: function(name){
+            var find = null;
+            this.eachWidget(function(w, n){
+                if (name === n){
+                    find = w;
+                }
+            });
+            return find;
+        },
+        cleanWidgets: function(){
+            this.eachWidget(function(widget){
+                widget.destroy();
+            }, this)
+            this._containerWidget = [];
+        }
+    };
+    NS.ContainerWidgetExt = ContainerWidgetExt;
 };
