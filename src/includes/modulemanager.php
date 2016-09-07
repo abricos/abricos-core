@@ -8,7 +8,7 @@
  * @link http://abricos.org
  */
 
-require_once 'structure.php';
+require_once 'moduleInfo.php';
 
 /**
  * Абстрактный класс модуля в платформе Абрикос
