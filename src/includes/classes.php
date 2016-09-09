@@ -66,97 +66,6 @@ class AbricosLogger {
 }
 
 /**
- * Class AbricosResponse
- */
-class AbricosResponse {
-    const ERR_BAD_REQUEST = 400;
-    const ERR_UNAUTHORIZED = 401;
-    const ERR_FORBIDDEN = 403;
-    const ERR_NOT_FOUND = 404;
-    const ERR_SERVER_ERROR = 500;
-
-    /**
-     * @var Ab_Module
-     */
-    protected $_structModule;
-
-    /**
-     * @var string
-     */
-    protected $_structName;
-
-    protected $_data = array();
-
-    /**
-     * @var AbricosModelStructure|null
-     */
-    protected $_structure = null;
-
-    /**
-     * @var AbricosApplication
-     */
-    public $app;
-
-    /** @var int error code */
-    public $error = 0;
-
-    /** @var int detail code */
-    public $code = 0;
-
-
-    /**
-     * AbricosResponse constructor.
-     *
-     * @param object|array $d
-     */
-    public function __construct($d){
-
-        if (is_string($this->_structModule)){
-            $this->_structModule = Abricos::GetModule($this->_structModule);
-        }
-
-        if (!($this->_structModule instanceof Ab_Module)){
-            throw new Exception('Module not found in AbricosModel');
-        }
-
-        if (empty($this->_structure) && !empty($this->_structModule) && !empty($this->_structName)){
-            $this->_structure = AbricosModelManager::GetManager($this->_structModule)->GetStructure($this->_structName);
-        }
-        if (!($this->_structure instanceof AbricosModelStructure)){
-            throw new Exception('Structure not found in AbricosModel');
-        }
-        $struct = $this->_structure;
-
-        if (is_object($d)){
-            $d = get_object_vars($d);
-        }
-        $this->id = isset($d[$struct->idField]) ? $d[$struct->idField] : 0;
-        $this->Update($d);
-    }
-
-    public static function IsError($response){
-        if ($response instanceof AbricosResponse){
-            return $response->error > 0;
-        }
-
-        if (is_integer($response)){
-            return true;
-        }
-        return false;
-    }
-
-    public function SetError($error){
-        $this->error = $error;
-        return $this;
-    }
-
-    public function ToJSON(){
-        $ret = new stdClass();
-        return $ret;
-    }
-}
-
-/**
  * Class AbricosApplication
  */
 abstract class AbricosApplication {
@@ -306,20 +215,18 @@ abstract class AbricosApplication {
                 return $this->AppStructureToJSON();
         }
         $ret = $this->ResponseToJSON($d);
+
+        if (empty($ret)){
+            $extApps = $this->GetChildApps();
+            for ($i = 0; $i < count($extApps); $i++){
+                /** @var AbricosApplication $extApp */
+                $extApp = $extApps[$i];
+                $ret = $extApp->ResponseToJSON($d);
+            }
+        }
         if (!empty($ret)){
             return $ret;
         }
-
-        $extApps = $this->GetChildApps();
-        for ($i = 0; $i < count($extApps); $i++){
-            /** @var AbricosApplication $extApp */
-            $extApp = $extApps[$i];
-            $ret = $extApp->ResponseToJSON($d);
-            if (!empty($ret)){
-                return $ret;
-            }
-        }
-
         $this->LogError('AJAX response unknow', array("do" => $d->do));
 
         return null;
@@ -352,7 +259,10 @@ abstract class AbricosApplication {
         if (is_integer($res)){
             $ret->err = $res;
             return $ret;
+        } else if ($res instanceof AbricosResponse && $res->error > 0){
+            $ret->err = $res->error;
         }
+
         if (is_object($res) && method_exists($res, 'ToJSON')){
             $ret->$name = $res->ToJSON();
         } else {

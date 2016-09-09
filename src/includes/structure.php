@@ -327,6 +327,7 @@ class AbricosModelStructure extends AbricosStructure {
     public function ToJSON(){
         $ret = parent::ToJSON();
         $ret->name = $this->name;
+        $ret->type = $this->type;
         $ret->fields = $ret->list;
         if ($this->idField !== 'id'){
             $ret->idField = $this->idField;
@@ -356,6 +357,70 @@ class AbricosModelListStructure extends AbricosModelStructure {
     }
 }
 
+class AbricosResponseStructureCode extends AbricosItem {
+
+    /**
+     * @var int
+     */
+    public $code = 0;
+
+    /**
+     * @var string
+     */
+    public $msg = '';
+
+    public function __construct($name, $data){
+        $this->id = $name;
+
+        $code = null;
+
+        if (is_integer($data)){
+            $code = $data;
+        } else if (is_object($data)){
+            if (isset($data->code)){
+                $code = intval($data->code);
+            }
+            if (isset($data->msg)){
+                $this->msg = strval($data->msg);
+            }
+        }
+
+        if (!is_integer($code)){
+            throw new Exception('Code is not set in AbricosResponseStructureCode');
+        }
+        $this->code = $code;
+    }
+
+    public function ToJSON(){
+        $ret = parent::ToJSON();
+        $ret->code = $this->code;
+        if (!empty($this->msg)){
+            $ret->msg = $this->msg;
+        }
+        return $ret;
+    }
+}
+
+class AbricosResponseStructureCodeList extends AbricosList {
+
+    public function __construct($codes = null){
+        if (!empty($codes)){
+            foreach ($codes as $name => $value){
+                $this->Add(new AbricosResponseStructureCode($name, $value));
+            }
+        }
+    }
+
+    public function __get($name){
+        /** @var AbricosResponseStructureCode $item */
+        $item = $this->Get($name);
+        if (empty($item)){
+            throw new Exception("Code `$name` not found in AbricosResponseStructureCodeList");
+        }
+        return $item->code;
+    }
+}
+
 class AbricosResponseStructure extends AbricosModelStructure {
 
     /**
@@ -363,19 +428,25 @@ class AbricosResponseStructure extends AbricosModelStructure {
      */
     public $vars;
 
+    public $codes;
+
     public function __construct($manager, $name, $data){
         parent::__construct($manager, $name, $data);
 
         $this->type = 'response';
 
         $fields = isset($data->vars) ? $data->vars : null;
-
         $this->vars = new AbricosStructure($manager, $fields);
+
+
+        $codes = isset($data->codes) ? $data->codes : null;
+        $this->codes = new AbricosResponseStructureCodeList($codes);
     }
 
     public function ToJSON(){
         $ret = parent::ToJSON();
         $ret->vars = $this->vars->ToJSON()->list;
+        $ret->codes = $this->codes->ToJSON()->list;
         return $ret;
     }
 }

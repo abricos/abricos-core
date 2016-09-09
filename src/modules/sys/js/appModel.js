@@ -77,7 +77,6 @@ Component.entryPoint = function(NS){
         },
         add: function(appItems, options){
             var isList = appItems._isAbricosAppItemList;
-
             if (isList || Y.Lang.isArray(appItems)){
                 return Y.Array.map(isList ? appItems.toArray() : appItems, function(appItem, index){
                     var appItemOptions = options || {};
@@ -397,9 +396,61 @@ Component.entryPoint = function(NS){
         }
     });
 
+    NS.AppStructure.CodeField = Y.Base.create('appStructure_CodeField', NS.AppItem, [], {}, {
+        ATTRS: {
+            id: {},
+            code: {
+                value: 0,
+                setter: function(val){
+                    return val | 0;
+                }
+            },
+            msg: {value: ''},
+        }
+    });
+
+    NS.AppStructure.CodeFieldList = Y.Base.create('appStructure_CodeFieldList', NS.AppItemList, [], {
+        appItem: NS.AppStructure.CodeField,
+        idField: 'id'
+    });
+
+    NS.AppStructure.ResponseStructure = Y.Base.create('appStructure_ResponseStructure', NS.AppStructure.Structure, [], {
+        varList: null,
+
+        codeList: null,
+
+        initializer: function(config){
+            config || (config = {});
+
+            this.varList = new NS.AppStructure.FieldList({
+                items: config.vars
+            });
+
+            this.codeList = new NS.AppStructure.CodeFieldList({
+                items: config.codes
+            });
+        },
+        toJSON: function(){
+            var json = NS.AppStructure.ResponseStructure.superclass.toJSON.apply(this, arguments);
+            json.vars = this.varList.toJSON();
+            json.codes = this.codeList.toJSON();
+            return json;
+        }
+    });
+
+
     NS.AppStructure.StructureList = Y.Base.create('appStructure_StructureList', NS.AppItemList, [], {
         appItem: NS.AppStructure.Structure,
-        idField: 'name'
+        idField: 'name',
+        _createAppItemInstance: function(data){
+            var struct;
+            if (data.type === 'response'){
+                struct = new NS.AppStructure.ResponseStructure(data);
+            } else {
+                struct = NS.AppStructure.StructureList.superclass._createAppItemInstance.apply(this, arguments);
+            }
+            return struct;
+        }
     });
 
     var MultiLangValue = function(d){
@@ -636,7 +687,7 @@ Component.entryPoint = function(NS){
     });
     NS.AppModel.langFieldName = function(name, lang){
         return name + '_' + lang;
-    }
+    };
 
     var AppModelList = function(){
         AppModelList.superclass.constructor.apply(this, arguments);
@@ -661,6 +712,39 @@ Component.entryPoint = function(NS){
     }, {
         NAME: 'appModelList',
         ATTRS: {}
+    });
+
+
+    NS.AppResponse = Y.Base.create('appResponse', NS.AppModel, [], {
+        initializer: function(d){
+            d || (d = {});
+
+            this.set('code', d.code | 0);
+        },
+        isSetCode: function(name){
+            var code = this.get('code'),
+                codeField = this.structure.codeList.getById(name);
+
+            if (!codeField){
+                throw new Error('Code `' + name + '` not found in AppResponse: `' + this.name + '` ');
+            }
+
+            return code & codeField.get('code');
+        },
+        toJSON: function(){
+            var json = NS.AppResponse.superclass.toJSON.apply(this, arguments);
+            json.code = this.get('code');
+            return json;
+        }
+    }, {
+        ATTRS: {
+            code: {
+                value: 0,
+                setter: function(val){
+                    return val | 0;
+                }
+            }
+        }
     });
 
 };

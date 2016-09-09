@@ -407,6 +407,7 @@ Component.entryPoint = function(NS){
                 switch (config.type) {
                     case 'model':
                     case 'modelList':
+                    case 'response':
                         if (!config.typeClass){
                             config.typeClass = a[1];
                         }
@@ -721,7 +722,15 @@ Component.entryPoint = function(NS){
 
             if (info.type && info.typeClass){
                 var di = data[name] || {}, typeClass;
+
                 switch (info.type) {
+                    case 'response':
+                        typeClass = this.get(info.typeClass) || NS.AppResponse;
+                        di = Y.merge(di || {}, {
+                            appInstance: this,
+                        });
+                        res[name] = new typeClass(di);
+                        break;
                     case 'model':
                         typeClass = this.get(info.typeClass) || NS.AppModel;
                         di = Y.merge(di || {}, {
@@ -759,7 +768,6 @@ Component.entryPoint = function(NS){
                 window.location.reload(false);
                 return;
             }
-
 
             var tRes = {},
                 rData = res.data || {};

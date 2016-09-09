@@ -10,53 +10,30 @@
 
 require_once 'structure.php';
 
-class AbricosModel extends AbricosItem {
-
-    /**
-     * @var AbricosApplication
-     */
-    public $app;
-
-    /**
-     * @var Ab_Module
-     */
-    protected $_structModule;
-
-    /**
-     * @var string
-     */
-    protected $_structName;
+class AbricosStructureData extends AbricosItem {
 
     protected $_data = array();
 
     /**
-     * @var AbricosModelStructure|null
+     * @var AbricosStructure
      */
-    protected $_structure = null;
+    protected $_structure;
 
-    public function __construct($d){
-        unset($this->id); // hack for use method __get('id')
-
-        if (is_string($this->_structModule)){
-            $this->_structModule = Abricos::GetModule($this->_structModule);
+    public function __construct($structure, $d){
+        if (!($structure instanceof AbricosStructure)){
+            throw new Exception('Structure not found in AbricosStructureData');
         }
-
-        if (!($this->_structModule instanceof Ab_Module)){
-            throw new Exception('Module not found in AbricosModel');
-        }
-
-        if (empty($this->_structure) && !empty($this->_structModule) && !empty($this->_structName)){
-            $this->_structure = AbricosModelManager::GetManager($this->_structModule)->GetStructure($this->_structName);
-        }
-        if (!($this->_structure instanceof AbricosModelStructure)){
-            throw new Exception('Structure not found in AbricosModel');
-        }
-        $struct = $this->_structure;
+        $this->_structure = $structure;
 
         if (is_object($d)){
             $d = get_object_vars($d);
         }
-        $this->id = isset($d[$struct->idField]) ? $d[$struct->idField] : 0;
+
+        if (isset($structure->idField)){
+            unset($this->id); // hack for use method __get('id')
+            $this->id = isset($d[$structure->idField]) ? $d[$structure->idField] : 0;
+        }
+
         $this->Update($d);
     }
 
@@ -84,7 +61,8 @@ class AbricosModel extends AbricosItem {
 
     public function __set($name, $value){
         /** @var AbricosModelStructureField $field */
-        $field = !empty($this->_structure) ? $this->_structure->Get($name) : null;
+        $field = $this->_structure->Get($name);
+
         if (empty($field)){
             $this->_data[$name] = $value;
             return;
@@ -194,11 +172,7 @@ class AbricosModel extends AbricosItem {
             }
         }
 
-        if (empty($this->app)){
-            $moduleManager = $this->_structModule->GetManager();
-        } else {
-            $moduleManager = $this->app->manager;
-        }
+        $moduleManager = $struct->manager->module->GetManager();
 
         $count = $struct->Count();
         for ($i = 0; $i < $count; $i++){
@@ -250,6 +224,39 @@ class AbricosModel extends AbricosItem {
         }
 
         return $ret;
+    }
+}
+
+class AbricosModel extends AbricosStructureData {
+
+    /**
+     * @var AbricosApplication
+     */
+    public $app;
+
+    /**
+     * @var Ab_Module
+     */
+    protected $_structModule;
+
+    /**
+     * @var string
+     */
+    protected $_structName;
+
+    public function __construct($d){
+        if (is_string($this->_structModule)){
+            $this->_structModule = Abricos::GetModule($this->_structModule);
+        }
+
+        if (!($this->_structModule instanceof Ab_Module)){
+            throw new Exception('Module not found in AbricosModel');
+        }
+
+        $moduleManager = AbricosModelManager::GetManager($this->_structModule);
+        $structure = $moduleManager->GetStructure($this->_structName);
+
+        parent::__construct($structure, $d);
     }
 
     public function ToArray($fieldName = ''){
@@ -376,6 +383,93 @@ class AbricosModelList extends AbricosList {
         }
         return $ret;
     }
+}
+
+/**
+ * Class AbricosResponse
+ */
+class AbricosResponse extends AbricosModel {
+    const ERR_BAD_REQUEST = 400;
+    const ERR_UNAUTHORIZED = 401;
+    const ERR_FORBIDDEN = 403;
+    const ERR_NOT_FOUND = 404;
+    const ERR_SERVER_ERROR = 500;
+
+    /**
+     * @var AbricosStructureData
+     */
+    public $vars;
+
+
+    /** @var int error code */
+    public $error = 0;
+
+    /** @var int detail code */
+    public $code = 0;
+
+    /**
+     * @var AbricosResponseStructureCodeList
+     */
+    public $codes;
+
+    public function __construct($varsData, $d){
+        parent::__construct($d);
+
+        /** @var AbricosResponseStructure $structure */
+        $structure = $this->_structure;
+
+        if (!($structure instanceof AbricosResponseStructure)){
+            throw new Exception(
+                'Structure must be AbricosResponseStructure '.
+                '(module: '.$this->_structModule->name.", name=".$this->_structName.")"
+            );
+        }
+
+        $this->codes = $structure->codes;
+
+        $this->vars = new AbricosStructureData($structure->vars, $varsData);
+    }
+
+    public static function isError($response){
+        if ($response instanceof AbricosResponse){
+            return $response->error > 0;
+        }
+
+        if (is_integer($response)){
+            return true;
+        }
+        return false;
+    }
+
+    public function setError($error, $code = 0){
+        $this->error = $error;
+        if (!empty($code)){
+            $this->code = intval($code);
+        }
+        return $this;
+    }
+
+    public function CleanCode(){
+        $this->code = 0;
+    }
+
+    public function SetCode($code){
+        $this->code = $code;
+    }
+
+    public function AddCode($code){
+        $this->code |= $code;
+    }
+
+    public function ToJSON(){
+        $ret = parent::ToJSON();
+        unset($ret->id);
+        if ($this->code > 0){
+            $ret->code = $this->code;
+        }
+        return $ret;
+    }
+
 }
 
 class AbricosMultiLangValue {
