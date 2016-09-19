@@ -1042,7 +1042,8 @@ Component.entryPoint = function(NS){
         NS.Language,
         NS.Template,
         NS.WidgetClick,
-        NS.WidgetWaiting
+        NS.WidgetWaiting,
+        NS.TriggerWidgetExt
     ], {
         // patch: not added yui3 class
         _renderBoxClassNames: function(){

@@ -731,6 +731,16 @@ Component.entryPoint = function(NS){
 
             return code & codeField.get('code');
         },
+        getCodesIsSet: function(){
+            var a = [], name;
+            this.structure.codeList.each(function(code){
+                name = code.get('id');
+                if (this.isSetCode(name)){
+                    a[a.length] = name;
+                }
+            }, this);
+            return a;
+        },
         toJSON: function(){
             var json = NS.AppResponse.superclass.toJSON.apply(this, arguments);
             json.code = this.get('code');

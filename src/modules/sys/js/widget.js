@@ -282,9 +282,69 @@ Component.entryPoint = function(NS){
         cleanWidgets: function(){
             this.eachWidget(function(widget){
                 widget.destroy();
-            }, this)
+            }, this);
             this._containerWidget = [];
         }
     };
     NS.ContainerWidgetExt = ContainerWidgetExt;
+
+    var TriggerWidgetExt = function(){
+    };
+    TriggerWidgetExt._split = function(codes){
+        codes = codes || [];
+
+        if (Y.Lang.isString(codes)){
+            codes = codes.replace(/\s+/g, '').split(',');
+        }
+        return codes;
+    };
+    TriggerWidgetExt._action = function(bbox, action, names, codes){
+        names = TriggerWidgetExt._split(names);
+        codes = TriggerWidgetExt._split(codes);
+
+        var name, code, i, find;
+
+        bbox.all('[data-trigger]').each(function(node){
+            name = node.getData('trigger');
+            code = node.getData('code');
+            find = false;
+            for (i = 0; i < names.length; i++){
+                if (names[i] === name){
+                    find = true;
+                    break;
+                }
+            }
+            if (!find){
+                return;
+            }
+            if (codes.length > 0){
+                find = false;
+                for (i = 0; i < codes.length; i++){
+                    if (codes[i] === code){
+                        find = true;
+                        break;
+                    }
+                }
+                if (!find){
+                    return;
+                }
+            }
+            if (action === 'hide'){
+                node.addClass('hide');
+            } else if (action === 'show'){
+                node.removeClass('hide');
+            }
+        }, this);
+    };
+    TriggerWidgetExt.prototype = {
+        triggerHide: function(names, codes){
+            var bbox = this.get(BOUNDING_BOX);
+            TriggerWidgetExt._action(bbox, 'hide', names, codes);
+        },
+        triggerShow: function(names, codes){
+            var bbox = this.get(BOUNDING_BOX);
+            TriggerWidgetExt._action(bbox, 'show', names, codes);
+        },
+    };
+    NS.TriggerWidgetExt = TriggerWidgetExt;
 };
