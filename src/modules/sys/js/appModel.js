@@ -721,15 +721,26 @@ Component.entryPoint = function(NS){
 
             this.set('code', d.code | 0);
         },
-        isSetCode: function(name){
-            var code = this.get('code'),
-                codeField = this.structure.codeList.getById(name);
-
-            if (!codeField){
-                throw new Error('Code `' + name + '` not found in AppResponse: `' + this.name + '` ');
+        isSetCode: function(ids){
+            if (Y.Lang.isString(ids)){
+                ids = ids.replace(/\s+/g, '').split(',');
             }
 
-            return code & codeField.get('code');
+            var code = this.get('code');
+
+            for (var i = 0, id, codeField; i < ids.length; i++){
+                id = ids[i];
+                codeField = this.structure.codeList.getById(id);
+
+                if (!codeField){
+                    throw new Error('Code `' + id + '` not found in AppResponse: `' + this.name + '` ');
+                }
+                if (!(code & codeField.get('code'))){
+                    return false;
+                }
+            }
+
+            return true;
         },
         getCodesIsSet: function(){
             var a = [], name;

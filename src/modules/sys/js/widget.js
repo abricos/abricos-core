@@ -290,43 +290,66 @@ Component.entryPoint = function(NS){
 
     var TriggerWidgetExt = function(){
     };
-    TriggerWidgetExt._split = function(codes){
-        codes = codes || [];
+    TriggerWidgetExt._split = function(s){
+        s = s || [];
 
-        if (Y.Lang.isString(codes)){
-            codes = codes.replace(/\s+/g, '').split(',');
+        if (Y.Lang.isString(s)){
+            s = s.replace(/\s+/g, '').split(',');
         }
-        return codes;
+        return s;
     };
-    TriggerWidgetExt._action = function(bbox, action, names, codes){
+    TriggerWidgetExt._indexOf = function(arr, str){
+        var find = false;
+        for (var i = 0; i < arr.length; i++){
+            if (arr[i] === str){
+                find = true;
+                break;
+            }
+        }
+        return find;
+    };
+    TriggerWidgetExt._action = function(bbox, action, names, codes, exactMatch){
         names = TriggerWidgetExt._split(names);
         codes = TriggerWidgetExt._split(codes);
 
-        var name, code, i, find;
+        var name, code, i, find, and = true;
 
         bbox.all('[data-trigger]').each(function(node){
             name = node.getData('trigger');
-            code = node.getData('code');
-            find = false;
-            for (i = 0; i < names.length; i++){
-                if (names[i] === name){
-                    find = true;
-                    break;
-                }
-            }
-            if (!find){
+            if (!TriggerWidgetExt._indexOf(names, name)){
                 return;
             }
-            if (codes.length > 0){
-                find = false;
-                for (i = 0; i < codes.length; i++){
-                    if (codes[i] === code){
-                        find = true;
-                        break;
-                    }
+            if (codes.length > 0 || exactMatch){
+                code = (node.getData('code') || '').replace(/\s+/g, '');
+
+                and = true;
+
+                if (code.indexOf('&') > -1){
+                    code = code.split('&');
+                } else if (code.indexOf('|') > -1){
+                    code = code.split('|');
+                    and = false;
+                } else {
+                    code = [code];
                 }
-                if (!find){
-                    return;
+
+                if (and){
+                    for (i = 0; i < code.length; i++){
+                        if (!TriggerWidgetExt._indexOf(codes, code[i])){
+                            return;
+                        }
+                    }
+                } else {
+                    find = false;
+                    for (i = 0; i < code.length; i++){
+                        if (TriggerWidgetExt._indexOf(codes, code[i])){
+                            find = true;
+                            break;
+                        }
+                    }
+                    if (!find){
+                        return;
+                    }
                 }
             }
             if (action === 'hide'){
@@ -337,13 +360,15 @@ Component.entryPoint = function(NS){
         }, this);
     };
     TriggerWidgetExt.prototype = {
-        triggerHide: function(names, codes){
+        triggerHide: function(names, codes, toggleCodes){
             var bbox = this.get(BOUNDING_BOX);
             TriggerWidgetExt._action(bbox, 'hide', names, codes);
+            TriggerWidgetExt._action(bbox, 'show', names, toggleCodes, true);
         },
-        triggerShow: function(names, codes){
+        triggerShow: function(names, codes, toggleCodes){
             var bbox = this.get(BOUNDING_BOX);
             TriggerWidgetExt._action(bbox, 'show', names, codes);
+            TriggerWidgetExt._action(bbox, 'hide', names, toggleCodes, true);
         },
     };
     NS.TriggerWidgetExt = TriggerWidgetExt;
