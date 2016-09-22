@@ -1096,12 +1096,49 @@ Component.entryPoint = function(NS){
             this.set(WAITING, false);
 
             this._appURLUpdate();
+            this._appTriggerUpdate();
 
             var args = {arguments: this._appWidgetArguments};
             this.onInitAppWidget.apply(this, [err, appInstance, args]);
             this.fire('initAppWidget', err, appInstance, args);
         },
         onInitAppWidget: function(){
+        },
+        _appTriggerUpdate: function(){
+            this.appTriggerUpdate();
+        },
+        appTriggerUpdate: function(){
+            var bbox = this.get(BOUNDING_BOX),
+                name, a, action, obj, code, flag;
+
+            bbox.all('[data-trigger]').each(function(node){
+                name = (node.getData('trigger') || '').replace(/\s+/g, '');
+                a = name.split(':');
+                if (a.length !== 2){
+                    return;
+                }
+                if (!Brick.mod[a[0]] || !Brick.mod[a[0]][a[1]]){
+                    return;
+                }
+                obj = Brick.mod[a[0]][a[1]];
+                if (!Y.Lang.isObject(obj)){
+                    return;
+                }
+
+                code = (node.getData('code') || '').replace(/\s+/g, '');
+                if (!obj.hasOwnProperty(code)){
+                    return;
+                }
+                flag = !!(Y.Lang.isFunction(obj[code]) ? obj[code]() : obj[code]);
+
+                action = (node.getData('action') || '').replace(/\s+/g, '');
+                action = action === '' ? 'show' : action;
+
+                if (action === 'hide'){
+                    flag = !flag;
+                }
+                flag ? this.triggerShow(name, code) : this.triggerHide(name, code);
+            }, this);
         },
         appURLUpdate: function(){
             this._appURLUpdate();
