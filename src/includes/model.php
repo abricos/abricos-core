@@ -401,10 +401,16 @@ class AbricosResponse extends AbricosModel {
     public $vars;
 
 
-    /** @var int error code */
+    /**
+     * Error code
+     * @var int
+     */
     public $error = 0;
 
-    /** @var int detail code */
+    /**
+     * Detail code
+     * @var int
+     */
     public $code = 0;
 
     /**
@@ -412,8 +418,16 @@ class AbricosResponse extends AbricosModel {
      */
     public $codes;
 
+    /**
+     * Source data
+     * @var object
+     */
+    public $srcData;
+
     public function __construct($varsData, $d){
         parent::__construct($d);
+
+        $this->srcData = $varsData;
 
         /** @var AbricosResponseStructure $structure */
         $structure = $this->_structure;
@@ -430,7 +444,7 @@ class AbricosResponse extends AbricosModel {
         $this->vars = new AbricosStructureData($structure->vars, $varsData);
     }
 
-    public static function isError($response){
+    public static function IsError($response){
         if ($response instanceof AbricosResponse){
             return $response->error > 0;
         }
@@ -441,7 +455,7 @@ class AbricosResponse extends AbricosModel {
         return false;
     }
 
-    public function setError($error, $code = 0){
+    public function SetError($error, $code = 0){
         $this->error = $error;
         if (!empty($code)){
             $this->code = intval($code);
@@ -449,16 +463,15 @@ class AbricosResponse extends AbricosModel {
         return $this;
     }
 
-    public function CleanCode(){
-        $this->code = 0;
+    public function AddCode(){
+        $count = func_num_args();
+        for ($i = 0; $i < $count; $i++){
+            $this->code |= intval(func_get_arg($i));
+        }
     }
 
-    public function SetCode($code){
-        $this->code = $code;
-    }
-
-    public function AddCode($code){
-        $this->code |= $code;
+    public function IsSetCode($code){
+        return $code & $this->code;
     }
 
     public function ToJSON(){
