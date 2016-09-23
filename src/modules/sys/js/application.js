@@ -1114,22 +1114,32 @@ Component.entryPoint = function(NS){
             bbox.all('[data-trigger]').each(function(node){
                 name = (node.getData('trigger') || '').replace(/\s+/g, '');
                 a = name.split(':');
-                if (a.length !== 2){
-                    return;
-                }
-                if (!Brick.mod[a[0]] || !Brick.mod[a[0]][a[1]]){
-                    return;
-                }
-                obj = Brick.mod[a[0]][a[1]];
+                obj = a[0] === 'this' ? this : Brick.mod[a[0]];
+
                 if (!Y.Lang.isObject(obj)){
                     return;
                 }
 
+                if (a[1]){
+                    if (obj.hasOwnProperty(a[1])){
+                        obj = obj[a[1]];
+                    } else if (Y.Lang.isFunction(obj.attrAdded)
+                        && obj.attrAdded(a[1])){
+                        obj = obj.get(a[1]);
+                    } else {
+                        return;
+                    }
+                }
+
                 code = (node.getData('code') || '').replace(/\s+/g, '');
-                if (!obj.hasOwnProperty(code)){
+                if (obj.hasOwnProperty(code) || Y.Lang.isFunction(obj[code])){
+                    flag = !!(Y.Lang.isFunction(obj[code]) ? obj[code]() : obj[code]);
+                } else if (Y.Lang.isFunction(obj.attrAdded)
+                    && obj.attrAdded(code)){
+                    flag = !!obj.get(code);
+                } else {
                     return;
                 }
-                flag = !!(Y.Lang.isFunction(obj[code]) ? obj[code]() : obj[code]);
 
                 action = (node.getData('action') || '').replace(/\s+/g, '');
                 action = action === '' ? 'show' : action;
@@ -1137,6 +1147,7 @@ Component.entryPoint = function(NS){
                 if (action === 'hide'){
                     flag = !flag;
                 }
+
                 flag ? this.triggerShow(name, code) : this.triggerHide(name, code);
             }, this);
         },
