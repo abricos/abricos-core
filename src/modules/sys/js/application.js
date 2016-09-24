@@ -1121,13 +1121,19 @@ Component.entryPoint = function(NS){
                 }
 
                 if (a[1]){
-                    if (obj.hasOwnProperty(a[1])){
-                        obj = obj[a[1]];
-                    } else if (Y.Lang.isFunction(obj.attrAdded)
-                        && obj.attrAdded(a[1])){
-                        obj = obj.get(a[1]);
-                    } else {
-                        return;
+                    var path = a[1].split('.');
+
+                    for (var i = 0, item; i < path.length; i++){
+                        item = path[i];
+
+                        if (obj.hasOwnProperty(item)){
+                            obj = obj[item];
+                        } else if (Y.Lang.isFunction(obj.attrAdded)
+                            && obj.attrAdded(item)){
+                            obj = obj.get(item);
+                        } else {
+                            return;
+                        }
                     }
                 }
 
