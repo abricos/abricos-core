@@ -1134,6 +1134,10 @@ Component.entryPoint = function(NS){
                         } else {
                             return;
                         }
+
+                        if (!Y.Lang.isObject(obj)){
+                            return;
+                        }
                     }
                 }
 
