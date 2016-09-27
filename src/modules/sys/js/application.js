@@ -912,12 +912,42 @@ Component.entryPoint = function(NS){
         };
     };
 
+    var AppWorkspacePage = function(p){
+        p = Y.merge({
+            component: '',
+            widget: '',
+            args: []
+        }, p || {});
+
+        this.init(p);
+    };
+    AppWorkspacePage.prototype = {
+        init: function(p){
+            this.component = p.component;
+            this.widget = p.widget;
+            this.args = p.args;
+
+            if (p.component === '' || p.widget === ''){
+                this.id = '';
+            } else {
+                this.id = p.component + ':' + p.widget + ':' + p.args.join(':');
+            }
+        },
+        isEmpty: function(){
+            return this.id === '';
+        }
+    };
+    NS.AppWorkspacePage = AppWorkspacePage;
+
     var AppWorkspace = function(){
     };
     AppWorkspace.NAME = 'appWorkspace';
     AppWorkspace.ATTRS = {
         workspaceWidget: {},
-        defaultPage: {}
+        defaultPage: {},
+        AppWorkspacePage: {
+            value: NS.AppWorkspacePage
+        }
     };
     AppWorkspace.prototype = {
         onInitAppWidget: function(err, appInstance, options){
@@ -932,7 +962,8 @@ Component.entryPoint = function(NS){
             callback.call(context || this, null, this.get('defaultPage'));
         },
         showWorkspacePage: function(page){
-            page = new NS.AppWorkspacePage(page);
+            var AppWorkspacePage = this.get('AppWorkspacePage');
+            page = new AppWorkspacePage(page);
 
             if (page.isEmpty()){
                 if (this.get('defineDefaultPage')){
@@ -950,10 +981,12 @@ Component.entryPoint = function(NS){
         onShowWorkspacePage: function(page, widget){
         },
         _showWorkspacePage: function(page){
-            page = new NS.AppWorkspacePage(page);
+            var AppWorkspacePage = this.get('AppWorkspacePage');
+
+            page = new AppWorkspacePage(page);
 
             var curWidget = this.get('workspaceWidget'),
-                curPage = curWidget ? curWidget.get('workspacePage') : new NS.AppWorkspacePage();
+                curPage = curWidget ? curWidget.get('workspacePage') : new AppWorkspacePage();
 
             if (curPage.id === page.id){
                 return;
@@ -996,16 +1029,19 @@ Component.entryPoint = function(NS){
                 }
 
                 var widget = new widgetClass(
-                    Y.mix({
+                    this.onFillWidgetOptions(Y.mix({
                         boundingBox: elDiv,
                         workspacePage: page
-                    }, args)
+                    }, args))
                 );
 
                 this.set('workspaceWidget', widget);
                 this.onShowWorkspacePage(page, widget);
             }, this);
-        }
+        },
+        onFillWidgetOptions: function(options){
+            return options;
+        },
     };
     AppWorkspace.build = function(moduleName, wsWidget){
         return function(config){
@@ -1013,30 +1049,6 @@ Component.entryPoint = function(NS){
         };
     };
     NS.AppWorkspace = AppWorkspace;
-
-    var AppWorkspacePage = function(p){
-        p = Y.merge({
-            component: '',
-            widget: '',
-            args: []
-        }, p || {});
-
-        this.component = p.component;
-        this.widget = p.widget;
-        this.args = p.args;
-
-        if (p.component === '' || p.widget === ''){
-            this.id = '';
-        } else {
-            this.id = p.component + ':' + p.widget + ':' + p.args.join(':');
-        }
-    };
-    AppWorkspacePage.prototype = {
-        isEmpty: function(){
-            return this.id === '';
-        }
-    };
-    NS.AppWorkspacePage = AppWorkspacePage;
 
     NS.AppWidget = Y.Base.create('appWidget', Y.Widget, [
         NS.Language,
