@@ -1108,8 +1108,8 @@ Component.entryPoint = function(NS){
             this.set(WAITING, false);
 
             this._appURLUpdate();
-            this._appTriggerUpdate();
             this._appSourceUpdate();
+            this._appTriggerUpdate();
 
             var args = {arguments: this._appWidgetArguments};
             this.onInitAppWidget.apply(this, [err, appInstance, args]);
@@ -1138,6 +1138,10 @@ Component.entryPoint = function(NS){
                 for (var i = 0, item; i < path.length; i++){
                     item = path[i];
 
+                    if (!Y.Lang.isObject(obj)){
+                        return;
+                    }
+
                     if (obj.hasOwnProperty(item)){
                         obj = obj[item];
                     } else if (Y.Lang.isFunction(obj.attrAdded)
@@ -1155,6 +1159,9 @@ Component.entryPoint = function(NS){
                 switch (node.get('tagName')) {
                     case 'INPUT':
                         node.set('value', obj);
+                        break;
+                    case 'IMG':
+                        node.set('src', obj);
                         break;
                     default:
                         node.setHTML(obj);
