@@ -53,7 +53,17 @@ Component.entryPoint = function(NS){
                 e.defineTarget = e.target;
             }
 
-            var state = this._clickState;
+            var state = this._clickState,
+                a;
+
+            if (e.dataClick && (a = e.dataClick.split(':')).length === 2){
+                if (a[0] === 'this' && Y.Lang.isFunction(this[a[1]])){
+                    this[a[1]].apply(this, arguments);
+                    e.halt();
+                    return;
+                }
+            }
+
             if (e.dataClick && !!state.get(e.dataClick, 'added')){
                 var click = state.data[e.dataClick],
                     event = click.event,
