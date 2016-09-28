@@ -1109,12 +1109,58 @@ Component.entryPoint = function(NS){
 
             this._appURLUpdate();
             this._appTriggerUpdate();
+            this._appSourceUpdate();
 
             var args = {arguments: this._appWidgetArguments};
             this.onInitAppWidget.apply(this, [err, appInstance, args]);
             this.fire('initAppWidget', err, appInstance, args);
         },
         onInitAppWidget: function(){
+        },
+        _appSourceUpdate: function(){
+            this.appSourceUpdate();
+        },
+        appSourceUpdate: function(){
+            var bbox = this.get(BOUNDING_BOX),
+                name, a, obj;
+
+            bbox.all('[data-src]').each(function(node){
+                name = (node.getData('src') || '').replace(/\s+/g, '');
+                a = name.split(':');
+                obj = a[0] === 'this' ? this : Brick.mod[a[0]];
+
+                if (!Y.Lang.isObject(obj) || !a[1]){
+                    return;
+                }
+
+                var path = a[1].split('.');
+
+                for (var i = 0, item; i < path.length; i++){
+                    item = path[i];
+
+                    if (obj.hasOwnProperty(item)){
+                        obj = obj[item];
+                    } else if (Y.Lang.isFunction(obj.attrAdded)
+                        && obj.attrAdded(item)){
+                        obj = obj.get(item);
+                    } else {
+                        return;
+                    }
+                }
+
+                if (!Y.Lang.isString(obj) && !Y.Lang.isNumber(obj)){
+                    return;
+                }
+
+                switch (node.get('tagName')) {
+                    case 'INPUT':
+                        node.set('value', obj);
+                        break;
+                    default:
+                        node.setHTML(obj);
+                        break;
+                }
+            }, this);
         },
         _appTriggerUpdate: function(){
             this.appTriggerUpdate();
