@@ -914,6 +914,7 @@ Component.entryPoint = function(NS){
 
     var AppWorkspacePage = function(p){
         p = Y.merge({
+            module: '',
             component: '',
             widget: '',
             args: []
@@ -923,18 +924,21 @@ Component.entryPoint = function(NS){
     };
     AppWorkspacePage.prototype = {
         init: function(p){
+            this.module = p.module;
             this.component = p.component;
             this.widget = p.widget;
             this.args = p.args;
-
-            if (p.component === '' || p.widget === ''){
-                this.id = '';
+        },
+        getId: function(){
+            if (this.component === '' || this.widget === ''){
+                return '';
             } else {
-                this.id = p.component + ':' + p.widget + ':' + p.args.join(':');
+                return [this.module, this.component, this.widget].join(':')
+                    + ':' + this.args.join(':');
             }
         },
         isEmpty: function(){
-            return this.id === '';
+            return this.getId() === '';
         }
     };
     NS.AppWorkspacePage = AppWorkspacePage;
@@ -988,7 +992,7 @@ Component.entryPoint = function(NS){
             var curWidget = this.get('workspaceWidget'),
                 curPage = curWidget ? curWidget.get('workspacePage') : new AppWorkspacePage();
 
-            if (curPage.id === page.id){
+            if (curPage.getId() === page.getId()){
                 return;
             }
 
@@ -999,8 +1003,10 @@ Component.entryPoint = function(NS){
                 return;
             }
 
+            var module = page.module !== '' ? page.module : this.get('component').moduleName;
+
             this.set(WAITING, true);
-            Brick.use(this.get('component').moduleName, page.component, function(err, ns){
+            Brick.use(module, page.component, function(err, ns){
                 if (err){
                     return;
                 }
