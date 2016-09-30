@@ -263,8 +263,8 @@ Component.entryPoint = function(NS){
         },
         eachWidget: function(fn, context){
             var list = this._containerWidget;
-            for (var i = 0; i < list.length; i++){
-                var wi = list[i];
+            for (var i = 0, wi; i < list.length; i++){
+                wi = list[i];
                 fn.call(context || this, wi.widget, wi.name, i);
             }
         },
@@ -288,6 +288,28 @@ Component.entryPoint = function(NS){
                 }
             });
             return find;
+        },
+        removeWidget: function(name){
+            var list = this._containerWidget,
+                nList = [];
+
+            for (var i = 0, wi, isRemove; i < list.length; i++){
+                wi = list[i];
+
+                isRemove = false;
+                if (Y.Lang.isFunction(name)){
+                    isRemove = name.call(this, wi.name, wi.widget);
+                } else {
+                    isRemove = name === wi.name;
+                }
+                if (isRemove){
+                    wi.widget.destroy();
+                } else {
+                    nList[nList.length] = wi;
+                }
+            }
+
+            this._containerWidget = nList;
         },
         cleanWidgets: function(){
             this.eachWidget(function(widget){
