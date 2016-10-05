@@ -253,7 +253,7 @@ abstract class AbricosApplication {
         return $ret;
     }
 
-    protected function ResultToJSON($name, $res){
+    public function ResultToJSON($name, $res){
         $ret = new stdClass();
 
         if (is_integer($res)){
@@ -290,7 +290,7 @@ abstract class AbricosApplication {
         }
     }
 
-    protected function ImplodeJSON($jsons, $ret = null){
+    public function ImplodeJSON($jsons, $ret = null){
         if (empty($ret)){
             $ret = new stdClass();
         }
