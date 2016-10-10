@@ -162,7 +162,7 @@ class AbricosModelStructureField extends AbricosItem {
         if ($this->type === 'string'){
             $value = strval($value);
 
-            if ($this->parse === 'standart'){
+            if ($this->parse === 'standard'){
                 if (empty(AbricosModelStructureField::$_utm)){
                     AbricosModelStructureField::$_utm = Abricos::TextParser();
                 }
