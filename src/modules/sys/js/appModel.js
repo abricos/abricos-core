@@ -216,9 +216,6 @@ Component.entryPoint = function(NS){
 
             return min;
         },
-        _compare: function(a, b){
-            return a < b ? -1 : (a > b ? 1 : 0);
-        },
         getById: function(id){
             return this._idMap[id] || null;
         },
@@ -609,12 +606,12 @@ Component.entryPoint = function(NS){
                     switch (type) {
                         case 'list':
                         case 'modelList':
-                            return new typeClass({
+                            return attrCfg.value = new typeClass({
                                 appInstance: app,
                                 items: val ? val.list : []
                             });
                         case 'model':
-                            return new typeClass(Y.merge({
+                            return attrCfg.value = new typeClass(Y.merge({
                                 appInstance: app
                             }, val || {}));
                     }
