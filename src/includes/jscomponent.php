@@ -1,12 +1,15 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 /**
  * JavaScript компонент
- *
- * @package Abricos
- * @subpackage Core
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin <roosit@abricos.org>
  */
 class Ab_CoreJSCFile {
 
@@ -22,7 +25,7 @@ class Ab_CoreJSCFile {
     public $localeFiles = array();
     public $fileJSONLangs = array();
 
-    public function __construct($pModule, $pComponent, $pTname = "default", $locale = "ru-RU") {
+    public function __construct($pModule, $pComponent, $pTname = "default", $locale = "ru-RU"){
         $tname = $this->parseName($pTname);
         $module = $this->parseName($pModule);
         $component = $this->parseName($pComponent);
@@ -39,24 +42,24 @@ class Ab_CoreJSCFile {
 
         $this->fileJS = $compPath.".js";
 
-        if ($pModule != $module || $pComponent != $component || !file_exists($this->fileJS)) {
+        if ($pModule != $module || $pComponent != $component || !file_exists($this->fileJS)){
             $this->error();
         }
 
         $overPath = realpath($rootPath."/tt/".$tname."/override/".$module."/js/".$component);
 
         $this->fileHTML = $compPath.".htm";
-        if (file_exists($this->fileHTML)) {
+        if (file_exists($this->fileHTML)){
             $override = $overPath.".htm";
-            if (file_exists($override)) {
+            if (file_exists($override)){
                 $this->fileHTML = $override;
             }
         }
 
         $this->fileCSS = $compPath.".css";
-        if (file_exists($this->fileCSS)) {
+        if (file_exists($this->fileCSS)){
             $override = $overPath.".css";
-            if (file_exists($override)) {
+            if (file_exists($override)){
                 $this->fileCSS = $override;
             }
         }
@@ -67,20 +70,20 @@ class Ab_CoreJSCFile {
         $this->fileJSONLangs = globa($modPath."/langs/".$component."_*.json");
     }
 
-    public function error() {
+    public function error(){
         header("HTTP/1.0 404 Not Found");
         header("HTTP/1.1 404 Not Found");
         header("Status: 404 Not Found");
         die();
     }
 
-    public function parseName($str) {
+    public function parseName($str){
         $ret = str_replace("\\", "/", $str);
         $ret = str_replace("..", "", $ret);
         return preg_replace("/[^0-9a-z\-_,\/\.\:]+/i", "", $ret);
     }
 
-    public function build() {
+    public function build(){
         $js = $this->readJS();
         $htm = $this->readHTML();
         $css = $this->readCSS();
@@ -91,35 +94,35 @@ class Ab_CoreJSCFile {
         return $jscomp->build($js, $htm, $css, $locales, $localesJSON);
     }
 
-    public function readJS() {
+    public function readJS(){
         return $this->read($this->fileJS);
     }
 
-    public function readCSS() {
+    public function readCSS(){
         return $this->read($this->fileCSS);
     }
 
-    public function readHTML() {
+    public function readHTML(){
         return $this->read($this->fileHTML);
     }
 
-    public function readLangs() {
+    public function readLangs(){
         $ret = array();
-        foreach ($this->localeFiles as $localeFile) {
+        foreach ($this->localeFiles as $localeFile){
             $ret[] = $this->read($localeFile);
         }
         return $ret;
     }
 
-    public function readJSONLangs() {
+    public function readJSONLangs(){
 
         $ret = array();
-        foreach ($this->fileJSONLangs as $localeFile) {
+        foreach ($this->fileJSONLangs as $localeFile){
             $fi = pathinfo($localeFile);
             $fn = $fi['filename'];
 
             $langId = str_replace($this->component."_", "", $fn);
-            if (!empty($langId)) {
+            if (!empty($langId)){
                 $ret[$langId] = $this->read($localeFile);
             }
         }
@@ -127,17 +130,17 @@ class Ab_CoreJSCFile {
         return $ret;
     }
 
-    public function read($path) {
+    public function read($path){
         $path = realpath($this->parseName($path));
         $fi = pathinfo($path);
 
-        if (!$path || !file_exists($path) || !@is_file($path)) {
+        if (!$path || !file_exists($path) || !@is_file($path)){
             return "";
         }
 
         $extension = strtolower($fi["extension"]);
 
-        switch ($extension) {
+        switch ($extension){
             case "css":
             case "htm":
             case "js":
@@ -149,16 +152,16 @@ class Ab_CoreJSCFile {
                 return "";
         }
 
-        if (function_exists("file_get_contents")) {
+        if (function_exists("file_get_contents")){
             return @file_get_contents($path);
         }
 
         $content = "";
         $fp = @fopen($path, "r");
-        if (!$fp) {
+        if (!$fp){
             return "";
         }
-        while (!feof($fp)) {
+        while (!feof($fp)){
             $content .= fgets($fp);
         }
         fclose($fp);
@@ -169,17 +172,17 @@ class Ab_CoreJSCFile {
     /**
      * Сгенерировать уникальный ключ js компонента
      */
-    public function buildKey() {
+    public function buildKey(){
         $key = $this->buildKeyByFile($this->fileJS);
         $key += $this->buildKeyByFile($this->fileCSS);
         $key += $this->buildKeyByFile($this->fileHTML);
         $key += $this->buildKeyByFile($this->fileLANG);
         $key += 5;
-        return md5($this->module.$this->component.$this->locale.$key);
+        return substr(md5($this->module.$this->component.$this->locale.$key), 0, 8);
     }
 
-    public function buildKeyByFile($file) {
-        if (!file_exists($file)) {
+    public function buildKeyByFile($file){
+        if (!file_exists($file)){
             return 0;
         }
 
@@ -194,14 +197,14 @@ class Ab_CoreJSCBuilder {
     public $version = "";
     public $key = "";
 
-    public function __construct($module, $component) {
+    public function __construct($module, $component){
         $this->module = $module;
         $this->component = $component;
 
         $this->key = "mod.".$module.".".$this->component;
     }
 
-    public function build($js, $htm, $css, $locales, $localesJSON) {
+    public function build($js, $htm, $css, $locales, $localesJSON){
         $module = $this->module;
         $component = $this->component;
 
@@ -217,12 +220,12 @@ class Ab_CoreJSCBuilder {
 
         $moduri = $module;
         $a = explode("/", $moduri);
-        if (count($a) == 2) {
+        if (count($a) == 2){
             $host = $a[0];
             $port = 80;
             $mname = $a[1];
             $aa = explode(":", $host);
-            if (count($aa) == 1 && intval($aa[1]) > 0) {
+            if (count($aa) == 1 && intval($aa[1]) > 0){
                 $port = intval($aa[1]);
             }
             $moduri = $aa[0]."\t".$port."\t".$mname;
@@ -236,10 +239,10 @@ class Ab_CoreJSCBuilder {
         return $content;
     }
 
-    public function buildLanguage($locales) {
+    public function buildLanguage($locales){
         $ret = "";
-        if (is_array($locales)) {
-            foreach ($locales as $lang) {
+        if (is_array($locales)){
+            foreach ($locales as $lang){
                 $ret .= "(function(){".$lang."})();";
             }
         }
@@ -247,10 +250,10 @@ class Ab_CoreJSCBuilder {
         return $ret;
     }
 
-    public function buildLanguageJSON($locales) {
+    public function buildLanguageJSON($locales){
         $ret = "";
-        if (is_array($locales)) {
-            foreach ($locales as $key => $value) {
+        if (is_array($locales)){
+            foreach ($locales as $key => $value){
                 $ret .= "
 Abricos.Language.add('".$this->key."', '".$key."', ".$value.");
 ";
@@ -260,8 +263,8 @@ Abricos.Language.add('".$this->key."', '".$key."', ".$value.");
         return $ret;
     }
 
-    public function buildHTML($htm) {
-        if (empty($htm)) {
+    public function buildHTML($htm){
+        if (empty($htm)){
             return "";
         }
 
@@ -272,7 +275,7 @@ Abricos.Template.add('".$this->key."', '".$this->parseHTMLnew($htm)."');
         return $content;
     }
 
-    public function parseHTMLnew($htm) {
+    public function parseHTMLnew($htm){
         $str = $htm;
         $str = preg_replace("/[\n\r\t]+/", "", $str);
         $str = preg_replace("/>[\s]+</", "><", $str);
@@ -281,7 +284,7 @@ Abricos.Template.add('".$this->key."', '".$this->parseHTMLnew($htm)."');
         return $str;
     }
 
-    public function parseHTML($htm) {
+    public function parseHTML($htm){
         $str = $htm;
         $str = preg_replace("/[\n\r\t]+/", "", $str);
         $str = preg_replace("/>[\s]+</", "><", $str);
@@ -293,7 +296,7 @@ Abricos.Template.add('".$this->key."', '".$this->parseHTMLnew($htm)."');
 
         $js = "t['".$this->component."']={};";
 
-        for ($i = count($mathes) - 1; $i >= 0; $i--) {
+        for ($i = count($mathes) - 1; $i >= 0; $i--){
             $varr = $mathes[$i][0];
             $var = trim($mathes[$i][1]);
 
@@ -309,8 +312,8 @@ Abricos.Template.add('".$this->key."', '".$this->parseHTMLnew($htm)."');
         return $js;
     }
 
-    public function buildCSS($css) {
-        if (empty($css)) {
+    public function buildCSS($css){
+        if (empty($css)){
             return "";
         }
 
@@ -322,14 +325,10 @@ Abricos.CSS.add('".$this->key."', '".$this->parseCSS($css)."');
         return $content;
     }
 
-    function parseCSS($css) {
+    function parseCSS($css){
         $str = $css;
         $str = preg_replace("/[\n\r\t]+/", "", $str);
         $str = addslashes($str);
         return $str;
     }
-
-
 }
-
-?>

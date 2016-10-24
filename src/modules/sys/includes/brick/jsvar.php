@@ -1,4 +1,13 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
+
 
 $brick = Brick::$builder->brick;
 $p = &$brick->param->param;
@@ -93,7 +102,7 @@ if (empty($replace['jsvs'])){
         $key += filemtime($file) + filesize($file) + 1;
     }
 
-    $replace['jsvs'] = md5($key.Abricos::$locale);
+    $replace['jsvs'] = substr(md5($key.Abricos::$locale), 0, 8);
 
     if ($isCache){
         @unlink($cacheFile);
@@ -103,4 +112,3 @@ if (empty($replace['jsvs'])){
 }
 
 $brick->content = Brick::ReplaceVarByData($brick->content, $replace);
-?>

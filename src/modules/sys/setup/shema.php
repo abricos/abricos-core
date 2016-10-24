@@ -1,25 +1,22 @@
 <?php
 /**
- * Схема таблиц данного модуля.
- * 
- * @version $Id$
  * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
  * @link http://abricos.org
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
- * @ignore
  */
 
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$updateManager = Ab_UpdateManager::$current; 
+$updateManager = Ab_UpdateManager::$current;
 $db = Abricos::$db;
 $pfx = $db->prefix;
 
 if ($updateManager->isInstall()){
-	Ab_UpdateManager::$isCoreInstall = true;
+    Ab_UpdateManager::$isCoreInstall = true;
 
-	$db->query_write("
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."content (
 		  contentid int(8) unsigned NOT NULL auto_increment,
 		  body longtext,
@@ -28,10 +25,10 @@ if ($updateManager->isInstall()){
 		  modman varchar(30) NOT NULL default '',
 		  PRIMARY KEY  (contentid)
 		)".$charset
-	);
+    );
 
-	// Кеш собранных кирпичей
-	$db->query_write("
+    // Кеш собранных кирпичей
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."sys_cache (
 		  cacheid int(10) unsigned NOT NULL auto_increment,
 		  module varchar(50) NOT NULL DEFAULT '' COMMENT 'Имя модуля',
@@ -42,10 +39,10 @@ if ($updateManager->isInstall()){
 		  KEY module (module),
 		  KEY name (name)
 		)".$charset
-	);
-	
-	// Кирпич
-	$db->query_write("
+    );
+
+    // Кирпич
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."sys_brick (
 		  brickid int(10) unsigned NOT NULL auto_increment,
 		  owner varchar(50) NOT NULL DEFAULT '' COMMENT 'Источник: шаблон - имя папки, кирпич - имя модуля',
@@ -61,10 +58,10 @@ if ($updateManager->isInstall()){
 		  KEY folder (owner),
 		  KEY name (name)
 		  )".$charset
-	);
-	
-	// параметры кирпича
-	$db->query_write("
+    );
+
+    // параметры кирпича
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."sys_brickparam (
 		  brickparamid int(10) unsigned NOT NULL auto_increment,
 		  brickid int(10) UNSIGNED NOT NULL DEFAULT '0',
@@ -75,10 +72,10 @@ if ($updateManager->isInstall()){
 		  PRIMARY KEY (brickparamid),
 		  KEY name (name)
 		)".$charset
-	);
-		
-	// Фразы
-	$db->query_write("
+    );
+
+    // Фразы
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."sys_phrase (
 		  phraseid int(10) unsigned NOT NULL auto_increment,
 		  module varchar(32) NOT NULL DEFAULT '',
@@ -92,13 +89,13 @@ if ($updateManager->isInstall()){
 		  KEY module (module),
 		  KEY name (name)
 		)".$charset
-	);
+    );
 }
 
 if ($updateManager->isUpdate('0.5.3')){
-	$db->query_write("DROP TABLE IF EXISTS ".$pfx."sys_permission");
-	
-	$db->query_write("
+    $db->query_write("DROP TABLE IF EXISTS ".$pfx."sys_permission");
+
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."sys_modaction (
 		  modactionid int(10) unsigned NOT NULL auto_increment,
 		  module varchar(50) NOT NULL DEFAULT '' COMMENT 'Имя модуля',
@@ -106,11 +103,9 @@ if ($updateManager->isUpdate('0.5.3')){
 		  PRIMARY KEY  (modactionid),
 		  UNIQUE KEY modaction (module,action)
 		)".$charset
-	);
+    );
 }
 
 if ($updateManager->isUpdate('0.5.5')){
-	Abricos::GetModule('sys')->permission->Install();
+    Abricos::GetModule('sys')->permission->Install();
 }
-
-?>

@@ -1,19 +1,22 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 /**
  * Класс по работе с БД MySql
- *
- * @todo Документирован не полностью
- *
- * @package Abricos
- * @subpackage Core
- * @author Alexander Kuzmin <roosit@abricos.org>
- * @copyright Copyright (C) 2008-2011 Abricos All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- *
- * @abstract
  */
 class Ab_DatabaseMySql extends Ab_Database {
+
+    /**
+     * @var mysqli
+     */
+    public $mysqli;
 
     /**
      * Массив констант используемых в fetch_array
@@ -21,93 +24,113 @@ class Ab_DatabaseMySql extends Ab_Database {
      * @var    array
      */
     public $fetchtypes = array(
-        Ab_Database::DBARRAY_NUM => MYSQL_NUM,
-        Ab_Database::DBARRAY_ASSOC => MYSQL_ASSOC,
-        Ab_Database::DBARRAY_BOTH => MYSQL_BOTH
+        Ab_Database::DBARRAY_NUM => MYSQLI_NUM,
+        Ab_Database::DBARRAY_ASSOC => MYSQLI_ASSOC,
+        Ab_Database::DBARRAY_BOTH => MYSQLI_BOTH
     );
 
-    protected function SetError($error) {
+    protected function SetError($error){
         $this->error = $error;
-        $this->errorText = mysql_error().
+        $this->errorText = $this->mysqli->error.
             "(SQL: ".$this->sql.")";
     }
 
-    protected function connect_pt($servername, $port, $username, $password) {
-        $lnk = @mysql_connect("$servername:$port", $username, $password);
-        @mysql_query("SET NAMES `utf8`");
-        return $lnk;
+    protected function connect_pt($server, $port, $username, $password){
+        $mysqli = new mysqli($server, $username, $password, $this->database, $port);
+        if ($mysqli->connect_errno){
+            $this->SetError(Ab_Database::ERROR_CONNECT);
+            return null;
+        }
+        $mysqli->set_charset('utf8');
+        $this->mysqli = $mysqli;
+        return $mysqli;
     }
 
-    protected function select_db_pt($database = '') {
-        $ret = mysql_select_db($database, $this->connection);
-        return $ret;
+    protected function select_db_pt($database = ''){
+        return true;
     }
 
-    protected function &execute_query_pt() {
-        $ret = mysql_query($this->sql);
-        return $ret;
+    protected function execute_query_pt(){
+        return $this->mysqli->query($this->sql);
     }
 
-    public function fetch_array_pt($queryresult, $type = Ab_Database::DBARRAY_ASSOC) {
-        $ret = @mysql_fetch_array($queryresult, $this->fetchtypes["$type"]);
-        return $ret;
+    public function fetch_array_pt($result, $type = Ab_Database::DBARRAY_ASSOC){
+        if (!$result){
+            return null;
+        }
+        return $result->fetch_array($this->fetchtypes["$type"]);
     }
 
-    protected function num_rows_pt($queryresult) {
-        $ret = @mysql_num_rows($queryresult);
-        return $ret;
+    protected function num_rows_pt($result){
+        if (!$result){
+            return 0;
+        }
+        return $result->num_rows;
     }
 
-    protected function num_fields_pt($queryresult) {
-        $ret = @mysql_num_fields($queryresult);
-        return $ret;
+    /**
+     * @param mysqli_result $result
+     * @return int
+     */
+    protected function num_fields_pt($result){
+        if (!$result){
+            return 0;
+        }
+        return $result->field_count;
     }
 
-    protected function field_name_pt($queryresult, $index) {
-        $ret = @mysql_field_name($queryresult, $index);
-        return $ret;
+    /**
+     * @param mysqli_result $result
+     * @param $index
+     * @return string
+     */
+    protected function field_name_pt($result, $index){
+        if (!$result){
+            return '';
+        }
+        $properties = mysqli_fetch_field_direct($result, $index);
+        return is_object($properties) ? $properties->name : null;
     }
 
-    protected function insert_id_pt() {
-        $ret = @mysql_insert_id($this->connection);
-        return $ret;
+    protected function insert_id_pt(){
+        return $this->mysqli->insert_id;
     }
 
-    protected function client_encoding_pt() {
-        $ret = @mysql_client_encoding($this->connection);
-        return $ret;
+    protected function close_pt(){
+        return $this->mysqli->close();
     }
 
-    protected function close_pt() {
-        $ret = @mysql_close($this->connection);
-        return $ret;
+    /**
+     * @param mysqli_result $result
+     * @return array
+     */
+    protected function fetch_row_pt($result){
+        return $result->fetch_row();
     }
 
-    protected function fetch_row_pt($queryresult) {
-        $ret = @mysql_fetch_row($queryresult);
-        return $ret;
+    /**
+     * @param mysqli_result $result
+     * @return object
+     */
+    protected function fetch_field_pt($result){
+        return $result->fetch_field();
     }
 
-    protected function fetch_field_pt($queryresult) {
-        $ret = @mysql_fetch_field($queryresult);
-        return $ret;
+    protected function free_result_pt($result){
+        if (!$result){
+            return null;
+        }
+
+        return $result->free_result();
     }
 
-    protected function free_result_pt($queryresult) {
-        $ret = @mysql_free_result($queryresult);
-        return $ret;
+    protected function affected_rows_pt(){
+        return $this->mysqli->affected_rows();
     }
 
-    protected function affected_rows_pt() {
-        $ret = @mysql_affected_rows($this->connection);
-        return $ret;
-    }
-
-    protected function system_query_pt($sqls) {
-        for ($i = 0; $i < count($sqls); $i++) {
+    protected function system_query_pt($sqls){
+        for ($i = 0; $i < count($sqls); $i++){
             $this->query_write($sqls[$i]);
         }
     }
 }
-
-?>

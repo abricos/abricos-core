@@ -1,6 +1,14 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
-require_once 'structure.php';
+require_once 'moduleInfo.php';
 
 /**
  * Абстрактный класс модуля в платформе Абрикос
@@ -14,12 +22,6 @@ require_once 'structure.php';
  * Главным файлом любого модуля в платформе является скрипт module.php,
  * который должен находиться в корневой папке модуля. Когда ядро платформы просматривает
  * доступные модули, то она смотрит именно этот файл.
- *
- * @package Abricos
- * @copyright Copyright (C) 2008-2011 Abricos. All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin <roosit@abricos.org>
- * @example modules/example/module.php
  */
 abstract class Ab_Module {
 
@@ -162,30 +164,26 @@ abstract class Ab_Module {
         return null;
     }
 
+    private $_manager = null;
+
     /**
-     * Получить менеджер модуля
-     *
-     * Пример из модуля Example:
-     * <code>
-     * class ExampleModule extends Ab_Module {
-     *    // экземпляр менеджера модуля
-     *    private $_manager = null;
-     *    ...
-     *    public function GetManager(){
-     *        if (is_null($this->_manager)){
-     *            require_once 'includes/manager.php';
-     *            $this->_manager = new ExampleManager($this);
-     *        }
-     *        return $this->_manager;
-     *    }
-     *    ...
-     * }
-     * </code>
-     *
      * @return Ab_ModuleManager
      */
     public function GetManager(){
-        return null;
+        if (is_null($this->_manager)){
+            $this->ScriptRequireOnce('includes/manager.php');
+
+            $className = $this->GetManagerClassName();
+            if (!class_exists($className)){
+                return;
+            }
+            $this->_manager = new $className($this);
+        }
+        return $this->_manager;
+    }
+
+    protected function GetManagerClassName(){
+        return ucwords($this->name)."Manager";
     }
 
     /**
@@ -193,6 +191,45 @@ abstract class Ab_Module {
      */
     public function GetPhrases(){
         return Abricos::$phrases->GetList($this->name);
+    }
+
+    private $_moduleDir = null;
+
+    public function GetCurrentDir(){
+        if (!is_null($this->_moduleDir)){
+            return $this->_moduleDir;
+        }
+        return $this->_moduleDir = CWD."/modules/".$this->name;
+    }
+
+    public function ScriptRequire($file){
+        if (is_array($file)){
+            $count = count($file);
+            for ($i = 0; $i < $count; $i++){
+                $this->ScriptRequire($file[$i]);
+            }
+            return;
+        }
+        $cd = $this->GetCurrentDir();
+        if (!($path = realpath($cd."/".$file))){
+            throw new Exception("Script `$file` not found in module `$this->name`");
+        }
+        return require $path;
+    }
+
+    public function ScriptRequireOnce($file){
+        if (is_array($file)){
+            $count = count($file);
+            for ($i = 0; $i < $count; $i++){
+                $this->ScriptRequireOnce($file[$i]);
+            }
+            return;
+        }
+        $cd = $this->GetCurrentDir();
+        if (!($path = realpath($cd."/".$file))){
+            throw new Exception("Script `$file` not found in module `$this->name`");
+        }
+        return require_once $path;
     }
 }
 
@@ -222,6 +259,7 @@ abstract class Ab_ModuleManager {
      * Пользователь
      *
      * @var UserItem
+     * @deprecated
      */
     protected $user;
 
@@ -229,6 +267,7 @@ abstract class Ab_ModuleManager {
      * Идентификатор пользователя
      *
      * @var integer
+     * @deprecated
      */
     protected $userid = 0;
 
@@ -251,6 +290,28 @@ abstract class Ab_ModuleManager {
 
     public function AJAX($data){
         return "";
+    }
+
+    protected $_application = null;
+
+    public function GetApp(){
+        if (is_null($this->_application)){
+            $this->module->ScriptRequireOnce(array(
+                'includes/models.php',
+                'includes/dbquery.php',
+                'includes/app.php'
+            ));
+            $className = $this->GetAppClassName();
+            if (!class_exists($className)){
+                return null;
+            }
+            $this->_application = new $className($this);
+        }
+        return $this->_application;
+    }
+
+    protected function GetAppClassName(){
+        return ucwords($this->module->name)."App";
     }
 
     private $_isRolesDisable = false;
@@ -338,6 +399,8 @@ class Ab_CoreModuleManager {
         $this->FetchModulesInfo();
     }
 
+    private $_isReadLanguages = false;
+
     private function AddModuleInfo($d){
         $name = $d['name'];
 
@@ -353,10 +416,23 @@ class Ab_CoreModuleManager {
         } else {
             $item->Update($d);
         }
+
+        if (!$this->_isReadLanguages){
+            $this->_isReadLanguages = true;
+
+            $list = array();
+            foreach ($d as $key => $value){
+                if (strpos($key, 'language_') === false){
+                    continue;
+                }
+                $lng = str_replace('language_', '', $key);
+                array_push($list, $lng);
+            }
+            Abricos::$supportLanguageList = $list;
+        }
+
         return $item;
     }
-
-    private $_isReadLanguages = false;
 
     private function FetchModulesInfo(){
         $db = Abricos::$db;
@@ -414,21 +490,6 @@ class Ab_CoreModuleManager {
             }
         } else {
             while (($row = $db->fetch_array($rows))){
-
-                if (!$this->_isReadLanguages){
-                    $this->_isReadLanguages = true;
-
-                    $list = array();
-                    foreach ($row as $key => $value){
-                        if (strpos($key, 'language_') === false){
-                            continue;
-                        }
-                        $lng = str_replace('language_', '', $key);
-                        array_push($list, $lng);
-                    }
-                    Abricos::$supportLanguageList = $list;
-                }
-
                 $this->AddModuleInfo($row);
             }
         }
@@ -513,9 +574,9 @@ class Ab_CoreModuleManager {
 
         Ab_UpdateManager::$current = new Ab_UpdateManager($module, $modInfo);
 
-        $shema = CWD."/modules/".$modName."/includes/shema.php";
+        $shema = CWD."/modules/".$modName."/setup/shema.php";
         if (!file_exists($shema)){
-            $shema = CWD."/modules/".$modName."/setup/shema.php";
+            $shema = CWD."/modules/".$modName."/includes/shema.php";
         }
         if (file_exists($shema)){
             require_once($shema);
@@ -660,5 +721,3 @@ class Ab_CoreModuleManager {
         return $ret;
     }
 }
-
-?>

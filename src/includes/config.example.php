@@ -1,7 +1,7 @@
 <?php
 /**
  * Пример конфигурационного файла платформы Абрикос
- * 
+ *
  * @package Abricos
  * @subpackage Core
  * @link http://abricos.org
@@ -56,7 +56,7 @@ $config['Misc']['locale'] = "ru-RU";
  * Включить/выключить режим "Разработчика" работы платформы
  * 
  * Если режим включен, то отключается кеширование JS компонентов
- */ 
+ */
 $config['Misc']['develop_mode'] = false;
 
 /*
@@ -135,5 +135,3 @@ $config['Takelink'] = array(
 	)
 );
 */
-
-?>

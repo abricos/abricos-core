@@ -5,6 +5,9 @@
  */
 
 var Component = new Brick.Component();
+Component.requires = {
+	yahoo: ['container']
+};
 Component.entryPoint = function(NS){
 	var L = YAHOO.lang;
 	

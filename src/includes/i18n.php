@@ -1,5 +1,16 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
+/**
+ * Class Ab_CoreI18n
+ */
 class Ab_CoreI18n {
 
     /**
@@ -67,9 +78,8 @@ class Ab_CoreI18n {
     }
 
     public function Translate($phraseId, $locale = ''){
-
         $locale = $this->LocaleNormalize($locale);
-        $data = &$this->GetData($locale);
+        $data = $this->GetData($locale);
 
         $aPhrases = explode(".", $phraseId);
         for ($i = 0; $i < count($aPhrases); $i++){
@@ -88,6 +98,3 @@ class Ab_CoreI18n {
         return $data;
     }
 }
-
-
-?>

@@ -1,548 +1,380 @@
 <?php
-
 /**
  * @package Abricos
  * @subpackage Core
- * @link http://abricos.org
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
  * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
  */
-class AbricosItem {
-    public $id;
 
-    public function __construct($d){
-        $this->id = isset($d['id']) ? $d['id'] : '';
+require_once 'model.php';
+
+class AbricosLogger {
+
+    const TRACE = 'trace';
+    const DEBUG = 'debug';
+    const INFO = 'info';
+    const WARN = 'warn';
+    const ERROR = 'error';
+    const FATAL = 'fatal';
+
+    const OWNER_TYPE_CORE = 'core';
+    const OWNER_TYPE_MODULE = 'module';
+    const OWNER_TYPE_OVER = 'over';
+
+    public static function IsEnable(){
+        return isset(Abricos::$config['module']['logs']['use'])
+        && Abricos::$config['module']['logs']['use'];
     }
 
-    public function ToJSON(){
-        $ret = new stdClass();
-        $ret->id = $this->id;
-        return $ret;
+    public static function Log($level, $message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        if (!AbricosLogger::IsEnable()){
+            return;
+        }
+        /** @var LogsApp $logsApp */
+        $logsApp = Abricos::GetApp('logs');
+        if (empty($logsApp)){
+            return;
+        }
+        $logsApp->LogAppend($level, $message, $ownerType, $ownerName, $debugInfo);
     }
 
-    /**
-     * @deprecated
-     */
-    public function ToAJAX(){
-        return $this->ToJSON();
+    public static function Trace($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::TRACE, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Debug($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::DEBUG, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Info($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::INFO, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Warn($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::WARN, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Error($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::ERROR, $message, $ownerType, $ownerName, $debugInfo);
+    }
+
+    public static function Fatal($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
+        return AbricosLogger::Log(AbricosLogger::FATAL, $message, $ownerType, $ownerName, $debugInfo);
     }
 }
 
-class AbricosListConfig {
-    public $page = 1;
-    public $limit = 0;
-
-    private $_total = 0;
-
-    public function __construct($d = null){
-        if (!is_array($d)){
-            return;
-        }
-        $this->page = max(intval($d['page']), 1);
-        $this->limit = intval($d['limit']);
-    }
-
-    public function SetTotal($total){
-        $this->_total = intval($total);
-    }
-
-    public function GetTotal(){
-        return $this->_total;
-    }
-
-    public function GetFrom(){
-        return ($this->page - 1) * $this->limit;
-    }
-
-    public function ToJSON(){
-        $ret = new stdClass();
-        $ret->page = $this->page;
-        $ret->limit = $this->limit;
-        $ret->total = $this->_total;
-        return $ret;
-    }
+/**
+ * Class AbricosApplication
+ */
+abstract class AbricosApplication {
 
     /**
-     * @deprecated
+     * @var Ab_ModuleManager
      */
-    public function ToAJAX(){
-        return $this->ToJSON();
-    }
-}
-
-class AbricosList {
+    public $manager;
 
     /**
-     * @var AbricosListConfig
+     * @var Ab_Database
      */
-    public $config;
-
-    public $classConfig = 'AbricosListConfig';
-
-    protected $_list = array();
-    protected $_map = array();
-    protected $_ids = array();
-
-    protected $isCheckDouble = false;
-
-    public function __construct($config = null){
-        $this->_list = array();
-        $this->_map = array();
-        if (empty($config)){
-            $config = new $this->classConfig();
-        }
-        $this->config = $config;
-    }
-
-    public function Add($item){
-        if (empty($item)){
-            return;
-        }
-
-        if ($this->isCheckDouble){
-            $checkItem = $this->Get($item->id);
-            if (!empty($checkItem)){
-                return;
-            }
-        }
-
-        $index = count($this->_list);
-        $this->_list[$index] = $item;
-        $this->_map[$item->id] = $index;
-
-        $this->_ids[] = $item->id;
-    }
+    public $db;
 
     /**
-     * Массив идентификаторов
+     * @var AbricosModelManager
      */
-    public function Ids(){
-        return $this->_ids;
-    }
-
-    public function Count(){
-        return count($this->_list);
-    }
+    public $models;
 
     /**
-     * @param integer $index
-     * @return AbricosItem
+     * @param Ab_ModuleManager $manager
+     * @param array $appExtends (optional)
      */
-    public function GetByIndex($index){
-        return $this->_list[$index];
+    public function __construct(Ab_ModuleManager $manager, $appExtends = array()){
+        $this->manager = $manager;
+        $this->db = $manager->db;
+        $this->models = AbricosModelManager::GetManager($manager->module->name);
+        $this->models->appExtends = $appExtends;
+        $this->RegisterClasses();
     }
 
-    /**
-     * @param mixed $id
-     * @return AbricosItem || null
-     */
-    public function Get($id){
-        if (!array_key_exists($id, $this->_map)){
-            return null;
-        }
-        $index = $this->_map[$id];
-        return $this->_list[$index];
+    protected $_cache = array();
+
+    public function CacheClear(){
+        $this->_cache = array();
     }
 
-    public function ToJSON(){
-        $list = array();
-        $count = $this->Count();
+    public function CacheExists(){
+        $count = func_num_args();
+        $cache = $this->_cache;
         for ($i = 0; $i < $count; $i++){
-            $list[] = $this->GetByIndex($i)->ToJSON();
+            $arg = func_get_arg($i);
+            if (!isset($cache[$arg])){
+                return false;
+            }
+            $cache = $cache[$arg];
         }
 
-        $ret = new stdClass();
-        $ret->list = $list;
-        if (!empty($this->config)){
-            $ret->config = $this->config->ToJSON();
-        }
-
-        return $ret;
+        return !empty($cache);
     }
 
-    /**
-     * @deprecated
-     */
-    public function ToAJAX(){
-        $list = array();
-        $count = $this->Count();
+    public final function Cache(){
+        $count = func_num_args();
+        $cache = $this->_cache;
         for ($i = 0; $i < $count; $i++){
-            $list[] = $this->GetByIndex($i)->ToAJAX();
-        }
-
-        $ret = new stdClass();
-        $ret->list = $list;
-        if (!empty($this->config)){
-            $ret->config = $this->config->ToAJAX();
-        }
-
-        return $ret;
-    }
-}
-
-class AbricosModel extends AbricosItem {
-
-    protected $_structModule = null;
-    protected $_structName = null;
-
-    protected $_data = array();
-
-    /**
-     * @var AbricosModelStructure|null
-     */
-    protected $_structure = null;
-
-    public function __construct($d){
-        if (empty($this->_structure) && !empty($this->_structModule) && !empty($this->_structName)){
-            $this->_structure = AbricosModelManager::GetManager($this->_structModule)->GetStructure($this->_structName);
-        }
-
-        $struct = $this->_structure;
-        if (!empty($struct)){
-            $this->id = isset($d[$struct->idField]) ? $d[$struct->idField] : 0;
-            $this->Update($d);
-        } else {
-            parent::__construct($d);
-        }
-    }
-
-    public function Update($d){
-        $struct = $this->_structure;
-        if (empty($struct)){
-            $this->_data = $d;
-            return;
-        }
-
-        $count = $struct->Count();
-        for ($i = 0; $i < $count; $i++){
-            $field = $struct->GetByIndex($i);
-            if ($field->type === 'multilang'){
-                $this->__set($field->name, $d);
-            } else if (isset($d[$field->name])){
-                $this->__set($field->name, $d[$field->name]);
+            $arg = func_get_arg($i);
+            if (!isset($cache[$arg])){
+                return null;
             }
+            $cache = $cache[$arg];
         }
+        return $cache;
     }
 
-    public function __set($name, $value){
-        $field = !empty($this->_structure) ? $this->_structure->Get($name) : null;
-        if (empty($field)){
-            $this->_data[$name] = $value;
-            return;
+    public final function SetCache(){
+        $count = func_num_args();
+        $cache = &$this->_cache;
+        if ($count < 2){
+            throw new Exception('Invalid param in SetCache');
         }
 
-        if ($field->type === 'multilang'){
-            if (isset($this->_data[$name])){
-                $this->_data[$name]->Set($value);
-            } else {
-                $this->_data[$name] = new AbricosMultiLangValue($name, $value);
+        for ($i = 0; $i < $count - 1; $i++){
+            $arg = func_get_arg($i);
+            if (!isset($cache[$arg])){
+                $cache[$arg] = array();
             }
-        } else {
-            $this->_data[$name] = $field->TypeVal($value);
+            $cache = &$cache[$arg];
         }
+        $cache = func_get_arg($count - 1);
+        return func_get_arg($count - 1);
     }
 
-    public function __get($name){
-        if (isset($this->_data[$name])){
-            if ($this->_data[$name] instanceof AbricosMultiLangValue){
-                return $this->_data[$name]->Get();
-            }
-            return $this->_data[$name];
-        }
-        $field = !empty($this->_structure) ? $this->_structure->Get($name) : null;
-        if (!empty($field) && isset($field->default)){
-            return $field->default;
-        }
-        return null;
+    protected function GetAppClasses(){
+        return array();
     }
 
-    public function ToJSON(){
-        $ret = parent::ToJSON();
-
-        $struct = $this->_structure;
-        if (empty($struct)){
-            return $ret;
-        }
-
-        $count = $struct->Count();
-        for ($i = 0; $i < $count; $i++){
-            $field = $struct->GetByIndex($i);
-            if (!isset($this->_data[$field->name])){
-                continue;
-            }
-            if ($field->type === 'multilang'){
-                $value = $this->_data[$field->name]->ToJSON();
-            } else {
-                $value = $this->_data[$field->name];
-            }
-            $jsonName = $field->json;
-            $ret->$jsonName = $value;
-        }
-
-        return $ret;
-    }
-}
-
-class AbricosModelList extends AbricosList {
-
-}
-
-class AbricosMultiLangValue {
-    public $name;
-    protected $_data = array();
-    private $_actualLang;
-
-    public function __construct($name, $d){
-        $this->name = $name;
-        $this->Set($d);
-    }
-
-    public static function FieldName($name, $lng = ''){
-        if (empty($lng)){
-            $lng = Abricos::$LNG;
-        }
-        return $name."_".$lng;
-    }
-
-    public function Set($d){
-        if (is_array($d)){
-            foreach (Abricos::$supportLanguageList as $lng){
-                $fieldName = AbricosMultiLangValue::FieldName($this->name, $lng);
-                $this->_data[$lng] = isset($d[$fieldName]) ? $d[$fieldName] : '';
-            }
-        } else if (is_string($d)){
-            $this->_data[Abricos::$LNG] = $d;
-        }
-        unset($this->_actualLang);
-        $this->_UpdateActualLang();
-    }
-
-    // TODO: refactor: modify to static function
-    private function _UpdateActualLang(){
-        if (isset($this->_actualLang)){
-            return;
-        }
-        $this->_actualLang = Abricos::$LNG;
-        if (!isset($this->_data[$this->_actualLang])){
-            $this->_data[$this->_actualLang] = '';
-        }
-
-        if (!empty($this->_data[$this->_actualLang])){
-            return;
-        }
-        foreach (Abricos::$supportLanguageList as $lng){
-            if ($this->_actualLang === $lng){
-                continue;
-            }
-            if (isset($this->_data[$lng]) && !empty($this->_data[$lng])){
-                $this->_actualLang = $lng;
-                return;
-            }
-        }
-    }
-
-    public function Get(){
-        $this->_UpdateActualLang();
-        return $this->_data[$this->_actualLang];
-    }
-
-    public function ToJSON(){
-        return $this->_data;
-    }
-
-}
-
-class AbricosModelStructureField extends AbricosItem {
-
-    public $name;
-
-    /**
-     * Field type
-     *
-     * @var string Values: 'string|int|bool|double|multilang'
-     */
-    public $type = 'string';
-
-    /**
-     * Default value
-     *
-     * @var mixed
-     */
-    public $default;
-
-    /**
-     * JSON name
-     *
-     * @var string
-     */
-    public $json;
-
-    public function __construct($name, $data = null){
-        $this->name = $this->id = $name;
-
-        if (empty($data)){
-            return;
-        }
-        if (isset($data->type)){
-            switch ($data->type){
-                case 'string':
-                case 'int':
-                case 'bool':
-                case 'double':
-                case 'multilang':
-                    $this->type = $data->type;
-                    break;
-            }
-        }
-        if (isset($data->default)){
-            $this->default = $this->TypeVal($data->default);
-        }
-        $this->json = isset($data->json) ? $data->json : $name;
-    }
-
-    public function TypeVal($value){
-        switch ($this->type){
-            case 'string':
-                return strval($value);
-            case 'bool':
-                return boolval($value);
-            case 'int':
-                return intval($value);
-            case 'double':
-                return doubleval($value);
-        }
-        return $value;
-    }
-
-    public function ToJSON(){
-        $ret = parent::ToJSON();
-        unset($ret->id);
-        $ret->name = $this->name;
-        $ret->type = $this->type;
-        if (isset($this->default)){
-            $ret->default = $this->default;
-        }
-        $ret->json = $this->json;
-
-        return $ret;
-    }
-}
-
-class AbricosModelStructure extends AbricosList {
-
-    public $name;
-
-    public $idField = 'id';
-
-    public function __construct($name, $data = null){
-        $this->name = $name;
-        if (empty($data)){
-            return;
-        }
-
-        if (isset($data->idField)){
-            $this->idField = $data->idField;
-        }
-
-        if (isset($data->fields)){
-            foreach ($data->fields as $fieldName => $value){
-                $this->Add(new AbricosModelStructureField($fieldName, $value));
-            }
-        }
-    }
-
-    /**
-     * @param $i
-     * @return AbricosModelStructureField
-     */
-    public function GetByIndex($i){
-        return parent::GetByIndex($i);
-    }
-
-    /**
-     * @param mixed $name
-     * @return AbricosModelStructureField
-     */
-    public function Get($name){
-        return parent::Get($name);
-    }
-
-
-    public function ToJSON(){
-        $ret = parent::ToJSON();
-        $ret->name = $this->name;
-        $ret->fields = $ret->list;
-        unset($ret->list);
-
-        return $ret;
-    }
-}
-
-class AbricosModelManager {
-
-    private static $_managers = array();
-
-    /**
-     * @var Ab_Module
-     */
-    public $module;
-
-    public $structures = array();
-
-    public function __construct(Ab_Module $module){
-        $this->module = $module;
-    }
-
-    /**
-     * @param Ab_Module $module
-     * @return AbricosModelManager
-     */
-    public static function GetManager($module){
-        if (is_string($module)){
-            $module = Abricos::GetModule($module);
-        }
-        $modName = $module->name;
-        if (!isset(AbricosModelManager::$_managers[$modName])){
-            AbricosModelManager::$_managers[$modName] = new AbricosModelManager($module);
-        }
-        return AbricosModelManager::$_managers[$modName];
-    }
+    protected $_cacheChildApps = array();
 
     /**
      * @param $name
-     * @return AbricosModelStructure|null
+     * @return AbricosApplication
      */
-    public function GetStructure($name){
-        $name = trim($name);
-        if (isset($this->structures[$name])){
-            return $this->structures[$name];
+    public function GetChildApp($name){
+        if (isset($this->_cacheChildApps[$name])){
+            return $this->_cacheChildApps[$name];
         }
-        $file = realpath(CWD."/modules/".$this->module->name."/model/".$name.".json");
-        if (!$file){
-            return null;
+        $classes = $this->GetAppClasses();
+        if (!isset($classes[$name])){
+            throw new Exception('Child app `'.$name.'` not found`');
         }
-        $json = file_get_contents($file);
-        $data = json_decode($json);
-        $struct = new AbricosModelStructure($name, $data);
-        $this->structures[$name] = $struct;
-        return $struct;
+        $className = $classes[$name];
+        return $this->_cacheChildApps[$name] =
+            new $className($this->manager, $this->models->appExtends);
     }
 
-    public function ToJSON($names){
-        if (is_string($names)){
-            $names = explode(",", $names);
-        }
-        $ret = new stdClass();
-        $ret->structures = array();
-
-        foreach ($names as $name){
-            $struct = $this->GetStructure($name);
-            if (empty($struct)){
-                continue;
-            }
-            $ret->structures[] = $struct->ToJSON();
+    public function GetChildApps(){
+        $ret = array();
+        $apps = $this->GetAppClasses();
+        foreach ($apps as $name => $value){
+            $ret[] = $this->GetChildApp($name);
         }
         return $ret;
     }
-}
 
-?>
+    protected $_cacheAppsByKey = array();
+
+    public function GetApp($key, $notException = false){
+        if (isset($this->_cacheAppsByKey[$key])){
+            return $this->_cacheAppsByKey[$key];
+        }
+        $arr = explode(".", $key);
+        $moduleName = $arr[0];
+        $module = Abricos::GetModule($moduleName);
+        if (empty($module)){
+            if (!$notException){
+                return null;
+            }
+            throw new Exception('Module `'.$moduleName.'` not found');
+        }
+        $manager = $module->GetManager();
+        if (empty($manager)){
+            if (!$notException){
+                return null;
+            }
+            throw new Exception('Manager not found in Module '.$moduleName);
+        }
+        if (!method_exists($manager, 'GetApp')){
+            if (!$notException){
+                return null;
+            }
+            throw new Exception('GetApp function not found in Manager of Module '.$moduleName);
+        }
+        $app = $manager->GetApp();
+        if (count($arr) > 1){
+            $app = $app->GetChildApp($arr[1]);
+        }
+        return $this->_cacheAppsByKey[$key] = $app;
+    }
+
+    public function IsAppFunctionExist($key, $fn){
+        $app = $this->GetApp($key);
+        if (empty($app)){
+            return false;
+        }
+        if (!method_exists($app, $fn)){
+            return false;
+        }
+        return true;
+    }
+
+    protected abstract function GetClasses();
+
+    protected function RegisterClasses(){
+        $classes = $this->GetClasses();
+        foreach ($classes as $key => $value){
+            $this->models->RegisterClass($key, $value);
+        }
+    }
+
+    public function InstanceClass($structName){
+        $args = func_get_args();
+        $p0 = isset($args[1]) ? $args[1] : null;
+        $p1 = isset($args[2]) ? $args[2] : null;
+        $p2 = isset($args[3]) ? $args[3] : null;
+
+        $obj = $this->models->InstanceClass($structName, $p0, $p1, $p2);
+        $obj->app = $this;
+        return $obj;
+    }
+
+    protected abstract function GetStructures();
+
+    public abstract function ResponseToJSON($d);
+
+    public function AJAX($d){
+        $d->do = isset($d->do) ? strval($d->do) : '';
+
+        $this->LogTrace('AJAX response begin', array("do" => $d->do));
+
+        switch ($d->do){
+            case "appStructure":
+                return $this->AppStructureToJSON();
+        }
+        $ret = $this->ResponseToJSON($d);
+
+        if (empty($ret)){
+            $extApps = $this->GetChildApps();
+            for ($i = 0; $i < count($extApps); $i++){
+                /** @var AbricosApplication $extApp */
+                $extApp = $extApps[$i];
+                $ret = $extApp->ResponseToJSON($d);
+            }
+        }
+        if (!empty($ret)){
+            return $ret;
+        }
+        $this->LogError('AJAX response unknow', array("do" => $d->do));
+
+        return null;
+    }
+
+    public function AppStructureToJSON(){
+        $arr = array($this->GetStructures());
+        $extApps = $this->GetChildApps();
+        for ($i = 0; $i < count($extApps); $i++){
+            /** @var AbricosApplication $extApp */
+            $extApp = $extApps[$i];
+            $arr[] = $extApp->GetStructures();
+        }
+
+        $structures = implode(",", $arr);
+        $res = $this->models->ToJSON($structures);
+        if (empty($res)){
+            return null;
+        }
+
+        $ret = new stdClass();
+        $ret->appStructure = $res;
+
+        return $ret;
+    }
+
+    public function ResultToJSON($name, $res){
+        $ret = new stdClass();
+
+        if (is_integer($res)){
+            $ret->err = $res;
+            return $ret;
+        } else if ($res instanceof AbricosResponse && $res->error > 0){
+            $ret->err = $res->error;
+        }
+
+        if (is_object($res) && method_exists($res, 'ToJSON')){
+            $ret->$name = $res->ToJSON();
+        } else {
+            $ret->$name = $res;
+        }
+
+        return $ret;
+    }
+
+    protected function MergeObject($o1, $o2){
+        foreach ($o2 as $key => $v2){
+            if (isset($o1->$key) && is_array($o1->$key) && is_array($v2)){
+                $v1 = &$o1->$key;
+                for ($i = 0; $i < count($v2); $i++){
+                    $v1[] = $v2[$i];
+                }
+                $o1->$key = $v1;
+            } else if (isset($o1->$key) && is_object($o1->$key)
+                && isset($o2->$key) && is_object($o2->$key)
+            ){
+                $this->MergeObject($o1->$key, $o2->$key);
+            } else {
+                $o1->$key = $v2;
+            }
+        }
+    }
+
+    public function ImplodeJSON($jsons, $ret = null){
+        if (empty($ret)){
+            $ret = new stdClass();
+        }
+        if (!is_array($jsons)){
+            $jsons = array($jsons);
+        }
+        foreach ($jsons as $json){
+            $this->MergeObject($ret, $json);
+        }
+        return $ret;
+    }
+
+    /* * * * * * * * * * * * * Logging * * * * * * * * * * * */
+
+    public function Log($level, $message, $debugInfo = null){
+        AbricosLogger::Log($level, $message, AbricosLogger::OWNER_TYPE_MODULE, $this->manager->module->name, $debugInfo);
+    }
+
+    public function LogTrace($message, $debugInfo = null){
+        $this->Log(AbricosLogger::TRACE, $message, $debugInfo);
+    }
+
+    public function LogDebug($message, $debugInfo = null){
+        $this->Log(AbricosLogger::DEBUG, $message, $debugInfo);
+    }
+
+    public function LogInfo($message, $debugInfo = null){
+        $this->Log(AbricosLogger::INFO, $message, $debugInfo);
+    }
+
+    public function LogWarn($message, $debugInfo = null){
+        $this->Log(AbricosLogger::WARN, $message, $debugInfo);
+    }
+
+    public function LogError($message, $debugInfo = null){
+        $this->Log(AbricosLogger::ERROR, $message, $debugInfo);
+    }
+
+    public function LogFatal($message, $debugInfo = null){
+        $this->Log(AbricosLogger::FATAL, $message, $debugInfo);
+    }
+}

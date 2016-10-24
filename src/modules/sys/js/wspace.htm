@@ -1,43 +1,24 @@
-<!--{panel}-->
-<div class='hd'>Настройки сайта</div>
-<div class='bd aw-sys'>
-    <div id="{i#widget}"></div>
-</div>
-
 <!--{widget}-->
-<div id="{i#id}" class="wspace">
-
-    <div id="{i#menu}"></div>
+<div class="aw-sys">
 
     <nav class="navbar navbar-default" role="navigation">
         <div class="navbar-header">
-            <a href="{v#urlconfig}" class="navbar-brand">Настройки сайта</a>
+            <a href="#" data-url="config.view" class="navbar-brand">Настройки сайта</a>
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
                 <li>
-                    <a href="{v#urlmodules}">Модули</a>
+                    <a href="#" data-url="module.list">Модули</a>
                 </li>
             </ul>
         </div>
     </nav>
 
-    <div id="{i#loading}" class="ws-loading">
-        <img src="/images/loading.gif"/> Идет загрузка данных <br/>Пожалуйста, подождите...
+    <div data-wait="show" class="text-center">
+        <img src="/images/loading.gif"/>
+        <p>Идет загрузка данных</p>
+        <p>Пожалуйста, подождите...</p>
     </div>
-    <div id="{i#board}" class="board" style="display: none"></div>
-</div>
 
-<!--{page}-->
-<div id="{i#id}" class='wspage'></div>
-
-<!--{home}-->
-<div id="{i#id}" class='wspage'>Добро пожаловать</div>
-
-<!--{accessdenied}-->
-<div id="{i#id}" class='wspage'>
-    <div class="ws-loading">
-        Доступ запрещен <br/>
-        У вас недостаточно прав, или необходимо зарегистрироваться.
-    </div>
+    <div class="app-workspace-page" data-wait="hide"></div>
 </div>

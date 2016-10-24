@@ -1,16 +1,18 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 /**
  * Ядро платформы Абрикос
  *
  * Содержит в себе все необходимые объекты и методы для полноценного
  * взаимодействия с платформой
- *
- * @package Abricos
- * @subpackage Core
- * @link http://abricos.org
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin <roosit@abricos.org>
  */
 final class Abricos {
 
@@ -271,6 +273,17 @@ final class Abricos {
         Brick::$builder = new Ab_CoreBrickBuilder();
         Brick::$style = $modSys->GetPhrases()->Get('style', 'default');
 
+        if (isset(Abricos::$config['module']['logs']['use'])
+            && Abricos::$config['module']['logs']['use']
+        ){
+            $logsModule = $modules->RegisterByName('logs');
+            if (!empty($logsModule)){
+                /** @var LogsApp $logsApp */
+                $logsApp = $this->GetApp('logs');
+                $logsApp->AccessLogAppend();
+            }
+        }
+
         // возможно стиль предопределен в конфиге для этого урла
 
         if (!empty(Abricos::$config["Template"])){
@@ -469,25 +482,23 @@ final class Abricos {
         return Abricos::$_json;
     }
 
-}
-
-class Ab_Notification {
-
-    /**
-     * Отправить EMail пользователю
-     *
-     * @param string $email
-     * @param string $subject
-     * @param string $message
-     * @return boolean true - если сообщение отправлено
-     */
-    public function SendMail($email, $subject, $message){
+    public static function GetApp($moduleName){
+        $module = Abricos::GetModule($moduleName);
+        if (empty($module)){
+            return null;
+        }
+        $manager = $module->GetManager();
+        if (empty($manager)){
+            return null;
+        }
+        $app = $manager->GetApp();
+        if (empty($app)){
+            return null;
+        }
+        return $app;
     }
 }
 
 define('PAGESTATUS_OK', 0);
 define('PAGESTATUS_404', 404);
 define('PAGESTATUS_500', 500);
-
-
-?>

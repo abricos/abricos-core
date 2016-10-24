@@ -1,4 +1,13 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
+
 
 /**
  * Кирпич - строительный материал для страниц в платформе Абрикос
@@ -30,12 +39,6 @@
  * {@example modules/example/includes/helloworld.php}
  *
  * Результат можно посмотреть по адресу: {@link http://demo.abricos.org/example/helloworld.html}
- *
- * @package Abricos
- * @subpackage Core
- * @link http://abricos.org
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin <roosit@abricos.org>
  */
 class Brick {
 
@@ -118,7 +121,7 @@ class Brick {
      * @param string $value значение, на которое будет заменен идентификатор
      * @return string
      */
-    public static function ReplaceVar($template, $varname, $value) {
+    public static function ReplaceVar($template, $varname, $value){
         return str_replace("{v#".$varname."}", $value, $template);
     }
 
@@ -138,8 +141,8 @@ class Brick {
      * @param mixed $data ассоциативный массив
      * @return string
      */
-    public static function ReplaceVarByData($template, $data) {
-        foreach ($data as $varname => $value) {
+    public static function ReplaceVarByData($template, $data){
+        foreach ($data as $varname => $value){
             $template = Brick::ReplaceVar($template, $varname, $value);
         }
         return $template;
@@ -254,8 +257,8 @@ class Ab_CoreBrickBuilder {
      *
      * @param string $modname имя модуля
      */
-    private function SetUseModule($modname) {
-        if (array_key_exists($modname, $this->_usemod) && $this->_usemod[$modname]) {
+    private function SetUseModule($modname){
+        if (array_key_exists($modname, $this->_usemod) && $this->_usemod[$modname]){
             return;
         }
         $this->_usemod[$modname] = true;
@@ -265,7 +268,7 @@ class Ab_CoreBrickBuilder {
      * Сборка страницы.
      * параметр $brick - имеет тип шаблон.
      */
-    public function Compile(Ab_CoreBrick $brick) {
+    public function Compile(Ab_CoreBrick $brick){
         // загрузить все глобальные параметры кирпичей 
         $this->TakeGlobalParam($brick);
 
@@ -275,33 +278,33 @@ class Ab_CoreBrickBuilder {
         $pbprm = &$brick->parent->param->param;
 
         // Установка метатегов страницы по умолчанию, если они не установлены в процессе компиляции кирпичей
-        if (isset($this->_phrase['sys:meta_title'])) {
-            if (!empty($pbprm['meta_title'])) {
+        if (isset($this->_phrase['sys:meta_title'])){
+            if (!empty($pbprm['meta_title'])){
                 $this->_globalVar['meta_title'] = $pbprm['meta_title'];
-            } else if (isset($this->_globalVar['meta_title']) && empty($this->_globalVar['meta_title'])) {
+            } else if (isset($this->_globalVar['meta_title']) && empty($this->_globalVar['meta_title'])){
                 $this->_globalVar['meta_title'] = $sysPhrases->Get('meta_title')->value;
             }
-            if (!empty($pbprm['meta_keys'])) {
+            if (!empty($pbprm['meta_keys'])){
                 $this->_globalVar['meta_keys'] = $pbprm['meta_keys'];
-            } else if (isset($this->_globalVar['meta_keys']) && empty($this->_globalVar['meta_keys'])) {
+            } else if (isset($this->_globalVar['meta_keys']) && empty($this->_globalVar['meta_keys'])){
                 $this->_globalVar['meta_keys'] = $sysPhrases->Get('meta_keys')->value;
             }
-            if (!empty($pbprm['meta_desc'])) {
+            if (!empty($pbprm['meta_desc'])){
                 $this->_globalVar['meta_desc'] = $pbprm['meta_desc'];
-            } else if (isset($this->_globalVar['meta_desc']) && empty($this->_globalVar['meta_desc'])) {
+            } else if (isset($this->_globalVar['meta_desc']) && empty($this->_globalVar['meta_desc'])){
                 $this->_globalVar['meta_desc'] = $sysPhrases->Get('meta_desc')->value;
             }
         }
-        if (isset($this->_globalVar['jsyui'])) {
+        if (isset($this->_globalVar['jsyui'])){
             $this->_globalVar['jsyui'] = SystemModule::$YUIVersion;
         }
 
         // установка версии
-        if (isset($this->_globalVar['version'])) {
+        if (isset($this->_globalVar['version'])){
             $modSys = Abricos::GetModule('sys');
             $this->_globalVar['version'] = $modSys->version;
         }
-        if (isset($this->_globalVar['host'])) {
+        if (isset($this->_globalVar['host'])){
             $this->_globalVar['host'] = $_SERVER['HTTP_HOST'] ? $_SERVER['HTTP_HOST'] : $_ENV['HTTP_HOST'];
         }
 
@@ -312,7 +315,7 @@ class Ab_CoreBrickBuilder {
         Abricos::$phrases->Save();
     }
 
-    public function SetGlobalVar($name, $value) {
+    public function SetGlobalVar($name, $value){
         $this->_globalVar[$name] = $value;
     }
 
@@ -322,16 +325,16 @@ class Ab_CoreBrickBuilder {
      * @param Ab_Module $module
      * @param string $name
      */
-    public function LoadBrick(Ab_Module $module, $name, Ab_CoreBrick $parent = null, $overparam = null) {
+    public function LoadBrick(Ab_Module $module, $name, Ab_CoreBrick $parent = null, $overparam = null){
 
         $bm = new Ab_CoreBrickManager(false);
         $brick = $bm->BuildOutput($module->name, $name, Brick::BRICKTYPE_BRICK, $parent);
 
         $this->SetUseModule($module->name);
 
-        if (!empty($parent)) {
+        if (!empty($parent)){
             $parent->child[] = $brick;
-            if (!isset($parent->param->module[$brick->owner])) {
+            if (!isset($parent->param->module[$brick->owner])){
                 $parent->param->module[$brick->owner] = array();
             }
             $bmod = new stdClass();
@@ -340,14 +343,14 @@ class Ab_CoreBrickBuilder {
         }
         $this->TakeGlobalParam($brick);
 
-        if (!is_null($overparam)) {
-            if (!empty($overparam['bkvar'])) {
-                foreach ($overparam['bkvar'] as $key => $value) {
+        if (!is_null($overparam)){
+            if (!empty($overparam['bkvar'])){
+                foreach ($overparam['bkvar'] as $key => $value){
                     $brick->param->var[$key] = $value;
                 }
             }
-            if (!empty($overparam['p'])) {
-                foreach ($overparam['p'] as $key => $value) {
+            if (!empty($overparam['p'])){
+                foreach ($overparam['p'] as $key => $value){
                     $brick->param->param[$key] = $value;
                 }
             }
@@ -357,7 +360,7 @@ class Ab_CoreBrickBuilder {
         return $brick;
     }
 
-    public function LoadBrickS($moduleName, $name, Ab_CoreBrick $parent = null, $overparam = null) {
+    public function LoadBrickS($moduleName, $name, Ab_CoreBrick $parent = null, $overparam = null){
         $mod = Abricos::GetModule($moduleName);
         return $this->LoadBrick($mod, $name, $parent, $overparam);
     }
@@ -368,8 +371,8 @@ class Ab_CoreBrickBuilder {
      * @param string $moduleName имя модуля
      * @param string $file имя файла
      */
-    public function AddJSModule($moduleName, $file) {
-        if (!isset($this->_jsmod[$moduleName])) {
+    public function AddJSModule($moduleName, $file){
+        if (!isset($this->_jsmod[$moduleName])){
             $this->_jsmod[$moduleName] = array();
         }
         $this->_jsmod[$moduleName][$file] = true;
@@ -381,7 +384,7 @@ class Ab_CoreBrickBuilder {
      * @param string $moduleName имя модуля
      * @param string $file - имя CSS файла
      */
-    public function AddCssModule($moduleName, $file) {
+    public function AddCssModule($moduleName, $file){
         $this->_cssmod[$moduleName][$file] = true;
     }
 
@@ -389,32 +392,32 @@ class Ab_CoreBrickBuilder {
      * @return array
      * @deprecated
      */
-    private function GetCSSModFiles() {
+    private function GetCSSModFiles(){
     }
 
     /**
      * Добавление JS файлов
      */
-    public function AddJSFile($file) {
+    public function AddJSFile($file){
         $this->_jsfile[$file] = $file;
     }
 
     /**
      * Добавление CSS файла
      */
-    public function AddCSSFile($file) {
+    public function AddCSSFile($file){
         $this->_cssfile[$file] = $file;
     }
 
-    public function AddTemplateCSSFile($file) {
+    public function AddTemplateCSSFile($file){
         $this->_tcssfile[$file] = $file;
     }
 
-    private function SetVar(Ab_CoreBrick $brick, $search, $replace) {
+    private function SetVar(Ab_CoreBrick $brick, $search, $replace){
         $brick->content = str_replace($search, $replace, $brick->content);
     }
 
-    private function PagePrint(Ab_CoreBrick $tplBrick) {
+    private function PagePrint(Ab_CoreBrick $tplBrick){
         header("Content-Type: text/html; charset=utf-8");
         header("Expires: Mon, 26 Jul 2005 15:00:00 GMT");
         header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -423,8 +426,8 @@ class Ab_CoreBrickBuilder {
         header("Pragma: no-cache");
 
         $contentBrick = null;
-        foreach ($tplBrick->child as $cbrick) {
-            if ($cbrick->type == Brick::BRICKTYPE_CONTENT) {
+        foreach ($tplBrick->child as $cbrick){
+            if ($cbrick->type == Brick::BRICKTYPE_CONTENT){
                 $contentBrick = $cbrick;
                 break;
             }
@@ -437,14 +440,14 @@ class Ab_CoreBrickBuilder {
         $this->PrintBrick($tplBrick, $sa[1]);
     }
 
-    public function PrintBrick(Ab_CoreBrick $brick, $content) {
+    public function PrintBrick(Ab_CoreBrick $brick, $content){
         // Поиск в $content запросы на вставку данных из дочерних кирпичей $brick,
         // результат будет занесен в $mathes, для последующей обработки. 
         $mathes = array();
         preg_match_all("#\[mod\](.+?)\[/mod\]#is", $content, $mathes, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
 
         $position = 0;
-        foreach ($mathes as $value) {
+        foreach ($mathes as $value){
             // Пример $value: 
             //	Array (
             // 		[0] => Array (
@@ -466,17 +469,17 @@ class Ab_CoreBrickBuilder {
             // if (empty($mods)){ continue; }
 
             $printBrick = null;
-            foreach ($brick->child as $cbrick) {
+            foreach ($brick->child as $cbrick){
                 if ($cbrick->owner != $modName
                     || $cbrick->name != $modBrickName
                     || (isset($cbrick->param->param['id']) && $cbrick->param->param['id'] > 0 && $cbrick->param->param['id'] != $modId)
-                ) {
+                ){
                     continue;
                 }
                 $printBrick = $cbrick;
                 break;
             }
-            if (!is_null($printBrick)) {
+            if (!is_null($printBrick)){
                 print substr($content, $position, $value[0][1] - $position);
                 $this->PrintBrick($printBrick, $printBrick->content);
                 $position = $value[0][1] + strlen($value[0][0]);
@@ -492,13 +495,13 @@ class Ab_CoreBrickBuilder {
         print substr($content, $position, strlen($content) - $position);
     }
 
-    private function FetchVars(Ab_CoreBrick $brick) {
+    private function FetchVars(Ab_CoreBrick $brick){
 
-        if ($brick->type == Brick::BRICKTYPE_TEMPLATE) {
+        if ($brick->type == Brick::BRICKTYPE_TEMPLATE){
             $list = array();
-            foreach ($this->_jsmod as $key => $mod) {
+            foreach ($this->_jsmod as $key => $mod){
                 $files = array();
-                foreach ($mod as $file => $value) {
+                foreach ($mod as $file => $value){
                     $files[] = "'".$file."'";
                 }
                 $list[] = "{name:'".$key."',files:[".implode(',', $files)."]}";
@@ -508,31 +511,31 @@ class Ab_CoreBrickBuilder {
             $this->_globalVar['ttowner'] = $brick->owner;
 
             // добавление дополнительных JS файлов
-            foreach ($this->_jsfile as $value) {
+            foreach ($this->_jsfile as $value){
                 $brick->param->var['js'] .= "<script src='".$value."' language='JavaScript' type='text/javascript' charset='utf-8'></script>";
             }
             $this->_globalVar['js'] = $brick->param->var['js'];
 
 
-            foreach ($this->_cssmod as $modname => $files) {
-                foreach ($files as $file => $value) {
+            foreach ($this->_cssmod as $modname => $files){
+                foreach ($files as $file => $value){
                     $webcssfile = "/modules/".$modname."/css/".$file;
 
                     $weboverride = "/tt/".Brick::$style."/override/".$modname."/css/".$file;
-                    if (file_exists(CWD.$weboverride)) {
+                    if (file_exists(CWD.$weboverride)){
                         $webcssfile = $weboverride;
                     }
-                    if (!file_exists(CWD.$webcssfile)) {
+                    if (!file_exists(CWD.$webcssfile)){
                         continue;
                     }
-                    if (filesize(CWD.$webcssfile) <= 5) {
+                    if (filesize(CWD.$webcssfile) <= 5){
                         continue;
                     }
 
                     $this->AddCSSFile($webcssfile);
                 }
             }
-            foreach ($this->_tcssfile as $value) {
+            foreach ($this->_tcssfile as $value){
                 $this->AddCSSFile("/tt/".Brick::$style."/css/".$value);
             }
 
@@ -540,8 +543,8 @@ class Ab_CoreBrickBuilder {
             $sCSS = "";
             $aCSS = array();
             $sVersion = "";
-            foreach ($this->_cssfile as $value) {
-                if (!file_exists(CWD.$value)) {
+            foreach ($this->_cssfile as $value){
+                if (!file_exists(CWD.$value)){
                     $sCSS .= "<link href='".$value."' type='text/css' rel='stylesheet' />\n";
                     continue;
                 }
@@ -549,28 +552,28 @@ class Ab_CoreBrickBuilder {
                 $aCSS [] = $value;
             }
 
-            if (count($aCSS) > 0) {
+            if (count($aCSS) > 0){
                 $sCSS .= "<link href='/gzip.php?v=".md5($sVersion)."&file=".implode(",", $aCSS)."' type='text/css' rel='stylesheet' />\n";
             }
             $this->_globalVar['css'] = $brick->param->var['css'] = $sCSS;
         }
 
-        foreach ($brick->child as $childbrick) {
+        foreach ($brick->child as $childbrick){
             $this->FetchVars($childbrick);
         }
 
         $p = $brick->param;
-        foreach ($p->var as $key => $value) {
+        foreach ($p->var as $key => $value){
             $this->SetVar($brick, "[bkvar]".$key."[/bkvar]", $value);
         }
 
-        foreach ($p->gvar as $key => $value) {
+        foreach ($p->gvar as $key => $value){
             $this->SetVar($brick, "[var]".$key."[/var]", $this->_globalVar[$key]);
         }
 
-        foreach ($p->phrase as $key => $value) {
+        foreach ($p->phrase as $key => $value){
             $sa = explode(":", $key);
-            if (count($sa) == 2) {
+            if (count($sa) == 2){
                 $newval = Abricos::$phrases->GetList($sa[0])->Get($sa[1], $value)->value;
                 $this->SetVar($brick, "[ph]".$key."[/ph]", $newval);
             }
@@ -582,37 +585,37 @@ class Ab_CoreBrickBuilder {
      *
      * @param Ab_CoreBrick $brick
      */
-    private function TakeGlobalParam(Ab_CoreBrick $brick) {
-        if ($brick->type != Brick::BRICKTYPE_TEMPLATE) {
+    private function TakeGlobalParam(Ab_CoreBrick $brick){
+        if ($brick->type != Brick::BRICKTYPE_TEMPLATE){
             $this->SetUseModule($brick->owner);
         }
         $p = $brick->param;
-        foreach ($p->gvar as $key => $value) {
+        foreach ($p->gvar as $key => $value){
             $this->_globalVar[$key] = $value;
         }
-        foreach ($p->phrase as $key => $value) {
+        foreach ($p->phrase as $key => $value){
             $this->_phrase[$key] = $value;
         }
-        foreach ($p->jsfile as $value) {
+        foreach ($p->jsfile as $value){
             $this->AddJSFile($value);
         }
-        foreach ($p->css as $value) {
+        foreach ($p->css as $value){
             $this->AddCSSFile($value);
         }
-        foreach ($p->tcss as $value) {
+        foreach ($p->tcss as $value){
             $this->AddTemplateCSSFile($value);
         }
-        foreach ($p->jsmod as $key => $files) {
-            foreach ($files as $file) {
+        foreach ($p->jsmod as $key => $files){
+            foreach ($files as $file){
                 $this->_jsmod[$key][$file] = true;
             }
         }
-        foreach ($p->cssmod as $key => $files) {
-            foreach ($files as $file) {
+        foreach ($p->cssmod as $key => $files){
+            foreach ($files as $file){
                 $this->_cssmod[$key][$file] = true;
             }
         }
-        foreach ($brick->child as $childbrick) {
+        foreach ($brick->child as $childbrick){
             $this->TakeGlobalParam($childbrick);
         }
     }
@@ -622,25 +625,25 @@ class Ab_CoreBrickBuilder {
      *
      * @param Ab_CoreBrick $brick
      */
-    private function ExecuteBrick(Ab_CoreBrick $brick) {
+    private function ExecuteBrick(Ab_CoreBrick $brick){
 
         $p = $brick->param;
-        foreach ($brick->child as $childbrick) {
+        foreach ($brick->child as $childbrick){
             $this->ExecuteBrick($childbrick);
         }
-        foreach ($p->script as $script) {
+        foreach ($p->script as $script){
             $path = CWD;
-            if ($brick->type == Brick::BRICKTYPE_TEMPLATE) {
+            if ($brick->type == Brick::BRICKTYPE_TEMPLATE){
                 $path .= "/includes/over/";
             } else {
                 $path .= "/modules/".$brick->owner."/includes/";
             }
             $file = $path.$script;
-            if (!file_exists($file)) {
+            if (!file_exists($file)){
                 $brick->content .= "File not found: ".$file."\n";
             } else {
                 $mod = Abricos::GetModule($brick->owner);
-                if (empty($mod)) {
+                if (empty($mod)){
                     $brick->content .= "Module ".$brick->owner." not found!\n";
                 } else {
                     Brick::$builder->brick = $brick;
@@ -671,9 +674,9 @@ class Ab_CoreBrickManager {
      */
     public $custom = null;
 
-    public function __construct($useCustom = true) {
+    public function __construct($useCustom = true){
         // пользовательские кирпичи и параметры
-        if ($useCustom) {
+        if ($useCustom){
             $this->custom = new Ab_CoreCustomBrickManager();
         }
     }
@@ -685,29 +688,29 @@ class Ab_CoreBrickManager {
      * @param integer $brickType - тип кирпича
      * @param string $brickName - имя кирпича
      */
-    public function BuildOutput($owner, $brickName, $brickType, $parent = null, $inparam = null, $isFile = false) {
+    public function BuildOutput($owner, $brickName, $brickType, $parent = null, $inparam = null, $isFile = false){
         $cache = null;
         $db = Abricos::$db;
         $recache = false;
         $brick = null;
 
         // Если это кирпичь модуля, то необходимо проверить наличие модуля в системе
-        if ($brickType == Brick::BRICKTYPE_BRICK) {
+        if ($brickType == Brick::BRICKTYPE_BRICK){
             $mod = Abricos::GetModule($owner);
-            if (empty($mod)) {
+            if (empty($mod)){
                 return null;
             }
         }
 
         // кеш, применим только к шаблону
-        if ($brickType == Brick::BRICKTYPE_TEMPLATE) {
-            if (array_key_exists('brick_cache', Abricos::$config['Misc']) && Abricos::$config['Misc']['brick_cache']) {
+        if ($brickType == Brick::BRICKTYPE_TEMPLATE){
+            if (array_key_exists('brick_cache', Abricos::$config['Misc']) && Abricos::$config['Misc']['brick_cache']){
                 $time = TIMENOW - 5 * 360;
                 $cache = Ab_CoreQuery::Cache($db, $owner, $brickName);
-                if (empty($cache) || $cache['ud'] < $time) {
+                if (empty($cache) || $cache['ud'] < $time){
                     $recache = true;
                 }
-                if (!$recache && !empty($cache)) {
+                if (!$recache && !empty($cache)){
                     $brick = unserialize($cache['bd']);
                     return $brick;
                 }
@@ -715,13 +718,13 @@ class Ab_CoreBrickManager {
         }
 
         // Возможно кирпичь редактировался пользователем, тогда он будет взят из базы 
-        if (is_null($brick) && !is_null($this->custom)) {
+        if (is_null($brick) && !is_null($this->custom)){
             $customBrick = $this->custom->GetBrick($owner, $brickName, $brickType);
         }
         $brick = null;
-        if (empty($customBrick)) {
+        if (empty($customBrick)){
             // кирпич не найден в БД, читаем из файла
-            if ($isFile) {
+            if ($isFile){
                 $brickFF = Ab_CoreBrickReader::ReadBrickFromFile($brickName, $owner);
             } else {
                 $brickFF = Ab_CoreBrickReader::ReadBrick($owner, $brickName, $brickType);
@@ -737,8 +740,8 @@ class Ab_CoreBrickManager {
 
         $p = $brick->param;
         // если кирпич вызывается с параметрами, необходим изменить дефолтные
-        if (!empty($inparam)) {
-            foreach ($inparam as $key => $value) {
+        if (!empty($inparam)){
+            foreach ($inparam as $key => $value){
                 $p->param[$key] = $value;
             }
         }
@@ -746,31 +749,31 @@ class Ab_CoreBrickManager {
         $brick->param->var['brickid'] = $brick->id;
 
         // обработка вложенных кирпичей
-        if (!empty($p->template)) {
-            if (!empty(Abricos::$config["Template"]) && $p->template['owner'] != "_sys") {
+        if (!empty($p->template)){
+            if (!empty(Abricos::$config["Template"]) && $p->template['owner'] != "_sys"){
                 $uri = Abricos::$adress->requestURI;
                 $cfg = &Abricos::$config["Template"];
                 $find = false;
 
-                if (!empty($cfg["ignore"])) {
-                    foreach ($cfg["ignore"] as &$exp) {
+                if (!empty($cfg["ignore"])){
+                    foreach ($cfg["ignore"] as &$exp){
                         $find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
-                        if ($find) {
+                        if ($find){
                             break;
                         }
                     }
                 }
-                if (!$find && !empty($cfg["exp"])) {
-                    foreach ($cfg["exp"] as &$exp) {
+                if (!$find && !empty($cfg["exp"])){
+                    foreach ($cfg["exp"] as &$exp){
                         $find = $exp["regexp"] ? preg_match($exp["pattern"], $uri) : $exp["pattern"] == $uri;
-                        if ($find) {
+                        if ($find){
                             $p->template["owner"] = $exp["owner"];
                             $p->template["name"] = $exp["name"];
                             break;
                         }
                     }
                 }
-                if (!$find && !empty($cfg["default"])) {
+                if (!$find && !empty($cfg["default"])){
                     $p->template = $cfg["default"];
                 }
             }
@@ -778,16 +781,16 @@ class Ab_CoreBrickManager {
             // шаблон определенный администратором
             $mod = Abricos::GetModule($owner);
             $ttpl = $mod->GetTemplate();
-            if (!is_null($ttpl)) {
+            if (!is_null($ttpl)){
                 $p->template["owner"] = $ttpl["owner"];
                 $p->template["name"] = $ttpl["name"];
             }
 
             $sysPhrases = Abricos::GetModule('sys')->GetPhrases();
 
-            if (empty($p->template["owner"])) {
+            if (empty($p->template["owner"])){
                 $towner = $sysPhrases->Get('style', 'default');
-                if (!file_exists(CWD."/tt/".$towner."/main.html")) {
+                if (!file_exists(CWD."/tt/".$towner."/main.html")){
                     $p->template["owner"] = "default";
                     $sysPhrases->Set('style', 'default');
                 } else {
@@ -797,22 +800,22 @@ class Ab_CoreBrickManager {
             $childBrick = $this->BuildOutput($p->template["owner"], $p->template['name'], Brick::BRICKTYPE_TEMPLATE, $brick);
             $brick->child[] = $childBrick;
         }
-        if (!empty($p->module)) {
-            foreach ($p->module as $key => $value) {
-                foreach ($value as $obj) {
-                    if (!property_exists($obj, 'param')) {
+        if (!empty($p->module)){
+            foreach ($p->module as $key => $value){
+                foreach ($value as $obj){
+                    if (!property_exists($obj, 'param')){
                         $obj->param = false;
                     }
                     $childBrick = $this->BuildOutput($key, $obj->name, Brick::BRICKTYPE_BRICK, $brick, $obj->param);
-                    if (is_null($childBrick)) {
+                    if (is_null($childBrick)){
                         continue;
                     }
                     $brick->child[] = $childBrick;
                 }
             }
         }
-        if ($brickType == Brick::BRICKTYPE_TEMPLATE && $recache) {
-            if (empty($cache)) {
+        if ($brickType == Brick::BRICKTYPE_TEMPLATE && $recache){
+            if (empty($cache)){
                 Ab_CoreQuery::CacheAppend($db, $owner, $brickName, serialize($brick));
             } else {
                 Ab_CoreQuery::CacheUpdate($db, $cache['id'], serialize($brick));
@@ -829,12 +832,12 @@ class Ab_CoreBrickManager {
      * @param integer $brickType
      * @param Ab_CoreBrickParam $param
      */
-    private function SyncParam($owner, $brickName, $brickType, Ab_CoreBrickParam $param) {
-        if (is_null($this->custom)) {
+    private function SyncParam($owner, $brickName, $brickType, Ab_CoreBrickParam $param){
+        if (is_null($this->custom)){
             return;
         }
         $customParam = $this->custom->GetParams($brickType, $owner, $brickName);
-        if (empty($customParam)) {
+        if (empty($customParam)){
             return;
         }
         Ab_CoreBrickReader::SyncParamFromDB($param, $customParam);
@@ -1002,7 +1005,7 @@ class Ab_CoreBrick {
      */
     public $isError = false;
 
-    public function __construct($owner, $name, $type, $content, $param, $parent) {
+    public function __construct($owner, $name, $type, $content, $param, $parent){
         $this->owner = $owner;
         $this->name = $name;
         $this->type = $type;
@@ -1030,44 +1033,41 @@ class Ab_CoreCustomBrickManager {
     public $bricks = array();
     public $params = array();
 
-    public function __construct() {
+    public function __construct(){
         $db = Abricos::$db;
         $rows = Ab_CoreQuery::BrickListCustom($db);
-        while (($row = $db->fetch_array($rows))) {
+        while (($row = $db->fetch_array($rows))){
             $key = $row['own'].$row['nm'].$row['tp'];
             $this->bricks[$key] = $row;
         }
 
         $rows = Ab_CoreQuery::BrickParamListCustom($db);
-        while (($row = $db->fetch_array($rows))) {
+        while (($row = $db->fetch_array($rows))){
             $k1 = $row['bown'].$row['bnm'].$row['btp'];
-            if (!is_array($this->params[$k1])) {
+            if (!is_array($this->params[$k1])){
                 $this->params[$k1] = array();
             }
             $this->params[$k1][] = $row;
         }
     }
 
-    public function GetBrick($owner, $name, $type) {
+    public function GetBrick($owner, $name, $type){
         $key = $owner.$name.$type;
-        if (!array_key_exists($key, $this->bricks)) {
+        if (!array_key_exists($key, $this->bricks)){
             return null;
         }
 
         return $this->bricks[$key];
     }
 
-    public function GetParam($brickType, $brickOwner, $brickName) {
+    public function GetParam($brickType, $brickOwner, $brickName){
         return $this->GetParams($brickOwner, $brickName, $brickType);
     }
 
-    public function GetParams($brickType, $brickOwner, $brickName) {
+    public function GetParams($brickType, $brickOwner, $brickName){
         $key = $brickOwner.$brickName.$brickType;
 
         return array_key_exists($key, $this->params) ? $this->params[$key] : null;
     }
 
 }
-
-
-?>

@@ -6,7 +6,6 @@
 
 var Component = new Brick.Component();
 Component.requires = {
-    yui: ['model', 'model-list'],
     mod: [
         {name: 'sys', files: ['widget.js']}
     ]
@@ -22,9 +21,6 @@ Component.entryPoint = function(NS){
     Form.ATTRS = {
         boundingBox: {
             setter: Y.one
-        },
-        modelClass: {
-            value: Y.Model
         },
         model: {
             value: null,
@@ -102,12 +98,13 @@ Component.entryPoint = function(NS){
             var focusField = this.get('formFocusField'),
                 focusFieldNode;
 
+            var data = model.toJSON(model.isAppModel);
+
             this.eachFieldNode(function(name, node){
-                if (!model.attrAdded(name)
-                    || node.get('type') === 'hidden'){
+                if (!(name in data) || node.get('type') === 'hidden'){
                     return;
                 }
-                var value = model.get(name);
+                var value = data[name];
                 if (Form.isCheckable(node)){
                     node.set('checked', value ? 'checked' : '');
                 } else {

@@ -1,4 +1,12 @@
 <?php
+/**
+ * @package Abricos
+ * @subpackage Core
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
+ * @link http://abricos.org
+ */
 
 require_once 'admin_structure.php';
 require_once 'admin_dbquery.php';
@@ -15,17 +23,17 @@ class SystemManager_Admin {
      */
     public $db;
 
-    public function __construct(SystemManager $manager) {
+    public function __construct(SystemManager $manager){
         $this->manager = $manager;
         $this->db = $manager->db;
     }
 
-    public function IsAdminRole() {
+    public function IsAdminRole(){
         return $this->manager->IsAdminRole();
     }
 
-    public function AJAX($d) {
-        switch ($d->do) {
+    public function AJAX($d){
+        switch ($d->do){
             case "coreConfig":
                 return $this->CoreConfigToAJAX();
             case "coreConfigSave":
@@ -37,8 +45,8 @@ class SystemManager_Admin {
     }
 
 
-    public function ModuleListToAJAX() {
-        if (!$this->IsAdminRole()) {
+    public function ModuleListToAJAX(){
+        if (!$this->IsAdminRole()){
             return 403;
         }
         Abricos::$modules->RegisterAllModule();
@@ -48,18 +56,18 @@ class SystemManager_Admin {
     }
 
 
-    public function TemplateList() {
-        if (!$this->IsAdminRole()) {
+    public function TemplateList(){
+        if (!$this->IsAdminRole()){
             return null;
         }
 
         $rows = array();
         $dir = dir(CWD."/tt");
-        while (false !== ($entry = $dir->read())) {
-            if ($entry == "." || $entry == ".." || empty($entry) || $entry == "_sys" || $entry == "_my") {
+        while (false !== ($entry = $dir->read())){
+            if ($entry == "." || $entry == ".." || empty($entry) || $entry == "_sys" || $entry == "_my"){
                 continue;
             }
-            if (!file_exists(CWD."/tt/".$entry."/main.html")) {
+            if (!file_exists(CWD."/tt/".$entry."/main.html")){
                 continue;
             }
             $rows[] = $entry;
@@ -68,9 +76,9 @@ class SystemManager_Admin {
         return $rows;
     }
 
-    public function CoreConfigToAJAX() {
+    public function CoreConfigToAJAX(){
         $config = $this->CoreConfig();
-        if (empty($config)) {
+        if (empty($config)){
             return 403;
         }
 
@@ -79,8 +87,8 @@ class SystemManager_Admin {
         return $ret;
     }
 
-    public function CoreConfig() {
-        if (!$this->IsAdminRole()) {
+    public function CoreConfig(){
+        if (!$this->IsAdminRole()){
             return null;
         }
         $phs = SystemModule::$instance->GetPhrases();
@@ -98,39 +106,39 @@ class SystemManager_Admin {
         return $ret;
     }
 
-    public function CoreConfigSaveToAJAX($d) {
-        if (!$this->CoreConfigSave($d)) {
+    public function CoreConfigSaveToAJAX($d){
+        if (!$this->CoreConfigSave($d)){
             return 403;
         }
         return $this->CoreConfigToAJAX();
     }
 
-    public function CoreConfigSave($d) {
-        if (!$this->IsAdminRole()) {
+    public function CoreConfigSave($d){
+        if (!$this->IsAdminRole()){
             return false;
         }
         $d = array_to_object($d);
 
         $phs = SystemModule::$instance->GetPhrases();
-        if (isset($d->site_name)) {
+        if (isset($d->site_name)){
             $phs->Set('site_name', $d->site_name);
         }
-        if (isset($d->site_title)) {
+        if (isset($d->site_title)){
             $phs->Set('site_title', $d->site_title);
         }
-        if (isset($d->admin_mail)) {
+        if (isset($d->admin_mail)){
             $phs->Set('admin_mail', $d->admin_mail);
         }
-        if (isset($d->meta_title)) {
+        if (isset($d->meta_title)){
             $phs->Set('meta_title', $d->meta_title);
         }
-        if (isset($d->meta_keys)) {
+        if (isset($d->meta_keys)){
             $phs->Set('meta_keys', $d->meta_keys);
         }
-        if (isset($d->meta_desc)) {
+        if (isset($d->meta_desc)){
             $phs->Set('meta_desc', $d->meta_desc);
         }
-        if (isset($d->style)) {
+        if (isset($d->style)){
             $phs->Set('style', $d->style);
         }
 
@@ -138,8 +146,5 @@ class SystemManager_Admin {
 
         return true;
     }
-
-
 }
 
-?>
