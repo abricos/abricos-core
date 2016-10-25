@@ -216,7 +216,7 @@ class Ab_URI {
         $requestUri = $a['path'];
 
         $this->host = "http://".Ab_URI::fetch_host();
-        $requestUri = strtolower($requestUri);
+        // $requestUri = strtolower($requestUri);
         $this->requestURI = $requestUri;
         $arr = parse_url($requestUri);
         $script = $arr['path'];
