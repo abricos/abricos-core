@@ -482,7 +482,13 @@ final class Abricos {
         return Abricos::$_json;
     }
 
+    private static $_appCache = array();
+
     public static function GetApp($moduleName){
+        if (isset(Abricos::$_appCache[$moduleName])){
+            return Abricos::$_appCache[$moduleName];
+        }
+
         $module = Abricos::GetModule($moduleName);
         if (empty($module)){
             return null;
@@ -492,6 +498,7 @@ final class Abricos {
             return null;
         }
         $app = $manager->GetApp();
+        Abricos::$_appCache[$moduleName] = $app;
         if (empty($app)){
             return null;
         }
