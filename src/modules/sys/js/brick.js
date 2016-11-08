@@ -767,19 +767,36 @@ Brick.namespace('util');
 
         Brick.AppRoles.instances[mName] = this;
 
-        var _isLoadRoles = false;
-
-        this._setRoles = function(user){
+        this._setRoles = function(){
+            var user = Brick.AppRoles.user;
             for (var nRole in mRoles){
                 this[nRole] = user ? user.isRoleEnable(mName, mRoles[nRole]) : false;
             }
         };
 
         this.load = function(callback, context){
-            Brick.appFunc('user', 'userCurrent', function(err, res){
-                _isLoadRoles = true;
+            if (Brick.AppRoles._loadProcess){
+                var instance = this;
+                return setTimeout(function(){
+                    instance.load(callback, context);
+                }, 100);
+            }
 
-                this._setRoles(res.userCurrent);
+            if (Brick.AppRoles.user){
+                this._setRoles();
+                if (Y.Lang.isFunction(callback)){
+                    callback.call(context, this);
+                }
+                return;
+            }
+
+            Brick.AppRoles._loadProcess = true;
+
+            Brick.appFunc('user', 'userCurrent', function(err, res){
+                Brick.AppRoles.user = res.userCurrent;
+                this._setRoles();
+
+                Brick.AppRoles._loadProcess = false;
 
                 if (Y.Lang.isFunction(callback)){
                     callback.call(context, this);
@@ -787,6 +804,9 @@ Brick.namespace('util');
             }, this);
         }
     };
+
+    Brick.AppRoles.user = null;
+    Brick.AppRoles._loadProcess = false;
 
     Brick.AppRoles.instances = {};
 
