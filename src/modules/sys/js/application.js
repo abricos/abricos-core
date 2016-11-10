@@ -1126,37 +1126,41 @@ Component.entryPoint = function(NS){
         _appSourceUpdate: function(){
             this.appSourceUpdate();
         },
-        appSourceUpdate: function(){
-            var bbox = this.get(BOUNDING_BOX),
-                name, a, obj;
-
-            bbox.all('[data-src]').each(function(node){
-                name = (node.getData('src') || '').replace(/\s+/g, '');
-                a = name.split(':');
+        getValueByPath: function(path){
+            var a = path.split(':'),
                 obj = a[0] === 'this' ? this : Brick.mod[a[0]];
 
-                if (!Y.Lang.isObject(obj) || !a[1]){
+            if (!Y.Lang.isObject(obj) || !a[1]){
+                return;
+            }
+
+            var aPath = a[1].split('.');
+
+            for (var i = 0, item; i < aPath.length; i++){
+                item = aPath[i];
+
+                if (!Y.Lang.isObject(obj)){
                     return;
                 }
 
-                var path = a[1].split('.');
-
-                for (var i = 0, item; i < path.length; i++){
-                    item = path[i];
-
-                    if (!Y.Lang.isObject(obj)){
-                        return;
-                    }
-
-                    if (obj.hasOwnProperty(item)){
-                        obj = obj[item];
-                    } else if (Y.Lang.isFunction(obj.attrAdded)
-                        && obj.attrAdded(item)){
-                        obj = obj.get(item);
-                    } else {
-                        return;
-                    }
+                if (obj.hasOwnProperty(item)){
+                    obj = obj[item];
+                } else if (Y.Lang.isFunction(obj.attrAdded)
+                    && obj.attrAdded(item)){
+                    obj = obj.get(item);
+                } else {
+                    return;
                 }
+            }
+            return obj;
+        },
+        appSourceUpdate: function(){
+            var bbox = this.get(BOUNDING_BOX),
+                path, obj;
+
+            bbox.all('[data-src]').each(function(node){
+                path = (node.getData('src') || '').replace(/\s+/g, '');
+                obj = this.getValueByPath(path);
 
                 if (!Y.Lang.isString(obj) && !Y.Lang.isNumber(obj)){
                     return;
@@ -1173,6 +1177,20 @@ Component.entryPoint = function(NS){
                         node.setHTML(obj);
                         break;
                 }
+            }, this);
+
+            bbox.all('[data-href]').each(function(node){
+                if (node.get('tagName') !== 'A'){
+                    return;
+                }
+                path = (node.getData('href') || '').replace(/\s+/g, '');
+                obj = this.getValueByPath(path);
+
+                if (!Y.Lang.isString(obj)){
+                    return;
+                }
+
+                node.set('href', obj);
             }, this);
         },
         _appTriggerUpdate: function(){
