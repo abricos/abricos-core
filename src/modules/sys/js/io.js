@@ -1,9 +1,3 @@
-/*!
- * Abricos Platform (http://abricos.org)
- * Copyright 2008-2016 Alexander Kuzmin <roosit@abricos.org>
- * Licensed under the MIT license
- */
-
 var Component = new Brick.Component();
 Component.requires = {
     yui: ['io', 'json']
@@ -48,7 +42,7 @@ Component.entryPoint = function(NS){
             return '/tajax/' + moduleName + '/' + uniqueURL() + '/';
         },
         ajax: function(data, callback, options){
-            options || (options = {})
+            options || (options = {});
 
             options.arguments = options.arguments || {};
 
@@ -111,15 +105,50 @@ Component.entryPoint = function(NS){
                 return;
             }
 
-            var msg = LNG.get('ajax.error.' + err.code);
-            if (msg === '' && this.language && details.action){
-                msg = this.language.get('ajax.' + details.action + '.error.' + err.code);
+            var msg = LNG.get('ajax.error.' + err.code),
+                lng = this.language,
+                action = details.action || '',
+                errTemplate = this.get('errorTemplate'),
+                ovrMsg;
+
+            if (lng && action){
+                ovrMsg = lng.get('ajax.' + action + '.error.' + err.code);
+                if (!ovrMsg){
+                    ovrMsg = lng.get('ajax.' + action + '.error.' + err.code + '.default');
+                }
+
+                var cName = this.get('component').name,
+                    extLang = this.get('component').language[cName],
+                    subCode = err.subCode | 0;
+
+                if (subCode > 0
+                    && extLang['ajax']
+                    && extLang['ajax'][action]
+                    && extLang['ajax'][action]['error']
+                    && Y.Lang.isObject(extLang['ajax'][action]['error'][err.code])){
+
+                    extLang = extLang['ajax'][action]['error'][err.code];
+
+                    var iCode;
+                    for (var name in extLang){
+                        if (!extLang.hasOwnProperty(name)){
+                            continue;
+                        }
+                        iCode = name | 0;
+                        if (iCode === 0){
+                            continue;
+                        }
+                        if ((subCode & iCode) > 0){
+                            ovrMsg = extLang[name] + '';
+                        }
+                    }
+                }
             }
+            msg = ovrMsg || msg;
 
             if (msg && msg !== ''){
-                if (this.language){
-                    var errTitle = this.language.get('ajax.' + details.action + '.error.title'),
-                        errTemplate = this.get('errorTemplate');
+                if (lng){
+                    var errTitle = lng.get('ajax.' + details.action + '.error.title');
 
                     if (errTitle !== ''){
                         msg = errTemplate.replace("{v#msg}", msg);
@@ -148,13 +177,19 @@ Component.entryPoint = function(NS){
         _onAJAXIOSuccess: function(txId, res, details){
             var callback = details.callback,
                 context = details.context,
+                detArgs = details.arguments,
+                action = detArgs.action,
                 request = new NS.AJAXRequest({
                     request: res
-                });
+                }),
+                err = null,
+                data = request.data || {};
 
-            var err = null, data = request.data || {};
             if (res && data && data.err > 0){
                 err = {code: data.err, msg: ''};
+                if (data[action] && data[action].code){
+                    err.subCode = data[action].code;
+                }
             }
 
             this._treatAJAXError(err, details.arguments);
