@@ -444,12 +444,23 @@ class Ab_CoreBrickReader {
 
         $oData = Ab_CoreBrickReader::ReadBrickFromFile($partPath, $modname);
 
+        $overrideContent = false;
+
         if (is_array($oData->param->param)){
             $oP = &$oData->param->param;
             foreach ($oP as $name => $key){
-                $ret->param->param[$name] = $key;
+                if ($name === 'overrideContent'){
+                    $overrideContent = true;
+                }else{
+                    $ret->param->param[$name] = $key;
+                }
             }
         }
+
+        if ($overrideContent){
+            $ret->body = $oData->body;
+        }
+
         if (is_array($oData->param->var)){
             $oP = &$oData->param->var;
             foreach ($oP as $name => $key){
