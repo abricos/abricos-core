@@ -589,7 +589,8 @@ Component.entryPoint = function(NS){
                     app = this.appInstance.getApp(typeModule);
 
                     if (!app){
-                        throw 'Type Module "' + typeModule + '" not found in AppStructure';
+                        // throw 'Type Module "' + typeModule + '" not found in AppStructure';
+                        return null;
                     }
                 }
 
