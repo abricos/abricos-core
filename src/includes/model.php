@@ -321,7 +321,7 @@ class AbricosModelList extends AbricosList {
      */
     protected $_structure = null;
 
-    public function __construct($items = null){
+    public function __construct($items = null, $options = null){
         parent::__construct();
 
         if (is_string($this->_structModule)){
@@ -349,7 +349,12 @@ class AbricosModelList extends AbricosList {
                 }
             }
         }
+
         $this->Update($items);
+    }
+
+    protected function OptionsNormalize($options = null){
+
     }
 
     /**
@@ -582,7 +587,7 @@ class AbricosModelManager {
     }
 
     /**
-     * @param Ab_Module $module
+     * @param Ab_Module $module|string
      * @return AbricosModelManager
      */
     public static function GetManager($module){

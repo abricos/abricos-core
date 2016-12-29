@@ -809,7 +809,7 @@ Component.entryPoint = function(NS){
                     if (!err){
                         tRes = Y.merge(tRes, result || {});
                     }
-                    return complete.call(this);
+                    return rCallbackFire.call(this, cbList);
                 }, this);
             };
 
