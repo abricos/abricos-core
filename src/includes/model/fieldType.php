@@ -8,19 +8,36 @@
  * @link http://abricos.org
  */
 
+return;
 
 /**
  * Class Ab_FieldType
+ *
+ * @property string $name
+ * @property string $fieldClass
  */
 abstract class Ab_FieldType {
 
+    protected $_name = 'undefined';
+
+    protected $_fieldClass;
+
+    public function __get($name){
+        switch ($name){
+            case 'name':
+                return $this->_name;
+            case 'fieldClass':
+                return $this->_fieldClass;
+        }
+    }
+
     /**
-     * @var string
+     * Create field on this type
+     *
+     * @param string $id
+     * @param null $data
+     * @return mixed
      */
-    public $name;
-
-    protected $fieldClass;
-
     public function Instance($id, $data = null){
         $field = new $this->fieldClass($this, $id);
 
@@ -32,11 +49,11 @@ abstract class Ab_FieldType {
     protected abstract function Init($field, $data);
 }
 
-class Ab_StringFieldType extends Ab_FieldType {
+class Ab_FieldTypeString extends Ab_FieldType {
 
-    public $name = 'string';
+    protected $_name = 'string';
 
-    protected $fieldClass = 'Ab_StringField';
+    protected $fieldClass = 'Ab_FieldString';
 
     protected function Init($field, $data){
         if (isset($data->valid)){
@@ -50,10 +67,10 @@ class Ab_StringFieldType extends Ab_FieldType {
 }
 
 
-class Ab_IntFieldType extends Ab_FieldType {
+class Ab_FieldTypeInt extends Ab_FieldType {
     public $name = 'int';
 
-    protected $fieldClass = 'Ab_StringField';
+    protected $fieldClass = 'Ab_FieldString';
 
     protected function Init($field, $data){
 
@@ -62,12 +79,9 @@ class Ab_IntFieldType extends Ab_FieldType {
 
 class Ab_FieldTypeManager {
 
-    private static $_types = array(
-        'int' => 'Ab_IntFieldType',
-        'string' => 'Ab_StringFieldType',
-    );
+    private static $_types = array();
 
-    public static function Add($name, $className){
+    public static function Register($name, $className){
         if (isset(Ab_FieldTypeManager::$_types[$name])){
             throw new Exception('Type `'.$name.'` is added');
         }
@@ -85,3 +99,6 @@ class Ab_FieldTypeManager {
         return Ab_FieldTypeManager::$_types[$name];
     }
 }
+
+Ab_FieldTypeManager::Register('int', 'Ab_FieldTypeInt');
+Ab_FieldTypeManager::Register('string', 'Ab_FieldTypeString');

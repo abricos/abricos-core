@@ -71,7 +71,7 @@ class Ab_StructureModel extends Ab_Structure {
 
         $dFields = isset($data->fields) ? $data->fields : null;
 
-        $this->fields = new Ab_FieldList($dFields);
+        $this->fields = new Ab_Fields($dFields);
     }
 
     public function ToJSON(){
