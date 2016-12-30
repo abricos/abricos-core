@@ -26,21 +26,6 @@ require_once 'moduleInfo.php';
 abstract class Ab_Module {
 
     /**
-     * CSS по умолчанию (имя файла в папке css модуля).
-     *
-     * @deprecated
-     */
-    private $defaultCSS = "";
-
-    /**
-     * TODO: remove
-     *
-     * @deprecated
-     */
-    private $lang;
-
-
-    /**
      * Ошибка модуля. Если true, модуль не инициализируется в ядре
      *
      * @var boolean
@@ -167,7 +152,7 @@ abstract class Ab_Module {
     private $_manager = null;
 
     /**
-     * @return Ab_ModuleManager
+     * @return Ab_ModuleManager|null
      */
     public function GetManager(){
         if (is_null($this->_manager)){
@@ -175,7 +160,7 @@ abstract class Ab_Module {
 
             $className = $this->GetManagerClassName();
             if (!class_exists($className)){
-                return;
+                return null;
             }
             $this->_manager = new $className($this);
         }
@@ -230,6 +215,21 @@ abstract class Ab_Module {
             throw new Exception("Script `$file` not found in module `$this->name`");
         }
         return require_once $path;
+    }
+
+    private $_structures = null;
+
+
+    /**
+     * @param string $name
+     * @return Ab_Structure
+     */
+    public function GetStructure($name){
+        if (empty($this->_structures)){
+            $this->_structures = new Ab_ModuleStructures($this);
+        }
+
+        return $this->_structures->Get($name);
     }
 }
 
@@ -680,6 +680,11 @@ class Ab_CoreModuleManager {
         if (empty($name)){
             return null;
         }
+
+        if ($name instanceof Ab_Module){
+            return $name;
+        }
+
         $modInfo = $this->list->Get($name);
 
         if (!empty($modInfo) && !empty($modInfo->instance)){

@@ -58,11 +58,14 @@ class Ab_IntFieldType extends Ab_FieldType {
     protected function Init($field, $data){
 
     }
-
 }
 
 class Ab_FieldTypeManager {
-    private static $_types = array();
+
+    private static $_types = array(
+        'int' => 'Ab_IntFieldType',
+        'string' => 'Ab_StringFieldType',
+    );
 
     public static function Add($name, $className){
         if (isset(Ab_FieldTypeManager::$_types[$name])){
@@ -82,6 +85,3 @@ class Ab_FieldTypeManager {
         return Ab_FieldTypeManager::$_types[$name];
     }
 }
-
-Ab_FieldTypeManager::Add('int', 'Ab_IntFieldType');
-Ab_FieldTypeManager::Add('string', 'Ab_StringFieldType');

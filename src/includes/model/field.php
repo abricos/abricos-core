@@ -14,7 +14,7 @@
 abstract class Ab_Field extends AbricosItem {
 
     /**
-     * @var Ab_Field
+     * @var Ab_FieldType
      */
     public $type;
 
@@ -31,6 +31,14 @@ abstract class Ab_Field extends AbricosItem {
 
     public function __set($name, $value){
         $this->_data[$name] = $value;
+    }
+
+    public function ToJSON(){
+        $ret = parent::ToJSON();
+        unset($ret->id);
+        $ret->name = $this->id;
+        $ret->type = $this->type->id;
+        return $ret;
     }
 }
 

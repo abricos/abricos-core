@@ -103,6 +103,9 @@ if (!defined('CWD')){
 
 require_once('includes/classes.php');
 require_once('includes/structure.php');
+
+require_once('includes/model/model.php');
+
 require_once('includes/functions.php');
 require_once('includes/core.php');
 require_once('includes/inputcleaner.php');
