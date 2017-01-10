@@ -15,6 +15,11 @@
 abstract class Ab_Application extends Ab_Cache {
 
     /**
+     * @var Ab_Module
+     */
+    public $module;
+
+    /**
      * @var Ab_ModuleManager
      */
     public $manager;
@@ -24,11 +29,10 @@ abstract class Ab_Application extends Ab_Cache {
      */
     public $db;
 
-    /**
-     * @param Ab_ModuleManager $manager
-     * @param array $appExtends (optional)
-     */
+    protected $aliases = array();
+
     public function __construct(Ab_ModuleManager $manager){
+        $this->module = $manager->module;
         $this->manager = $manager;
         $this->db = $manager->db;
     }
@@ -36,6 +40,36 @@ abstract class Ab_Application extends Ab_Cache {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     /*                         Models                        */
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+    /**
+     * Deprecated. Use $this->aliases
+     *
+     * @return array
+     * @deprecated
+     */
+    protected function GetClasses(){
+    }
+
+    protected abstract function GetStructures();
+
+    public function InstanceClass($className){
+        $args = func_get_args();
+        $p = array();
+        for ($i = 0; $i < 3; $i++){
+            $p[$i] = isset($args[$i]) ? $args[$i] : null;
+        }
+
+        if (isset($this->aliases[$className])){
+            $className = $this->aliases[$className];
+        }
+
+        if (!class_exists($className)){
+            $moduleName = $this->module->name;
+            throw new Exception("Class `$className` not defined (`$moduleName` module)");
+        }
+
+        return new $className($this, $p[0], $p[1], $p[2]);
+    }
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */

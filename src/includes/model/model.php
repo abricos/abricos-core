@@ -13,23 +13,52 @@ require_once 'field.php';
 require_once 'structure.php';
 
 /**
- * Class Ab_Structure
- *
- * @property string $type
- * @property string $version
+ * Class Ab_ModelBase
  */
 abstract class Ab_ModelBase extends AbricosItem {
 
-    protected $_type = 'undefined';
+    protected $_structName;
 
-    protected $_version = '0.1.0';
+    /**
+     * @var Ab_Structure
+     */
+    protected $_structure;
 
-    public function __get($name){
-        switch ($name){
-            case 'type':
-                return $this->_type;
-            case 'version':
-                return $this->_version;
+    protected $_data = array();
+
+    /**
+     * Ab_ModelBase constructor.
+     *
+     * @throws Exception
+     *
+     * @param Ab_Application $app
+     * @param mixed|null $data
+     * @param mixed|null $vars
+     */
+    public function __construct($app, $data = null, $vars = null){
+        $struct = $app->module->GetStructure($this->_structName);
+
+        if (empty($struct)){
+            throw new Exception("Structure `$this->_structName` not found");
+        }
+
+        $this->_structure = $struct;
+
+        $this->Update($data);
+    }
+
+    public function Update($d){
+        if (is_object($d)){
+            $d = get_object_vars($d);
+        } else if (empty($d)){
+            $d = array();
+        }
+
+        $fields = $this->_structure->fields;
+        for ($i = 0, $count = $fields->Count(); $i < $count; $i++){
+            $field = $fields->GetByIndex($i);
         }
     }
+
+
 }

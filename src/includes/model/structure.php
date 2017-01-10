@@ -23,12 +23,21 @@ abstract class Ab_Structure {
 
     protected $_name;
 
+    /**
+     * @var Ab_Fields
+     */
+    public $fields;
+
     public function __construct($name, $data = null){
         $this->_name = $name;
 
         if (isset($data->version)){
             $this->_version = $data->version;
         }
+
+        $dFields = isset($data->fields) ? $data->fields : null;
+
+        $this->fields = new Ab_Fields($dFields);
     }
 
     public function __get($name){
@@ -48,6 +57,11 @@ abstract class Ab_Structure {
         $ret->name = $this->name;
         $ret->version = $this->version;
 
+        if ($this->fields->Count() > 0){
+            $rFields = $this->fields->ToJSON();
+            $ret->fields = $rFields->list;
+        }
+
         return $ret;
     }
 }
@@ -57,21 +71,12 @@ class Ab_StructureModel extends Ab_Structure {
 
     public $idField = 'id';
 
-    /**
-     * @var Ab_FieldList
-     */
-    public $fields;
-
     public function __construct($name, $data){
         parent::__construct($name, $data);
 
         if (isset($data->idField)){
             $this->idField = $data->idField;
         }
-
-        $dFields = isset($data->fields) ? $data->fields : null;
-
-        $this->fields = new Ab_Fields($dFields);
     }
 
     public function ToJSON(){
@@ -79,11 +84,6 @@ class Ab_StructureModel extends Ab_Structure {
         if ($this->idField !== 'id'){
             $ret->idField = $this->idField;
         }
-
-        $rFields = $this->fields->ToJSON();
-
-        $ret->fields = $rFields->list;
-
         return $ret;
     }
 }
