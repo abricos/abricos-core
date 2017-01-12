@@ -38,8 +38,8 @@ abstract class Ab_Field extends AbricosItem {
         if (isset($data->rolefn)){
             $this->rolefn = $data->rolefn;
         }
-        if (isset($data->notNULL) && $data->notNULL){
-            $this->notNULL = true;
+        if (isset($data->notNULL)){
+            $this->notNULL = !!$data->notNULL;
         }
     }
 
