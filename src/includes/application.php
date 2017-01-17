@@ -8,12 +8,10 @@
  * @link http://abricos.org
  */
 
-
 /**
  * Class Ab_Application
  */
-abstract class Ab_Application extends Ab_Cache {
-
+abstract class Ab_App extends Ab_Cache {
     /**
      * @var Ab_Module
      */
@@ -41,17 +39,6 @@ abstract class Ab_Application extends Ab_Cache {
     /*                         Models                        */
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    /**
-     * Deprecated. Use $this->aliases
-     *
-     * @return array
-     * @deprecated
-     */
-    protected function GetClasses(){
-    }
-
-    protected abstract function GetStructures();
-
     public function InstanceClass($className){
         $args = func_get_args();
         $p = array();
@@ -72,11 +59,26 @@ abstract class Ab_Application extends Ab_Cache {
     }
 
 
+    /**
+     * Deprecated. Use $this->aliases
+     *
+     * @return array
+     * @deprecated
+     */
+    protected function GetClasses(){
+    }
+
+    protected function GetStructures(){
+    }
+
+
+
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     /*                          AJAX                         */
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    public abstract function ResponseToJSON($d);
+    public function ResponseToJSON($d){
+    }
 
     public function AJAX($d){
         $d->do = isset($d->do) ? strval($d->do) : '';

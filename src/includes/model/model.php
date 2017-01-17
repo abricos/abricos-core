@@ -8,7 +8,6 @@
  * @link http://abricos.org
  */
 
-require_once 'fieldType.php';
 require_once 'field.php';
 require_once 'structure.php';
 
@@ -17,6 +16,14 @@ require_once 'structure.php';
  */
 abstract class Ab_ModelBase extends AbricosItem {
 
+    /**
+     * @var string
+     */
+    protected $_structModule;
+
+    /**
+     * @var string
+     */
     protected $_structName;
 
     /**
@@ -24,41 +31,89 @@ abstract class Ab_ModelBase extends AbricosItem {
      */
     protected $_structure;
 
-    protected $_data = array();
-
     /**
-     * Ab_ModelBase constructor.
-     *
-     * @throws Exception
-     *
-     * @param Ab_Application $app
-     * @param mixed|null $data
-     * @param mixed|null $vars
+     * @var Ab_FieldsData
      */
-    public function __construct($app, $data = null, $vars = null){
-        $struct = $app->module->GetStructure($this->_structName);
+    protected $_fieldsData;
 
-        if (empty($struct)){
-            throw new Exception("Structure `$this->_structName` not found");
-        }
-
-        $this->_structure = $struct;
-
+    public function __construct($data = null){
         $this->Update($data);
     }
 
-    public function Update($d){
-        if (is_object($d)){
-            $d = get_object_vars($d);
-        } else if (empty($d)){
-            $d = array();
+    public function GetStructure(){
+        if (isset($this->_structure)){
+            return $this->_structure;
         }
 
-        $fields = $this->_structure->fields;
-        for ($i = 0, $count = $fields->Count(); $i < $count; $i++){
-            $field = $fields->GetByIndex($i);
+        $module = Abricos::GetModule($this->_structModule);
+        $structure = $module->GetStructure($this->_structName);
+
+        if (empty($structure)){
+            throw new Exception(
+                "Structure `$this->_structName` not found in module `".$this->_structModule."`"
+            );
         }
+
+        return $this->_structure = $structure;
     }
 
+    protected function GetFieldsData(){
+        if (isset($this->_fieldsData)){
+            return $this->_fieldsData;
+        }
+        $struct = $this->GetStructure();
+        return $this->_fieldsData = new Ab_FieldsData($struct->fields);
+    }
+
+    public function __get($name){
+        if (!$this->_fieldsData){
+            $this->GetFieldsData();
+        }
+        return $this->_fieldsData->Get($name);
+    }
+
+    public function __set($name, $value){
+        if (!$this->_fieldsData){
+            $this->GetFieldsData();
+        }
+        $this->_fieldsData->Set($name, $value);
+    }
+
+    public function Update($data){
+        if (!$this->_fieldsData){
+            $this->GetFieldsData();
+        }
+        $this->_fieldsData->Update($data);
+    }
+
+    /**
+     * @var Ab_FieldsData
+     */
+    protected $_argsData;
+
+    public function GetArgs(){
+        if (isset($this->_argsData)){
+            return $this->_argsData;
+        }
+        $struct = $this->GetStructure();
+
+        return $this->_argsData = new Ab_FieldsData($struct->args);
+    }
+
+    public function SetArgs($data){
+        $argsData = $this->GetArgs();
+        $argsData->Clean();
+        $argsData->Update($data);
+    }
+
+}
+
+
+class Ab_Model extends Ab_ModelBase {
+
+    public function __construct($data = null, $vars = null){
+        // parent::__construct($app, $data, $vars);
+
+    }
 
 }

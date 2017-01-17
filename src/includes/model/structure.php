@@ -28,6 +28,8 @@ abstract class Ab_Structure {
      */
     public $fields;
 
+    public $args;
+
     public function __construct($name, $data = null){
         $this->_name = $name;
 
@@ -35,9 +37,11 @@ abstract class Ab_Structure {
             $this->_version = $data->version;
         }
 
-        $dFields = isset($data->fields) ? $data->fields : null;
+        $this->fields = new Ab_Fields(isset($data->fields) ? $data->fields : null);
 
-        $this->fields = new Ab_Fields($dFields);
+        if (isset($data->args)){
+            $this->args = new Ab_Fields(isset($data->args) ? $data->args : null);
+        }
     }
 
     public function __get($name){
@@ -58,8 +62,13 @@ abstract class Ab_Structure {
         $ret->version = $this->version;
 
         if ($this->fields->Count() > 0){
-            $rFields = $this->fields->ToJSON();
-            $ret->fields = $rFields->list;
+            $rList = $this->fields->ToJSON();
+            $ret->fields = $rList->list;
+        }
+
+        if (!empty($this->args) && $this->args->Count() > 0){
+            $rList = $this->args->ToJSON();
+            $ret->fields = $rList->list;
         }
 
         return $ret;

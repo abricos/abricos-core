@@ -12,11 +12,8 @@
  * Class Ab_Field
  *
  * @property string $id Unique field ID (Field Name)
- * @property string $type
- *
- * @property string|null $dbField
- * @property string|null $json
- * @property string|null $rolefn
+ * @property string $name (readonly) Field Name (alias of $id)
+ * @property string $type (readonly)
  *
  * @property bool $notNULL
  */
@@ -24,40 +21,53 @@ abstract class Ab_Field extends AbricosItem {
 
     protected $_type;
 
-    protected $_data = array();
+    /**
+     * @var string
+     */
+    public $dbField;
+
+    /**
+     * @var string
+     */
+    public $json;
+
+    /**
+     * @var string
+     */
+    public $rolefn;
+
+    /**
+     * @var mixed
+     */
+    public $default;
 
     public function __construct($id, $data = null){
         $this->id = $id;
 
-        if (isset($data->dbField)){
-            $this->dbField = $data->dbField;
+        if (isset($data->dbField) && !empty($data->dbField)){
+            $this->dbField = strval($data->dbField);
         }
-        if (isset($data->json)){
-            $this->json = $data->json;
+        if (isset($data->json) && !empty($data->json)){
+            $this->json = strval($data->json);
         }
-        if (isset($data->rolefn)){
-            $this->rolefn = $data->rolefn;
+        if (isset($data->rolefn) && !empty($data->rolefn)){
+            $this->rolefn = strval($data->rolefn);
         }
         if (isset($data->notNULL)){
             $this->notNULL = !!$data->notNULL;
         }
+        if (isset($data->default)){
+            $this->default = $this->Convert($data->default);
+        }
     }
 
     public function __get($name){
-        $pName = "_".$name;
-        if (property_exists($this, $pName)){
-            return $this->$pName;
+        switch ($name){
+            case 'type':
+                return $this->_type;
+            case 'name':
+                return $this->id;
         }
-        return isset($this->_data[$name]) ? $this->_data[$name] : null;
-    }
-
-    public function __set($name, $value){
-        $pName = "_".$name;
-        if (property_exists($this, $pName)){
-            return;
-        }
-
-        $this->_data[$name] = $value;
     }
 
     public function ToJSON(){
@@ -66,36 +76,45 @@ abstract class Ab_Field extends AbricosItem {
         $r->name = $this->id;
         $r->type = $this->type;
 
-        $data = $this->_data;
-
-        if (isset($data['json'])){
-            $r->json = $data['json'];
+        if (isset($this->json)){
+            $r->json = $this->json;
         }
 
-        if (isset($data['notNULL'])){
-            $r->notNull = $data['notNULL'];
+        if (isset($this->notNULL) && $this->notNULL){
+            $r->notNull = !!$this->notNULL;
+        }
+
+        if (isset($this->default)){
+            $r->default = $this->default;
         }
 
         return $r;
     }
+
+    public function IsValid($value){
+        return true;
+    }
+
+    public abstract function Convert($value);
 }
 
 /**
  * Class Ab_FieldString
  *
- * @property string|null $default
- * @property array|null $valid
+ * @property string $default
+ * @property array $valid
  */
 class Ab_FieldString extends Ab_Field {
 
     protected $_type = 'string';
 
+    /**
+     * @var array $valid
+     */
+    public $valid;
+
     public function __construct($id, $data){
         parent::__construct($id, $data);
-
-        if (isset($data->default)){
-            $this->default = strval($data->default);
-        }
 
         if (isset($data->valid)){
             if (is_array($data->valid)){
@@ -106,17 +125,31 @@ class Ab_FieldString extends Ab_Field {
         }
     }
 
+    public function IsValid($value){
+        if (!isset($this->valid)){
+            return true;
+        }
+
+        $value = strval($value);
+
+        $count = count($this->valid);
+        for ($i = 0; $i < $count; $i++){
+            if ($this->valid[$i] === $value){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function Convert($value){
+        return strval($value);
+    }
+
     public function ToJSON(){
         $r = parent::ToJSON();
 
-        $d = $this->_data;
-
-        if (isset($d['valid'])){
-            $r->valid = implode(',', $d['valid']);
-        }
-
-        if (isset($d['default'])){
-            $r->default = $d['default'];
+        if (isset($this->valid) && count($this->valid) > 0){
+            $r->valid = $this->valid;
         }
 
         return $r;
@@ -126,19 +159,23 @@ class Ab_FieldString extends Ab_Field {
 /**
  * Class Ab_FieldInt
  *
- * @property int|null $default
- * @property int|null $min
- * @property int|null $max
+ * @property int $default
  */
 class Ab_FieldInt extends Ab_Field {
     protected $_type = 'int';
 
+    /**
+     * @var int
+     */
+    public $min;
+
+    /**
+     * @var int
+     */
+    public $max;
+
     public function __construct($id, $data){
         parent::__construct($id, $data);
-
-        if (isset($data->default)){
-            $this->default = intval($data->default);
-        }
 
         if (isset($data->min)){
             $this->min = intval($data->min);
@@ -149,23 +186,38 @@ class Ab_FieldInt extends Ab_Field {
         }
     }
 
+    public function IsValid($value){
+        if (!isset($this->min) && !isset($this->max)){
+            return true;
+        }
+
+        $value = $this->Convert($value);
+
+        if (isset($this->min) && $value < $this->min){
+            return false;
+        }
+
+        if (isset($this->max) && $value > $this->max){
+            return false;
+        }
+
+        return true;
+    }
+
+    public function Convert($value){
+        return intval($value);
+    }
+
     public function ToJSON(){
         $r = parent::ToJSON();
 
-        $d = $this->_data;
-
-        if (isset($d['default'])){
-            $r->default = $d['default'];
+        if (isset($this->min)){
+            $r->min = $this->min;
         }
 
-        if (isset($d['min'])){
-            $r->min = $d['min'];
+        if (isset($this->max)){
+            $r->max = $this->max;
         }
-
-        if (isset($d['max'])){
-            $r->max = $d['max'];
-        }
-
         return $r;
     }
 }
@@ -179,152 +231,76 @@ class Ab_FieldBool extends Ab_Field {
 
     protected $_type = 'bool';
 
-    public function __construct($id, $data){
-        parent::__construct($id, $data);
-
-        if (isset($data->default)){
-            $this->default = boolval($data->default);
-        }
-    }
-
-    public function ToJSON(){
-        $r = parent::ToJSON();
-        $d = $this->_data;
-
-        if (isset($d['default'])){
-            $r->default = !!$d['default'];
-        }
-
-        return $r;
+    public function Convert($value){
+        return boolval($value);
     }
 }
 
-class Ab_FieldDouble extends Ab_Field {
+class Ab_FieldDouble extends Ab_FieldInt {
 
     protected $_type = 'double';
 
-    public function __construct($id, $data){
-        parent::__construct($id, $data);
-
-        if (isset($data->default)){
-            $this->default = doubleval($data->default);
-        }
-    }
-
-    public function ToJSON(){
-        $r = parent::ToJSON();
-        $d = $this->_data;
-
-        if (isset($d['default'])){
-            $r->default = $d['default'];
-        }
-
-        return $r;
+    public function Convert($value){
+        return doubleval($value);
     }
 }
 
-class Ab_FieldDate extends Ab_Field {
-
+class Ab_FieldDate extends Ab_FieldInt {
     protected $_type = 'date';
-
-    public function __construct($id, $data){
-        parent::__construct($id, $data);
-
-        if (isset($data->default)){
-            $this->default = intval($data->default);
-        }
-    }
-
-    public function ToJSON(){
-        $r = parent::ToJSON();
-        $d = $this->_data;
-
-        if (isset($d['default'])){
-            $r->default = $d['default'];
-        }
-
-        return $r;
-    }
 }
 
 class Ab_FieldArray extends Ab_Field {
-
     protected $_type = 'array';
 
-    public function __construct($id, $data){
-        parent::__construct($id, $data);
-
-        if (isset($data->default)){
-            $this->default = $data->default;
-        }
-    }
-
-    public function ToJSON(){
-        $r = parent::ToJSON();
-        $d = $this->_data;
-
-        if (isset($d['default'])){
-            $r->default = $d['default'];
-        }
-
-        return $r;
+    public function Convert($value){
+        return $value;
     }
 }
 
 class Ab_FieldObject extends Ab_Field {
-
     protected $_type = 'object';
 
-    public function __construct($id, $data){
-        parent::__construct($id, $data);
-
-        if (isset($data->default)){
-            $this->default = $data->default;
-        }
-    }
-
-    public function ToJSON(){
-        $r = parent::ToJSON();
-        $d = $this->_data;
-
-        if (isset($d['default'])){
-            $r->default = $d['default'];
-        }
-
-        return $r;
+    public function Convert($value){
+        return $value;
     }
 }
 
 /**
  * Class Ab_FieldAppItem
- *
- * @property string $module
- * @property string $class
  */
 abstract class Ab_FieldAppItem extends Ab_Field {
+
+    /**
+     * @var string
+     */
+    public $module;
+
+    /**
+     * @var string
+     */
+    public $class;
+
     public function __construct($id, $data){
         parent::__construct($id, $data);
 
         if (isset($data->module)){
-            $this->module = $data->module;
+            $this->module = strval($data->module);
         }
 
         if (isset($data->class)){
-            $this->class = $data->class;
+            $this->class = strval($data->class);
         }
+    }
+
+    public function Convert($value){
+        return $value;
     }
 
     public function ToJSON(){
         $r = parent::ToJSON();
-        $d = $this->_data;
 
-        if (isset($d['module'])){
-            $r->module = $d['module'];
-        }
-
-        if (isset($d['class'])){
-            $r->class = $d['class'];
-        }
+        $r->module = $this->module;
+        $r->class = $this->class;
 
         return $r;
     }
@@ -338,7 +314,15 @@ class Ab_FieldModelList extends Ab_FieldAppItem {
     protected $_type = 'modelList';
 }
 
+/**
+ * Class Ab_Fields
+ *
+ * @method Ab_Field Get($name)
+ * @method Ab_Field GetByIndex($i)
+ */
 class Ab_Fields extends AbricosList {
+
+    protected $_aliases = array();
 
     public function __construct($fields = null){
         parent::__construct();
@@ -382,6 +366,64 @@ class Ab_Fields extends AbricosList {
 
             $this->Add($field);
         }
+    }
+
+}
+
+class Ab_FieldsData {
+
+    protected $_fields;
+
+    protected $_data = array();
+
+    public function __construct(Ab_Fields $fields){
+        $this->_fields = $fields;
+    }
+
+    public function Get($name){
+        if (isset($this->_data[$name])){
+            return $this->_data[$name];
+        }
+
+        if (array_key_exists($name, $this->_data)){
+            return $this->_data[$name];
+        }
+
+        $field = $this->_fields->Get($name);
+
+        if (empty($field)){
+            return null;
+        }
+
+        return $this->_data[$name] = $field->default;
+    }
+
+    public function Set($name, $value){
+        $field = $this->_fields->Get($name);
+
+        if (empty($field)){
+            return null;
+        }
+
+        return $this->_data[$name] = $field->Convert($value);
+    }
+
+    public function Update($d){
+        if (is_object($d)){
+            $d = get_object_vars($d);
+        }
+
+        if (empty($d)){
+            return;
+        }
+
+        foreach ($d as $name => $value){
+            $this->Set($name, $value);
+        }
+    }
+
+    public function Clean(){
+        $this->_data = array();
     }
 }
 
