@@ -504,6 +504,30 @@ final class Abricos {
         }
         return $app;
     }
+
+    /**
+     * @var Ab_Structures
+     */
+    private static $_structures;
+
+    /**
+     * @param string $module
+     * @param string $name
+     *
+     * @return Ab_Structure
+     */
+    public static function GetStructure($module, $name){
+        if (!Abricos::$_structures){
+            require_once(CWD.'/includes/model/key.php');
+            require_once(CWD.'/includes/model/field.php');
+            require_once(CWD.'/includes/model/model.php');
+            require_once(CWD.'/includes/model/structure.php');
+
+            Abricos::$_structures = new Ab_Structures();
+        }
+        return Abricos::$_structures->Get($module, $name);
+    }
+
 }
 
 define('PAGESTATUS_OK', 0);

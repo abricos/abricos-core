@@ -216,21 +216,6 @@ abstract class Ab_Module {
         }
         return require_once $path;
     }
-
-    private $_structures = null;
-
-
-    /**
-     * @param string $name
-     * @return Ab_Structure
-     */
-    public function GetStructure($name){
-        if (empty($this->_structures)){
-            $this->_structures = new Ab_ModuleStructures($this);
-        }
-
-        return $this->_structures->Get($name);
-    }
 }
 
 /**

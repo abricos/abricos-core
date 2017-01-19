@@ -37,6 +37,7 @@ abstract class Ab_ModelBase extends AbricosItem {
     protected $_fieldsData;
 
     public function __construct($data = null){
+        parent::__construct($data);
         $this->Update($data);
     }
 
@@ -45,8 +46,7 @@ abstract class Ab_ModelBase extends AbricosItem {
             return $this->_structure;
         }
 
-        $module = Abricos::GetModule($this->_structModule);
-        $structure = $module->GetStructure($this->_structName);
+        $structure = Abricos::GetStructure($this->_structModule, $this->_structName);
 
         if (empty($structure)){
             throw new Exception(
@@ -62,7 +62,10 @@ abstract class Ab_ModelBase extends AbricosItem {
             return $this->_fieldsData;
         }
         $struct = $this->GetStructure();
-        return $this->_fieldsData = new Ab_FieldsData($struct->fields);
+        return $this->_fieldsData = new Ab_FieldsData(
+            $struct->key,
+            $struct->fields
+        );
     }
 
     public function __get($name){
@@ -97,7 +100,10 @@ abstract class Ab_ModelBase extends AbricosItem {
         }
         $struct = $this->GetStructure();
 
-        return $this->_argsData = new Ab_FieldsData($struct->args);
+        return $this->_argsData = new Ab_FieldsData(
+            $this->_structModule,
+            $struct->args
+        );
     }
 
     public function SetArgs($data){
@@ -106,14 +112,19 @@ abstract class Ab_ModelBase extends AbricosItem {
         $argsData->Update($data);
     }
 
+    public function ToJSON(){
+        $ret = parent::ToJSON();
+
+        if (!$this->_fieldsData && !$this->_argsData){
+            return $ret;
+        }
+
+        return $ret;
+    }
+
 }
 
 
 class Ab_Model extends Ab_ModelBase {
-
-    public function __construct($data = null, $vars = null){
-        // parent::__construct($app, $data, $vars);
-
-    }
 
 }

@@ -11,45 +11,48 @@
 /**
  * Class Ab_StructureBase
  *
+ * @property Ab_Key $key
  * @property string $type
- * @property string $name
  * @property string $version
  */
 abstract class Ab_Structure {
 
     protected $_type = 'undefined';
 
-    protected $_version = '0.1.0';
+    protected $_version = '0.2.0';
 
-    protected $_name;
+    protected $_key;
 
     /**
      * @var Ab_Fields
      */
     public $fields;
 
+    /**
+     * @var Ab_Fields
+     */
     public $args;
 
-    public function __construct($name, $data = null){
-        $this->_name = $name;
+    public function __construct(Ab_Key $key, $data = null){
+        $this->_key = $key;
 
         if (isset($data->version)){
             $this->_version = $data->version;
         }
 
-        $this->fields = new Ab_Fields(isset($data->fields) ? $data->fields : null);
+        $this->fields = new Ab_Fields($key, isset($data->fields) ? $data->fields : null);
 
         if (isset($data->args)){
-            $this->args = new Ab_Fields(isset($data->args) ? $data->args : null);
+            $this->args = new Ab_Fields($key, isset($data->args) ? $data->args : null);
         }
     }
 
     public function __get($name){
         switch ($name){
+            case 'key':
+                return $this->_key;
             case 'type':
                 return $this->_type;
-            case 'name':
-                return $this->_name;
             case 'version':
                 return $this->_version;
         }
@@ -57,8 +60,8 @@ abstract class Ab_Structure {
 
     public function ToJSON(){
         $ret = new stdClass();
+        $ret->name = $this->_key->name;
         $ret->type = $this->type;
-        $ret->name = $this->name;
         $ret->version = $this->version;
 
         if ($this->fields->Count() > 0){
@@ -68,7 +71,7 @@ abstract class Ab_Structure {
 
         if (!empty($this->args) && $this->args->Count() > 0){
             $rList = $this->args->ToJSON();
-            $ret->fields = $rList->list;
+            $ret->args = $rList->list;
         }
 
         return $ret;
@@ -97,35 +100,41 @@ class Ab_StructureModel extends Ab_Structure {
     }
 }
 
-final class Ab_ModuleStructures {
+class Ab_Structures extends Ab_Cache {
 
-    /**
-     * @var Ab_Module
-     */
-    public $module;
+    private static $_types = array(
+        'model' => 'Ab_StructureModel'
+    );
 
-    private $_cache = array();
+    public static function Register($type, $className){
+        if (isset(Ab_Structures::$_types[$type])){
+            throw new Exception('Structure type `'.$type.'` is registered');
+        }
+        Ab_Structures::$_types[$type] = $className;
+    }
 
-    public function __construct(Ab_Module $module){
-        $this->module = $module;
+    protected $_keys;
+
+    public function __construct(){
+        $this->_keys = new Ab_Keys();
     }
 
     /**
-     * @param string $name Structure name
-     *
+     * @param Ab_Key|string|array $module
+     * @param string $name (optional)
      * @throws Exception
-     *
      * @return Ab_Structure
      */
-    public function Get($name){
-        if (isset($this->_cache[$name])){
-            return $this->_cache[$name];
+    public function Get($module, $name = null){
+        $key = $this->_keys->Get($module, $name);
+
+        if ($struct = $this->Cache($key->module, $key->name)){
+            return $struct;
         }
 
-        $moduleName = $this->module->name;
-        $file = realpath(CWD."/modules/".$moduleName."/model/".$name.".json");
+        $file = realpath(CWD."/modules/".$key->module."/model/".$key->name.".json");
         if (!$file){
-            throw new Exception("Structure `$name` not found in `$moduleName` module");
+            throw new Exception("Structure `$key->name` not found in `$key->module` module");
         }
 
         $json = file_get_contents($file);
@@ -135,27 +144,16 @@ final class Ab_ModuleStructures {
             $data->type = 'model';
         }
 
-        if (!isset(Ab_ModuleStructures::$_classes[$data->type])){
-            throw new Exception("Structure type `$data->type` not registered");
+        if (!isset(Ab_Structures::$_types[$data->type])){
+            throw new Exception("Structure type `$data->type` is not registered");
         }
 
-        $className = Ab_ModuleStructures::$_classes[$data->type];
+        $className = Ab_Structures::$_types[$data->type];
 
-        return $this->_cache[$name] = new $className($name, $data);
-    }
+        $struct = new $className($key, $data);
+        $this->SetCache($key->module, $key->name, $struct);
 
-    /*********************************************************/
-    /*                    Static functions                   */
-    /*********************************************************/
-
-    private static $_classes = array(
-        'model' => 'Ab_StructureModel',
-        'modelList' => 'Ab_StructureModelList',
-        'response' => 'Ab_StructureResponse',
-    );
-
-    public static function Register($type, $className){
-        Ab_ModuleStructures::$_classes[$type] = $className;
+        return $struct;
     }
 }
 
