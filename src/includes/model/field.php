@@ -123,14 +123,17 @@ abstract class Ab_Field extends AbricosItem {
     }
 
     public function AttrInit(){
-        $attr = new Ab_Attr($this);
-        return $attr;
+        return new Ab_Attr($this);
     }
 
     public abstract function AttrConvert($value);
 
     public function AttrIsValid($value){
         return true;
+    }
+
+    public function AttrToJSON($value){
+        return $value;
     }
 }
 
@@ -159,6 +162,9 @@ class Ab_FieldString extends Ab_Field {
      */
     public $valid;
 
+    /**
+     * @var bool
+     */
     public $parse;
 
     public function OnInit($data){
@@ -172,6 +178,16 @@ class Ab_FieldString extends Ab_Field {
         if (isset($data->parse)){
             $this->parse = strval($data->parse);
         }
+    }
+
+    public function ToJSON(){
+        $r = parent::ToJSON();
+
+        if (isset($this->valid) && count($this->valid) > 0){
+            $r->valid = $this->valid;
+        }
+
+        return $r;
     }
 
     public function AttrIsValid($value){
@@ -207,16 +223,6 @@ class Ab_FieldString extends Ab_Field {
 
         return $value;
     }
-
-    public function ToJSON(){
-        $r = parent::ToJSON();
-
-        if (isset($this->valid) && count($this->valid) > 0){
-            $r->valid = $this->valid;
-        }
-
-        return $r;
-    }
 }
 
 /**
@@ -247,6 +253,19 @@ class Ab_FieldInt extends Ab_Field {
         }
     }
 
+    public function ToJSON(){
+        $r = parent::ToJSON();
+
+        if (isset($this->min)){
+            $r->min = $this->min;
+        }
+
+        if (isset($this->max)){
+            $r->max = $this->max;
+        }
+        return $r;
+    }
+
     public function AttrIsValid($value){
         if (!isset($this->min) && !isset($this->max)){
             return true;
@@ -267,19 +286,6 @@ class Ab_FieldInt extends Ab_Field {
 
     public function AttrConvert($value){
         return intval($value);
-    }
-
-    public function ToJSON(){
-        $r = parent::ToJSON();
-
-        if (isset($this->min)){
-            $r->min = $this->min;
-        }
-
-        if (isset($this->max)){
-            $r->max = $this->max;
-        }
-        return $r;
     }
 }
 
@@ -342,10 +348,6 @@ abstract class Ab_FieldAppItem extends Ab_Field {
         }
     }
 
-    public function AttrConvert($value){
-        return $value;
-    }
-
     public function ToJSON(){
         $r = parent::ToJSON();
 
@@ -353,14 +355,26 @@ abstract class Ab_FieldAppItem extends Ab_Field {
 
         return $r;
     }
+
+    public function AttrConvert($value){
+        return $value;
+    }
 }
 
 class Ab_FieldModel extends Ab_FieldAppItem {
     protected $_type = 'model';
+
+    public function AttrToJSON($value){
+        return $value->ToJSON();
+    }
 }
 
 class Ab_FieldModelList extends Ab_FieldAppItem {
     protected $_type = 'modelList';
+
+    public function AttrToJSON($value){
+        return $value->ToJSON();
+    }
 }
 
 /**

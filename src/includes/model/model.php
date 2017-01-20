@@ -109,19 +109,26 @@ abstract class Ab_ModelBase {
     }
 
     public function ToJSON(){
-        $ret = parent::ToJSON();
+        $ret = new stdClass();
 
         if (!$this->_attrs && !$this->_argsData){
             return $ret;
         }
 
+        $ret->attrs = $this->_attrs->ToJSON();
+
         return $ret;
     }
-
 }
 
-
 class Ab_Model extends Ab_ModelBase {
+
+    public function ToArray($fieldName = ''){
+        if (!$this->_attrs){
+            $this->GetFieldsData();
+        }
+        return $this->_attrs->ToArray($fieldName);
+    }
 
 }
 
@@ -151,7 +158,7 @@ class Ab_ModelList extends Ab_ModelBase {
     }
 
     public function GetByIndex($index){
-        return $this->_list->Count($index);
+        return $this->_list->GetByIndex($index);
     }
 
     public function Get($id){
@@ -160,6 +167,27 @@ class Ab_ModelList extends Ab_ModelBase {
 
     public function GetBy($name, $value){
         return $this->_list->GetBy($name, $value);
+    }
+
+    public function ToArray($fieldName = ''){
+        if ($fieldName === 'id'){
+            return $this->Ids();
+        }
+
+        $ret = array();
+        $count = $this->Count();
+        for ($i = 0; $i < $count; $i++){
+
+            /** @var Ab_Model $item */
+            $item = $this->GetByIndex($i);
+
+            if (empty($fieldName)){
+                $ret[] = $item->ToArray();
+            } else {
+                $ret[] = $item->$fieldName;
+            }
+        }
+        return $ret;
     }
 
     public function ToJSON(){

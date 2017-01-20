@@ -111,10 +111,9 @@ class AbricosList {
      * @return object
      */
     public function ToJSON(){
-
         if (func_num_args() === 0){
             $ret = new stdClass();
-        }else{
+        } else {
             $ret = func_get_arg(0);
         }
 

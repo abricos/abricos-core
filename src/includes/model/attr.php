@@ -51,10 +51,11 @@ class Ab_Attr {
     }
 
     public function ToJSON(){
-        if (!$this->isInit){
+        if (!$this->isInit || !$this->value){
             return null;
         }
-        return $this->value;
+
+        return $this->field->AttrToJSON($this->value);
     }
 }
 
@@ -161,6 +162,34 @@ class Ab_Attrs {
         return $userid === $fUserId;
     }
 
+    public function ToArray($fieldName = ''){
+        $ret = array();
+
+        if (!empty($fieldName)){
+            $field = $this->_fields->Get($fieldName);
+            if (empty($field)){
+                return $ret;
+            }
+
+            $ret[$fieldName] = $this->Get($fieldName);
+
+            return $ret;
+        }
+
+        foreach ($this->_attrs as $name => $attr){
+            if (!$attr->isInit){
+                continue;
+            }
+
+            $value = $attr->Get();
+            if (empty($value)){
+                continue;
+            }
+            $ret[$name] = $value;
+        }
+
+        return $ret;
+    }
 
     public function ToJSON($ret = null){
         if (!$ret){
