@@ -518,11 +518,6 @@ final class Abricos {
      */
     public static function GetStructure($module, $name){
         if (!Abricos::$_structures){
-            require_once(CWD.'/includes/model/key.php');
-            require_once(CWD.'/includes/model/field.php');
-            require_once(CWD.'/includes/model/model.php');
-            require_once(CWD.'/includes/model/structure.php');
-
             Abricos::$_structures = new Ab_Structures();
         }
         return Abricos::$_structures->Get($module, $name);

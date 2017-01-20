@@ -101,11 +101,18 @@ if (!defined('CWD')){
     define('CWD', (($getcwd = getcwd()) ? $getcwd : '.'));
 }
 
-require_once('includes/classes.php');
-require_once('includes/structure.php');
-
-require_once('includes/model/model.php');
 require_once('includes/cache.php');
+require_once('includes/collection.php');
+
+require_once('includes/deprecated/classes.php');
+require_once('includes/deprecated/structure.php');
+
+require_once('includes/model/key.php');
+require_once('includes/model/field.php');
+require_once('includes/model/attr.php');
+require_once('includes/model/model.php');
+require_once('includes/model/structure.php');
+
 require_once('includes/application.php');
 
 require_once('includes/functions.php');

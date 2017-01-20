@@ -34,18 +34,6 @@ class AbricosItem {
 
 class AbricosList {
 
-    /**
-     * @var AbricosListConfig
-     * @deprecated
-     */
-    private $config;
-
-    /**
-     * @var string
-     * @deprecated
-     */
-    private $classConfig;
-
     protected $_list = array();
     protected $_map = array();
     protected $_ids = array();
@@ -118,14 +106,24 @@ class AbricosList {
         return null;
     }
 
+    /**
+     * @param object|null $ret
+     * @return object
+     */
     public function ToJSON(){
+
+        if (func_num_args() === 0){
+            $ret = new stdClass();
+        }else{
+            $ret = func_get_arg(0);
+        }
+
         $list = array();
         $count = $this->Count();
         for ($i = 0; $i < $count; $i++){
             $list[] = $this->GetByIndex($i)->ToJSON();
         }
 
-        $ret = new stdClass();
         $ret->list = $list;
 
         return $ret;

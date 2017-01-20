@@ -81,6 +81,11 @@ abstract class Ab_Field extends AbricosItem {
         if (isset($data->default)){
             $this->default = $this->AttrConvert($data->default);
         }
+
+        $this->OnInit($data);
+    }
+
+    protected function OnInit($data){
     }
 
     public function __get($name){
@@ -156,9 +161,7 @@ class Ab_FieldString extends Ab_Field {
 
     public $parse;
 
-    public function __construct($id, $data){
-        parent::__construct($id, $data);
-
+    public function OnInit($data){
         if (isset($data->valid)){
             if (is_array($data->valid)){
                 $this->valid = $data->valid;
@@ -234,9 +237,7 @@ class Ab_FieldInt extends Ab_Field {
      */
     public $max;
 
-    public function __construct($id, $data){
-        parent::__construct($id, $data);
-
+    public function OnInit($data){
         if (isset($data->min)){
             $this->min = intval($data->min);
         }
@@ -335,9 +336,7 @@ abstract class Ab_FieldAppItem extends Ab_Field {
      */
     public $class;
 
-    public function __construct($id, $data){
-        parent::__construct($id, $data);
-
+    public function OnInit($data){
         if (isset($data->class)){
             $this->class = strval($data->class);
         }
@@ -367,10 +366,11 @@ class Ab_FieldModelList extends Ab_FieldAppItem {
 /**
  * Class Ab_Fields
  *
- * @method Ab_Field Get($name)
  * @method Ab_Field GetByIndex($i)
  */
 class Ab_Fields extends AbricosList {
+
+    private $_aliases = array();
 
     public function __construct(Ab_Key $key, $fields = null){
         parent::__construct();
@@ -415,195 +415,27 @@ class Ab_Fields extends AbricosList {
             $this->Add($field);
         }
     }
-}
-
-class Ab_Attr {
 
     /**
-     * @var Ab_Field
+     * @param Ab_Field $item
      */
-    public $field;
-
-    /**
-     * @var mixed
-     */
-    public $value;
-
-    /**
-     * @var bool
-     */
-    public $isInit = false;
-
-    public function __construct($field){
-        $this->field = $field;
-    }
-
-    public function Set($value){
-        $value = $this->field->AttrConvert($value);
-        if (!$this->field->AttrIsValid($value)){
-            return false;
+    public function Add($item){
+        parent::Add($item);
+        if ($item->dbField){
+            $this->_aliases[$item->dbField] = $item->name;
         }
-        $this->isInit = true;
-        $this->value = $value;
-        return true;
-    }
-
-    public function Get(){
-        if (!$this->isInit){
-            $this->Set($this->field->default);
-        }
-
-        return $this->value;
-    }
-
-    public function ToJSON(){
-        if (!$this->isInit){
-            return null;
-        }
-        return $this->value;
-    }
-
-    public function FillJSON($ret){
-        if (!$this->isInit || empty($this->value)){
-            return false;
-        }
-
-        return $this->field->AttrFillJSON($ret, $this->value);
-    }
-}
-
-class Ab_FieldsData {
-
-    protected $_fields;
-
-    /**
-     * @var Ab_Attr[]
-     */
-    protected $_attrs = array();
-
-    /**
-     * @var Ab_Key
-     */
-    public $key;
-
-    public function __construct($key, Ab_Fields $fields){
-        $this->key = $key;
-        $this->_fields = $fields;
     }
 
     /**
-     * @param string $name
-     * @return Ab_Attr|null
+     * @param string $id
+     * @return Ab_Field
      */
-    protected function GetAttr($name){
-        if (isset($this->_attrs[$name])){
-            return $this->_attrs[$name];
+    public function Get($id){
+        if (isset($this->_aliases[$id])){
+            $id = $this->_aliases[$id];
         }
 
-        $field = $this->_fields->Get($name);
-
-        if (empty($field)){
-            return null;
-        }
-
-        return $this->_attrs[$name] = $field->AttrInit();
-    }
-
-    public function Get($name){
-        $attr = $this->GetAttr($name);
-        if (!$attr){
-            return null;
-        }
-        return $attr->Get();
-    }
-
-    public function Set($name, $value){
-        $attr = $this->GetAttr($name);
-        if (!$attr){
-            return false;
-        }
-
-        return $attr->Set($value);
-    }
-
-    public function Update($d){
-        if (is_object($d)){
-            $d = get_object_vars($d);
-        }
-
-        if (empty($d)){
-            return;
-        }
-
-        foreach ($d as $name => $value){
-            $this->Set($name, $value);
-        }
-    }
-
-    public function Clean(){
-        $this->_attrs = array();
-    }
-
-    public function IsRoleAccess(Ab_Attr $attr){
-        $rolefn = $attr->field->rolefn;
-
-        $moduleManager = Abricos::GetModuleManager($this->key->module);
-        if (!method_exists($moduleManager, $rolefn)){
-            return false;
-        }
-
-        return $moduleManager->$rolefn();
-    }
-
-    public function IsPersonalAccess(Ab_Attr $attr){
-        $userid = intval(Abricos::$user->id);
-        if (empty($userid)){
-            return false;
-        }
-
-        $field = $this->_fields->Get('userid');
-        if (empty($field)){
-            return false;
-        }
-
-        $fUserId = intval($this->Get('userid'));
-
-        return $userid === $fUserId;
-    }
-
-
-    public function ToJSON($ret = null){
-        if (!$ret){
-            $ret = new stdClass();
-        }
-
-        /**
-         * @var string $name
-         * @var Ab_Attr $attr
-         */
-        foreach ($this->_attrs as $name => $attr){
-            if (!$attr->isInit){
-                continue;
-            }
-
-            $field = $attr->field;
-
-            if ($field->rolefn && !$this->IsRoleAccess($attr)){
-                continue;
-            } else if ($field->personal && !$this->IsRoleAccess($attr)){
-                continue;
-            }
-
-            $value = $attr->ToJSON();
-            if (empty($value)){
-                continue;
-            }
-
-            $name = !empty($field->json) ? $field->json : $field->name;
-            $ret->$name = $value;
-        }
-
-        return $ret;
+        return parent::Get($id);
     }
 }
 

@@ -321,7 +321,7 @@ class AbricosModelList extends AbricosList {
      */
     protected $_structure = null;
 
-    public function __construct($items = null, $options = null){
+    public function __construct($items = null){
         parent::__construct();
 
         if (is_string($this->_structModule)){
@@ -351,10 +351,6 @@ class AbricosModelList extends AbricosList {
         }
 
         $this->Update($items);
-    }
-
-    protected function OptionsNormalize($options = null){
-
     }
 
     /**

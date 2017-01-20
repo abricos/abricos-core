@@ -81,6 +81,9 @@ abstract class Ab_Structure {
 class Ab_StructureModel extends Ab_Structure {
     protected $_type = 'model';
 
+    /**
+     * @var string
+     */
     public $idField = 'id';
 
     public function __construct($name, $data){
@@ -100,10 +103,24 @@ class Ab_StructureModel extends Ab_Structure {
     }
 }
 
+class Ab_StructureModelList extends Ab_Structure {
+    protected $_type = 'modelList';
+
+    public $itemType;
+
+    public function __construct($name, $data){
+        parent::__construct($name, $data);
+
+        $this->itemType = $data->itemType;
+    }
+
+}
+
 class Ab_Structures extends Ab_Cache {
 
     private static $_types = array(
-        'model' => 'Ab_StructureModel'
+        'model' => 'Ab_StructureModel',
+        'modelList' => 'Ab_StructureModelList'
     );
 
     public static function Register($type, $className){

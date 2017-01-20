@@ -8,13 +8,10 @@
  * @link http://abricos.org
  */
 
-require_once 'field.php';
-require_once 'structure.php';
-
 /**
  * Class Ab_ModelBase
  */
-abstract class Ab_ModelBase extends AbricosItem {
+abstract class Ab_ModelBase {
 
     /**
      * @var string
@@ -32,12 +29,11 @@ abstract class Ab_ModelBase extends AbricosItem {
     protected $_structure;
 
     /**
-     * @var Ab_FieldsData
+     * @var Ab_Attrs
      */
-    protected $_fieldsData;
+    protected $_attrs;
 
     public function __construct($data = null){
-        parent::__construct($data);
         $this->Update($data);
     }
 
@@ -58,39 +54,39 @@ abstract class Ab_ModelBase extends AbricosItem {
     }
 
     protected function GetFieldsData(){
-        if (isset($this->_fieldsData)){
-            return $this->_fieldsData;
+        if (isset($this->_attrs)){
+            return $this->_attrs;
         }
         $struct = $this->GetStructure();
-        return $this->_fieldsData = new Ab_FieldsData(
+        return $this->_attrs = new Ab_Attrs(
             $struct->key,
             $struct->fields
         );
     }
 
     public function __get($name){
-        if (!$this->_fieldsData){
+        if (!$this->_attrs){
             $this->GetFieldsData();
         }
-        return $this->_fieldsData->Get($name);
+        return $this->_attrs->Get($name);
     }
 
     public function __set($name, $value){
-        if (!$this->_fieldsData){
+        if (!$this->_attrs){
             $this->GetFieldsData();
         }
-        $this->_fieldsData->Set($name, $value);
+        $this->_attrs->Set($name, $value);
     }
 
     public function Update($data){
-        if (!$this->_fieldsData){
+        if (!$this->_attrs){
             $this->GetFieldsData();
         }
-        $this->_fieldsData->Update($data);
+        $this->_attrs->Update($data);
     }
 
     /**
-     * @var Ab_FieldsData
+     * @var Ab_Attrs
      */
     protected $_argsData;
 
@@ -100,7 +96,7 @@ abstract class Ab_ModelBase extends AbricosItem {
         }
         $struct = $this->GetStructure();
 
-        return $this->_argsData = new Ab_FieldsData(
+        return $this->_argsData = new Ab_Attrs(
             $this->_structModule,
             $struct->args
         );
@@ -115,7 +111,7 @@ abstract class Ab_ModelBase extends AbricosItem {
     public function ToJSON(){
         $ret = parent::ToJSON();
 
-        if (!$this->_fieldsData && !$this->_argsData){
+        if (!$this->_attrs && !$this->_argsData){
             return $ret;
         }
 
@@ -126,5 +122,52 @@ abstract class Ab_ModelBase extends AbricosItem {
 
 
 class Ab_Model extends Ab_ModelBase {
+
+}
+
+class Ab_ModelList extends Ab_ModelBase {
+
+    /**
+     * @var AbricosList
+     */
+    protected $_list;
+
+    public function __construct($data = null){
+        parent::__construct($data);
+
+        $this->_list = new AbricosList();
+    }
+
+    public function Add($item){
+        $this->_list->Add($item);
+    }
+
+    public function Ids(){
+        return $this->_list->Ids();
+    }
+
+    public function Count(){
+        return $this->_list->Count();
+    }
+
+    public function GetByIndex($index){
+        return $this->_list->Count($index);
+    }
+
+    public function Get($id){
+        return $this->_list->Get($id);
+    }
+
+    public function GetBy($name, $value){
+        return $this->_list->GetBy($name, $value);
+    }
+
+    public function ToJSON(){
+        $ret = parent::ToJSON();
+
+        $this->_list->ToJSON($ret);
+
+        return $ret;
+    }
 
 }

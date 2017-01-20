@@ -10,60 +10,6 @@
 
 require_once 'model.php';
 
-class AbricosLogger {
-
-    const TRACE = 'trace';
-    const DEBUG = 'debug';
-    const INFO = 'info';
-    const WARN = 'warn';
-    const ERROR = 'error';
-    const FATAL = 'fatal';
-
-    const OWNER_TYPE_CORE = 'core';
-    const OWNER_TYPE_MODULE = 'module';
-    const OWNER_TYPE_OVER = 'over';
-
-    public static function IsEnable(){
-        return isset(Abricos::$config['module']['logs']['use'])
-        && Abricos::$config['module']['logs']['use'];
-    }
-
-    public static function Log($level, $message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
-        if (!AbricosLogger::IsEnable()){
-            return;
-        }
-        /** @var LogsApp $logsApp */
-        $logsApp = Abricos::GetApp('logs');
-        if (empty($logsApp)){
-            return;
-        }
-        $logsApp->LogAppend($level, $message, $ownerType, $ownerName, $debugInfo);
-    }
-
-    public static function Trace($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
-        return AbricosLogger::Log(AbricosLogger::TRACE, $message, $ownerType, $ownerName, $debugInfo);
-    }
-
-    public static function Debug($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
-        return AbricosLogger::Log(AbricosLogger::DEBUG, $message, $ownerType, $ownerName, $debugInfo);
-    }
-
-    public static function Info($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
-        return AbricosLogger::Log(AbricosLogger::INFO, $message, $ownerType, $ownerName, $debugInfo);
-    }
-
-    public static function Warn($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
-        return AbricosLogger::Log(AbricosLogger::WARN, $message, $ownerType, $ownerName, $debugInfo);
-    }
-
-    public static function Error($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
-        return AbricosLogger::Log(AbricosLogger::ERROR, $message, $ownerType, $ownerName, $debugInfo);
-    }
-
-    public static function Fatal($message, $ownerType = 'over', $ownerName = '', $debugInfo = null){
-        return AbricosLogger::Log(AbricosLogger::FATAL, $message, $ownerType, $ownerName, $debugInfo);
-    }
-}
 
 /**
  * Class AbricosApplication

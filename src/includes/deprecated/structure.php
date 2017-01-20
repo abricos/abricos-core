@@ -8,8 +8,9 @@
  * @link http://abricos.org
  */
 
-require_once 'collection.php';
-
+/**
+ * Class AbricosModelStructureField
+ */
 class AbricosModelStructureField extends AbricosItem {
 
     /**
