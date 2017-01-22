@@ -27,7 +27,7 @@ abstract class Ab_App extends Ab_Cache {
      */
     public $db;
 
-    protected $aliases = array();
+    protected $_aliases;
 
     public function __construct(Ab_ModuleManager $manager){
         $this->module = $manager->module;
@@ -35,109 +35,29 @@ abstract class Ab_App extends Ab_Cache {
         $this->db = $manager->db;
     }
 
-    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-    /*                         Models                        */
-    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-    public function InstanceClass($className){
-        $args = func_get_args();
-        $p = array();
-        for ($i = 0; $i < 3; $i++){
-            $p[$i] = isset($args[$i]) ? $args[$i] : null;
+    public function GetClassName($alias){
+        if (isset($this->_aliases[$alias])){
+            return $this->_aliases[$alias];
         }
+        return $alias;
+    }
 
-        if (isset($this->aliases[$className])){
-            $className = $this->aliases[$className];
-        }
-
+    public function Create($className){
+        $className = $this->GetClassName($className);
         if (!class_exists($className)){
             $moduleName = $this->module->name;
             throw new Exception("Class `$className` not defined (`$moduleName` module)");
         }
 
-        return new $className($this, $p[0], $p[1], $p[2]);
+        $args = func_get_args();
+        $p = array();
+        for ($i = 0; $i < 3; $i++){
+            $p[$i] = isset($args[$i + 1]) ? $args[$i + 1] : null;
+        }
+        return new $className($p[0], $p[1], $p[2]);
     }
 
 
-    /**
-     * Deprecated. Use $this->aliases
-     *
-     * @return array
-     * @deprecated
-     */
-    protected function GetClasses(){
-    }
-
-    protected function GetStructures(){
-    }
-
-
-
-    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-    /*                          AJAX                         */
-    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-    public function ResponseToJSON($d){
-    }
-
-    public function AJAX($d){
-        $d->do = isset($d->do) ? strval($d->do) : '';
-
-        $this->LogTrace('AJAX response begin', array("do" => $d->do));
-
-        switch ($d->do){
-            case "appStructure":
-                return $this->AppStructureToJSON();
-        }
-        $ret = $this->ResponseToJSON($d);
-
-        if (empty($ret)){
-            $extApps = $this->GetChildApps();
-            for ($i = 0; $i < count($extApps); $i++){
-                /** @var AbricosApplication $extApp */
-                $extApp = $extApps[$i];
-                $ret = $extApp->ResponseToJSON($d);
-            }
-        }
-        if (!empty($ret)){
-            return $ret;
-        }
-        $this->LogError('AJAX response unknown', array("do" => $d->do));
-
-        return null;
-    }
-
-    public function ResultToJSON($name, $res){
-        $ret = new stdClass();
-
-        if (is_integer($res)){
-            $ret->err = $res;
-            return $ret;
-        } else if ($res instanceof AbricosResponse && $res->error > 0){
-            $ret->err = $res->error;
-        }
-
-        if (is_object($res) && method_exists($res, 'ToJSON')){
-            $ret->$name = $res->ToJSON();
-        } else {
-            $ret->$name = $res;
-        }
-
-        return $ret;
-    }
-
-    public function ImplodeJSON($jsons, $ret = null){
-        if (empty($ret)){
-            $ret = new stdClass();
-        }
-        if (!is_array($jsons)){
-            $jsons = array($jsons);
-        }
-        foreach ($jsons as $json){
-            $this->MergeObject($ret, $json);
-        }
-        return $ret;
-    }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     /*                         Logging                       */

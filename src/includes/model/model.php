@@ -37,6 +37,10 @@ abstract class Ab_ModelBase {
         $this->Update($data);
     }
 
+    /**
+     * @return Ab_Structure
+     * @throws Exception
+     */
     public function GetStructure(){
         if (isset($this->_structure)){
             return $this->_structure;
@@ -108,6 +112,13 @@ abstract class Ab_ModelBase {
         $argsData->Update($data);
     }
 
+    /**
+     * @return Ab_App
+     */
+    public function GetApp(){
+        return Abricos::GetApp($this->_structModule);
+    }
+
     public function ToJSON(){
         $ret = new stdClass();
 
@@ -132,12 +143,19 @@ class Ab_Model extends Ab_ModelBase {
 
 }
 
+/**
+ * Class Ab_ModelList
+ *
+ * @method Ab_StructureModelList GetStructure()
+ */
 class Ab_ModelList extends Ab_ModelBase {
 
     /**
      * @var AbricosList
      */
     protected $_list;
+
+    protected $_itemClassName;
 
     public function __construct($data = null){
         parent::__construct($data);
@@ -146,6 +164,15 @@ class Ab_ModelList extends Ab_ModelBase {
     }
 
     public function Add($item){
+        if (is_array($item)){
+            if (!isset($this->_itemClassName)){
+                $app = $this->GetApp();
+                $alias = $this->GetStructure()->itemType;
+                $this->_itemClassName = $app->GetClassName($alias);
+            }
+            $item = new $this->_itemClassName($item);
+        }
+
         $this->_list->Add($item);
     }
 

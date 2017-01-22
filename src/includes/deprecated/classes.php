@@ -13,18 +13,11 @@ require_once 'model.php';
 
 /**
  * Class AbricosApplication
+ *
+ * @see Ab_App
+ * @deprecated
  */
-abstract class AbricosApplication {
-
-    /**
-     * @var Ab_ModuleManager
-     */
-    public $manager;
-
-    /**
-     * @var Ab_Database
-     */
-    public $db;
+abstract class AbricosApplication extends Ab_App {
 
     /**
      * @var AbricosModelManager
@@ -36,62 +29,11 @@ abstract class AbricosApplication {
      * @param array $appExtends (optional)
      */
     public function __construct(Ab_ModuleManager $manager, $appExtends = array()){
-        $this->manager = $manager;
-        $this->db = $manager->db;
+        parent::__construct($manager);
+
         $this->models = AbricosModelManager::GetManager($manager->module->name);
         $this->models->appExtends = $appExtends;
         $this->RegisterClasses();
-    }
-
-    protected $_cache = array();
-
-    public function CacheClear(){
-        $this->_cache = array();
-    }
-
-    public function CacheExists(){
-        $count = func_num_args();
-        $cache = $this->_cache;
-        for ($i = 0; $i < $count; $i++){
-            $arg = func_get_arg($i);
-            if (!isset($cache[$arg])){
-                return false;
-            }
-            $cache = $cache[$arg];
-        }
-
-        return !empty($cache);
-    }
-
-    public final function Cache(){
-        $count = func_num_args();
-        $cache = $this->_cache;
-        for ($i = 0; $i < $count; $i++){
-            $arg = func_get_arg($i);
-            if (!isset($cache[$arg])){
-                return null;
-            }
-            $cache = $cache[$arg];
-        }
-        return $cache;
-    }
-
-    public final function SetCache(){
-        $count = func_num_args();
-        $cache = &$this->_cache;
-        if ($count < 2){
-            throw new Exception('Invalid param in SetCache');
-        }
-
-        for ($i = 0; $i < $count - 1; $i++){
-            $arg = func_get_arg($i);
-            if (!isset($cache[$arg])){
-                $cache[$arg] = array();
-            }
-            $cache = &$cache[$arg];
-        }
-        $cache = func_get_arg($count - 1);
-        return func_get_arg($count - 1);
     }
 
     protected function GetAppClasses(){
@@ -172,7 +114,12 @@ abstract class AbricosApplication {
         return true;
     }
 
-    protected abstract function GetClasses();
+    protected function GetClasses(){
+        if (!empty($this->_aliases)){
+            return $this->_aliases;
+        }
+        return array();
+    }
 
     protected function RegisterClasses(){
         $classes = $this->GetClasses();
@@ -263,24 +210,6 @@ abstract class AbricosApplication {
         return $ret;
     }
 
-    protected function MergeObject($o1, $o2){
-        foreach ($o2 as $key => $v2){
-            if (isset($o1->$key) && is_array($o1->$key) && is_array($v2)){
-                $v1 = &$o1->$key;
-                for ($i = 0; $i < count($v2); $i++){
-                    $v1[] = $v2[$i];
-                }
-                $o1->$key = $v1;
-            } else if (isset($o1->$key) && is_object($o1->$key)
-                && isset($o2->$key) && is_object($o2->$key)
-            ){
-                $this->MergeObject($o1->$key, $o2->$key);
-            } else {
-                $o1->$key = $v2;
-            }
-        }
-    }
-
     public function ImplodeJSON($jsons, $ret = null){
         if (empty($ret)){
             $ret = new stdClass();
@@ -294,33 +223,4 @@ abstract class AbricosApplication {
         return $ret;
     }
 
-    /* * * * * * * * * * * * * Logging * * * * * * * * * * * */
-
-    public function Log($level, $message, $debugInfo = null){
-        AbricosLogger::Log($level, $message, AbricosLogger::OWNER_TYPE_MODULE, $this->manager->module->name, $debugInfo);
-    }
-
-    public function LogTrace($message, $debugInfo = null){
-        $this->Log(AbricosLogger::TRACE, $message, $debugInfo);
-    }
-
-    public function LogDebug($message, $debugInfo = null){
-        $this->Log(AbricosLogger::DEBUG, $message, $debugInfo);
-    }
-
-    public function LogInfo($message, $debugInfo = null){
-        $this->Log(AbricosLogger::INFO, $message, $debugInfo);
-    }
-
-    public function LogWarn($message, $debugInfo = null){
-        $this->Log(AbricosLogger::WARN, $message, $debugInfo);
-    }
-
-    public function LogError($message, $debugInfo = null){
-        $this->Log(AbricosLogger::ERROR, $message, $debugInfo);
-    }
-
-    public function LogFatal($message, $debugInfo = null){
-        $this->Log(AbricosLogger::FATAL, $message, $debugInfo);
-    }
 }
