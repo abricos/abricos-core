@@ -105,6 +105,7 @@ require_once('includes/cache.php');
 require_once('includes/collection.php');
 
 require_once('includes/model/key.php');
+require_once('includes/model/code.php');
 require_once('includes/model/field.php');
 require_once('includes/model/attr.php');
 require_once('includes/model/model.php');

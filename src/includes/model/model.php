@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package Abricos
  * @subpackage Core
@@ -7,9 +8,30 @@
  * @author Alexander Kuzmin <roosit@abricos.org>
  * @link http://abricos.org
  */
+class Ab_Response {
+    const ERR_BAD_REQUEST = 400;
+    const ERR_UNAUTHORIZED = 401;
+    const ERR_FORBIDDEN = 403;
+    const ERR_NOT_FOUND = 404;
+    const ERR_SERVER_ERROR = 500;
+
+    public static function IsError($response){
+        if ($response instanceof AbricosResponse){
+            return $response->error > 0;
+        }
+
+        if (is_integer($response)){
+            return true;
+        }
+
+        return false;
+    }
+}
 
 /**
  * Class Ab_ModelBase
+ *
+ * @method void Fill(Ab_App $app, $p0 = null, $p1 = null, $p2 = null) (optional)
  */
 abstract class Ab_ModelBase {
 
@@ -33,8 +55,34 @@ abstract class Ab_ModelBase {
      */
     protected $_attrs;
 
+    /**
+     * @var Ab_Attrs
+     */
+    protected $_args;
+
+    /**
+     * Error code
+     *
+     * @var int
+     */
+    protected $_error = 0;
+
+    /**
+     * Response Detail Codes
+     *
+     * @var int
+     */
+    protected $_code = 0;
+
     public function __construct($data = null){
         $this->Update($data);
+    }
+
+    /**
+     * @return Ab_App
+     */
+    public function GetApp(){
+        return Abricos::GetApp($this->_structModule);
     }
 
     /**
@@ -57,7 +105,7 @@ abstract class Ab_ModelBase {
         return $this->_structure = $structure;
     }
 
-    protected function GetFieldsData(){
+    protected function GetAttrs(){
         if (isset($this->_attrs)){
             return $this->_attrs;
         }
@@ -70,37 +118,32 @@ abstract class Ab_ModelBase {
 
     public function __get($name){
         if (!$this->_attrs){
-            $this->GetFieldsData();
+            $this->GetAttrs();
         }
         return $this->_attrs->Get($name);
     }
 
     public function __set($name, $value){
         if (!$this->_attrs){
-            $this->GetFieldsData();
+            $this->GetAttrs();
         }
         $this->_attrs->Set($name, $value);
     }
 
     public function Update($data){
         if (!$this->_attrs){
-            $this->GetFieldsData();
+            $this->GetAttrs();
         }
         $this->_attrs->Update($data);
     }
 
-    /**
-     * @var Ab_Attrs
-     */
-    protected $_argsData;
-
     public function GetArgs(){
-        if (isset($this->_argsData)){
-            return $this->_argsData;
+        if (isset($this->_args)){
+            return $this->_args;
         }
         $struct = $this->GetStructure();
 
-        return $this->_argsData = new Ab_Attrs(
+        return $this->_args = new Ab_Attrs(
             $this->_structModule,
             $struct->args
         );
@@ -112,17 +155,43 @@ abstract class Ab_ModelBase {
         $argsData->Update($data);
     }
 
-    /**
-     * @return Ab_App
-     */
-    public function GetApp(){
-        return Abricos::GetApp($this->_structModule);
+
+    public function SetError($error, $code = 0){
+        $this->_error = intval($error);
+        if (!empty($code)){
+            $this->_code = intval($code);
+        }
+        return $this;
+    }
+
+    public function IsError(){
+        return $this->_error > 0;
+    }
+
+    public function AddCode(){
+        $count = func_num_args();
+        for ($i = 0; $i < $count; $i++){
+            $this->_code |= intval(func_get_arg($i));
+        }
+    }
+
+    public function IsSetCode($code){
+        return $code & $this->_code;
     }
 
     public function ToJSON(){
         $ret = new stdClass();
 
-        if (!$this->_attrs && !$this->_argsData){
+        if ($this->_code > 0){
+            $ret->code = $this->_code;
+        }
+
+        if ($this->_error > 0){
+            $ret->error = $this->_error;
+            return $ret;
+        }
+
+        if (!$this->_attrs && !$this->_args){
             return $ret;
         }
 
@@ -136,7 +205,7 @@ class Ab_Model extends Ab_ModelBase {
 
     public function ToArray($fieldName = ''){
         if (!$this->_attrs){
-            $this->GetFieldsData();
+            $this->GetAttrs();
         }
         return $this->_attrs->ToArray($fieldName);
     }
@@ -174,6 +243,7 @@ class Ab_ModelList extends Ab_ModelBase {
         }
 
         $this->_list->Add($item);
+        return $item;
     }
 
     public function Ids(){

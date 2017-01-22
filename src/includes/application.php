@@ -49,14 +49,34 @@ abstract class Ab_App extends Ab_Cache {
             throw new Exception("Class `$className` not defined (`$moduleName` module)");
         }
 
-        $args = func_get_args();
-        $p = array();
-        for ($i = 0; $i < 3; $i++){
-            $p[$i] = isset($args[$i + 1]) ? $args[$i + 1] : null;
+        if (func_num_args() > 1){
+            $args = func_get_args();
+            $p = array();
+            for ($i = 0; $i < 3; $i++){
+                $p[$i] = isset($args[$i + 1]) ? $args[$i + 1] : null;
+            }
+            return new $className($p[0], $p[1], $p[2]);
         }
-        return new $className($p[0], $p[1], $p[2]);
+        return new $className();
     }
 
+    /**
+     * @param $className
+     * @param mixed $p0 (optional)
+     * @param mixed $p1 (optional)
+     * @param mixed $p2 (optional)
+     * @return Ab_ModelBase
+     */
+    public function CreateFilled($className, $p0 = null, $p1 = null, $p2 = null){
+        /** @var Ab_ModelBase $entity */
+        $entity = $this->Create($className);
+
+        if (method_exists($entity, 'Fill')){
+            $entity->Fill($this, $p0, $p1, $p2);
+        }
+
+        return $entity;
+    }
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */

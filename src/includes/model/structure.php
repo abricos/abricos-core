@@ -33,6 +33,11 @@ abstract class Ab_Structure {
      */
     public $args;
 
+    /**
+     * @var Ab_Codes
+     */
+    public $codes;
+
     public function __construct(Ab_Key $key, $data = null){
         $this->_key = $key;
 
@@ -44,6 +49,10 @@ abstract class Ab_Structure {
 
         if (isset($data->args)){
             $this->args = new Ab_Fields($key, isset($data->args) ? $data->args : null);
+        }
+
+        if (isset($data->codes)){
+            $this->codes = new Ab_Codes(isset($data->codes) ? $data->codes : null);
         }
     }
 
@@ -69,9 +78,14 @@ abstract class Ab_Structure {
             $ret->fields = $rList->list;
         }
 
-        if (!empty($this->args) && $this->args->Count() > 0){
+        if (isset($this->args) && $this->args->Count() > 0){
             $rList = $this->args->ToJSON();
             $ret->args = $rList->list;
+        }
+
+        if (isset($this->codes) && $this->codes->Count() > 0){
+            $rList = $this->codes->ToJSON();
+            $ret->codes = $rList->list;
         }
 
         return $ret;
