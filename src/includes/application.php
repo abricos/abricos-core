@@ -42,6 +42,11 @@ abstract class Ab_App extends Ab_Cache {
         return $alias;
     }
 
+    /**
+     * @param $className
+     * @return Ab_ModelBase
+     * @throws Exception
+     */
     public function Create($className){
         $className = $this->GetClassName($className);
         if (!class_exists($className)){
