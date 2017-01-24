@@ -111,6 +111,7 @@ require_once('includes/model/attr.php');
 require_once('includes/model/model.php');
 require_once('includes/model/structure.php');
 
+require_once('includes/logger.php');
 require_once('includes/application.php');
 
 require_once('includes/deprecated/classes.php');

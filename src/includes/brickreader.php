@@ -270,22 +270,26 @@ class Ab_CoreBrickReader {
                 $path = CWD."/tt/".$owner."/".$name.".html";
             }
         } else {
-            $nextpath = "";
+            $nextPath = "";
             $nextPartPath = "";
             switch ($type){
                 case Brick::BRICKTYPE_BRICK:
-                    $nextpath = "brick/";
+                    $nextPath = "brick/";
                     $nextPartPath = "brick-part/";
                     break;
                 case Brick::BRICKTYPE_CONTENT:
-                    $nextpath = "content/";
+                    $nextPath = "content/";
                     $nextPartPath = "content-part/";
                     break;
             }
-            $path = CWD."/modules/".$owner."/".$nextpath.$name.".html";
+
+            $module = Abricos::GetModule($owner);
+            $module->I18n()->LoadBrickLocale($type, $name);
+
+            $path = CWD."/modules/".$owner."/".$nextPath.$name.".html";
 
             // возможно c поставляемым шаблоном есть перегруженный кирпич
-            $override = CWD."/tt/".Brick::$style."/override/".$owner."/".$nextpath.$name.".html";
+            $override = CWD."/tt/".Brick::$style."/override/".$owner."/".$nextPath.$name.".html";
             if (file_exists($override)){
                 $path = $override;
             }
@@ -320,29 +324,14 @@ class Ab_CoreBrickReader {
         if (is_array($lngs) && is_array($lngs[0]) && count($lngs[0]) > 0){
             $mod = Abricos::GetModule($modname);
             if (!empty($mod)){
+                $i18n = $mod->I18n();
+
                 foreach ($lngs[0] as $value){
                     $key = str_replace("{#", "", $value);
                     $key = str_replace("}", "", $key);
 
-                    $lang = $mod->GetI18n();
-
-                    $arr = explode(".", $key);
-
-                    $ph = null;
-                    foreach ($arr as $s){
-                        if (!isset($lang) || !isset($lang[$s])){
-                            break;
-                        }
-                        if (is_array($lang[$s])){
-                            $lang = &$lang[$s];
-                        } else if (is_string($lang[$s])){
-                            $ph = $lang[$s];
-                            break;
-                        }
-                    }
-                    if (!is_null($ph)){
-                        $filebody = str_replace("{#".$key."}", $ph, $filebody);
-                    }
+                    $ph = $i18n->Translate($key);
+                    $filebody = str_replace("{#".$key."}", $ph, $filebody);
                 }
             }
         }
@@ -451,7 +440,7 @@ class Ab_CoreBrickReader {
             foreach ($oP as $name => $key){
                 if ($name === 'overrideContent'){
                     $overrideContent = true;
-                }else{
+                } else {
                     $ret->param->param[$name] = $key;
                 }
             }

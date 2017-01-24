@@ -65,6 +65,42 @@ class Ab_CoreI18n {
         $this->_locales[$locale] = &$arr;
     }
 
+    public function LoadBrickLocale($type, $name, $locale = ''){
+        $defLocale = $this->module->defaultLocale;
+        if ($locale !== $defLocale){
+            $this->LoadBrickLocale($type, $name, $defLocale);
+        }
+
+        $locale = $this->LocaleNormalize($locale);
+        $file = CWD."/modules/".$this->module->name."/";
+        switch ($type){
+            case Brick::BRICKTYPE_BRICK:
+                $typeName = "brick";
+                break;
+            case Brick::BRICKTYPE_CONTENT:
+                $typeName = "content";
+                break;
+            default:
+                return;
+        }
+        $file .= $typeName."/i18n/".$name."_".$locale.".json";
+
+        if (!file_exists($file)){
+            return;
+        }
+
+        $this->_LoadLocale($locale);
+
+        $data = &$this->_locales[$locale];
+
+        if (!isset($data[$typeName])){
+            $data[$typeName] = array();
+        }
+
+        $json = file_get_contents($file);
+        $data[$typeName][$name] = json_decode($json, true);
+    }
+
     /**
      * @param string $locale
      * @return array
