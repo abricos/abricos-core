@@ -288,6 +288,11 @@ class Ab_CoreBrickReader {
 
             $path = CWD."/modules/".$owner."/".$nextPath.$name.".html";
 
+            $pathLocale = CWD."/modules/".$owner."/".$nextPath.$name."_".Abricos::$locale.".html";
+            if (file_exists($pathLocale)){
+                $path = $pathLocale;
+            }
+
             // возможно c поставляемым шаблоном есть перегруженный кирпич
             $override = CWD."/tt/".Brick::$style."/override/".$owner."/".$nextPath.$name.".html";
             if (file_exists($override)){
