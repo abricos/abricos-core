@@ -44,6 +44,9 @@ class Ab_CoreI18n {
 
     private function _LoadLocale($locale){
         $locale = $this->LocaleNormalize($locale);
+        if (array_key_exists($locale, $this->_locales)){
+            return;
+        }
         $file = CWD."/modules/".$this->module->name."/i18n/".$locale.".php";
 
         if (!file_exists($file)){
