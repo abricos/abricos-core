@@ -583,8 +583,9 @@ class AbricosModelManager {
     }
 
     /**
-     * @param Ab_Module $module|string
+     * @param Ab_Module|string $module
      * @return AbricosModelManager
+     * @throws Exception
      */
     public static function GetManager($module){
         if (is_string($module)){

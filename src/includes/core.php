@@ -188,7 +188,6 @@ final class Abricos {
     }
 
     private function BuildOutput(){
-
         // Определить модуль управления выводом
         $adress = Abricos::$adress;
         $modules = Abricos::$modules;
@@ -203,14 +202,13 @@ final class Abricos {
             $modman = $modSys;
             $contentName = $this->_superContentFile;
             $isSuperContent = true;
-        } else if ($adress->level >= 2 && $adress->dir[0] == 'ajax'){
-            // TODO: remove
-            $modman = $modSys;
-            $contentName = 'ajax';
         } else if ($adress->level >= 2 && $adress->dir[0] == 'tajax'){
             // TODO: remove
             $modman = $modSys;
             $contentName = 'tajax';
+        } else if ($adress->level >= 2 && $adress->dir[0] === 'api') {
+            $modman = $modSys;
+            $contentName = 'api';
         } else {
             $flagDevelopPage = $adress->level >= 2 && $adress->dir[1] == 'develop' && Abricos::$config['Misc']['develop_mode'];
 
@@ -328,7 +326,6 @@ final class Abricos {
                 foreach ($contentName as $cname){
                     if (file_exists(CWD."/modules/".$modman->name."/content/".$cname.".html")){
                         $contentName = $cname;
-                        $find = true;
                         break;
                     }
                 }

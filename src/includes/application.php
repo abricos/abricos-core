@@ -83,6 +83,23 @@ abstract class Ab_App extends Ab_Cache {
         return $entity;
     }
 
+    protected $_API;
+
+    public function GetAPI(){
+        if (!isset($this->_API)){
+            $this->module->ScriptRequireOnce('includes/api.php');
+            $className = $this->GetAPIClassName();
+            if (!class_exists($className)){
+                return null;
+            }
+            $this->_API = new $className($this);
+        }
+        return $this->_API;
+    }
+
+    protected function GetAPIClassName(){
+        return ucwords($this->module->name)."API";
+    }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     /*                         Logging                       */
@@ -131,7 +148,7 @@ abstract class Ab_App extends Ab_Cache {
             } else if (isset($o1->$key) && is_object($o1->$key)
                 && isset($o2->$key) && is_object($o2->$key)
             ){
-                Ab_Application::MergeObject($o1->$key, $o2->$key);
+                Ab_App::MergeObject($o1->$key, $o2->$key);
             } else {
                 $o1->$key = $v2;
             }

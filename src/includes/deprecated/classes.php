@@ -165,7 +165,7 @@ abstract class AbricosApplication extends Ab_App {
         if (!empty($ret)){
             return $ret;
         }
-        $this->LogError('AJAX response unknow', array("do" => $d->do));
+        $this->LogError('AJAX response unknown', array("do" => $d->do));
 
         return null;
     }

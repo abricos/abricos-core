@@ -449,7 +449,7 @@ class Ab_CoreModuleManager {
                     $row["takelink"] = $link;
                     $mainLink = $row;
                 }
-                if ($name != "sys" && $name != "ajax" && $name != "user" && count($enmod) > 0 && $modName != $name){
+                if ($name != "sys" && $name != "user" && count($enmod) > 0 && $modName != $name){
 
                     $find = false;
                     foreach ($enmod as $key){

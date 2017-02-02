@@ -179,8 +179,17 @@ abstract class Ab_ModelBase {
         return $code & $this->_code;
     }
 
+    public function IsJSONExtended(){
+        return $this->_code > 0 || $this->_error > 0;
+    }
+
     public function ToJSON(){
+        if (!$this->IsJSONExtended()){
+            return $this->_attrs->ToJSON();
+        }
+
         $ret = new stdClass();
+        $ret->__ = 1;
 
         if ($this->_code > 0){
             $ret->code = $this->_code;
