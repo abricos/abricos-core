@@ -168,6 +168,10 @@ abstract class Ab_ModelBase {
         return $this->_error > 0;
     }
 
+    public function GetError(){
+        return $this->_error;
+    }
+
     public function AddCode(){
         $count = func_num_args();
         for ($i = 0; $i < $count; $i++){
@@ -179,34 +183,12 @@ abstract class Ab_ModelBase {
         return $code & $this->_code;
     }
 
-    public function IsJSONExtended(){
-        return $this->_code > 0 || $this->_error > 0;
+    public function GetCodes(){
+        return $this->_code;
     }
 
     public function ToJSON(){
-        if (!$this->IsJSONExtended()){
-            return $this->_attrs->ToJSON();
-        }
-
-        $ret = new stdClass();
-        $ret->__ = 1;
-
-        if ($this->_code > 0){
-            $ret->code = $this->_code;
-        }
-
-        if ($this->_error > 0){
-            $ret->error = $this->_error;
-            return $ret;
-        }
-
-        if (!$this->_attrs && !$this->_args){
-            return $ret;
-        }
-
-        $ret->attrs = $this->_attrs->ToJSON();
-
-        return $ret;
+        return $this->_attrs->ToJSON();
     }
 }
 

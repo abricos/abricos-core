@@ -202,7 +202,7 @@ abstract class Ab_Module {
         return require $path;
     }
 
-    public function ScriptRequireOnce($file){
+    public function ScriptRequireOnce($file, $ignoreExists = false){
         if (is_array($file)){
             $count = count($file);
             for ($i = 0; $i < $count; $i++){
@@ -211,10 +211,12 @@ abstract class Ab_Module {
             return;
         }
         $cd = $this->GetCurrentDir();
-        if (!($path = realpath($cd."/".$file))){
+        if ($path = realpath($cd."/".$file)){
+            return require_once $path;
+        }
+        if (!$ignoreExists){
             throw new Exception("Script `$file` not found in module `$this->name`");
         }
-        return require_once $path;
     }
 }
 

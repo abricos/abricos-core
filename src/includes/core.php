@@ -206,7 +206,7 @@ final class Abricos {
             // TODO: remove
             $modman = $modSys;
             $contentName = 'tajax';
-        } else if ($adress->level >= 2 && $adress->dir[0] === 'api') {
+        } else if ($adress->level >= 1 && $adress->dir[0] === 'api') {
             $modman = $modSys;
             $contentName = 'api';
         } else {

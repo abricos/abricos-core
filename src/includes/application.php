@@ -85,9 +85,12 @@ abstract class Ab_App extends Ab_Cache {
 
     protected $_API;
 
+    /**
+     * @return Ab_API
+     */
     public function GetAPI(){
         if (!isset($this->_API)){
-            $this->module->ScriptRequireOnce('includes/api.php');
+            $this->module->ScriptRequireOnce('includes/api.php', true);
             $className = $this->GetAPIClassName();
             if (!class_exists($className)){
                 return null;

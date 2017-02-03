@@ -113,6 +113,7 @@ require_once('includes/model/structure.php');
 
 require_once('includes/logger.php');
 require_once('includes/application.php');
+require_once('includes/api.php');
 
 require_once('includes/deprecated/classes.php');
 require_once('includes/deprecated/structure.php');

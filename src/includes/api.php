@@ -25,17 +25,11 @@ abstract class Ab_API {
      */
     private $_instances = array();
 
-    /**
-     * @var string[]
-     */
-    protected $_methods = array();
-
     public function __construct(Ab_App $app){
         $this->app = $app;
     }
 
     public function Run(){
-
         $aGetURL = array_slice(Abricos::$adress->dir, 2);
 
         if (count($aGetURL) < 2){
@@ -60,22 +54,25 @@ abstract class Ab_API {
             $this->_instances[$version] = new $className($this->app);
         }
 
-        $instance = $this->_instances[$version];
         $methodAPI = $aGetURL[1];
 
-        if (!isset($this->_methods[$methodAPI])
-            || !method_exists($instance, $methodAPI)
+        /** @var Ab_APIMethods $instance */
+        $instance = $this->_instances[$version];
+        if (!isset($instance->methods[$methodAPI])
+            || !method_exists($instance, $instance->methods[$methodAPI])
         ){
             // return (new AbricosAPIResponse400())->MethodNotDefined($funcName);
             return Ab_Response::ERR_BAD_REQUEST;
         }
+
+        $funcName = $instance->methods[$methodAPI];
 
         $p = array();
         for ($i = 0; $i < 5; $i++){
             $p[$i] = isset($aGetURL[$i + 2]) ? isset($aGetURL[$i + 2]) : null;
         }
 
-        $result = $instance->$methodAPI($p[0], $p[1], $p[2], $p[3], $p[4]);
+        $result = $instance->$funcName($p[0], $p[1], $p[2], $p[3], $p[4]);
 
         if ($result instanceof Ab_ModelBase){
             return $result;
@@ -95,6 +92,12 @@ abstract class Ab_APIMethods {
      * @var Ab_App
      */
     public $app;
+
+    /**
+     * @var string[]
+     */
+    public $methods;
+
 
     public function __construct(Ab_App $app){
         $this->app = $app;
