@@ -74,11 +74,7 @@ abstract class Ab_API {
 
         $result = $instance->$funcName($p[0], $p[1], $p[2], $p[3], $p[4]);
 
-        if ($result instanceof Ab_ModelBase){
-            return $result;
-        }
-
-        throw new Exception("TODO: release object response");
+        return $result;
     }
 }
 

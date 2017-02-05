@@ -4,13 +4,13 @@ Component.requires = {
 };
 Component.entryPoint = function(NS){
     var Y = Brick.YUI,
-        LNG = new Abricos.ComponentLanguage(this);
+        LNG = new Abricos.ComponentLanguage(this),
 
+        queryCounter = 0,
 
-    var queryCounter = 0;
-    var uniqueURL = function(){
-        return (queryCounter++) + (new Date().getTime());
-    };
+        uniqueURL = function(){
+            return (queryCounter++) + (new Date().getTime());
+        };
 
     var AJAX = function(){
     };

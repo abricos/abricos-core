@@ -1,9 +1,3 @@
-/*!
- * Abricos Platform (http://abricos.org)
- * Copyright 2008-2015 Alexander Kuzmin <roosit@abricos.org>
- * Licensed under the MIT license
- */
-
 var Component = new Brick.Component();
 Component.requires = {
     mod: [
@@ -20,10 +14,9 @@ Component.entryPoint = function(NS){
 
         WAITING = 'waiting',
         BOUNDING_BOX = 'boundingBox',
+        ADDED = 'added',
 
         SLICE = Array.prototype.slice;
-
-    var ADDED = 'added';
 
     var Navigator = function(){
         this._initNavigator();
@@ -579,7 +572,6 @@ Component.entryPoint = function(NS){
     };
     NS.CronCore = CronCore;
 
-
     NS.Application = Y.Base.create('application', Y.Base, [
         NS.AppsCore,
         NS.Navigator,
@@ -608,13 +600,13 @@ Component.entryPoint = function(NS){
             }
 
             var state = this._reqsState,
-                info = state.data[name];
+                info = state.data[name],
 
-            var funcArgs = SLICE.call(arguments),
+                funcArgs = SLICE.call(arguments),
                 funcArg,
-                defArgsOffset = 1;
+                defArgsOffset = 1,
 
-            var aArgs = [],
+                aArgs = [],
                 args = info.args,
                 rData = {
                     'do': name
@@ -818,27 +810,13 @@ Component.entryPoint = function(NS){
         onAJAXError: function(err){
             Brick.mod.widget.notice.show(err.msg);
         },
-
-        /**
-         * @deprecated
-         */
-        ajaxa: function(rData, callback, context){
-            this._request.apply(this, arguments);
-        }
     }, {
         ATTRS: {
-            initCallback: {
-                value: null
-            },
-            component: {
-                value: null
-            },
-            moduleName: {
-                value: null
-            },
-            isLoadAppStructure: {
-                value: false
-            }
+            initCallback: {value: null},
+            component: {value: null},
+            moduleName: {value: ''},
+            isLoadAppStructure: {value: false},
+            isAPI: {value: false}
         }
     });
 
@@ -857,8 +835,9 @@ Component.entryPoint = function(NS){
 
         ajaxes = sx.REQS = Y.merge(ajaxes, sx.REQS || {});
 
-        var moduleName = component.moduleName;
-        var ns = Brick.mod[moduleName];
+        var moduleName = component.moduleName,
+            ns = Brick.mod[moduleName],
+            appName = moduleName + 'App';
 
         for (var n in ajaxes){
             (function(){
@@ -872,20 +851,12 @@ Component.entryPoint = function(NS){
         }
 
         sx.ATTRS = Y.merge(sx.ATTRS || {}, {
-            component: {
-                value: component
-            },
-            moduleName: {
-                value: moduleName
-            }
+            component: {value: component},
+            moduleName: {value: moduleName}
         });
 
-        var appName = moduleName + 'App';
         ns.App = Y.Base.create(appName, NS.Application, extensions, px, sx);
-
-        ns.appInstance = null;
         ns.initApp = function(options){
-
             if (Y.Lang.isFunction(options)){
                 options = {
                     initCallback: options
@@ -899,17 +870,9 @@ Component.entryPoint = function(NS){
                 return options.initCallback(null, ns.appInstance);
             }
 
-            /* // TODO: load roles
-             if (ns.roles && Y.Lang.isFunction(ns.roles.load)){
-             ns.roles.load(function(){
-             new ns.App(options);
-             });
-             } else {
-             new ns.App(options);
-             }
-             /**/
             new ns.App(options);
         };
+        ns.appInstance = null;
     };
 
     var AppWorkspacePage = function(p){
@@ -1118,7 +1081,7 @@ Component.entryPoint = function(NS){
             this._appTriggerUpdate();
 
             var args = {arguments: this._appWidgetArguments};
-            this.onInitAppWidget.apply(this, [err, appInstance, args]);
+            this.onInitAppWidget.call(this, err, appInstance, args);
             this.fire('initAppWidget', err, appInstance, args);
         },
         onInitAppWidget: function(){

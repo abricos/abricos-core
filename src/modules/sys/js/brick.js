@@ -180,49 +180,6 @@ Brick.convertToObject = function(path){
     return o;
 };
 
-
-/**
- * Найти в Dom элементы типа SCRIPT, удалить их, при этом
- * собрав весь JavaScript текст
- * @method cleanScript
- * @static
- * @param {Object} el Dom элемент
- * @return {String} JavaScript текст
- */
-Brick.cleanScript = function(el){
-    if (!el.childNodes.length){
-        return "";
-    }
-    var i, s = "", c;
-    for (i = 0; i < el.childNodes.length; i++){
-        c = el.childNodes[i];
-        if (typeof c.tagName != 'undefined'){
-            if (c.tagName.toLowerCase() == 'script'){
-                s += c.innerHTML;
-                el.removeChild(c);
-            } else {
-                s += Brick.cleanScript(c);
-            }
-        }
-    }
-    return s;
-};
-
-
-/**
- * Выполнить JavaScript text
- *
- * @method readScript
- * @static
- * @param {String} text JavaScript текст
- */
-Brick.readScript = function(text){
-    var s = document.createElement("script");
-    s.charset = "utf-8";
-    s.text = text;
-    document.body.appendChild(s);
-};
-
 /**
  * Проверить, существует ли компонент модуля в наличие на сервере.
  * Осуществляет поиск в Brick.Modules
@@ -519,7 +476,6 @@ Brick.namespace('util');
          * @type Brick.Template
          */
         this.template = null;
-
     };
 
     /**
@@ -573,10 +529,6 @@ Brick.namespace('util');
          */
         this.removeWidget = function(name){
             if (widgets[name]){
-                // if (typeof widgets[name]['destroy'] == 'function'){
-                //	widgets[name].destroy();
-                // }
-                // this.removeWidget(name);
                 delete widgets[name];
             }
         };
@@ -709,7 +661,8 @@ Brick.namespace('util');
         if (!Brick.componentExists(mName, cName)){
             var err = {
                 code: 404,
-                msg: 'Component of Module not found'
+                msg: 'Component `' + cName + '` not found in `'
+                + mName + '`'
             };
             return callback.apply(context, [err, null]);
         }
@@ -873,74 +826,6 @@ Brick.namespace('util');
         notPages[notPages.length] = pageAdress;
     };
 
-})();
-
-
-(function(){
-
-    var querycount = 0;
-    var uniqurl = function(){
-        querycount++;
-        return (querycount++) + (new Date().getTime());
-    };
-
-    var readScript = Brick.readScript;
-
-    var sendPost = function(module, brick, cfg){
-        cfg = cfg || {};
-        cfg['json'] = cfg['json'] || {};
-
-        var post = "json=" + encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['json']));
-        YAHOO.util.Connect.asyncRequest("POST",
-            '/ajax/' + module + '/' + brick + '/' + uniqurl() + '/', {
-                success: function(o){
-                    readScript(o.responseText);
-                    if (typeof cfg.success == 'function'){
-                        cfg.success(o);
-                    }
-                },
-                failure: function(o){
-                    // alert("CONNECTION FAILED!");
-                }
-            },
-            post
-        );
-    };
-
-    /**
-     * Менеджер AJAX запросов
-     *
-     * @class Connection
-     * @namespace Brick.util
-     * @static
-     */
-    Brick.util.Connection = {};
-
-    /**
-     * Отправить AJAX запрос кирпичу определенного модуля
-     *
-     * @method sendCommand
-     * @static
-     * @param {String} module Имя модуля
-     * @param {String} brick Имя кирпича
-     * @param {Object} cfg Параметры запроса, в т.ч. и POST данные.
-     * Если cfg['hidden'] == True, то запрос будет происходить в фоновом режиме,
-     * иначе будет показана панель "ожидания процесса"
-     */
-    Brick.util.Connection.sendCommand = function(module, brick, cfg){
-        if (typeof YAHOO.util.Connect == 'undefined' || typeof YAHOO.lang.JSON == 'undefined'){
-            Brick.Loader.add({
-                yahoo: ['connection', 'json'],
-                onSuccess: function(){
-                    sendPost(module, brick, cfg);
-                },
-                onFailure: function(){
-                }
-            });
-        } else {
-            sendPost(module, brick, cfg);
-        }
-    };
 })();
 
 //типизированный AJAX
@@ -1327,7 +1212,7 @@ Brick.dateExt = function(){
     Brick.Loader.addRange(old.mods);
 })();
 
-// TODO: suppord older versions
+// TODO: support older versions
 (function(){
     Brick.util.Language = {
         add: function(locale, phrases){
