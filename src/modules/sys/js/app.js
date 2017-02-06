@@ -2,24 +2,19 @@ var Component = new Brick.Component();
 Component.requires = {
     yui: ['io', 'json'],
     mod: [
-        {name: '{C#MODNAME}', files: ['application.js']}
+        {name: '{C#MODNAME}', files: ['appLib.js']}
     ]
 };
 Component.entryPoint = function(NS){
 
     var Y = Brick.YUI,
-        L = Y.Lang,
-
-        UID = Brick.env.user.id | 0,
-
-        WAITING = 'waiting',
-        BOUNDING_BOX = 'boundingBox',
-        ADDED = 'added',
-
         SLICE = Array.prototype.slice;
 
     NS.AppCore = Y.Base.create('appCore', Y.Base, [
-        NS.RequestCore
+        NS.CronCore,
+        NS.Navigator,
+        NS.APIRequests,
+        NS.Language
     ], {
         initializer: function(){
             this.publish('appResponses');
@@ -52,16 +47,164 @@ Component.entryPoint = function(NS){
                 return callback.call(context, this);
             }
 
-            var task = this._appTasks.shift();
+            var appTasks = this._appTasks,
+                task = appTasks.shift();
+
             if (!Y.Lang.isFunction(task)){
                 throw {
                     msg: 'Task is not function in App'
                 };
             }
 
+            var instance = this;
             task.call(this, function(){
+                if (appTasks.length > 0){
+                    return instance.runAppTasks(callback, context);
+                }
                 callback.call(context, this);
             });
+        },
+        apiRequestSend: function(){
+            var args = SLICE.call(arguments),
+                name = args.shift();
+
+            if (!this.apiRequestAdded(name)){
+                return;
+            }
+
+            var info = args.shift(),
+                params = [];
+
+            for (var i = 0; i < info.args.length; i++){
+                params[params.length] = args.shift();
+            }
+
+            var callback = args.shift() || function(){
+                    },
+                context = args.shift() || this;
+
+            var cacheResult;
+            if (Y.Lang.isFunction(info.cache)){
+                cacheResult = info.cache.apply(this, params);
+            }
+            if (!cacheResult && info.attribute){
+                cacheResult = this.get(name);
+            }
+
+            if (cacheResult){
+                return callback.call(context, null, {
+                    name: cacheResult
+                });
+            }
+
+            var module = this.get('component').moduleName,
+                version = this.get('apiVersion'),
+                url = '/api/' + module + '/' + version + '/' + name + '/';
+
+            if (Y.Lang.isFunction(info.argsHandle)){
+                params = info.argsHandle.apply(this, params);
+            }
+
+            for (var i = 0, name; i < info.args.length; i++){
+                name = info.args[i];
+                if (info.method === 'GET'){
+                    url += encodeURIComponent(params[i]) + '/';
+                }
+            }
+
+            Y.io(url, {
+                headers: {
+                    'X-CSRF-Token': Brick.env.user.session
+                },
+                method: info.method,
+                timeout: 30000,
+                on: {
+                    complete: function(txId, response){
+                        this.onAPIRequestSend({
+                            name: name,
+                            params: params,
+                            request: info,
+                            response: response,
+                            callback: callback,
+                            context: context
+                        });
+                    }
+                },
+                context: this
+            });
+        },
+        onAPIRequestSend: function(options){
+            var response = options.response,
+                status = response.status,
+                statusText = response.statusText,
+                code = response.getResponseHeader('X-Extended-Code') | 0;
+
+            if (status !== 200){
+                var err = {
+                    err: status,
+                    code: code,
+                    msg: statusText
+                };
+                return options.callback.call(options.context, err, null);
+            }
+
+            var name = options.name,
+                info = options.request,
+                json = {},
+                ret = {};
+
+            if (response.responseText !== ''){
+                try {
+                    json = Y.JSON.parse(response.responseText);
+                } catch (e) {
+                    // TODO: fire callback with JSON error
+                }
+            }
+
+
+            if (info.type && info.typeClass){
+                json = Y.merge(json || {}, {
+                    appInstance: this,
+                });
+
+                var typeClass;
+                switch (info.type) {
+                    case 'response':
+                        typeClass = this.get(info.typeClass) || NS.AppResponse;
+                        ret[name] = new typeClass(json);
+                        break;
+                    case 'model':
+                        typeClass = this.get(info.typeClass) || NS.AppModel;
+                        ret[name] = new typeClass(json);
+                        break;
+                    case 'modelList':
+                        typeClass = this.get(info.typeClass) || NS.AppModelList;
+                        ret[name] = new typeClass({
+                            appInstance: this,
+                            items: json.list || []
+                        });
+                        break;
+                }
+            } else {
+                ret[name] = json;
+                if (Y.Lang.isFunction(info.response)){
+                    ret[name] = info.response.call(this, data[name]);
+                }
+            }
+
+            if (info.attribute){
+                this.set(name, ret[name]);
+            }
+
+            var callback;
+            if (ret[name] && Y.Lang.isFunction(info.onResponse)){
+                callback = info.onResponse.call(this, ret[name], json);
+            }
+            if (Y.Lang.isFunction(callback)){
+                // TODO: release
+            }
+
+            options.callback.call(options.context, null, ret);
         }
     }, {
         ATTRS: {
@@ -88,6 +231,7 @@ Component.entryPoint = function(NS){
                 return callback.call(context, null, app);
             }
             ns.app = new ns.App();
+            ns.app.apiRequestsBind();
             ns.app.runAppTasks(callback, context);
         };
         return ns.App;
@@ -138,18 +282,17 @@ Component.entryPoint = function(NS){
                 return callback.call(context, err, null);
             }
 
-            ns.App.initialize(function(){
-                return callback.call(context, null, ns.app);
-            });
+            if (Y.Lang.isFunction(ns.App.initialize)){
+                ns.App.initialize(function(){
+                    return callback.call(context, null, ns.app);
+                });
+            } else {
+                ns.initApp({
+                    initCallback: function(err, appInstance){
+                        return callback.call(context, err, appInstance);
+                    }
+                });
+            }
         });
     };
-
-    NS.initializeApps = function(modules, callback, context){
-        callback = callback || function(){
-            };
-        context = context || null;
-
-        var module = modules.pop();
-
-    }
 };
