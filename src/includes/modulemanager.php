@@ -206,7 +206,7 @@ abstract class Ab_Module {
         if (is_array($file)){
             $count = count($file);
             for ($i = 0; $i < $count; $i++){
-                $this->ScriptRequireOnce($file[$i]);
+                $this->ScriptRequireOnce($file[$i], $ignoreExists);
             }
             return;
         }
@@ -287,7 +287,7 @@ abstract class Ab_ModuleManager {
                 'includes/models.php',
                 'includes/dbquery.php',
                 'includes/app.php'
-            ));
+            ), true);
             $className = $this->GetAppClassName();
             if (!class_exists($className)){
                 return null;

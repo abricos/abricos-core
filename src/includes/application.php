@@ -29,6 +29,8 @@ abstract class Ab_App extends Ab_Cache {
 
     protected $_aliases;
 
+    private $_aliasesNonGroup = array();
+
     public function __construct(Ab_ModuleManager $manager){
         $this->module = $manager->module;
         $this->manager = $manager;
@@ -36,9 +38,26 @@ abstract class Ab_App extends Ab_Cache {
     }
 
     public function GetClassName($alias){
-        if (isset($this->_aliases[$alias])){
+        if (isset($this->_aliases[$alias])
+            && is_string($this->_aliases[$alias])
+        ){
             return $this->_aliases[$alias];
         }
+
+        if (isset($this->_aliasesNonGroup[$alias])){
+            return $this->_aliasesNonGroup[$alias];
+        }
+
+        foreach ($this->_aliases as $group => $value){
+            if (!is_array($value) || !isset($value[$alias])){
+                continue;
+            }
+
+            $this->module->ScriptRequireOnce('includes/models/'.$group.'.php', true);
+
+            return $this->_aliasesNonGroup[$alias] = $value[$alias];
+        }
+
         return $alias;
     }
 

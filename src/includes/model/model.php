@@ -1,12 +1,15 @@
 <?php
-
 /**
  * @package Abricos
  * @subpackage Core
- * @copyright 2008-2016 Alexander Kuzmin
+ * @copyright 2008-2017 Alexander Kuzmin
  * @license http://opensource.org/licenses/mit-license.php MIT License
  * @author Alexander Kuzmin <roosit@abricos.org>
  * @link http://abricos.org
+ */
+
+/**
+ * Class Ab_Response
  */
 class Ab_Response {
     const ERR_BAD_REQUEST = 400;
@@ -31,7 +34,7 @@ class Ab_Response {
 /**
  * Class Ab_ModelBase
  *
- * @method void Fill(Ab_App $app, $p0 = null, $p1 = null, $p2 = null) (optional)
+ * @method void Fill(Ab_App $app) (optional)
  */
 abstract class Ab_ModelBase {
 
@@ -149,12 +152,16 @@ abstract class Ab_ModelBase {
         );
     }
 
+    /**
+     * @param $data
+     * @return Ab_Attrs
+     */
     public function SetArgs($data){
         $argsData = $this->GetArgs();
         $argsData->Clean();
         $argsData->Update($data);
+        return $argsData;
     }
-
 
     public function SetError($error, $code = 0){
         $this->_error = intval($error);
@@ -285,5 +292,4 @@ class Ab_ModelList extends Ab_ModelBase {
 
         return $ret;
     }
-
 }
