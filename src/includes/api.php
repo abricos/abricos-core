@@ -29,39 +29,70 @@ abstract class Ab_API {
         $this->app = $app;
     }
 
+    protected function OnRequestRoot(){
+        return Ab_Response::ERR_BAD_REQUEST;
+    }
+
+    protected function GetCurrentVersion(){
+        if (count($this->_versions) === 0){
+            return '';
+        }
+
+        foreach ($this->_versions as $key => $value){
+            return $key;
+        }
+        return '';
+    }
+
+    /**
+     * @param string $version (optional)
+     * @return Ab_APIMethods|int
+     * @throws Exception
+     */
+    protected function GetMethods($version = null){
+        if (empty($version)){
+            $version = $this->GetCurrentVersion();
+        }
+
+        if (isset($this->_instances[$version])){
+            return $this->_instances[$version];
+        }
+
+        if (!isset($this->_versions[$version])){
+            return Ab_Response::ERR_BAD_REQUEST;
+        }
+
+        $className = $this->_versions[$version];
+
+        if (!class_exists($className)){
+            $moduleName = $this->app->module->name;
+            throw new Exception("Class `$className` not defined in `$moduleName`");
+        }
+
+        return $this->_instances[$version] = new $className($this->app);
+    }
+
     public function Run(){
         $aGetURL = array_slice(Abricos::$adress->dir, 2);
 
         if (count($aGetURL) < 2){
-            return Ab_Response::ERR_BAD_REQUEST;
+            return $this->OnRequestRoot();
         }
 
         $version = $aGetURL[0];
 
-        if (!isset($this->_versions[$version])){
-            // return (new AbricosAPIResponse400())->BadVersion($version);
-            return Ab_Response::ERR_BAD_REQUEST;
-        }
+        /** @var Ab_APIMethods $instance */
+        $instance = $this->GetMethods($version);
 
-        if (!isset($this->_instances[$version])){
-            $className = $this->_versions[$version];
-
-            if (!class_exists($className)){
-                $moduleName = $this->app->module->name;
-                throw new Exception("Class `$className` not defined in `$moduleName`");
-            }
-
-            $this->_instances[$version] = new $className($this->app);
+        if (is_integer($instance)){
+            return $instance;
         }
 
         $methodAPI = $aGetURL[1];
 
-        /** @var Ab_APIMethods $instance */
-        $instance = $this->_instances[$version];
         if (!isset($instance->methods[$methodAPI])
             || !method_exists($instance, $instance->methods[$methodAPI])
         ){
-            // return (new AbricosAPIResponse400())->MethodNotDefined($funcName);
             return Ab_Response::ERR_BAD_REQUEST;
         }
 
@@ -75,6 +106,19 @@ abstract class Ab_API {
         $result = $instance->$funcName($p[0], $p[1], $p[2], $p[3], $p[4]);
 
         return $result;
+    }
+
+    public function ToJSON(){
+        $methods = $this->GetMethods();
+        if (is_integer($methods)){
+            return $methods;
+        }
+
+        $ret = new stdClass();
+        $ret->version = $this->GetCurrentVersion();
+        $ret->structures = $methods->ToJSON();
+
+        return $ret;
     }
 }
 
@@ -94,8 +138,28 @@ abstract class Ab_APIMethods {
      */
     public $methods;
 
-
     public function __construct(Ab_App $app){
         $this->app = $app;
+    }
+
+    protected function GetStructures(){
+        return '';
+    }
+
+    public function ToJSON(){
+        $names = $this->GetStructures();
+        if (is_string($names)){
+            $names = explode(",", $names);
+        }
+        $moduleName = $this->app->module->name;
+
+        $ret = array();
+
+        foreach ($names as $name){
+            $structure = Abricos::GetStructure($moduleName, $name);
+            $ret[] = $structure->ToJSON();
+        }
+
+        return $ret;
     }
 }

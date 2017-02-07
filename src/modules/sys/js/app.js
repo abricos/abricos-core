@@ -26,6 +26,8 @@ Component.entryPoint = function(NS){
 
             this._appTasks = [];
 
+            this.addAppTask(this._apiInfoLoad);
+
             var ROLES = this.constructor.ROLES;
             if (ROLES && !ns.roles){
                 ns.roles = new Brick.AppRoles(component.moduleName, ROLES);
@@ -63,6 +65,40 @@ Component.entryPoint = function(NS){
                 }
                 callback.call(context, this);
             });
+        },
+        _apiInfoLoad: function(callback){
+            var module = this.get('component').moduleName,
+                url = '/api/' + module + '/';
+
+            Y.io(url, {
+                headers: {
+                    'X-CSRF-Token': Brick.env.user.session
+                },
+                method: 'GET',
+                timeout: 30000,
+                on: {
+                    complete: function(txId, response){
+                        this._apiOnInfoLoad(response);
+                        callback.call(this);
+                    }
+                },
+                context: this
+            });
+        },
+        _apiOnInfoLoad: function(response){
+            if (response.status !== 200){
+                return;
+            }
+            var json;
+            try {
+                json = Y.JSON.parse(response.responseText);
+            } catch (e) {
+                // TODO: fire callback with JSON error
+            }
+
+            this.set('apiVersion', json.version);
+            var structures = new NS.AppStructure(json);
+            this.set('appStructure', structures);
         },
         apiRequestSend: function(){
             var args = SLICE.call(arguments),
@@ -161,7 +197,6 @@ Component.entryPoint = function(NS){
                 }
             }
 
-
             if (info.type && info.typeClass){
                 json = Y.merge(json || {}, {
                     appInstance: this,
@@ -209,7 +244,7 @@ Component.entryPoint = function(NS){
     }, {
         ATTRS: {
             component: {value: null},
-            isLoadAppStructure: {value: false}
+            appStructure: {},
         }
     });
 

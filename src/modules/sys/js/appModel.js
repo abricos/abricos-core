@@ -628,9 +628,8 @@ Component.entryPoint = function(NS){
                         val = false;
                     } else if (val === 'true'){
                         val = true;
-                    } else {
-                        return !!val;
                     }
+                    return !!val;
                 case 'int':
                     return (val | 0);
                 case 'date':
@@ -765,5 +764,4 @@ Component.entryPoint = function(NS){
             }
         }
     });
-
 };

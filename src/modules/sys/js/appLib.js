@@ -253,7 +253,7 @@ Component.entryPoint = function(NS){
         this._apiRequestsInit(options && options.API ? options.API : null);
     };
     APIRequests.ATTRS = {
-        apiVersion: {value: 'v1'}
+        apiVersion: {value: ''}
     };
     APIRequests.prototype = {
         _apiRequestsInit: function(options){
@@ -281,11 +281,7 @@ Component.entryPoint = function(NS){
                 if (!reqs.hasOwnProperty(name)){
                     continue;
                 }
-                if (name === '_version'){
-                    this.set('apiVersion', reqs[name]);
-                } else {
-                    this.apiRequestAdd(name, reqs[name]);
-                }
+                this.apiRequestAdd(name, reqs[name]);
             }
         },
         apiRequestAdded: function(name){
