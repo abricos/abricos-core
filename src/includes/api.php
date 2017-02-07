@@ -146,6 +146,17 @@ abstract class Ab_APIMethods {
         return '';
     }
 
+    public function POSTParamToObject($name){
+        $val = Abricos::CleanGPC('p', $name, TYPE_STR);
+
+        try {
+            $data = json_decode($val);
+        } catch (Exception $d){
+            return null;
+        }
+        return $data;
+    }
+
     public function ToJSON(){
         $names = $this->GetStructures();
         if (is_string($names)){

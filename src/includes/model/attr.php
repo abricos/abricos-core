@@ -100,6 +100,29 @@ class Ab_Attrs {
         return $this->_attrs[$field->name] = $field->AttrInit();
     }
 
+    public function IsSetValue($name){
+        if (!isset($this->_attrs[$name])){
+            return false;
+        }
+
+        /** @var Ab_Attr $attr */
+        $attr = $this->_attrs[$name];
+
+        return $attr->isInit;
+    }
+
+    public function IsEmptyValue($name){
+        if (!$this->IsSetValue($name)){
+            return false;
+        }
+
+        /** @var Ab_Attr $attr */
+        $attr = $this->_attrs[$name];
+
+        return empty($attr->value);
+    }
+
+
     public function Get($name){
         $attr = $this->GetAttr($name);
         if (!$attr){
@@ -223,5 +246,51 @@ class Ab_Attrs {
         }
 
         return $ret;
+    }
+}
+
+interface Ab_IAttrsData {
+    public function IsSetValue($name);
+
+    public function IsEmptyValue($name);
+}
+
+class Ab_AttrsData implements Ab_IAttrsData {
+
+    /**
+     * @var Ab_Attrs
+     */
+    protected $_attrs;
+
+    public function __construct($key, Ab_Fields $fields){
+        $this->_attrs = new Ab_Attrs($key, $fields);
+    }
+
+    public function __get($name){
+        return $this->_attrs->Get($name);
+    }
+
+    public function __set($name, $value){
+        $this->_attrs->Set($name, $value);
+    }
+
+    public function IsSetValue($name){
+        return $this->_attrs->IsSetValue($name);
+    }
+
+    public function IsEmptyValue($name){
+        return $this->_attrs->IsEmptyValue($name);
+    }
+
+    public function Clean(){
+        $this->_attrs->Clean();
+    }
+
+    public function Update($data){
+        $this->_attrs->Update($data);
+    }
+
+    public function ToJSON(){
+        return $this->_attrs->ToJSON();
     }
 }

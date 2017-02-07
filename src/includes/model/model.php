@@ -59,7 +59,7 @@ abstract class Ab_ModelBase {
     protected $_attrs;
 
     /**
-     * @var Ab_Attrs
+     * @var Ab_AttrsData
      */
     protected $_args;
 
@@ -146,7 +146,7 @@ abstract class Ab_ModelBase {
         }
         $struct = $this->GetStructure();
 
-        return $this->_args = new Ab_Attrs(
+        return $this->_args = new Ab_AttrsData(
             $this->_structModule,
             $struct->args
         );
@@ -154,7 +154,7 @@ abstract class Ab_ModelBase {
 
     /**
      * @param $data
-     * @return Ab_Attrs
+     * @return Ab_AttrsData
      */
     public function SetArgs($data){
         $argsData = $this->GetArgs();

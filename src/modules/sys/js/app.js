@@ -141,18 +141,34 @@ Component.entryPoint = function(NS){
                 params = info.argsHandle.apply(this, params);
             }
 
-            for (var i = 0, name; i < info.args.length; i++){
+            var POST = {},
+                method = 'GET';
+
+            for (var i = 0, name, param, isPOST; i < info.args.length; i++){
                 name = info.args[i];
-                if (info.method === 'GET'){
-                    url += encodeURIComponent(params[i]) + '/';
+                param = params[i];
+                isPOST = false;
+
+                for (var ii = 0; ii < info.toPOST.length; i++){
+                    if (info.toPOST[ii] === name){
+                        isPOST = true;
+                        method = 'POST';
+                        break;
+                    }
+                }
+
+                if (isPOST){
+                    POST[name] = Y.JSON.stringify(param);
+                } else {
+                    url += encodeURIComponent(param) + '/';
                 }
             }
 
-            Y.io(url, {
+            var config = {
                 headers: {
                     'X-CSRF-Token': Brick.env.user.session
                 },
-                method: info.method,
+                method: method,
                 timeout: 30000,
                 on: {
                     complete: function(txId, response){
@@ -167,7 +183,13 @@ Component.entryPoint = function(NS){
                     }
                 },
                 context: this
-            });
+            };
+
+            if (method === 'POST'){
+                config.data = POST;
+            }
+
+            Y.io(url, config);
         },
         onAPIRequestSend: function(options){
             var response = options.response,
@@ -204,10 +226,6 @@ Component.entryPoint = function(NS){
 
                 var typeClass;
                 switch (info.type) {
-                    case 'response':
-                        typeClass = this.get(info.typeClass) || NS.AppResponse;
-                        ret[name] = new typeClass(json);
-                        break;
                     case 'model':
                         typeClass = this.get(info.typeClass) || NS.AppModel;
                         ret[name] = new typeClass(json);

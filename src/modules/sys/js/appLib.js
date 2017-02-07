@@ -294,9 +294,9 @@ Component.entryPoint = function(NS){
             }
 
             config = Y.merge({
-                method: 'GET',
                 args: [],
                 argsHandle: null,
+                toPOST: [],
                 attribute: false,
                 type: null,
                 typeClass: null,
