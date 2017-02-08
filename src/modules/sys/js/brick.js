@@ -828,6 +828,90 @@ Brick.namespace('util');
 
 })();
 
+(function(){
+
+    /**
+     * Выполнить JavaScript text
+     *
+     * @method readScript
+     * @static
+     * @param {String} text JavaScript текст
+     */
+    Brick.readScript = function(text){
+        var s = document.createElement("script");
+        s.charset = "utf-8";
+        s.text = text;
+        document.body.appendChild(s);
+    };
+
+    var querycount = 0;
+    var uniqurl = function(){
+        querycount++;
+        return (querycount++) + (new Date().getTime());
+    };
+
+    var readScript = Brick.readScript;
+
+    var sendPost = function(module, brick, cfg ){
+        cfg = cfg || {};
+        cfg['json'] = cfg['json'] || {};
+
+        var post = "json="+encodeURIComponent(YAHOO.lang.JSON.stringify(cfg['json']));
+        YAHOO.util.Connect.asyncRequest("POST",
+            '/ajax/' + module + '/' + brick +'/'+ uniqurl()+'/', {
+                success: function(o) {
+                    readScript(o.responseText);
+                    if (typeof cfg.success == 'function'){
+                        cfg.success(o);
+                    }
+                },
+                failure: function(o){
+                    // alert("CONNECTION FAILED!");
+                }
+            },
+            post
+        );
+    };
+
+    /**
+     * Менеджер AJAX запросов
+     *
+     * @class Connection
+     * @namespace Brick.util
+     * @deprecated
+     * @static
+     */
+    Brick.util.Connection = {};
+
+    /**
+     * Отправить AJAX запрос кирпичу определенного модуля
+     *
+     * @method sendCommand
+     * @static
+     * @deprecated
+     * @param {String} module Имя модуля
+     * @param {String} brick Имя кирпича
+     * @param {Object} cfg Параметры запроса, в т.ч. и POST данные.
+     * Если cfg['hidden'] == True, то запрос будет происходить в фоновом режиме,
+     * иначе будет показана панель "ожидания процесса"
+     */
+    Brick.util.Connection.sendCommand = function(module, brick, cfg){
+        if (typeof YAHOO.util.Connect == 'undefined' || typeof YAHOO.lang.JSON == 'undefined'){
+            Brick.Loader.add({
+                yahoo: ['connection', 'json'],
+                onSuccess: function() {
+                    sendPost(module, brick, cfg);
+                },
+                onFailure: function(){
+                }
+            });
+        }else{
+            sendPost(module, brick, cfg);
+        }
+    };
+})();
+
+
 //типизированный AJAX
 (function(){
 

@@ -208,19 +208,18 @@ Component.entryPoint = function(NS){
 
             var name = options.name,
                 info = options.request,
-                json = {},
-                ret = {};
+                result = null;
 
             if (response.responseText !== ''){
                 try {
-                    json = Y.JSON.parse(response.responseText);
+                    result = Y.JSON.parse(response.responseText);
                 } catch (e) {
                     // TODO: fire callback with JSON error
                 }
             }
 
             if (info.type && info.typeClass){
-                json = Y.merge(json || {}, {
+                result = Y.merge(result || {}, {
                     appInstance: this,
                 });
 
@@ -228,36 +227,33 @@ Component.entryPoint = function(NS){
                 switch (info.type) {
                     case 'model':
                         typeClass = this.get(info.typeClass) || NS.AppModel;
-                        ret[name] = new typeClass(json);
+                        result = new typeClass(result);
                         break;
                     case 'modelList':
                         typeClass = this.get(info.typeClass) || NS.AppModelList;
-                        ret[name] = new typeClass({
+                        result = new typeClass({
                             appInstance: this,
-                            items: json.list || []
+                            items: result.list || []
                         });
                         break;
                 }
-            } else {
-                ret[name] = json;
-                if (Y.Lang.isFunction(info.response)){
-                    ret[name] = info.response.call(this, data[name]);
-                }
+            } else if (Y.Lang.isFunction(info.response)){
+                result = info.response.call(this, result);
             }
 
             if (info.attribute){
-                this.set(name, ret[name]);
+                this.set(name, result);
             }
 
             var callback;
-            if (ret[name] && Y.Lang.isFunction(info.onResponse)){
-                callback = info.onResponse.call(this, ret[name], json);
+            if (result && Y.Lang.isFunction(info.onResponse)){
+                callback = info.onResponse.call(this, result);
             }
             if (Y.Lang.isFunction(callback)){
                 // TODO: release
             }
 
-            options.callback.call(options.context, null, ret);
+            options.callback.call(options.context, null, result);
         }
     }, {
         ATTRS: {
