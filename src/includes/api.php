@@ -100,7 +100,7 @@ abstract class Ab_API {
 
         $p = array();
         for ($i = 0; $i < 5; $i++){
-            $p[$i] = isset($aGetURL[$i + 2]) ? isset($aGetURL[$i + 2]) : null;
+            $p[] = isset($aGetURL[$i + 2]) ? $aGetURL[$i + 2] : null;
         }
 
         $result = $instance->$funcName($p[0], $p[1], $p[2], $p[3], $p[4]);
